@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.7.6 - 2024-08-17
+- Fixed Album disappearing from Lectern when Amendments is installed.
+- Added es_es lang.
+
 ## 1.7.5 - 2024-07-25
 - Fixed Camera resetting zoom when attachments change.
 - Minor adjustments to unlocking recipes in a recipe book
