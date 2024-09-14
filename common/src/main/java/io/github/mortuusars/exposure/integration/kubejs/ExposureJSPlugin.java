@@ -1,7 +1,8 @@
 package io.github.mortuusars.exposure.integration.kubejs;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import dev.latvian.mods.kubejs.KubeJSPlugin;
+import dev.latvian.mods.kubejs.event.EventGroupRegistry;
+import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
 import dev.latvian.mods.kubejs.event.EventResult;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import io.github.mortuusars.exposure.integration.kubejs.event.ExposureJSEvents;
@@ -16,7 +17,7 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class ExposureJSPlugin extends KubeJSPlugin {
+public class ExposureJSPlugin implements KubeJSPlugin {
     @Override
     public void init() {
         subscribeToEvents();
@@ -28,8 +29,8 @@ public class ExposureJSPlugin extends KubeJSPlugin {
     }
 
     @Override
-    public void registerEvents() {
-        ExposureJSEvents.register();
+    public void registerEvents(EventGroupRegistry registry) {
+        registry.register(ExposureJSEvents.GROUP);
     }
 
     public static boolean fireShutterOpeningEvent(Player player, ItemStack cameraStack, int lightLevel, boolean shouldFlashFire) {

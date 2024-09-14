@@ -10,9 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Containers;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -32,15 +30,19 @@ import org.jetbrains.annotations.Nullable;
 public class LightroomBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
+    public static final BooleanProperty REFRACTED = BooleanProperty.create("refracted");
 
     public LightroomBlock(Properties properties) {
         super(properties);
-        this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.NORTH).setValue(LIT, false));
+        this.registerDefaultState(this.stateDefinition.any()
+                .setValue(FACING, Direction.NORTH)
+                .setValue(LIT, false)
+                .setValue(REFRACTED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(FACING, LIT);
+        pBuilder.add(FACING, LIT, REFRACTED);
     }
 
     @Override
@@ -48,16 +50,17 @@ public class LightroomBlock extends Block implements EntityBlock {
         return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
     }
 
-    @Override
-    public void setPlacedBy(@NotNull Level pLevel, @NotNull BlockPos pPos, @NotNull BlockState pState, LivingEntity pPlacer, ItemStack pStack) {
-        if (pStack.hasCustomHoverName()) {
-            BlockEntity blockentity = pLevel.getBlockEntity(pPos);
-            if (blockentity instanceof LightroomBlockEntity lightroomBlockEntity)
-                lightroomBlockEntity.setCustomName(pStack.getHoverName());
-        }
-    }
+    // TODO: Check custom name
+//    @Override
+//    public void setPlacedBy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, LivingEntity placer, ItemStack stack) {
+//        @Nullable Component customName = stack.get(DataComponents.CUSTOM_NAME);
+//        if (customName != null) {
+//            BlockEntity blockentity = level.getBlockEntity(pos);
+//            if (blockentity instanceof LightroomBlockEntity lightroomBlockEntity)
+//                lightroomBlockEntity.setCustomName(stack.getHoverName());
+//        }
+//    }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
@@ -74,57 +77,47 @@ public class LightroomBlock extends Block implements EntityBlock {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean hasAnalogOutputSignal(@NotNull BlockState state) {
         return true;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public int getAnalogOutputSignal(@NotNull BlockState blockState, Level level, @NotNull BlockPos pos) {
-        if (!(level.getBlockEntity(pos) instanceof LightroomBlockEntity lightroomBlockEntity)) {
-            return 0;
+        if (level.getBlockEntity(pos) instanceof LightroomBlockEntity lightroomBlockEntity) {
+            ItemStack resultStack = lightroomBlockEntity.getItem(Lightroom.RESULT_SLOT);
+
+            if (resultStack.getItem() instanceof StackedPhotographsItem stackedPhotographsItem) {
+                int photographsCount = stackedPhotographsItem.getPhotographs(resultStack).size();
+                return (int) ((photographsCount / (float) stackedPhotographsItem.getStackLimit() * 14) + 1);
+            } else if (!resultStack.isEmpty()) {
+                return (int) ((resultStack.getCount() / (float) resultStack.getMaxStackSize() * 14) + 1);
+            }
         }
 
-        ItemStack resultStack = lightroomBlockEntity.getItem(Lightroom.RESULT_SLOT);
-
-        if (resultStack.isEmpty()) {
-            return 0;
-        }
-
-        if (resultStack.getItem() instanceof StackedPhotographsItem stackedPhotographsItem) {
-            int photographsCount = stackedPhotographsItem.getPhotographsCount(resultStack);
-            return (int) ((photographsCount / (float) stackedPhotographsItem.getStackLimit() * 14) + 1);
-        }
-        else {
-            return 1;
-        }
+        return 0;
     }
 
 
-    @SuppressWarnings("deprecation")
     @Override
     public @NotNull BlockState rotate(BlockState pState, Rotation pRotation) {
         return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public @NotNull BlockState mirror(BlockState pState, Mirror pMirror) {
         return pState.rotate(pMirror.getRotation(pState.getValue(FACING)));
     }
 
-    @SuppressWarnings("deprecation")
     @Override
-    public @NotNull InteractionResult use(@NotNull BlockState blockState, Level level, @NotNull BlockPos pos, @NotNull Player player, @NotNull InteractionHand hand, @NotNull BlockHitResult hitResult) {
+    protected @NotNull InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
         if (!(level.getBlockEntity(pos) instanceof LightroomBlockEntity lightroomBlockEntity))
-            return InteractionResult.FAIL;
+            return super.useWithoutItem(state, level, pos, player, hitResult);
 
         player.awardStat(Exposure.Stats.INTERACT_WITH_LIGHTROOM);
 
         if (player instanceof ServerPlayer serverPlayer) {
-            lightroomBlockEntity.setLastPlayer(serverPlayer);
+            lightroomBlockEntity.setLastUser(serverPlayer);
             lightroomBlockEntity.setChanged(); // Updates state for client. Without this GUI buttons have some problems. (PrintButton active state)
             PlatformHelper.openMenu(serverPlayer, lightroomBlockEntity, buffer -> buffer.writeBlockPos(pos));
         }
@@ -132,7 +125,6 @@ public class LightroomBlock extends Block implements EntityBlock {
         return InteractionResult.sidedSuccess(level.isClientSide);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void neighborChanged(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean pIsMoving) {
         if (!level.isClientSide) {
@@ -142,10 +134,14 @@ public class LightroomBlock extends Block implements EntityBlock {
                     if (relative.equals(fromPos) && level.getSignal(relative, direction) > 0
                             && level.getBlockEntity(pos) instanceof LightroomBlockEntity lightroomBlockEntity) {
                         lightroomBlockEntity.startPrintingProcess(true);
-                        return;
+                        break;
                     }
                 }
             }
+
+            level.setBlock(pos, level.getBlockState(pos)
+                    .setValue(LightroomBlock.REFRACTED, level.getBlockState(pos.above()).is(Exposure.Tags.Blocks.CHROMATIC_REFRACTORS)),
+                    Block.UPDATE_CLIENTS);
         }
     }
 
@@ -165,7 +161,6 @@ public class LightroomBlock extends Block implements EntityBlock {
         return new LightroomBlockEntity(pos, state);
     }
 
-    @SuppressWarnings("unused")
     public static <T extends BlockEntity> BlockEntityTicker<T> getBlockTicker(Level level, BlockState state, BlockEntityType<T> blockEntityType) {
         if (!level.isClientSide && blockEntityType.equals(Exposure.BlockEntityTypes.LIGHTROOM.get()))
             return LightroomBlockEntity::serverTick;

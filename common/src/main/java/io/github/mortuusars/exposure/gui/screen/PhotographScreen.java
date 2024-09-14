@@ -8,18 +8,20 @@ import com.mojang.datafixers.util.Either;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.infrastructure.FrameData;
-import io.github.mortuusars.exposure.data.storage.ClientsideExposureExporter;
+import io.github.mortuusars.exposure.core.frame.FrameProperties;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.render.PhotographRenderProperties;
-import io.github.mortuusars.exposure.render.PhotographRenderer;
+import io.github.mortuusars.exposure.client.render.PhotographRenderProperties;
+import io.github.mortuusars.exposure.client.render.PhotographRenderer;
 import io.github.mortuusars.exposure.util.ClientsideWorldNameGetter;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
@@ -28,8 +30,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -38,6 +40,16 @@ import java.util.Optional;
 
 public class PhotographScreen extends ZoomableScreen {
     public static final ResourceLocation WIDGETS_TEXTURE = Exposure.resource("textures/gui/widgets.png");
+
+    public static final WidgetSprites PREV_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("widgets/previous_button"),
+            Exposure.resource("widgets/previous_button_disabled"),
+            Exposure.resource("widgets/previous_button_highlighted"));
+
+    public static final WidgetSprites NEXT_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("widgets/next_button"),
+            Exposure.resource("widgets/next_button_disabled"),
+            Exposure.resource("widgets/next_button_highlighted"));
 
     private final List<ItemAndStack<PhotographItem>> photographs;
     private final List<String> savedExposures = new ArrayList<>();
@@ -60,13 +72,8 @@ public class PhotographScreen extends ZoomableScreen {
 
     protected void queryAllPhotographs(List<ItemAndStack<PhotographItem>> photographs) {
         for (ItemAndStack<PhotographItem> photograph : photographs) {
-            FrameData.getIdOrTexture(photograph.getStack())
-                    .left()
-                    .ifPresent(id -> {
-                        if (!id.isBlank()) {
-                            ExposureClient.getExposureStorage().getOrQuery(id);
-                        }
-                    });
+            ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
+            frame.identifier().ifId(ExposureClient::getOrQuery);
         }
     }
 
@@ -78,15 +85,15 @@ public class PhotographScreen extends ZoomableScreen {
     @Override
     protected void init() {
         super.init();
-        zoomFactor = (float) height / ExposureClient.getExposureRenderer().getSize();
+        zoomFactor = (float) height / ExposureClient.exposureRenderer().getSize();
 
         ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
-                0, 0, 16, WIDGETS_TEXTURE, 256, 256,
+                PREV_BUTTON_SPRITES,
                 button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
         addRenderableWidget(previousButton);
 
         ImageButton nextButton = new ImageButton(width - 16, (int) (height / 2f - 16 / 2f), 16, 16,
-                16, 0, 16, WIDGETS_TEXTURE, 256, 256,
+                NEXT_BUTTON_SPRITES,
                 button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
         addRenderableWidget(nextButton);
 
@@ -97,7 +104,7 @@ public class PhotographScreen extends ZoomableScreen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         pager.update();
 
-        renderBackground(guiGraphics);
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 500); // Otherwise exposure will overlap buttons
@@ -111,9 +118,9 @@ public class PhotographScreen extends ZoomableScreen {
         guiGraphics.pose().translate(x, y, 0);
         guiGraphics.pose().translate(width / 2f, height / 2f, 0);
         guiGraphics.pose().scale(scale, scale, scale);
-        guiGraphics.pose().translate(ExposureClient.getExposureRenderer().getSize() / -2f, ExposureClient.getExposureRenderer().getSize() / -2f, 0);
+        guiGraphics.pose().translate(ExposureClient.exposureRenderer().getSize() / -2f, ExposureClient.exposureRenderer().getSize() / -2f, 0);
 
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         ArrayList<ItemAndStack<PhotographItem>> photos = new ArrayList<>(photographs);
         Collections.rotate(photos, -pager.getCurrentPage());
@@ -125,39 +132,47 @@ public class PhotographScreen extends ZoomableScreen {
 
         ItemAndStack<PhotographItem> photograph = photographs.get(pager.getCurrentPage());
 
-        if (minecraft.player != null && minecraft.player.isCreative() && FrameData.hasIdOrTexture(photograph.getStack())) {
-            guiGraphics.drawString(font, "?", width - font.width("?") - 10, 10, 0xFFFFFFFF);
-
-            if (mouseX > width - 20 && mouseX < width && mouseY < 20) {
-                Either<String, ResourceLocation> idOrTexture = FrameData.getIdOrTexture(photograph.getStack());
-
-                List<Component> lines = new ArrayList<>();
-
-                String exposureName = idOrTexture.map(id -> id, ResourceLocation::toString);
-                lines.add(Component.literal(exposureName));
-
-                lines.add(Component.translatable("gui.exposure.photograph_screen.drop_as_item_tooltip", Component.literal("CTRL + I")));
-
-                lines.add(idOrTexture.map(
-                        id -> Component.translatable("gui.exposure.photograph_screen.copy_id_tooltip", "CTRL + C"),
-                        texture -> Component.translatable("gui.exposure.photograph_screen.copy_texture_path_tooltip", "CTRL + C")));
-
-                guiGraphics.renderTooltip(font, lines, Optional.empty(), mouseX, mouseY + 20);
-            }
-        }
+        renderFrameInfoHint(guiGraphics, mouseX, mouseY, photograph);
 
         if (Config.Client.SAVE_EXPOSURE_TO_FILE_WHEN_VIEWED.get())
             trySaveToFile(photograph);
+    }
+
+    private void renderFrameInfoHint(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, ItemAndStack<PhotographItem> photograph) {
+        if (minecraft.player == null || !minecraft.player.isCreative()) {
+            return;
+        }
+
+        ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
+        if (frame == ExposureFrame.EMPTY) {
+            return;
+        }
+
+        guiGraphics.drawString(font, "?", width - font.width("?") - 10, 10, 0xFFFFFFFF);
+
+        if (mouseX > width - 20 && mouseX < width && mouseY < 20) {
+            String exposureName = frame.identifier().map(id -> id, ResourceLocation::toString);
+
+            List<Component> lines = List.of(
+                    Component.literal(exposureName),
+                    Component.translatable("gui.exposure.photograph_screen.drop_as_item_tooltip", Component.literal("CTRL + I")),
+                    Component.translatable("gui.exposure.photograph_screen.copy_" +
+                            frame.identifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
+
+            guiGraphics.renderTooltip(font, lines, Optional.empty(), mouseX, mouseY + 20);
+        }
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         LocalPlayer player = Minecraft.getInstance().player;
         ItemAndStack<PhotographItem> photograph = photographs.get(pager.getCurrentPage());
-        if (Screen.hasControlDown() && player != null && player.isCreative() && FrameData.hasIdOrTexture(photograph.getStack())) {
+
+        ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
+
+        if (Screen.hasControlDown() && player != null && player.isCreative() && frame != ExposureFrame.EMPTY) {
             if (keyCode == InputConstants.KEY_C) {
-                Either<String, ResourceLocation> idOrTexture = FrameData.getIdOrTexture(photograph.getStack());
-                String text = idOrTexture.map(id -> id, ResourceLocation::toString);
+                String text = frame.identifier().map(id -> id, ResourceLocation::toString);
                 Minecraft.getInstance().keyboardHandler.setClipboard(text);
                 player.displayClientMessage(Component.translatable("gui.exposure.photograph_screen.copied_message", text), false);
                 return true;
@@ -165,9 +180,9 @@ public class PhotographScreen extends ZoomableScreen {
 
             if (keyCode == InputConstants.KEY_I) {
                 if (Minecraft.getInstance().gameMode != null) {
-                    Minecraft.getInstance().gameMode.handleCreativeModeItemDrop(photograph.getStack().copy());
+                    Minecraft.getInstance().gameMode.handleCreativeModeItemDrop(photograph.getItemStack().copy());
                     player.displayClientMessage(Component.translatable("gui.exposure.photograph_screen.item_dropped_message",
-                            photograph.getStack().toString()), false);
+                            photograph.getItemStack().toString()), false);
                 }
                 return true;
             }
@@ -182,29 +197,25 @@ public class PhotographScreen extends ZoomableScreen {
     }
 
     private void trySaveToFile(ItemAndStack<PhotographItem> photograph) {
-        if (Minecraft.getInstance().player == null || photograph.getStack().getTag() == null)
-            return;
+        LocalPlayer player = Minecraft.getInstance().player;
+        ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
 
-        CompoundTag tag = photograph.getStack().getTag();
-        if (tag == null
-                || Minecraft.getInstance().player == null
-                || !tag.contains(FrameData.PHOTOGRAPHER_ID, Tag.TAG_INT_ARRAY)
-                || !tag.getUUID(FrameData.PHOTOGRAPHER_ID).equals(Minecraft.getInstance().player.getUUID())) {
+        if (player == null || frame == ExposureFrame.EMPTY || !frame.isTakenBy(player)) {
             return;
         }
 
-        FrameData.getIdOrTexture(photograph.getStack()).left().ifPresent(id -> {
-            if (id.isBlank()) {
+        frame.identifier().ifId(id -> {
+            if (StringUtil.isBlank(id)) {
                 return;
             }
 
-            PhotographRenderProperties properties = PhotographRenderProperties.get(photograph.getStack());
+            PhotographRenderProperties properties = PhotographRenderProperties.get(photograph.getItemStack());
             String filename = properties != PhotographRenderProperties.DEFAULT ? id + "_" + properties.getId() : id;
 
             if (savedExposures.contains(filename))
                 return;
 
-            ExposureClient.getExposureStorage().getOrQuery(id).ifPresent(exposure -> {
+            ExposureClient.exposureCache().getOrQuery(id).ifPresent(exposure -> {
                 savedExposures.add(filename);
 
                 new Thread(() -> new ClientsideExposureExporter(filename)
@@ -212,7 +223,7 @@ public class PhotographScreen extends ZoomableScreen {
                         .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), ClientsideWorldNameGetter::getWorldName)
                         .withModifier(properties.getModifier())
                         .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
-                        .save(exposure), "ExposureSaving").start();
+                        .export(exposure), "ExposureSaving").start();
             });
         });
     }

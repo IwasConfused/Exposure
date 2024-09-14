@@ -4,8 +4,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.infrastructure.FocalRange;
-import io.github.mortuusars.exposure.data.Lenses;
+import io.github.mortuusars.exposure.core.camera.FocalRange;
+import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.gui.screen.ItemListScreen;
 import io.github.mortuusars.exposure.item.CameraItem;
@@ -43,15 +43,15 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     protected Map<Integer, Rect2i> slotPlaceholders = Collections.emptyMap();
 
     protected final HoveredElement flash = new HoveredElement(List.of(new Rect2i(96, 11, 28, 27)),
-            () -> getMenu().getSlot(CameraItem.FLASH_ATTACHMENT.slot()).hasItem());
+            () -> getMenu().getSlot(1).hasItem());
     protected final HoveredElement filterOnLens = new HoveredElement(List.of(new Rect2i(114, 57, 13, 6),
-            new Rect2i(110, 63, 17, 24)), () -> getMenu().getSlot(CameraItem.LENS_ATTACHMENT.slot()).hasItem());
+            new Rect2i(110, 63, 17, 24)), () -> getMenu().getSlot(2).hasItem());
     protected final HoveredElement lens = new HoveredElement(List.of(new Rect2i(93, 48, 33, 34)),
-            () -> getMenu().getSlot(CameraItem.LENS_ATTACHMENT.slot()).hasItem());
+            () -> getMenu().getSlot(2).hasItem());
     protected final HoveredElement filter = new HoveredElement(List.of(new Rect2i(110, 55, 13, 6),
-            new Rect2i(106, 61, 17, 24)), () -> !getMenu().getSlot(CameraItem.LENS_ATTACHMENT.slot()).hasItem());
+            new Rect2i(106, 61, 17, 24)), () -> !getMenu().getSlot(2).hasItem());
     protected final HoveredElement lensBuiltIn = new HoveredElement(List.of(new Rect2i(93, 48, 29, 32)),
-            () -> !getMenu().getSlot(CameraItem.LENS_ATTACHMENT.slot()).hasItem());
+            () -> !getMenu().getSlot(2).hasItem());
     protected final HoveredElement viewfinder = new HoveredElement(List.of(new Rect2i(65, 25, 30, 12),
             new Rect2i(72, 31, 39, 11), new Rect2i(80, 42, 24, 5)), () -> true);
 
@@ -72,16 +72,15 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
         super.init();
 
         slotPlaceholders = Map.of(
-                CameraItem.FILM_ATTACHMENT.slot(), new Rect2i(238, 0, 18, 18),
-                CameraItem.FLASH_ATTACHMENT.slot(), new Rect2i(238, 18, 18, 18),
-                CameraItem.LENS_ATTACHMENT.slot(), new Rect2i(238, 36, 18, 18),
-                CameraItem.FILTER_ATTACHMENT.slot(), new Rect2i(238, 54, 18, 18)
+                0, new Rect2i(238, 0, 18, 18),
+                1, new Rect2i(238, 18, 18, 18),
+                2, new Rect2i(238, 36, 18, 18),
+                3, new Rect2i(238, 54, 18, 18)
         );
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         for (Slot slot : getMenu().slots) {
@@ -119,12 +118,12 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     }
 
     private void renderAttachments(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        if (getMenu().getSlot(CameraItem.FLASH_ATTACHMENT.slot()).hasItem()) {
+        if (getMenu().getSlot(1).hasItem()) {
             int vOffset = isMouseOver(flash, mouseX, mouseY) ? 28 : 0;
             guiGraphics.blit(TEXTURE, leftPos + 96, topPos + 11, 176, vOffset, 28, 28);
         }
 
-        boolean hasLens = getMenu().getSlot(CameraItem.LENS_ATTACHMENT.slot()).hasItem();
+        boolean hasLens = getMenu().getSlot(2).hasItem();
         if (hasLens) {
             int vOffset = isMouseOver(lens, mouseX, mouseY) && !isMouseOver(filterOnLens, mouseX, mouseY) ? 37 : 0;
             guiGraphics.blit(TEXTURE, leftPos + 93, topPos + 47, 176, 56 + vOffset, 35, 37);
@@ -132,7 +131,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
             guiGraphics.blit(TEXTURE, leftPos + 93, topPos + 47, 176, 130, 31, 35);
         }
 
-        Slot filterSlot = getMenu().getSlot(CameraItem.FILTER_ATTACHMENT.slot());
+        Slot filterSlot = getMenu().getSlot(3);
         int filterX = hasLens ? 102 : 98;
         int filterY = hasLens ? 54 : 52;
         if (filterSlot.hasItem()) {

@@ -1,11 +1,8 @@
 package io.github.mortuusars.exposure.gui.component;
 
-import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.vertex.Tesselator;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.item.StackedPhotographsItem;
-import io.github.mortuusars.exposure.render.PhotographRenderer;
+import io.github.mortuusars.exposure.client.render.PhotographRenderer;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -14,7 +11,6 @@ import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.inventory.tooltip.TooltipComponent;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -23,15 +19,8 @@ public class PhotographTooltip implements ClientTooltipComponent, TooltipCompone
     public static final int SIZE = 72;
     private final List<ItemAndStack<PhotographItem>> photographs;
 
-    public PhotographTooltip(ItemStack photographStack) {
-        Preconditions.checkArgument(photographStack.getItem() instanceof PhotographItem,
-                photographStack + " is not a PhotographItem.");
-
-        this.photographs = List.of(new ItemAndStack<>(photographStack));
-    }
-
-    public PhotographTooltip(ItemAndStack<StackedPhotographsItem> stackedPhotographs) {
-        this.photographs = stackedPhotographs.getItem().getPhotographs(stackedPhotographs.getStack());
+    public PhotographTooltip(List<ItemAndStack<PhotographItem>> photographs) {
+        this.photographs = photographs;
     }
 
     @Override
@@ -51,12 +40,12 @@ public class PhotographTooltip implements ClientTooltipComponent, TooltipCompone
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(mouseX, mouseY, 5);
-        float scale = SIZE / (float) ExposureClient.getExposureRenderer().getSize();
-        float nextPhotographOffset = PhotographRenderer.getStackedPhotographOffset() / ExposureClient.getExposureRenderer().getSize();
+        float scale = SIZE / (float) ExposureClient.exposureRenderer().getSize();
+        float nextPhotographOffset = PhotographRenderer.getStackedPhotographOffset() / ExposureClient.exposureRenderer().getSize();
         scale *= 1f - (additionalPhotographs * nextPhotographOffset);
         guiGraphics.pose().scale(scale, scale, 1f);
 
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         PhotographRenderer.renderStackedPhotographs(photographs, guiGraphics.pose(), bufferSource,
                 LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
@@ -72,8 +61,8 @@ public class PhotographTooltip implements ClientTooltipComponent, TooltipCompone
             int fontWidth = Minecraft.getInstance().font.width(count);
             float fontScale = 1.6f;
             guiGraphics.pose().translate(
-                    mouseX + ExposureClient.getExposureRenderer().getSize() * scale - 2 - fontWidth * fontScale,
-                    mouseY + ExposureClient.getExposureRenderer().getSize() * scale - 2 - 8 * fontScale,
+                    mouseX + ExposureClient.exposureRenderer().getSize() * scale - 2 - fontWidth * fontScale,
+                    mouseY + ExposureClient.exposureRenderer().getSize() * scale - 2 - 8 * fontScale,
                     10);
             guiGraphics.pose().scale(fontScale, fontScale, fontScale);
             guiGraphics.drawString(font, count, 0, 0, 0xFFFFFFFF);

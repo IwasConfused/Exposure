@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.integration.jei.category;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
+import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.integration.jei.ExposureJeiPlugin;
 import io.github.mortuusars.exposure.integration.jei.recipe.PhotographPrintingJeiRecipe;
 import mezz.jei.api.constants.VanillaTypes;
@@ -44,7 +44,7 @@ public class PhotographPrintingCategory implements IRecipeCategory<PhotographPri
     @Override
     public void setRecipe(IRecipeLayoutBuilder builder, @NotNull PhotographPrintingJeiRecipe recipe, @NotNull IFocusGroup focuses) {
         builder.addSlot(RecipeIngredientRole.INPUT, 78, 17)
-                .addItemStack(new ItemStack(recipe.getFilmType() == FilmType.COLOR ?
+                .addItemStack(new ItemStack(recipe.getExposureType() == ExposureType.COLOR ?
                         Exposure.Items.DEVELOPED_COLOR_FILM.get()
                         : Exposure.Items.DEVELOPED_BLACK_AND_WHITE_FILM.get()))
                 .setSlotName("Film");
@@ -59,7 +59,7 @@ public class PhotographPrintingCategory implements IRecipeCategory<PhotographPri
                 .addItemStacks(papers)
                 .setSlotName("Paper");
 
-        if (recipe.getFilmType() == FilmType.COLOR) {
+        if (recipe.getExposureType() == ExposureType.COLOR) {
             List<ItemStack> cyanDyes = BuiltInRegistries.ITEM.getTag(Exposure.Tags.Items.CYAN_PRINTING_DYES)
                     .map(holders -> holders.stream()
                             .map(itemHolder -> new ItemStack(itemHolder.value())).collect(Collectors.toList()))
@@ -97,13 +97,14 @@ public class PhotographPrintingCategory implements IRecipeCategory<PhotographPri
                 .addItemStacks(blackDyes)
                 .setSlotName("Black");
 
-        builder.addSlot(RecipeIngredientRole.OUTPUT, 144, 55)
-                .addItemStack(new ItemStack(Exposure.Items.PHOTOGRAPH.get()));
+        ItemStack resultItemStack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
+        resultItemStack.set(Exposure.DataComponents.PHOTOGRAPH_TYPE, recipe.getExposureType());
+        builder.addSlot(RecipeIngredientRole.OUTPUT, 144, 55).addItemStack(resultItemStack);
     }
 
     @Override
     public void draw(PhotographPrintingJeiRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        if (recipe.getFilmType() == FilmType.COLOR)
+        if (recipe.getExposureType() == ExposureType.COLOR)
             RenderSystem.setShaderColor(1.1F, 0.86F, 0.66F, 1.0F);
         filmDrawable.draw(guiGraphics);
     }

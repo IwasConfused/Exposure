@@ -5,6 +5,7 @@ import io.github.mortuusars.exposure.item.AlbumItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -28,7 +29,7 @@ public class LecternAlbumMenu extends AlbumMenu {
 
     protected LecternAlbumMenu(MenuType<? extends AbstractContainerMenu> type, int containerId, BlockPos lecternPos,
                                Inventory playerInventory, ItemAndStack<AlbumItem> album, Container lectern, ContainerData lecternData) {
-        super(type, containerId, playerInventory, new ItemAndStack<>(album.getStack()), false);
+        super(type, containerId, playerInventory, 0);
         checkContainerSize(lectern, 1);
         checkContainerDataCount(lecternData, 1);
         this.lecternPos = lecternPos;
@@ -82,8 +83,8 @@ public class LecternAlbumMenu extends AlbumMenu {
                 && Container.stillValidBlockEntity(lecternBlockEntity, player);
     }
 
-    public static LecternAlbumMenu fromBuffer(int containerId, Inventory inventory, FriendlyByteBuf buffer) {
+    public static LecternAlbumMenu fromBuffer(int containerId, Inventory inventory, RegistryFriendlyByteBuf buffer) {
         return new LecternAlbumMenu(containerId, buffer.readBlockPos(), inventory,
-                new ItemAndStack<>(buffer.readItem()), new SimpleContainer(1), new SimpleContainerData(1));
+                new ItemAndStack<>(ItemStack.STREAM_CODEC.decode(buffer)), new SimpleContainer(1), new SimpleContainerData(1));
     }
 }

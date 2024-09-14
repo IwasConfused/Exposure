@@ -6,8 +6,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
 import io.github.mortuusars.exposure.camera.capture.converter.IImageToMapColorsConverter;
 import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
-import io.github.mortuusars.exposure.data.storage.ExposureSavedData;
+import io.github.mortuusars.exposure.core.ExposureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 public abstract class Capture {
-    protected FilmType type = FilmType.COLOR;
+    protected ExposureType type = ExposureType.COLOR;
     protected int size = 320;
     protected float cropFactor = Exposure.CROP_FACTOR;
     protected float brightnessStops = 0f;
@@ -50,11 +49,11 @@ public abstract class Capture {
         return framesDelay;
     }
 
-    public FilmType getFilmType() {
+    public ExposureType getFilmType() {
         return type;
     }
 
-    public Capture setFilmType(FilmType type) {
+    public Capture setFilmType(ExposureType type) {
         this.type = type;
         return this;
     }
@@ -259,11 +258,11 @@ public abstract class Capture {
                 component.teardown(this);
             }
 
-            CompoundTag propertiesTag = new CompoundTag();
-            addSavedDataProperties(propertiesTag);
+            CompoundTag extraData = new CompoundTag();
+            addExtraData(extraData);
 
             for (ICaptureComponent component : components) {
-                component.save(pixels, modifiedImage.getWidth(), modifiedImage.getHeight(), propertiesTag);
+                component.save(modifiedImage.getWidth(), modifiedImage.getHeight(), pixels, extraData);
             }
         } catch (Exception e) {
             Exposure.LOGGER.error(e.toString());
@@ -280,8 +279,7 @@ public abstract class Capture {
         }
     }
 
-    protected void addSavedDataProperties(CompoundTag tag) {
-        tag.putString(ExposureSavedData.TYPE_PROPERTY, getFilmType().getSerializedName());
+    protected void addExtraData(CompoundTag extraData) {
     }
 
     protected @Nullable NativeImage scaleCropAndProcess(@NotNull NativeImage sourceImage) {

@@ -1,48 +1,47 @@
 package io.github.mortuusars.exposure;
 
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
-import io.github.mortuusars.exposure.camera.infrastructure.FocalRange;
+import io.github.mortuusars.exposure.core.camera.FocalRange;
 import io.github.mortuusars.exposure.data.ExposureSize;
 import io.github.mortuusars.exposure.util.Color;
-import net.minecraftforge.common.ForgeConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
-import java.util.List;
+//TODO: Restructure
 
 /**
  * Using ForgeConfigApiPort on fabric allows using forge config in both environments and without extra dependencies on forge.
  */
 public class Config {
     public static class Common {
-        public static final ForgeConfigSpec SPEC;
+        public static final ModConfigSpec SPEC;
 
         // Camera
-        public static final ForgeConfigSpec.ConfigValue<String> CAMERA_DEFAULT_FOCAL_RANGE;
-        public static final ForgeConfigSpec.BooleanValue CAMERA_VIEWFINDER_ATTACK;
-        public static final ForgeConfigSpec.BooleanValue CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN;
-        public static final ForgeConfigSpec.BooleanValue CAMERA_GUI_RIGHT_CLICK_HOTSWAP;
+        public static final ModConfigSpec.ConfigValue<String> CAMERA_DEFAULT_FOCAL_RANGE;
+        public static final ModConfigSpec.BooleanValue CAMERA_VIEWFINDER_ATTACK;
+        public static final ModConfigSpec.BooleanValue CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN;
+        public static final ModConfigSpec.BooleanValue CAMERA_GUI_RIGHT_CLICK_HOTSWAP;
 
         // Lightroom
-        public static final ForgeConfigSpec.IntValue LIGHTROOM_BW_PRINT_TIME;
-        public static final ForgeConfigSpec.IntValue LIGHTROOM_COLOR_PRINT_TIME;
-        public static final ForgeConfigSpec.IntValue LIGHTROOM_CHROMATIC_PRINT_TIME;
-        public static final ForgeConfigSpec.IntValue LIGHTROOM_EXPERIENCE_PER_PRINT_BW;
-        public static final ForgeConfigSpec.IntValue LIGHTROOM_EXPERIENCE_PER_PRINT_COLOR;
-        public static final ForgeConfigSpec.IntValue LIGHTROOM_EXPERIENCE_PER_PRINT_CHROMATIC;
+        public static final ModConfigSpec.IntValue LIGHTROOM_BW_PRINT_TIME;
+        public static final ModConfigSpec.IntValue LIGHTROOM_COLOR_PRINT_TIME;
+        public static final ModConfigSpec.IntValue LIGHTROOM_CHROMATIC_PRINT_TIME;
+        public static final ModConfigSpec.IntValue LIGHTROOM_EXPERIENCE_PER_PRINT_BW;
+        public static final ModConfigSpec.IntValue LIGHTROOM_EXPERIENCE_PER_PRINT_COLOR;
+        public static final ModConfigSpec.IntValue LIGHTROOM_EXPERIENCE_PER_PRINT_CHROMATIC;
 
         // Photographs
-        public static final ForgeConfigSpec.IntValue STACKED_PHOTOGRAPHS_MAX_SIZE;
+        public static final ModConfigSpec.IntValue STACKED_PHOTOGRAPHS_MAX_SIZE;
 
         // Misc
-        public static final ForgeConfigSpec.BooleanValue FILM_ROLL_RENAMING;
-        public static final ForgeConfigSpec.BooleanValue LOOT_ADDITION;
+        public static final ModConfigSpec.BooleanValue FILM_ROLL_RENAMING;
+        public static final ModConfigSpec.BooleanValue LOOT_ADDITION;
 
         // Compatibility
-        public static final ForgeConfigSpec.BooleanValue CREATE_SPOUT_DEVELOPING_ENABLED;
-        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CREATE_SPOUT_DEVELOPING_SEQUENCE_COLOR;
-        public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CREATE_SPOUT_DEVELOPING_SEQUENCE_BW;
+//        public static final ModConfigSpec.BooleanValue CREATE_SPOUT_DEVELOPING_ENABLED;
+//        public static final ModConfigSpec.ConfigValue<List<? extends String>> CREATE_SPOUT_DEVELOPING_SEQUENCE_COLOR;
+//        public static final ModConfigSpec.ConfigValue<List<? extends String>> CREATE_SPOUT_DEVELOPING_SEQUENCE_BW;
 
         static {
-            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+            ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
             builder.push("Camera");
             {
@@ -115,74 +114,74 @@ public class Config {
 
             builder.push("Integration");
             {
-                builder.push("Create");
-                {
-                    builder.push("SequencedSpoutFilmDeveloping");
-                    {
-                        CREATE_SPOUT_DEVELOPING_ENABLED = builder
-                                .comment("Film can be developed with create Spout Filling. Default: true")
-                                .define("Enabled", true);
-                        CREATE_SPOUT_DEVELOPING_SEQUENCE_COLOR = builder
-                                .comment("Fluid spouting sequence required to develop color film.")
-                                .defineList("ColorFilmSequence", PlatformHelper.getDefaultSpoutDevelopmentColorSequence(), o -> true);
-                        CREATE_SPOUT_DEVELOPING_SEQUENCE_BW = builder
-                                .comment("Fluid spouting sequence required to develop black and white film.")
-                                .defineList("BlackAndWhiteFilmSequence", PlatformHelper.getDefaultSpoutDevelopmentBWSequence(), o -> true);
-                    }
-                    builder.pop();
-                }
-                builder.pop();
+//                builder.push("Create");
+//                {
+//                    builder.push("SequencedSpoutFilmDeveloping");
+//                    {
+//                        CREATE_SPOUT_DEVELOPING_ENABLED = builder
+//                                .comment("Film can be developed with create Spout Filling. Default: true")
+//                                .define("Enabled", true);
+//                        CREATE_SPOUT_DEVELOPING_SEQUENCE_COLOR = builder
+//                                .comment("Fluid spouting sequence required to develop color film.")
+//                                .defineList("ColorFilmSequence", PlatformHelper.getDefaultSpoutDevelopmentColorSequence(), o -> true);
+//                        CREATE_SPOUT_DEVELOPING_SEQUENCE_BW = builder
+//                                .comment("Fluid spouting sequence required to develop black and white film.")
+//                                .defineList("BlackAndWhiteFilmSequence", PlatformHelper.getDefaultSpoutDevelopmentBWSequence(), o -> true);
+//                    }
+//                    builder.pop();
+//                }
+//                builder.pop();
             }
             builder.pop();
 
             SPEC = builder.build();
         }
 
-        public static ForgeConfigSpec.ConfigValue<List<? extends String>> spoutDevelopingSequence(FilmType filmType) {
-            return filmType == FilmType.COLOR ? CREATE_SPOUT_DEVELOPING_SEQUENCE_COLOR : CREATE_SPOUT_DEVELOPING_SEQUENCE_BW;
-        }
+//        public static ModConfigSpec.ConfigValue<List<? extends String>> spoutDevelopingSequence(ExposureType exposureType) {
+//            return exposureType == ExposureType.COLOR ? CREATE_SPOUT_DEVELOPING_SEQUENCE_COLOR : CREATE_SPOUT_DEVELOPING_SEQUENCE_BW;
+//        }
     }
 
     public static class Client {
-        public static final ForgeConfigSpec SPEC;
+        public static final ModConfigSpec SPEC;
 
         // UI
-        public static final ForgeConfigSpec.BooleanValue RECIPE_TOOLTIPS_WITHOUT_JEI;
-        public static final ForgeConfigSpec.BooleanValue CAMERA_SHOW_TOOLTIP_DETAILS;
-        public static final ForgeConfigSpec.BooleanValue CAMERA_SHOW_FILM_FRAMES_IN_TOOLTIP;
-        public static final ForgeConfigSpec.BooleanValue CAMERA_SHOW_FILM_BAR_ON_ITEM;
-        public static final ForgeConfigSpec.BooleanValue PHOTOGRAPH_SHOW_PHOTOGRAPHER_IN_TOOLTIP;
-        public static final ForgeConfigSpec.BooleanValue PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR;
-        public static final ForgeConfigSpec.BooleanValue SIGNED_ALBUM_GLINT;
-        public static final ForgeConfigSpec.BooleanValue ALBUM_SHOW_PHOTOS_COUNT;
+        public static final ModConfigSpec.BooleanValue RECIPE_TOOLTIPS_WITHOUT_JEI;
+        public static final ModConfigSpec.BooleanValue CAMERA_SHOW_TOOLTIP_DETAILS;
+        public static final ModConfigSpec.BooleanValue CAMERA_SHOW_FILM_FRAMES_IN_TOOLTIP;
+        public static final ModConfigSpec.BooleanValue CAMERA_SHOW_FILM_BAR_ON_ITEM;
+        public static final ModConfigSpec.BooleanValue PHOTOGRAPH_SHOW_PHOTOGRAPHER_IN_TOOLTIP;
+        public static final ModConfigSpec.BooleanValue PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR;
+        public static final ModConfigSpec.BooleanValue SIGNED_ALBUM_GLINT;
+        public static final ModConfigSpec.BooleanValue ALBUM_SHOW_PHOTOS_COUNT;
 
         // CAPTURE
-        public static final ForgeConfigSpec.IntValue CAPTURE_DELAY_FRAMES;
-        public static final ForgeConfigSpec.IntValue FLASH_CAPTURE_DELAY_TICKS;
+        public static final ModConfigSpec.IntValue CAPTURE_DELAY_FRAMES;
+        public static final ModConfigSpec.IntValue FLASH_CAPTURE_DELAY_TICKS;
 
         // VIEWFINDER
-        public static final ForgeConfigSpec.DoubleValue VIEWFINDER_ZOOM_SENSITIVITY_MODIFIER;
-        public static final ForgeConfigSpec.ConfigValue<String> VIEWFINDER_BACKGROUND_COLOR;
-        public static final ForgeConfigSpec.ConfigValue<String> VIEWFINDER_FONT_MAIN_COLOR;
-        public static final ForgeConfigSpec.ConfigValue<String> VIEWFINDER_FONT_SECONDARY_COLOR;
-        public static final ForgeConfigSpec.BooleanValue VIEWFINDER_MIDDLE_CLICK_CONTROLS;
+        public static final ModConfigSpec.DoubleValue VIEWFINDER_ZOOM_SENSITIVITY_MODIFIER;
+        public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_BACKGROUND_COLOR;
+        public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_FONT_MAIN_COLOR;
+        public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_FONT_SECONDARY_COLOR;
+        public static final ModConfigSpec.BooleanValue VIEWFINDER_MIDDLE_CLICK_CONTROLS;
 
         // RENDER
-        public static final ForgeConfigSpec.BooleanValue HIDE_PHOJECTED_PHOTOGRAPHS_MADE_BY_OTHERS;
-        public static final ForgeConfigSpec.BooleanValue HIDE_ALL_PHOTOGRAPHS_MADE_BY_OTHERS;
-        public static final ForgeConfigSpec.IntValue PHOTOGRAPH_FRAME_CULLING_DISTANCE;
+        public static final ModConfigSpec.BooleanValue HIDE_LOADED_PHOTOGRAPHS_MADE_BY_OTHERS;
+        public static final ModConfigSpec.BooleanValue HIDE_ALL_PHOTOGRAPHS_MADE_BY_OTHERS;
+        public static final ModConfigSpec.IntValue PHOTOGRAPH_FRAME_CULLING_DISTANCE;
 
         // INTEGRATION
-        public static final ForgeConfigSpec.BooleanValue SHOW_JEI_INFORMATION;
-        public static final ForgeConfigSpec.BooleanValue REAL_CAMERA_DISABLE_IN_VIEWFINDER;
+        public static final ModConfigSpec.BooleanValue SHOW_JEI_INFORMATION;
+        public static final ModConfigSpec.BooleanValue REAL_CAMERA_DISABLE_IN_VIEWFINDER;
 
         // IMAGE SAVING
-        public static final ForgeConfigSpec.BooleanValue SAVE_EXPOSURE_TO_FILE_WHEN_VIEWED;
-        public static final ForgeConfigSpec.BooleanValue EXPOSURE_SAVING_LEVEL_SUBFOLDER;
-        public static final ForgeConfigSpec.EnumValue<ExposureSize> EXPOSURE_SAVING_SIZE;
+        public static final ModConfigSpec.BooleanValue SAVE_EXPOSURE_TO_FILE_WHEN_VIEWED;
+        public static final ModConfigSpec.BooleanValue EXPOSURE_SAVING_LEVEL_SUBFOLDER;
+        public static final ModConfigSpec.EnumValue<ExposureSize> EXPOSURE_SAVING_SIZE;
 
         static {
-            ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
+            ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
             {
                 builder.push("UI");
@@ -259,7 +258,7 @@ public class Config {
             {
                 builder.push("Render");
 
-                HIDE_PHOJECTED_PHOTOGRAPHS_MADE_BY_OTHERS = builder
+                HIDE_LOADED_PHOTOGRAPHS_MADE_BY_OTHERS = builder
                         .comment("Projected photographs (using Interplanar Projector) made by other players will not be rendered.")
                         .define("HideProjectedPhotographsMadeByOthers", false);
 

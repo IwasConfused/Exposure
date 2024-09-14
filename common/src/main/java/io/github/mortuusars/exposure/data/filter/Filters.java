@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.util.Color;
 import net.minecraft.resources.ResourceLocation;
@@ -65,7 +66,7 @@ public class Filters {
 
                 deserializeFilter(key, jsonObject).ifPresent(filter -> {
                     filters.put(key, filter);
-                    Exposure.LOGGER.info("Filter [" + key + ", " + filter.getShader() + "] added.");
+                    Exposure.LOGGER.info("Filter [{}, {}] added.", key, filter.getShader());
                 });
             }
 
@@ -76,17 +77,17 @@ public class Filters {
 
         private Optional<Filter> deserializeFilter(ResourceLocation key, JsonObject jsonObject) {
             try {
-                Ingredient ingredient = Ingredient.fromJson(jsonObject.get("item"));
+                Ingredient ingredient = Ingredient.CODEC.parse(JsonOps.INSTANCE, jsonObject.get("item")).getOrThrow();
                 if (ingredient.isEmpty()) {
                     Exposure.LOGGER.error("Filter '{}' was not loaded: ingredient cannot be empty.", key);
                     return Optional.empty();
                 }
 
-                ResourceLocation shader = new ResourceLocation(jsonObject.get("shader").getAsString());
+                ResourceLocation shader = ResourceLocation.parse(jsonObject.get("shader").getAsString());
 
                 ResourceLocation attachmentTexture = Filter.DEFAULT_GLASS_TEXTURE;
                 if (jsonObject.has("attachment_texture")) {
-                    attachmentTexture = new ResourceLocation(jsonObject.get("attachment_texture").getAsString());
+                    attachmentTexture =  ResourceLocation.parse(jsonObject.get("attachment_texture").getAsString());
                 }
 
                 int tintColor = Filter.DEFAULT_TINT_COLOR;

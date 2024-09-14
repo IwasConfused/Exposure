@@ -8,7 +8,7 @@ public class RealCameraCompat {
     public static void init() {
         DisableHelper.registerOr("renderModel", entity ->
                 entity instanceof Player player && CameraInHand.getCamera(player)
-                        .map(c -> c.get().getItem().isActive(c.get().getStack()))
+                        .map(c -> c.get().getItem().isActive(c.get().getItemStack()))
                         .orElse(false));
     }
 }

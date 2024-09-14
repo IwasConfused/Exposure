@@ -24,7 +24,7 @@ public class ShaderCommand {
                 .requires((stack) -> stack.hasPermission(2))
                 .then(Commands.literal("apply")
                         .then(Commands.argument("targets", EntityArgument.players())
-                                .then(Commands.argument("shaderLocation", new ShaderLocationArgument())
+                                .then(Commands.argument("shader_location", new ShaderLocationArgument())
                                         .executes(ShaderCommand::applyShader))))
                 .then(Commands.literal("remove")
                         .then(Commands.argument("targets", EntityArgument.players())
@@ -32,7 +32,7 @@ public class ShaderCommand {
     }
 
     private static int applyShader(CommandContext<CommandSourceStack> context) {
-        ResourceLocation shaderLocation = ResourceLocationArgument.getId(context, "shaderLocation");
+        ResourceLocation shaderLocation = ResourceLocationArgument.getId(context, "shader_location");
         for (ServerPlayer targetPlayer : getTargetPlayers(context)) {
             Packets.sendToClient(new ApplyShaderS2CP(shaderLocation), targetPlayer);
         }
@@ -40,7 +40,7 @@ public class ShaderCommand {
     }
 
     private static int removeShader(CommandContext<CommandSourceStack> context) {
-        ResourceLocation shaderLocation = new ResourceLocation("minecraft:none");
+        ResourceLocation shaderLocation = ResourceLocation.withDefaultNamespace("none");
         for (ServerPlayer targetPlayer : getTargetPlayers(context)) {
             Packets.sendToClient(new ApplyShaderS2CP(shaderLocation), targetPlayer);
             context.getSource().sendSuccess(() -> Component.translatable("command.exposure.shader.removed"), false);

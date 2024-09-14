@@ -61,6 +61,6 @@ public class ShutterTimerTickingSoundInstance extends AbstractTickableSoundInsta
     }
 
     private boolean hasShutterOpen(ItemStack stack) {
-        return stack.getItem() instanceof CameraItem cameraItem && cameraItem.isShutterOpen(stack);
+        return stack.getItem() instanceof CameraItem cameraItem && cameraItem.getShutterState(stack).isOpen();
     }
 }

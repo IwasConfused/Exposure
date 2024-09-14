@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "key": {
+    "G": {
+      "item": "minecraft:gunpowder"
+    },
+    "I": {
+      "tag": "c:ingots/gold"
+    },
+    "K": {
+      "item": "minecraft:dried_kelp"
+    },
+    "L": {
+      "item": "minecraft:lapis_lazuli"
+    },
+    "N": {
+      "tag": "c:nuggets/gold"
+    }
+  },
+  "pattern": [
+    "NLL",
+    "IGG",
+    "IKK"
+  ],
+  "result": {
+    "id": "exposure:color_film"
+  }
+}

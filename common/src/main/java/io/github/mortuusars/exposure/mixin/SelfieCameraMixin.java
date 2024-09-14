@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(Camera.class)
 public abstract class SelfieCameraMixin {
     @Inject(method = "getMaxZoom", at = @At(value = "RETURN"), cancellable = true)
-    private void getMaxZoom(double pStartingDistance, CallbackInfoReturnable<Double> cir) {
+    private void getMaxZoom(float maxZoom, CallbackInfoReturnable<Float> cir) {
         if (Viewfinder.isLookingThrough())
             cir.setReturnValue(Math.min(Viewfinder.getSelfieCameraDistance(), cir.getReturnValue()));
     }

@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.fabric;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.ComplicatedChromaticFinalizer;
+import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.fabric.resources.ExposureFabricClientReloadListener;
 import io.github.mortuusars.exposure.fabric.resources.FabricFiltersLoader;
 import io.github.mortuusars.exposure.gui.component.PhotographTooltip;
@@ -12,10 +12,8 @@ import io.github.mortuusars.exposure.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.gui.screen.camera.CameraAttachmentsScreen;
 import io.github.mortuusars.exposure.network.fabric.PacketsImpl;
-import io.github.mortuusars.exposure.render.PhotographEntityRenderer;
-import io.github.mortuusars.exposure.render.PhotographFrameEntityRenderer;
+import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.model.loading.v1.ModelLoadingPlugin;
@@ -39,22 +37,21 @@ public class ExposureFabricClient implements ClientModInitializer {
         MenuScreens.register(Exposure.MenuTypes.ITEM_RENAME.get(), ItemRenameScreen::new);
 
         ModelLoadingPlugin.register(pluginContext ->
-                pluginContext.addModels(ExposureClient.Models.CAMERA_GUI,
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL,
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL_STRIPPED,
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM,
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM_STRIPPED,
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE,
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE_STRIPPED));
+                pluginContext.addModels(ExposureClient.Models.CAMERA_GUI.id(),
+                        ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL.id(),
+                        ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL_STRIPPED.id(),
+                        ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM.id(),
+                        ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM_STRIPPED.id(),
+                        ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE.id(),
+                        ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE_STRIPPED.id()));
 
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new ExposureFabricClientReloadListener());
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new FabricFiltersLoader());
 
-        EntityRendererRegistry.register(Exposure.EntityTypes.PHOTOGRAPH.get(), PhotographEntityRenderer::new);
         EntityRendererRegistry.register(Exposure.EntityTypes.PHOTOGRAPH_FRAME.get(), PhotographFrameEntityRenderer::new);
 
         TooltipComponentCallback.EVENT.register(data -> data instanceof PhotographTooltip photographTooltip ? photographTooltip : null);
-        ClientTickEvents.END_CLIENT_TICK.register(client -> ComplicatedChromaticFinalizer.clientTick());
+        ClientTickEvents.END_CLIENT_TICK.register(client -> ClientTrichromeFinalizer.clientTick());
 
         PacketsImpl.registerS2CPackets();
     }

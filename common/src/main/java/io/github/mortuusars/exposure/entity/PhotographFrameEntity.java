@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.entity;
 
+import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
@@ -16,6 +17,8 @@ import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
@@ -36,7 +39,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import org.apache.commons.lang3.Validate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -69,15 +71,6 @@ public class PhotographFrameEntity extends HangingEntity {
         return distance < d * d;
     }
 
-    protected void defineSynchedData() {
-        getEntityData().define(DATA_SIZE, 0);
-        getEntityData().define(DATA_FRAME_ITEM, ItemStack.EMPTY);
-        getEntityData().define(DATA_ITEM, ItemStack.EMPTY);
-        getEntityData().define(DATA_ITEM_ROTATION, 0);
-        getEntityData().define(DATA_STRIPPED, false);
-        getEntityData().define(DATA_GLOWING, false);
-    }
-
     public void onSyncedDataUpdated(EntityDataAccessor<?> key) {
         if (key.equals(DATA_ITEM)) {
             onItemChanged(getItem());
@@ -99,7 +92,7 @@ public class PhotographFrameEntity extends HangingEntity {
     }
 
     @Override
-    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket() {
+    public @NotNull Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity entity) {
         int packedData = (size << 8) | direction.get3DDataValue();
         return new ClientboundAddEntityPacket(this, packedData, this.getPos());
     }
@@ -108,13 +101,13 @@ public class PhotographFrameEntity extends HangingEntity {
         super.addAdditionalSaveData(tag);
         ItemStack item = getItem();
         if (!item.isEmpty()) {
-            tag.put("Item", item.save(new CompoundTag()));
+            tag.put("Item", item.save(this.registryAccess()));
             tag.putBoolean("IsGlowing", this.isGlowing()); // "Glowing" is used in vanilla
             tag.putByte("ItemRotation", (byte) this.getItemRotation());
         }
         ItemStack frameItem = getFrameItem();
         if (!frameItem.isEmpty())
-            tag.put("FrameItem", frameItem.save(new CompoundTag()));
+            tag.put("FrameItem", frameItem.save(this.registryAccess()));
 
         tag.putByte("Size", (byte) getSize());
         tag.putByte("Facing", (byte) direction.get3DDataValue());
@@ -126,21 +119,13 @@ public class PhotographFrameEntity extends HangingEntity {
         super.readAdditionalSaveData(tag);
         CompoundTag frameItemTag = tag.getCompound("FrameItem");
         if (!frameItemTag.isEmpty()) {
-            ItemStack itemstack = ItemStack.of(frameItemTag);
-            if (itemstack.isEmpty()) {
-                Exposure.LOGGER.warn("Unable to load frame item from: {}", frameItemTag);
-                itemstack = new ItemStack(Exposure.Items.PHOTOGRAPH_FRAME.get());
-            }
-
-            setFrameItem(itemstack);
+            ItemStack stack = ItemStack.parse(registryAccess(), frameItemTag).orElse(new ItemStack(Exposure.Items.PHOTOGRAPH_FRAME.get()));
+            setFrameItem(stack);
         }
 
         CompoundTag itemTag = tag.getCompound("Item");
         if (!itemTag.isEmpty()) {
-            ItemStack itemstack = ItemStack.of(itemTag);
-            if (itemstack.isEmpty())
-                Exposure.LOGGER.warn("Unable to load item from: {}", itemTag);
-
+            ItemStack itemstack = ItemStack.parse(registryAccess(), itemTag).orElse(ItemStack.EMPTY);
             setItem(itemstack);
             setGlowing(tag.getBoolean("IsGlowing")); // "Glowing" is used in vanilla
             setItemRotation(tag.getByte("ItemRotation"));
@@ -158,16 +143,19 @@ public class PhotographFrameEntity extends HangingEntity {
     }
 
     @Override
-    protected float getEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
+    public double getEyeY() {
         return 0f;
     }
 
-    @Override
+    //    @Override
+//    protected float getEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
+//        return 0f;
+//    }
+//
     public int getWidth() {
         return getSize() * 16 + 16;
     }
 
-    @Override
     public int getHeight() {
         return getSize() * 16 + 16;
     }
@@ -183,14 +171,10 @@ public class PhotographFrameEntity extends HangingEntity {
     }
 
     @Override
-    protected void recalculateBoundingBox() {
-        //noinspection ConstantValue
-        if (this.direction == null)
-            return;
-
-        double x = (double)this.pos.getX() + 0.5;
-        double y = (double)this.pos.getY() + 0.5;
-        double z = (double)this.pos.getZ() + 0.5;
+    protected @NotNull AABB calculateBoundingBox(BlockPos pos, Direction direction) {
+        double x = (double)pos.getX() + 0.5;
+        double y = (double)pos.getY() + 0.5;
+        double z = (double)pos.getZ() + 0.5;
 
         double widthOffset = getWidth() % 32 == 0 ? 0.5 : 0.0;
         double heightOffset = getHeight() % 32 == 0 ? 0.5 : 0.0;
@@ -201,11 +185,11 @@ public class PhotographFrameEntity extends HangingEntity {
 
         double hangOffset = 0.46875;
 
-        if (getDirection().getAxis().isHorizontal()) {
+        if (direction.getAxis().isHorizontal()) {
             x -= getDirection().getStepX() * hangOffset;
             z -= getDirection().getStepZ() * hangOffset;
-            Direction direction = getDirection().getCounterClockWise();
-            setPosRaw(x += widthOffset * (double)direction.getStepX(), y += heightOffset, z += widthOffset * (double)direction.getStepZ());
+            Direction ccwDirection = direction.getCounterClockWise();
+            setPosRaw(x += widthOffset * (double)ccwDirection.getStepX(), y += heightOffset, z += widthOffset * (double)ccwDirection.getStepZ());
             double xSize = this.getWidth();
             double ySize = this.getHeight();
             double zSize = this.getWidth();
@@ -213,14 +197,14 @@ public class PhotographFrameEntity extends HangingEntity {
                 zSize = 1.0;
             else
                 xSize = 1.0;
-            setBoundingBox(new AABB(x - (xSize /= 32.0), y - (ySize /= 32.0), z - (zSize /= 32.0), x + xSize, y + ySize, z + zSize));
+            return new AABB(x - (xSize /= 32.0), y - (ySize /= 32.0), z - (zSize /= 32.0), x + xSize, y + ySize, z + zSize);
         }
         else {
             y -= getDirection().getStepY() * hangOffset;
             setPosRaw(x += widthOffset, y, z -= heightOffset);
             double xSize = getWidth();
             double zSize = getHeight();
-            setBoundingBox(new AABB(x - (xSize /= 32.0), y - (1.0 / 32.0), z - (zSize /= 32.0), x + xSize, y + 1.0 / 32.0, z + zSize));
+            return new AABB(x - (xSize /= 32.0), y - (1.0 / 32.0), z - (zSize /= 32.0), x + xSize, y + 1.0 / 32.0, z + zSize);
         }
     }
 
@@ -262,7 +246,7 @@ public class PhotographFrameEntity extends HangingEntity {
 
     @Override
     protected void setDirection(@NotNull Direction facingDirection) {
-        Validate.notNull(facingDirection);
+        Preconditions.checkNotNull(facingDirection);
 
         direction = facingDirection;
         if (facingDirection.getAxis().isHorizontal()) {
@@ -341,7 +325,11 @@ public class PhotographFrameEntity extends HangingEntity {
             if (canStrip(itemInHand)) {
                 if (!level().isClientSide) {
                     setStripped(true);
-                    itemInHand.hurtAndBreak(1, player, (pl) -> pl.broadcastBreakEvent(hand));
+                    if (player instanceof ServerPlayer serverPlayer) {
+                        itemInHand.hurtAndBreak(1, serverPlayer.serverLevel(), serverPlayer,
+                                item -> player.onEquippedItemBroken(item,
+                                        hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND));
+                    }
                     gameEvent(GameEvent.BLOCK_CHANGE, player);
                     playSound(SoundEvents.AXE_STRIP, 1f, 1f);
                 }
@@ -457,6 +445,16 @@ public class PhotographFrameEntity extends HangingEntity {
     }
 
     @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+       builder.define(DATA_SIZE, 0);
+       builder.define(DATA_FRAME_ITEM, ItemStack.EMPTY);
+       builder.define(DATA_ITEM, ItemStack.EMPTY);
+       builder.define(DATA_ITEM_ROTATION, 0);
+       builder.define(DATA_STRIPPED, false);
+       builder.define(DATA_GLOWING, false);
+    }
+
+    @Override
     public void tick() {
         super.tick();
         if (level().isClientSide && isGlowing() && level().getRandom().nextFloat() < 0.003f) {
@@ -499,10 +497,10 @@ public class PhotographFrameEntity extends HangingEntity {
         return super.getTypeName();
     }
 
-    @Override
-    public float getNameTagOffsetY() {
-        return (getSize() + 1) / 2f + 0.35f;
-    }
+//    @Override
+//    public float getNameTagOffsetY() {
+//        return (getSize() + 1) / 2f + 0.35f;
+//    }
 
     @Override
     public void playPlacementSound() {

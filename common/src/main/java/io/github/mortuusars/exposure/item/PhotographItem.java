@@ -3,9 +3,11 @@ package io.github.mortuusars.exposure.item;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
-import io.github.mortuusars.exposure.camera.infrastructure.FrameData;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.gui.ClientGUI;
 import io.github.mortuusars.exposure.gui.component.PhotographTooltip;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -31,40 +33,49 @@ public class PhotographItem extends Item {
         super(properties);
     }
 
-    @Override
-    public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack) {
-        return FrameData.hasIdOrTexture(stack) ? Optional.of(new PhotographTooltip(stack)) : Optional.empty();
+    public ExposureFrame getFrame(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY);
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        if (stack.getTag() == null) {
+    public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack) {
+        ExposureIdentifier identifier = getFrame(stack).identifier();
+        return !identifier.isEmpty() ? Optional.of(new PhotographTooltip(List.of(new ItemAndStack<>(stack)))) : Optional.empty();
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        @Nullable Integer generation = stack.get(Exposure.DataComponents.PHOTOGRAPH_GENERATION);
+        if (generation != null) {
+            if (generation > 0)
+                tooltipComponents.add(Component.translatable("item.exposure.photograph.generation." + generation)
+                        .withStyle(ChatFormatting.GRAY));
+        }
+
+        @Nullable ExposureFrame frame = stack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
+        if (frame == null) {
             return;
         }
 
-        int generation = stack.getTag().getInt("generation");
-        if (generation > 0)
-            tooltipComponents.add(Component.translatable("item.exposure.photograph.generation." + generation)
-                    .withStyle(ChatFormatting.GRAY));
-
-        String photographerName = stack.getTag().getString(FrameData.PHOTOGRAPHER);
-        if (!photographerName.isEmpty() && Config.Client.PHOTOGRAPH_SHOW_PHOTOGRAPHER_IN_TOOLTIP.get()) {
+        String photographerName = frame.photographer().name();
+        if (Config.Client.PHOTOGRAPH_SHOW_PHOTOGRAPHER_IN_TOOLTIP.get() && !photographerName.isEmpty()) {
             tooltipComponents.add(Component.translatable("item.exposure.photograph.photographer_tooltip",
                             Component.literal(photographerName).withStyle(ChatFormatting.WHITE))
                     .withStyle(ChatFormatting.GRAY));
         }
 
-        // The value is not constant here
-        //noinspection ConstantValue
-        if (generation < 2 && !PlatformHelper.isModLoaded("jei") && Config.Client.RECIPE_TOOLTIPS_WITHOUT_JEI.get()) {
-            ClientGUI.addPhotographCopyingTooltip(stack, level, tooltipComponents, isAdvanced);
+        if (Config.Client.RECIPE_TOOLTIPS_WITHOUT_JEI.get()) {
+            boolean jeiLoaded = PlatformHelper.isModLoaded("jei");
+            if ((generation == null || generation < 2) && !jeiLoaded) {
+                ClientGUI.addPhotographCopyingTooltip(stack, context, tooltipComponents, tooltipFlag);
+            }
         }
 
-        if (isAdvanced.isAdvanced()) {
-            String str = FrameData.getIdOrTexture(stack.getTag()).map(
+        if (tooltipFlag.isAdvanced()) {
+            String identifier = frame.identifier().map(
                     id -> "Exposure Id: " + id,
                     texture -> "Texture: " + texture);
-            tooltipComponents.add(Component.literal(str).withStyle(ChatFormatting.DARK_GRAY));
+            tooltipComponents.add(Component.literal(identifier).withStyle(ChatFormatting.DARK_GRAY));
         }
     }
 
@@ -72,8 +83,8 @@ public class PhotographItem extends Item {
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand hand) {
         ItemStack itemInHand = player.getItemInHand(hand);
 
-        if (!FrameData.hasIdOrTexture(itemInHand)) {
-            Exposure.LOGGER.warn("No Id or Texture is defined. - {}", itemInHand);
+        ExposureFrame frame = getFrame(itemInHand);
+        if (frame == ExposureFrame.EMPTY || frame.identifier().isEmpty()) {
             return InteractionResultHolder.pass(itemInHand);
         }
 

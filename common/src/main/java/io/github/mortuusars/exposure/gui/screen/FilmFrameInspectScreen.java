@@ -4,8 +4,10 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
+import io.github.mortuusars.exposure.core.FilmColor;
+import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
@@ -13,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -23,6 +26,17 @@ import org.jetbrains.annotations.Nullable;
 public class FilmFrameInspectScreen extends ZoomableScreen {
     public static final ResourceLocation TEXTURE = Exposure.resource("textures/gui/film_frame_inspect.png");
     public static final ResourceLocation WIDGETS_TEXTURE = Exposure.resource("textures/gui/widgets.png");
+
+    public static final WidgetSprites PREV_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("widgets/previous_button"),
+            Exposure.resource("widgets/previous_button_disabled"),
+            Exposure.resource("widgets/previous_button_highlighted"));
+
+    public static final WidgetSprites NEXT_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("widgets/next_button"),
+            Exposure.resource("widgets/next_button_disabled"),
+            Exposure.resource("widgets/next_button_highlighted"));
+
     public static final int BG_SIZE = 78;
     public static final int FRAME_SIZE = 54;
     public static final int BUTTON_SIZE = 16;
@@ -56,9 +70,9 @@ public class FilmFrameInspectScreen extends ZoomableScreen {
         zoomFactor = (float) height / BG_SIZE;
 
         previousButton = new ImageButton(0, (int) (height / 2f - BUTTON_SIZE / 2f), BUTTON_SIZE, BUTTON_SIZE,
-                0, 0, BUTTON_SIZE, WIDGETS_TEXTURE, this::buttonPressed);
+                PREV_BUTTON_SPRITES, this::buttonPressed);
         nextButton = new ImageButton(width - BUTTON_SIZE, (int) (height / 2f - BUTTON_SIZE / 2f), BUTTON_SIZE, BUTTON_SIZE,
-                16, 0, BUTTON_SIZE, WIDGETS_TEXTURE, this::buttonPressed);
+                NEXT_BUTTON_SPRITES, this::buttonPressed);
 
         addRenderableWidget(previousButton);
         addRenderableWidget(nextButton);
@@ -79,7 +93,7 @@ public class FilmFrameInspectScreen extends ZoomableScreen {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics);
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 500); // Otherwise exposure will overlap buttons
@@ -109,9 +123,10 @@ public class FilmFrameInspectScreen extends ZoomableScreen {
         if (!(filmStack.getItem() instanceof DevelopedFilmItem film))
             return;
 
-        FilmType negative = film.getType();
+        ExposureType exposureType = film.getType();
+        FilmColor filmColor = exposureType.getFilmColor();
 
-        RenderSystem.setShaderColor(negative.filmR, negative.filmG, negative.filmB, negative.filmA);
+        RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
 
         GuiUtil.blit(guiGraphics.pose(), 0, 0, BG_SIZE, BG_SIZE, 0, BG_SIZE, 256, 256, 0);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -119,9 +134,9 @@ public class FilmFrameInspectScreen extends ZoomableScreen {
         guiGraphics.pose().translate(12, 12, 0);
 
         int currentFrame = getLightroomMenu().getSelectedFrame();
-        @Nullable CompoundTag frame = getLightroomMenu().getFrameIdByIndex(currentFrame);
+        @Nullable ExposureFrame frame = getLightroomMenu().getFrameIdByIndex(currentFrame);
         if (frame != null)
-            lightroomScreen.renderFrame(frame, guiGraphics.pose(), 0, 0, FRAME_SIZE, 1f, negative);
+            lightroomScreen.renderFrame(frame, guiGraphics.pose(), 0, 0, FRAME_SIZE, 1f, exposureType);
 
         guiGraphics.pose().popPose();
 

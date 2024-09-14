@@ -2,35 +2,24 @@ package io.github.mortuusars.exposure.integration.jade.component_provider;
 
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
+import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.integration.jade.ExposureJadePlugin;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
-import org.jetbrains.annotations.Nullable;
-import snownee.jade.api.BlockAccessor;
-import snownee.jade.api.IBlockComponentProvider;
-import snownee.jade.api.IServerDataProvider;
-import snownee.jade.api.ITooltip;
+import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
-import snownee.jade.api.view.IServerExtensionProvider;
-import snownee.jade.api.view.ViewGroup;
-import snownee.jade.impl.ui.ProgressArrowElement;
 
-import java.util.List;
-
-public enum LightroomComponentProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor>,
-        IServerExtensionProvider<LightroomBlockEntity, ItemStack> {
+public enum LightroomComponentProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
 
     @Override
-    public void appendTooltip(ITooltip tooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
-        CompoundTag tag = blockAccessor.getServerData();
+    public void appendTooltip(ITooltip tooltip, BlockAccessor accessor, IPluginConfig iPluginConfig) {
+        CompoundTag tag = accessor.getServerData();
 
         if (tag.getBoolean("Empty"))
             return;
@@ -39,7 +28,7 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
 
         tooltip.add(helper.spacer(0, 0));
 
-        ItemStack film = ItemStack.of(tag.getCompound("Film"));
+        ItemStack film = ItemStack.parseOptional(accessor.getLevel().registryAccess(), tag.getCompound("Film"));
         if (!film.isEmpty()) {
             tooltip.append(helper.item(film));
             tooltip.append(helper.text(Component.literal("|").withStyle(ChatFormatting.GRAY))
@@ -48,7 +37,7 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
                     .message(null));
         }
 
-        ItemStack paper = ItemStack.of(tag.getCompound("Paper"));
+        ItemStack paper = ItemStack.parseOptional(accessor.getLevel().registryAccess(), tag.getCompound("Paper"));
         if (!paper.isEmpty()) {
             tooltip.append(helper.item(paper));
             tooltip.append(helper.text(Component.literal("+").withStyle(ChatFormatting.GRAY))
@@ -58,18 +47,18 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
         }
 
         for (String dye : new String[] {"Cyan", "Yellow", "Magenta", "Black"}) {
-            ItemStack stack = ItemStack.of(tag.getCompound(dye));
+            ItemStack stack = ItemStack.parseOptional(accessor.getLevel().registryAccess(), tag.getCompound(dye));
             if (!stack.isEmpty())
                 tooltip.append(helper.item(stack));
         }
 
-        tooltip.append(new ProgressArrowElement(tag.getFloat("Progress")));
+        tooltip.append(helper.progress(tag.getFloat("Progress")));
 
-        tooltip.append(helper.item(ItemStack.of(tag.getCompound("Result"))));
+        tooltip.append(helper.item(ItemStack.parseOptional(accessor.getLevel().registryAccess(), tag.getCompound("Result"))));
 
 
-        Lightroom.Process process = Lightroom.Process.fromStringOrDefault(tag.getString("Process"), Lightroom.Process.REGULAR);
-        if (process != Lightroom.Process.REGULAR)
+        PrintingMode process = PrintingMode.fromStringOrDefault(tag.getString("Process"), PrintingMode.REGULAR);
+        if (process != PrintingMode.REGULAR)
             tooltip.add(helper.text(Component.translatable("gui.exposure.lightroom.process." + process.getSerializedName())));
 
         tooltip.add(helper.spacer(0, 2));
@@ -83,23 +72,23 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
                 return;
             }
 
-            tag.put("Film", lightroomBlockEntity.getItem(Lightroom.FILM_SLOT).save(new CompoundTag()));
-            tag.put("Paper", lightroomBlockEntity.getItem(Lightroom.PAPER_SLOT).save(new CompoundTag()));
-            tag.put("Cyan", lightroomBlockEntity.getItem(Lightroom.CYAN_SLOT).save(new CompoundTag()));
-            tag.put("Yellow", lightroomBlockEntity.getItem(Lightroom.YELLOW_SLOT).save(new CompoundTag()));
-            tag.put("Magenta", lightroomBlockEntity.getItem(Lightroom.MAGENTA_SLOT).save(new CompoundTag()));
-            tag.put("Black", lightroomBlockEntity.getItem(Lightroom.BLACK_SLOT).save(new CompoundTag()));
-            tag.put("Result", lightroomBlockEntity.getItem(Lightroom.RESULT_SLOT).save(new CompoundTag()));
+            tag.put("Film", lightroomBlockEntity.getItem(Lightroom.FILM_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
+            tag.put("Paper", lightroomBlockEntity.getItem(Lightroom.PAPER_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
+            tag.put("Cyan", lightroomBlockEntity.getItem(Lightroom.CYAN_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
+            tag.put("Yellow", lightroomBlockEntity.getItem(Lightroom.YELLOW_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
+            tag.put("Magenta", lightroomBlockEntity.getItem(Lightroom.MAGENTA_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
+            tag.put("Black", lightroomBlockEntity.getItem(Lightroom.BLACK_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
+            tag.put("Result", lightroomBlockEntity.getItem(Lightroom.RESULT_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
 
-            tag.putString("Process", lightroomBlockEntity.getProcess().getSerializedName());
+            tag.putString("Process", lightroomBlockEntity.getPrintingMode().getSerializedName());
 
             tag.putFloat("Progress", lightroomBlockEntity.getProgressPercentage());
         }
     }
 
     @Override
-    public @Nullable List<ViewGroup<ItemStack>> getGroups(ServerPlayer serverPlayer, ServerLevel serverLevel, LightroomBlockEntity lightroomBlockEntity, boolean b) {
-        return null;
+    public boolean shouldRequestData(BlockAccessor accessor) {
+        return true;
     }
 
     @Override

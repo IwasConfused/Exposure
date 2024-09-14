@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
 import io.github.mortuusars.exposure.camera.Camera;
+import io.github.mortuusars.exposure.client.animation.ModelPoses;
 import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.item.CameraItemClientExtensions;
 import io.github.mortuusars.exposure.util.CameraInHand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
@@ -39,10 +39,10 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
         if (cameraInHand.getHand() == InteractionHand.OFF_HAND)
             arm = arm.getOpposite();
 
-        if (camera.get().getItem().isInSelfieMode(camera.get().getStack()))
-            CameraItemClientExtensions.applySelfieHoldingPose((HumanoidModel<?>) (Object) this, entity, arm, false);
+        if (camera.get().getItem().isInSelfieMode(camera.get().getItemStack()))
+            ModelPoses.applyCameraSelfiePose((HumanoidModel<?>) (Object) this, entity, arm, false);
         else
-            CameraItemClientExtensions.applyDefaultHoldingPose((HumanoidModel<?>) (Object) this, entity, arm);
+            ModelPoses.applyCameraPose(((HumanoidModel<?>) (Object) this), entity, arm);
 
         hat.copyFrom(getHead());
     }

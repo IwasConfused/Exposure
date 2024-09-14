@@ -3,46 +3,37 @@ package io.github.mortuusars.exposure.network.packet.server;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
-import io.github.mortuusars.exposure.data.storage.ExposureSavedData;
-import io.github.mortuusars.exposure.network.PacketDirection;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Optional;
-
-public record QueryExposureDataC2SP(String id) implements IPacket {
-    
+public record QueryExposureDataC2SP(String exposureId) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("query_exposure_data");
+    public static final CustomPacketPayload.Type<QueryExposureDataC2SP> TYPE = new CustomPacketPayload.Type<>(ID);
+
+    public static final StreamCodec<FriendlyByteBuf, QueryExposureDataC2SP> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, QueryExposureDataC2SP::exposureId,
+            QueryExposureDataC2SP::new
+    );
 
     @Override
-    public ResourceLocation getId() {
-        return ID;
-    }
-
-    public FriendlyByteBuf toBuffer(FriendlyByteBuf buffer) {
-        buffer.writeUtf(id);
-        return buffer;
-    }
-
-    public static QueryExposureDataC2SP fromBuffer(FriendlyByteBuf buffer) {
-        return new QueryExposureDataC2SP(buffer.readUtf());
+    public @NotNull Type<? extends CustomPacketPayload> type() {
+        return TYPE;
     }
 
     @Override
-    public boolean handle(PacketDirection direction, @Nullable Player player) {
-        Preconditions.checkArgument(player != null, "Cannot handle QueryExposureDataPacket: Player was null");
-
-        Optional<ExposureSavedData> exposureSavedData = ExposureServer.getExposureStorage().getOrQuery(id);
-
-        if (exposureSavedData.isEmpty())
-            Exposure.LOGGER.error("Cannot get exposure data with an id '" + id + "'. Result is null.");
-        else {
-            ExposureServer.getExposureSender().sendTo(player, id, exposureSavedData.get());
-        }
-
+    public boolean handle(PacketFlow flow, Player player) {
+        Preconditions.checkArgument(player instanceof ServerPlayer, "Cannot handle packet: Player was is not available.");
+        ExposureData exposureData = ExposureServer.exposureStorage().get(exposureId);
+        ExposureServer.exposureSender().sendTo(exposureId, exposureData, ((ServerPlayer) player));
         return true;
     }
 }

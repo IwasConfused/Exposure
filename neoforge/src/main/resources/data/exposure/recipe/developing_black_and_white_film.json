@@ -1,0 +1,22 @@
+{
+  "type": "exposure:film_developing",
+  "film": {
+    "item": "exposure:black_and_white_film"
+  },
+  "ingredients": [
+    [
+      {
+        "type": "neoforge:components",
+        "items": "minecraft:potion",
+        "components": {
+          "minecraft:potion_contents": {
+            "potion": "minecraft:water"
+          }
+        }
+      }
+    ]
+  ],
+  "result": {
+    "id": "exposure:developed_black_and_white_film"
+  }
+}

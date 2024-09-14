@@ -5,6 +5,7 @@ import io.github.mortuusars.exposure.integration.jei.ExposureJeiPlugin;
 import io.github.mortuusars.exposure.integration.jei.recipe.PhotographStackingJeiRecipe;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableStatic;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
@@ -38,14 +39,14 @@ public class PhotographStackingCategory implements IRecipeCategory<PhotographSta
     }
 
     @Override
-    public @NotNull List<Component> getTooltipStrings(PhotographStackingJeiRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
-        if (recipe.getType() == PhotographStackingJeiRecipe.STACKING && mouseX >= 10 && mouseX < 38 && mouseY >= 4 && mouseY < 28)
-            return List.of(Component.translatable("jei.exposure.photograph_stacking.stacking.tooltip"));
+    public void getTooltip(ITooltipBuilder tooltip, PhotographStackingJeiRecipe recipe, IRecipeSlotsView recipeSlotsView, double mouseX, double mouseY) {
+        if (recipe.getType() == PhotographStackingJeiRecipe.STACKING && mouseX >= 10 && mouseX < 38 && mouseY >= 4 && mouseY < 28) {
+            tooltip.add(Component.translatable("jei.exposure.photograph_stacking.stacking.tooltip"));
+        }
 
-        if (recipe.getType() == PhotographStackingJeiRecipe.REMOVING && mouseX >= 10 && mouseX < 37 && mouseY >= 13 && mouseY < 35)
-            return List.of(Component.translatable("jei.exposure.photograph_stacking.removing.tooltip"));
-
-        return IRecipeCategory.super.getTooltipStrings(recipe, recipeSlotsView, mouseX, mouseY);
+        if (recipe.getType() == PhotographStackingJeiRecipe.REMOVING && mouseX >= 10 && mouseX < 37 && mouseY >= 13 && mouseY < 35) {
+            tooltip.add(Component.translatable("jei.exposure.photograph_stacking.removing.tooltip"));
+        }
     }
 
     @Override

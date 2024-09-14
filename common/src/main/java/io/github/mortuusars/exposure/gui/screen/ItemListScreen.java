@@ -108,14 +108,14 @@ public class ItemListScreen extends Screen {
 
         int left = leftPos;
         int top = topPos;
-        renderBackground(guiGraphics);
+//        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate((width / 2f), (height / 2f), 0.0f);
         guiGraphics.pose().scale(animProgress, animProgress, animProgress);
         guiGraphics.pose().translate(-(width / 2f), -(height / 2f), 0.0f);
 
-        renderBg(guiGraphics, partialTick, mouseX, mouseY);
+        renderBg(guiGraphics, mouseX, mouseY, partialTick);
         RenderSystem.disableDepthTest();
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         {
@@ -144,7 +144,7 @@ public class ItemListScreen extends Screen {
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
 
-    protected void renderBg(@NotNull GuiGraphics guiGraphics, float partialTick, int mouseX, int mouseY) {
+    protected void renderBg(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 

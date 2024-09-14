@@ -9,13 +9,12 @@ public class GuiUtil {
     public static void blit(PoseStack poseStack, float minX, float maxX, float minY, float maxY, float blitOffset, float minU, float maxU, float minV, float maxV) {
         Matrix4f matrix = poseStack.last().pose();
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix, minX, maxY, blitOffset).uv(minU, maxV).endVertex();
-        bufferbuilder.vertex(matrix, maxX, maxY, blitOffset).uv(maxU, maxV).endVertex();
-        bufferbuilder.vertex(matrix, maxX, minY, blitOffset).uv(maxU, minV).endVertex();
-        bufferbuilder.vertex(matrix, minX, minY, blitOffset).uv(minU, minV).endVertex();
-        BufferUploader.drawWithShader(bufferbuilder.end());
+        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferBuilder.addVertex(matrix, minX, maxY, blitOffset).setUv(minU, maxV);
+        bufferBuilder.addVertex(matrix, maxX, maxY, blitOffset).setUv(maxU, maxV);
+        bufferBuilder.addVertex(matrix, maxX, minY, blitOffset).setUv(maxU, minV);
+        bufferBuilder.addVertex(matrix, minX, minY, blitOffset).setUv(minU, minV);
+        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
     }
 
     public static void blit(PoseStack poseStack, float x, float y, float width, float height, int u, int v, int textureWidth, int textureHeight, float blitOffset) {

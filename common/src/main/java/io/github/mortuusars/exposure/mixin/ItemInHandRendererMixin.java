@@ -1,9 +1,10 @@
 package io.github.mortuusars.exposure.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
-import io.github.mortuusars.exposure.render.PhotographInHandRenderer;
+import io.github.mortuusars.exposure.client.render.PhotographInHandRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -35,10 +36,10 @@ public abstract class ItemInHandRendererMixin {
     protected abstract void renderMapHand(PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, HumanoidArm pSide);
 
     @Inject(method = "renderArmWithItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;isEmpty()Z", ordinal = 0),
-            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
+            cancellable = true)
     private void renderPhotograph(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand,
                                   float swingProgress, ItemStack stack, float equipProgress, PoseStack poseStack,
-                                  MultiBufferSource buffer, int combinedLight, CallbackInfo ci, boolean isMainHand, HumanoidArm arm) {
+                                  MultiBufferSource buffer, int combinedLight, CallbackInfo ci, @Local boolean isMainHand, @Local HumanoidArm arm) {
         if (Viewfinder.isLookingThrough()) {
             poseStack.popPose();
             ci.cancel();

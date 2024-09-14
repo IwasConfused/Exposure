@@ -4,30 +4,6 @@ import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
 public class Lightroom {
-    public enum Process implements StringRepresentable {
-        REGULAR("regular"),
-        CHROMATIC("chromatic");
-
-        private final String name;
-
-        Process(String name) {
-            this.name = name;
-        }
-
-        public static Process fromStringOrDefault(String serializedName, Process defaultValue) {
-            for (Process value : values()) {
-                if (value.getSerializedName().equals(serializedName))
-                    return value;
-            }
-            return defaultValue;
-        }
-
-        @Override
-        public @NotNull String getSerializedName() {
-            return name;
-        }
-    }
-
     public static final int SLOTS = 7;
     public static final int FILM_SLOT = 0;
     public static final int PAPER_SLOT = 1;
@@ -43,6 +19,6 @@ public class Lightroom {
     public static final int[] DYES_FOR_BW = new int[] { BLACK_SLOT };
     public static final int[] DYES_FOR_COLOR = new int[] { CYAN_SLOT, MAGENTA_SLOT, YELLOW_SLOT, BLACK_SLOT };
     public static final int[] DYES_FOR_CHROMATIC_RED = new int[] { MAGENTA_SLOT, YELLOW_SLOT };
-    public static final int[] DYES_FOR_CHROMATIC_BLUE = new int[] { CYAN_SLOT, MAGENTA_SLOT };
     public static final int[] DYES_FOR_CHROMATIC_GREEN = new int[] { CYAN_SLOT, YELLOW_SLOT };
+    public static final int[] DYES_FOR_CHROMATIC_BLUE = new int[] { CYAN_SLOT, MAGENTA_SLOT };
 }

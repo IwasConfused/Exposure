@@ -1,7 +1,9 @@
 package io.github.mortuusars.exposure.item;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.InterplanarProjectorMode;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.player.Player;
@@ -10,7 +12,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -21,12 +22,12 @@ public class InterplanarProjectorItem extends Item {
         super(properties);
     }
 
-    public boolean isDithered(ItemStack stack) {
-        return stack.getTag() == null || !stack.getTag().getBoolean("Clean");
+    public InterplanarProjectorMode getMode(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.INTERPLANAR_PROJECTOR_MODE, InterplanarProjectorMode.DITHERED);
     }
 
-    public void setDithered(ItemStack stack, boolean dithered) {
-        stack.getOrCreateTag().putBoolean("Clean", !dithered);
+    public void setMode(ItemStack stack, InterplanarProjectorMode mode) {
+        stack.set(Exposure.DataComponents.INTERPLANAR_PROJECTOR_MODE, mode);
     }
 
     public boolean isConsumable(ItemStack stack) {
@@ -34,15 +35,8 @@ public class InterplanarProjectorItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> components, TooltipFlag isAdvanced) {
-        super.appendHoverText(stack, level, components, isAdvanced);
-
-        if (isDithered(stack)){
-            components.add(Component.translatable("item.exposure.interplanar_projector.mode.dithered"));
-        }
-        else {
-            components.add(Component.translatable("item.exposure.interplanar_projector.mode.clear"));
-        }
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag tooltipFlag) {
+        components.add(getMode(stack).translate());
 
         if (Screen.hasShiftDown()) {
             if (isConsumable(stack)) {
@@ -59,7 +53,7 @@ public class InterplanarProjectorItem extends Item {
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
         if (other.isEmpty() && action == ClickAction.SECONDARY) {
-            setDithered(stack, !isDithered(stack));
+            setMode(stack, getMode(stack).cycle());
             slot.setChanged();
             if (player.level().isClientSide) {
                 player.playSound(Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 0.6f, 1f);
@@ -70,7 +64,8 @@ public class InterplanarProjectorItem extends Item {
         return super.overrideOtherStackedOnMe(stack, other, slot, action, player, access);
     }
 
-    public Optional<String> getFilename(ItemStack stack) {
-        return stack.hasCustomHoverName() ? Optional.of(stack.getHoverName().getString()) : Optional.empty();
+    public Optional<String> getFilepath(ItemStack stack) {
+        @Nullable Component customName = stack.get(DataComponents.CUSTOM_NAME);
+        return customName != null ? Optional.of(customName.getString()) : Optional.empty();
     }
 }

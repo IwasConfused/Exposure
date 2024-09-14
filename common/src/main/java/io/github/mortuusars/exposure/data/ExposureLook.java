@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.data;
 
-import io.github.mortuusars.exposure.render.modifiers.ExposurePixelModifiers;
-import io.github.mortuusars.exposure.render.modifiers.IPixelModifier;
+import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
+import io.github.mortuusars.exposure.core.pixel_modifiers.IPixelModifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

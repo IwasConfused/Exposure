@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.command.suggestion;
 
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -15,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 public class ExposureIdSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
-        List<String> ids = ExposureServer.getExposureStorage().getAllIds();
+        List<String> ids = ExposureServer.exposureStorage().getAllExposureIds();
         return SharedSuggestionProvider.suggest(ids, builder);
     }
 }

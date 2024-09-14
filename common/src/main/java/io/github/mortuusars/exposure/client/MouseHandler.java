@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.gui.ClientGUI;
-import io.github.mortuusars.exposure.gui.screen.camera.ViewfinderControlsScreen;
+import io.github.mortuusars.exposure.gui.screen.camera.CameraControlsScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 
@@ -28,7 +28,7 @@ public class MouseHandler {
             return false;
         }
 
-        if (!(Minecraft.getInstance().screen instanceof ViewfinderControlsScreen)) {
+        if (!(Minecraft.getInstance().screen instanceof CameraControlsScreen)) {
             if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && Minecraft.getInstance().options.keyAttack.matchesMouse(button))
                 return true; // Block attacks
 

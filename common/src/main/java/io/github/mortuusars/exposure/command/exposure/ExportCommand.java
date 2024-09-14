@@ -10,8 +10,8 @@ import io.github.mortuusars.exposure.command.argument.ExposureSizeArgument;
 import io.github.mortuusars.exposure.command.suggestion.ExposureIdSuggestionProvider;
 import io.github.mortuusars.exposure.data.ExposureLook;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.data.storage.ExposureSavedData;
-import io.github.mortuusars.exposure.data.storage.ServersideExposureExporter;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.data.export.ServersideExposureExporter;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.ClickEvent;
@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
@@ -69,7 +68,7 @@ public class ExportCommand {
     }
 
     private static int exportAll(CommandSourceStack source, ExposureSize size, ExposureLook look) {
-        List<String> ids = ExposureServer.getExposureStorage().getAllIds();
+        List<String> ids = ExposureServer.exposureStorage().getAllExposureIds();
         return exportExposures(source, ids, size, look);
     }
 
@@ -79,25 +78,24 @@ public class ExportCommand {
         File folder = stack.getServer().getWorldPath(LevelResource.ROOT).resolve("exposures").toFile();
         boolean ignored = folder.mkdirs();
 
-        for (String id : exposureIds) {
-            Optional<ExposureSavedData> data = ExposureServer.getExposureStorage().getOrQuery(id);
-            if (data.isEmpty()) {
-                stack.sendFailure(Component.translatable("command.exposure.export.failure.not_found", id));
+        for (String exposureId : exposureIds) {
+            ExposureData exposureData = ExposureServer.getExposure(exposureId);
+            if (exposureData == ExposureData.EMPTY) {
+                stack.sendFailure(Component.translatable("command.exposure.export.failure.not_found", exposureId));
                 continue;
             }
 
-            ExposureSavedData exposureSavedData = data.get();
-            String name = id + look.getIdSuffix();
+            String name = exposureId + look.getIdSuffix();
 
             boolean saved = new ServersideExposureExporter(name)
                     .withFolder(folder.getAbsolutePath().replace("\\.\\", "\\").replace("/./", "/"))
                     .withModifier(look.getModifier())
                     .withSize(size)
-                    .save(exposureSavedData);
+                    .export(exposureData);
 
             if (saved)
                 stack.sendSuccess(() ->
-                        Component.translatable("command.exposure.export.success.saved_exposure_id", id), true);
+                        Component.translatable("command.exposure.export.success.saved_exposure_id", exposureId), true);
 
             savedCount++;
         }

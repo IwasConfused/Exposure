@@ -4,13 +4,13 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.AlbumItem;
-import io.github.mortuusars.exposure.item.AlbumPage;
 import io.github.mortuusars.exposure.item.PhotographItem;
+import io.github.mortuusars.exposure.item.component.album.AlbumPage;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.AlbumSignC2SP;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.Side;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -32,8 +32,9 @@ public class AlbumMenu extends AbstractContainerMenu {
     public static final int SIGN_BUTTON = 5;
     public static final int CANCEL_SIGNING_BUTTON = 6;
 
-    protected final ItemAndStack<AlbumItem> album;
-    protected final boolean editable;
+    protected final int albumSlot;
+    protected final ItemStack albumStack;
+    protected final AlbumItem albumItem;
 
     protected final List<AlbumPage> pages;
 
@@ -74,37 +75,49 @@ public class AlbumMenu extends AbstractContainerMenu {
         put(CANCEL_SIGNING_BUTTON, p -> signing = false);
     }};
 
-    public AlbumMenu(int containerId, Inventory playerInventory, ItemAndStack<AlbumItem> album, boolean editable) {
-        this(Exposure.MenuTypes.ALBUM.get(), containerId, playerInventory, album, editable);
+    public AlbumMenu(int containerId, Inventory playerInventory, int albumSlot) {
+        this(Exposure.MenuTypes.ALBUM.get(), containerId, playerInventory, albumSlot);
     }
 
-    protected AlbumMenu(MenuType<? extends AbstractContainerMenu> type, int containerId, Inventory playerInventory, ItemAndStack<AlbumItem> album, boolean editable) {
+    protected AlbumMenu(MenuType<? extends AbstractContainerMenu> type, int containerId, Inventory playerInventory, int albumSlot) {
         super(type, containerId);
-        this.album = album;
-        this.editable = editable;
+        this.albumSlot = albumSlot;
 
-        List<AlbumPage> albumPages = album.getItem().getPages(album.getStack());
+        albumStack = playerInventory.getItem(albumSlot);
+        if (!(albumStack.getItem() instanceof AlbumItem albumItem)) {
+            throw new IllegalStateException("Expected AlbumItem in slot '" + albumSlot + "'. Got: " + albumStack);
+        }
+
+        this.albumItem = albumItem;
+
+        List<AlbumPage> albumPages = albumItem.getContent(albumStack).pages();
         pages = isAlbumEditable() ? new ArrayList<>(albumPages) : albumPages;
 
-        if (isAlbumEditable()) {
-            while (pages.size() < album.getItem().getMaxPages()) {
-                addEmptyPage();
-            }
-        }
+//        if (isAlbumEditable()) {
+//            while (pages.size() < album.getItem().getMaxPages()) {
+//                addEmptyPage();
+//            }
+//        }
 
         addPhotographSlots();
         addPlayerInventorySlots(playerInventory, 70, 115);
         addDataSlot(currentSpreadIndex);
     }
 
-    private void addPhotographSlots() {
-        ItemStack[] photographs = pages.stream().map(AlbumPage::getPhotographStack).toArray(ItemStack[]::new);
+    protected void addPhotographSlots() {
+        ItemStack[] photographs = pages.stream().map(AlbumPage::photograph).toArray(ItemStack[]::new);
         SimpleContainer container = new SimpleContainer(photographs);
 
         for (int i = 0; i < container.getContainerSize(); i++) {
             int x = i % 2 == 0 ? 71 : 212;
             int y = 67;
-            AlbumPhotographSlot slot = new AlbumPhotographSlot(container, i, x, y);
+            AlbumPhotographSlot slot = new AlbumPhotographSlot(container, i, x, y) {
+                @Override
+                public void set(ItemStack stack) {
+                    super.set(stack);
+                    onPhotographSlotChanged(getContainerSlot(), stack);
+                }
+            };
             addSlot(slot);
             photographSlots.add(slot);
         }
@@ -114,10 +127,14 @@ public class AlbumMenu extends AbstractContainerMenu {
             for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
                 AlbumPage page = pages.get(pageIndex);
                 ItemStack stack = container.getItem(pageIndex);
-                page.setPhotographStack(stack);
+//                page.setPhotographStack(stack);
             }
             updateAlbumStack();
         });
+    }
+
+    private void onPhotographSlotChanged(int slotIndex, ItemStack stack) {
+
     }
 
     private void addPlayerInventorySlots(Inventory playerInventory, int x, int y) {
@@ -160,7 +177,7 @@ public class AlbumMenu extends AbstractContainerMenu {
     }
 
     public boolean isAlbumEditable() {
-        return editable;
+        return true;
     }
 
     public boolean isInAddingPhotographMode() {
@@ -180,10 +197,10 @@ public class AlbumMenu extends AbstractContainerMenu {
     }
 
     public boolean canSignAlbum() {
-        for (AlbumPage page : getPages()) {
-            if (!page.getPhotographStack().isEmpty() || page.getNote().left().map(note -> !note.isEmpty()).orElse(false))
-                return true;
-        }
+//        for (AlbumPage page : getPages()) {
+//            if (!page.getPhotographStack().isEmpty() || page.getNote().left().map(note -> !note.isEmpty()).orElse(false))
+//                return true;
+//        }
         return false;
     }
 
@@ -194,21 +211,21 @@ public class AlbumMenu extends AbstractContainerMenu {
         if (!canSignAlbum())
             throw new IllegalStateException("Cannot sign the album.\n" + Arrays.toString(getPages().toArray()));
 
-        Packets.sendToServer(new AlbumSignC2SP(title));
+        Packets.sendToServer(new AlbumSignC2SP(albumSlot, title, player.getScoreboardName()));
     }
 
     public void updateAlbumStack() {
-        List<AlbumPage> pages = getPages();
-        for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
-            AlbumPage page = pages.get(pageIndex);
-            album.getItem().setPage(album.getStack(), page, pageIndex);
-        }
+//        List<AlbumPage> pages = getPages();
+//        for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
+//            AlbumPage page = pages.get(pageIndex);
+//            album.getItem().setPage(album.getItemStack(), page, pageIndex);
+//        }
     }
 
     protected void addEmptyPage() {
-        AlbumPage page = album.getItem().createEmptyPage();
-        pages.add(page);
-        album.getItem().addPage(album.getStack(), page);
+//        AlbumPage page = album.getItem().createEmptyPage();
+//        pages.add(page);
+//        album.getItem().addPage(album.getItemStack(), page);
     }
 
     public List<AlbumPlayerInventorySlot> getPlayerInventorySlots() {
@@ -270,7 +287,7 @@ public class AlbumMenu extends AbstractContainerMenu {
 
     private void onPhotoButtonPress(Player player, Side side) {
         Preconditions.checkArgument(isAlbumEditable(),
-                "Photo Button should be disabled and hidden when Album is not editable. " + album.getStack());
+                "Photo Button should be disabled and hidden when Album is not editable. " + albumStack);
 
         Optional<AlbumPhotographSlot> photographSlot = getPhotographSlot(side);
         if (photographSlot.isEmpty())
@@ -332,11 +349,10 @@ public class AlbumMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(Player player) {
-        return !isAlbumEditable() || (player.getMainHandItem().getItem() instanceof AlbumItem
-                || player.getOffhandItem().getItem() instanceof AlbumItem);
+        return player.getInventory().getItem(albumSlot).getItem() instanceof AlbumItem;
     }
 
-    public static AlbumMenu fromBuffer(int containerId, Inventory inventory, FriendlyByteBuf buffer) {
-        return new AlbumMenu(containerId, inventory, new ItemAndStack<>(buffer.readItem()), buffer.readBoolean());
+    public static AlbumMenu fromBuffer(int containerId, Inventory inventory, RegistryFriendlyByteBuf buffer) {
+        return new AlbumMenu(containerId, inventory, buffer.readVarInt());
     }
 }

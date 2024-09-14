@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.kubejs.event;
 
-import dev.latvian.mods.kubejs.player.PlayerEventJS;
+import dev.latvian.mods.kubejs.player.KubePlayerEvent;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
  * If canceled only on the client - shutter would be opened, but the image would not be captured.
  * All checks are passed at this point, and if this event is not canceled - photo will be taken.
  */
-public class ShutterOpeningEventJS extends PlayerEventJS {
+public class ShutterOpeningEventJS implements KubePlayerEvent {
     private final Player player;
     private final ItemStack cameraStack;
     private final int lightLevel;

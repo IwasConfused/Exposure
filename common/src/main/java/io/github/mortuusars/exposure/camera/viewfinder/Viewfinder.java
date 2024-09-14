@@ -6,8 +6,8 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.camera.infrastructure.FocalRange;
-import io.github.mortuusars.exposure.camera.infrastructure.ZoomDirection;
+import io.github.mortuusars.exposure.core.camera.FocalRange;
+import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.Fov;
 import net.minecraft.client.CameraType;
@@ -48,10 +48,10 @@ public class Viewfinder {
 
         Camera<?> camera = Camera.getCamera(player).orElseThrow();
         CameraItem cameraItem = camera.get().getItem();
-        ItemStack cameraStack = camera.get().getStack();
+        ItemStack cameraStack = camera.get().getItemStack();
 
         focalRange = cameraItem.getFocalRange(cameraStack);
-        targetFov = Fov.focalLengthToFov(Mth.clamp(cameraItem.getFocalLength(cameraStack), focalRange.min(), focalRange.max()));
+        targetFov = Fov.focalLengthToFov(Mth.clamp(cameraItem.getZoom(cameraStack), focalRange.min(), focalRange.max()));
 
         isOpen = true;
 
@@ -116,7 +116,10 @@ public class Viewfinder {
 
         targetFov = fov;
 
-        CameraClient.setZoom(Fov.fovToFocalLength(fov));
+        double focalLength = Fov.fovToFocalLength(fov);
+
+        double zoom = Mth.map(focalLength, focalRange.min(), focalRange.max(), 0.0, 1.0);
+        CameraClient.setZoom(zoom);
     }
 
     public static double modifyMouseSensitivity(double sensitivity) {
@@ -139,12 +142,12 @@ public class Viewfinder {
 
     public static double modifyFov(double fov) {
         if (isLookingThrough()) {
-            currentFov = Mth.lerp(Math.min(0.8f * Minecraft.getInstance().getDeltaFrameTime(), 0.8f), currentFov, targetFov);
+            currentFov = Mth.lerp(Math.min(0.8f * Minecraft.getInstance().getTimer().getGameTimeDeltaTicks(), 0.8f), currentFov, targetFov);
             shouldRestoreFov = true;
             return currentFov;
         }
         else if (shouldRestoreFov && Math.abs(currentFov - fov) > 0.00001) {
-            currentFov = Mth.lerp(Math.min(0.95f * Minecraft.getInstance().getDeltaFrameTime(), 0.95f), currentFov, fov);
+            currentFov = Mth.lerp(Math.min(0.95f * Minecraft.getInstance().getTimer().getGameTimeDeltaTicks(), 0.95f), currentFov, fov);
             return currentFov;
         } else {
             currentFov = fov;

@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.fabric.resources;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.data.LensesDataLoader;
+import io.github.mortuusars.exposure.data.lenses.LensesDataLoader;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.ResourceLocation;
 

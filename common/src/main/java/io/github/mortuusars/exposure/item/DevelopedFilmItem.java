@@ -1,40 +1,37 @@
 package io.github.mortuusars.exposure.item;
 
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
+import io.github.mortuusars.exposure.core.ExposureType;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class DevelopedFilmItem extends Item implements IFilmItem {
-    private final FilmType type;
+    private final ExposureType type;
 
-    public DevelopedFilmItem(FilmType type, Properties properties) {
+    public DevelopedFilmItem(ExposureType type, Properties properties) {
         super(properties);
         this.type = type;
     }
 
     @Override
-    public FilmType getType() {
+    public ExposureType getType() {
         return type;
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {
-        int exposedFrames = getExposedFramesCount(stack);
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        int exposedFrames = getStoredFramesCount(stack);
         if (exposedFrames > 0) {
             tooltipComponents.add(Component.translatable("item.exposure.developed_film.tooltip.frame_count", exposedFrames)
                     .withStyle(ChatFormatting.GRAY));
         }
 
         int frameSize = getFrameSize(stack);
-        if (frameSize != getDefaultFrameSize()) {
+        if (frameSize != getDefaultFrameSize(stack)) {
             tooltipComponents.add(Component.translatable("item.exposure.film_roll.tooltip.frame_size",
                             Component.literal(String.format("%.1f", frameSize / 10f)))
                     .withStyle(ChatFormatting.GRAY));

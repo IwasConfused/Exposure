@@ -1,55 +1,78 @@
 package io.github.mortuusars.exposure.gui.screen.camera.button;
 
-import io.github.mortuusars.exposure.gui.screen.element.IElementWithTooltip;
+import io.netty.util.collection.IntObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public abstract class CycleButton extends ImageButton implements IElementWithTooltip {
-    protected final Screen screen;
-    protected int count = 1;
-    protected int currentIndex = 0;
-    protected boolean loop = true;
+import java.util.Map;
 
-    public CycleButton(Screen screen, int x, int y, int width, int height, int u, int v, int yDiffTex, ResourceLocation texture) {
-        super(x, y, width, height, u, v, yDiffTex, texture, button -> {});
-        this.screen = screen;
-    }
+public class CycleButton extends ImageButton {
+    protected final int indexCount;
+    protected final boolean loop;
+    protected final Map<Integer, WidgetSprites> spritesMap;
+    protected final Tooltip defaultTooltip;
+    protected final Map<Integer, Tooltip> tooltipMap;
 
-    @Override
-    public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-    }
+    protected int currentIndex;
 
-    @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float pPartialTick) {
-        super.render(guiGraphics, mouseX, mouseY, pPartialTick);
-    }
+    public CycleButton(int x, int y, int width, int height, int indexCount, int startingIndex, boolean loop,
+                       WidgetSprites defaultSprites, IntObjectMap<WidgetSprites> spritesMap,
+                       @Nullable Tooltip defaultTooltip, IntObjectMap<Tooltip> tooltipMap) {
+        super(x, y, width, height, defaultSprites, button -> {});
+        this.indexCount = indexCount;
+        this.loop = loop;
+        this.spritesMap = spritesMap;
+        this.defaultTooltip = defaultTooltip;
+        this.tooltipMap = tooltipMap;
 
-    public void renderToolTip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) { }
-
-    public void setupButtonElements(int count, int startingIndex) {
-        this.count = count;
         this.currentIndex = startingIndex;
+    }
+
+    public int getIndexCount() {
+        return indexCount;
+    }
+
+    public boolean isLooping() {
+        return loop;
+    }
+
+    public int getCurrentIndex() {
+        return currentIndex;
+    }
+
+    public void setCurrentIndex(int currentIndex) {
+        this.currentIndex = currentIndex;
+    }
+
+    @Override
+    public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        setTooltip(tooltipMap.getOrDefault(getCurrentIndex(), defaultTooltip));
+
+        WidgetSprites sprites = spritesMap.getOrDefault(getCurrentIndex(), this.sprites);
+        ResourceLocation resourceLocation = sprites.get(this.isActive(), this.isHoveredOrFocused());
+        guiGraphics.blitSprite(resourceLocation, this.getX(), this.getY(), this.width, this.height);
     }
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if ((button == 0 || button == 1) && clicked(mouseX, mouseY)) {
             cycle(button == 1);
-            this.playDownSound(Minecraft.getInstance().getSoundManager());
+            playDownSound(Minecraft.getInstance().getSoundManager());
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        cycle(delta < 0d);
-        this.playDownSound(Minecraft.getInstance().getSoundManager());
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        cycle(scrollY < 0d);
+        playDownSound(Minecraft.getInstance().getSoundManager());
         return true;
     }
 
@@ -67,9 +90,9 @@ public abstract class CycleButton extends ImageButton implements IElementWithToo
         int value = currentIndex;
         value += reverse ? -1 : 1;
         if (value < 0)
-            value = loop ? count - 1 : 0;
-        else if (value >= count)
-            value = loop ? 0 : count - 1;
+            value = loop ? indexCount - 1 : 0;
+        else if (value >= indexCount)
+            value = loop ? 0 : indexCount - 1;
 
         if (currentIndex != value) {
             currentIndex = value;

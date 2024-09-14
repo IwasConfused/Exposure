@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.gui.screen;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.camera.infrastructure.ZoomDirection;
+import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.gui.screen.element.ZoomHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -50,11 +50,11 @@ public abstract class ZoomableScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        boolean handled = super.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        boolean handled = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 
         if (!handled) {
-            zoom.change(delta >= 0.0 ? ZoomDirection.IN : ZoomDirection.OUT);
+            zoom.change(scrollY >= 0.0 ? ZoomDirection.IN : ZoomDirection.OUT);
             return true;
         }
 

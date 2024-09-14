@@ -10,10 +10,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WrittenBookItem.class)
 public abstract class BookPageCountMixin {
-    @Inject(method = "getPageCount", at = @At("HEAD"), cancellable = true)
-    private static void getPageCount(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
-        if (stack.getItem() instanceof AlbumItem albumItem) {
-            cir.setReturnValue(albumItem.getPages(stack).size());
-        }
-    }
+//    @Inject(method = "getPageCount", at = @At("HEAD"), cancellable = true)
+//    private static void getPageCount(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
+//        if (stack.getItem() instanceof AlbumItem albumItem) {
+//            cir.setReturnValue(albumItem.getPages(stack).size());
+//        }
+//    }
 }

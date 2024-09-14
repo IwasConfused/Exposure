@@ -54,7 +54,7 @@ public abstract class LecternMixin {
 
         PlatformHelper.openMenu(player, menuProvider, buffer -> {
             buffer.writeBlockPos(lecternBlockEntity.getBlockPos());
-            buffer.writeItem(albumStack);
+            ItemStack.STREAM_CODEC.encode(buffer, albumStack);
         });
     }
 }

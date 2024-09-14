@@ -1,13 +1,12 @@
 package io.github.mortuusars.exposure.item;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.PlatformHelper;
+import com.google.common.collect.ImmutableList;
+import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
-import io.github.mortuusars.exposure.camera.AttachmentSound;
-import io.github.mortuusars.exposure.camera.AttachmentType;
+import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.core.*;
+import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.capture.Capture;
 import io.github.mortuusars.exposure.camera.capture.CaptureManager;
@@ -16,63 +15,65 @@ import io.github.mortuusars.exposure.camera.capture.ScreenshotCapture;
 import io.github.mortuusars.exposure.camera.capture.component.*;
 import io.github.mortuusars.exposure.camera.capture.converter.DitheringColorConverter;
 import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
-import io.github.mortuusars.exposure.camera.infrastructure.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.client.EntitiesInFrame;
+import io.github.mortuusars.exposure.core.frame.FrameProperties;
+import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.item.component.EntityInFrame;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.item.component.StoredItemStack;
+import io.github.mortuusars.exposure.item.component.camera.ShutterState;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
-import io.github.mortuusars.exposure.network.packet.server.CameraAddFrameC2SP;
-import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsPacketC2SP;
+import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerPlayerSounds;
 import io.github.mortuusars.exposure.sound.OnePerPlayerSoundsClient;
 import io.github.mortuusars.exposure.util.CameraInHand;
 import io.github.mortuusars.exposure.util.ColorChannel;
-import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
-import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluids;
@@ -83,69 +84,81 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class CameraItem extends Item {
-    public static final AttachmentType FILM_ATTACHMENT = new AttachmentType("Film", 0,
-            stack -> stack.getItem() instanceof FilmRollItem, AttachmentSound.FILM);
-    public static final AttachmentType FLASH_ATTACHMENT = new AttachmentType("Flash", 1,
-            stack -> stack.is(Exposure.Tags.Items.FLASHES), AttachmentSound.FLASH);
-    public static final AttachmentType LENS_ATTACHMENT = new AttachmentType("Lens", 2,
-            stack -> stack.is(Exposure.Tags.Items.LENSES), AttachmentSound.LENS);
-    public static final AttachmentType FILTER_ATTACHMENT = new AttachmentType("Filter", 3,
-            stack -> stack.is(Exposure.Tags.Items.FILTERS), AttachmentSound.FILTER);
-
-    public static final List<AttachmentType> ATTACHMENTS = List.of(
-            FILM_ATTACHMENT,
-            FLASH_ATTACHMENT,
-            LENS_ATTACHMENT,
-            FILTER_ATTACHMENT);
-
-    public static final List<ShutterSpeed> SHUTTER_SPEEDS = List.of(
-            new ShutterSpeed("15\""),
-            new ShutterSpeed("8\""),
-            new ShutterSpeed("4\""),
-            new ShutterSpeed("2\""),
-            new ShutterSpeed("1\""),
-            new ShutterSpeed("2"),
-            new ShutterSpeed("4"),
-            new ShutterSpeed("8"),
-            new ShutterSpeed("15"),
-            new ShutterSpeed("30"),
-            new ShutterSpeed("60"),
-            new ShutterSpeed("125"),
-            new ShutterSpeed("250"),
-            new ShutterSpeed("500")
-    );
+    private static final String ID_OF_LAST_SHOT = "id_of_last_shot";
+    private static final String FLASH_HAS_FIRED_ON_LAST_SHOT = "flash_has_fired_on_last_shot";
+    private static final String LIGHT_LEVEL_ON_LAST_SHOT = "light_level_on_last_shot";
+    protected final List<ShutterSpeed> shutterSpeeds;
+    protected final List<AttachmentType> attachments;
 
     public CameraItem(Properties properties) {
         super(properties);
+        shutterSpeeds = ImmutableList.copyOf(defineShutterSpeeds());
+        attachments = ImmutableList.copyOf(defineAttachments());
+    }
+
+    protected List<ShutterSpeed> defineShutterSpeeds() {
+        return List.of(
+                new ShutterSpeed("15\""),
+                new ShutterSpeed("8\""),
+                new ShutterSpeed("4\""),
+                new ShutterSpeed("2\""),
+                new ShutterSpeed("1\""),
+                new ShutterSpeed("1/2"),
+                new ShutterSpeed("1/4"),
+                new ShutterSpeed("1/8"),
+                new ShutterSpeed("1/15"),
+                new ShutterSpeed("1/30"),
+                new ShutterSpeed("1/60"),
+                new ShutterSpeed("1/125"),
+                new ShutterSpeed("1/250"),
+                new ShutterSpeed("1/500")
+        );
+    }
+
+    protected List<AttachmentType> defineAttachments() {
+        return List.of(
+                AttachmentType.FILM,
+                AttachmentType.FLASH,
+                AttachmentType.LENS,
+                AttachmentType.FILTER
+        );
+    }
+
+    public List<ShutterSpeed> getShutterSpeeds(ItemStack stack) {
+        return shutterSpeeds;
+    }
+
+    public List<AttachmentType> getAttachments(ItemStack stack) {
+        return attachments;
     }
 
     @Override
-    public int getUseDuration(@NotNull ItemStack stack) {
+    public int getUseDuration(ItemStack stack, LivingEntity entity) {
         return 1000;
     }
 
     public boolean isBarVisible(@NotNull ItemStack stack) {
         if (!Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get())
             return false;
-        return getAttachment(stack, FILM_ATTACHMENT)
-                .map(f -> f.getItem() instanceof FilmRollItem filmRollItem && filmRollItem.isBarVisible(f))
-                .orElse(false);
+
+        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        return filmStack.getItem() instanceof FilmRollItem filmRollItem && filmRollItem.isBarVisible(filmStack.getForReading());
     }
 
     public int getBarWidth(@NotNull ItemStack stack) {
         if (!Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get())
             return 0;
-        return getAttachment(stack, FILM_ATTACHMENT)
-                .map(f -> f.getItem() instanceof FilmRollItem filmRollItem ? filmRollItem.getBarWidth(f) : 0)
-                .orElse(0);
+
+        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        return filmStack.getItem() instanceof FilmRollItem filmRollItem ? filmRollItem.getBarWidth(filmStack.getForReading()) : 0;
     }
 
     public int getBarColor(@NotNull ItemStack stack) {
         if (!Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get())
             return 0;
-        return getAttachment(stack, FILM_ATTACHMENT)
-                .map(f -> f.getItem() instanceof FilmRollItem filmRollItem ? filmRollItem.getBarColor(f) : 0)
-                .orElse(0);
+
+        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        return filmStack.getItem() instanceof FilmRollItem filmRollItem ? filmRollItem.getBarColor(filmStack.getForReading()) : 0;
     }
 
     @Override
@@ -159,7 +172,7 @@ public class CameraItem extends Item {
             }
 
             if (player.isCreative() && player.level().isClientSide()/* && CameraItemClientExtensions.isInCreativeModeInventory()*/) {
-                Packets.sendToServer(new OpenCameraAttachmentsPacketC2SP(slot.getContainerSlot()));
+                Packets.sendToServer(new OpenCameraAttachmentsInCreativePacketC2SP(slot.getContainerSlot()));
                 return true;
             }
 
@@ -167,42 +180,46 @@ public class CameraItem extends Item {
             return true;
         }
 
-        if (PlatformHelper.canShear(otherStack) && !isTooltipRemoved(stack)) {
-            if (otherStack.isDamageableItem()) {
-                // broadcasting break event is expecting item to be in hand,
-                // but making it work for carried items would be too much work for such small feature.
-                // No one will ever notice it anyway.
-                otherStack.hurtAndBreak(1, player, pl -> pl.broadcastBreakEvent(InteractionHand.MAIN_HAND));
-            }
-
-            if (player.level().isClientSide)
-                player.playSound(SoundEvents.SHEEP_SHEAR);
-
-            setTooltipRemoved(stack, true);
-            return true;
-        }
-
-        if (isTooltipRemoved(stack) && (otherStack.getItem() instanceof BookItem || otherStack.getItem() instanceof WritableBookItem
-                || otherStack.getItem() instanceof WrittenBookItem || otherStack.getItem() instanceof KnowledgeBookItem)) {
-            setTooltipRemoved(stack, false);
-            if (player.level().isClientSide)
-                player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT);
-            return true;
-        }
+//        if (PlatformHelper.canShear(otherStack) && !isTooltipRemoved(stack)) {
+//            if (otherStack.isDamageableItem() && player instanceof ServerPlayer serverPlayer) {
+//                // broadcasting break event is expecting item to be in hand,
+//                // but making it work for carried items would be too much work for such small feature.
+//                // No one will ever notice it anyway.
+//                otherStack.hurtAndBreak(1, serverPlayer.serverLevel(),
+//                        serverPlayer, item -> serverPlayer.onEquippedItemBroken(item, EquipmentSlot.MAINHAND));
+//            }
+//
+//            if (player.level().isClientSide)
+//                player.playSound(SoundEvents.SHEEP_SHEAR);
+//
+//            setTooltipRemoved(stack, true);
+//            return true;
+//        }
+//
+//        if (isTooltipRemoved(stack) && (otherStack.getItem() instanceof BookItem || otherStack.getItem() instanceof WritableBookItem
+//                || otherStack.getItem() instanceof WrittenBookItem || otherStack.getItem() instanceof KnowledgeBookItem)) {
+//            setTooltipRemoved(stack, false);
+//            if (player.level().isClientSide)
+//                player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT);
+//            return true;
+//        }
 
         if (Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get()) {
-            for (AttachmentType attachmentType : getAttachmentTypes(stack)) {
+            for (AttachmentType attachmentType : getAttachments(stack)) {
                 if (attachmentType.matches(otherStack)) {
-                    Optional<ItemStack> current = getAttachment(stack, attachmentType);
+                    StoredItemStack currentAttachment = getAttachment(stack, attachmentType);
 
-                    if (otherStack.getCount() > 1 && current.isPresent()) {
+                    if (otherStack.getCount() > 1 && !currentAttachment.isEmpty()) {
                         if (player.level().isClientSide())
                             OnePerPlayerSoundsClient.play(player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), SoundSource.PLAYERS, 0.9f, 1f);
                         return true; // Cannot swap when holding more than one item
                     }
 
                     setAttachment(stack, attachmentType, otherStack.split(1));
-                    access.set(current.orElse(otherStack));
+
+                    ItemStack returnedStack = !currentAttachment.isEmpty() ? currentAttachment.getCopy() : otherStack;
+                    access.set(returnedStack);
+
                     attachmentType.sound().playOnePerPlayer(player, false);
                     return true;
                 }
@@ -213,18 +230,17 @@ public class CameraItem extends Item {
     }
 
     @Override
-    public void appendHoverText(@NotNull ItemStack stack, @Nullable Level level, @NotNull List<Component> components, @NotNull TooltipFlag isAdvanced) {
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag tooltipFlag) {
         if (Config.Client.CAMERA_SHOW_FILM_FRAMES_IN_TOOLTIP.get()) {
-            getAttachment(stack, FILM_ATTACHMENT).ifPresent(f -> {
-                if (f.getItem() instanceof FilmRollItem filmRollItem) {
-                    int exposed = filmRollItem.getExposedFramesCount(f);
-                    int max = filmRollItem.getMaxFrameCount(f);
-                    components.add(Component.translatable("item.exposure.camera.tooltip.film_roll_frames", exposed, max));
-                }
-            });
+            StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+            if (filmStack.getItem() instanceof FilmRollItem filmRollItem) {
+                int exposed = filmRollItem.getStoredFramesCount(filmStack.getForReading());
+                int max = filmRollItem.getMaxFrameCount(filmStack.getForReading());
+                components.add(Component.translatable("item.exposure.camera.tooltip.film_roll_frames", exposed, max));
+            }
         }
 
-        if (!isTooltipRemoved(stack) && Config.Client.CAMERA_SHOW_TOOLTIP_DETAILS.get()) {
+        if (/*!isTooltipRemoved(stack) &&*/ Config.Client.CAMERA_SHOW_TOOLTIP_DETAILS.get()) {
             boolean rClickAttachments = Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get();
             boolean rClickHotswap = Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get();
 
@@ -234,7 +250,7 @@ public class CameraItem extends Item {
                         components.add(Component.translatable("item.exposure.camera.tooltip.details_attachments_screen"));
                     if (rClickHotswap)
                         components.add(Component.translatable("item.exposure.camera.tooltip.details_hotswap"));
-                    components.add(Component.translatable("item.exposure.camera.tooltip.details_remove_tooltip"));
+                    // components.add(Component.translatable("item.exposure.camera.tooltip.details_remove_tooltip"));
                 } else
                     components.add(Component.translatable("tooltip.exposure.hold_for_details"));
             }
@@ -242,11 +258,11 @@ public class CameraItem extends Item {
     }
 
     public boolean isActive(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().getBoolean("Active");
+        return stack.get(Exposure.DataComponents.CAMERA_ACTIVE) != null;
     }
 
     public void setActive(ItemStack stack, boolean active) {
-        stack.getOrCreateTag().putBoolean("Active", active);
+        setOrRemoveBooleanComponent(stack, Exposure.DataComponents.CAMERA_ACTIVE, active);
     }
 
     public void activate(Player player, ItemStack stack) {
@@ -266,19 +282,11 @@ public class CameraItem extends Item {
     }
 
     public boolean isInSelfieMode(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().getBoolean("Selfie");
+        return stack.getOrDefault(Exposure.DataComponents.SELFIE_MODE, false);
     }
 
-    public void setSelfieMode(ItemStack stack, boolean selfie) {
-        stack.getOrCreateTag().putBoolean("Selfie", selfie);
-    }
-
-    public boolean isTooltipRemoved(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().getBoolean("TooltipRemoved");
-    }
-
-    public void setTooltipRemoved(ItemStack stack, boolean removed) {
-        stack.getOrCreateTag().putBoolean("TooltipRemoved", removed);
+    public void setSelfieMode(ItemStack stack, boolean active) {
+        setOrRemoveBooleanComponent(stack, Exposure.DataComponents.SELFIE_MODE, active);
     }
 
     public void setSelfieModeWithEffects(Player player, ItemStack stack, boolean selfie) {
@@ -288,61 +296,74 @@ public class CameraItem extends Item {
         }
     }
 
-    public boolean isShutterOpen(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().getBoolean("ShutterOpen");
+    public ShutterState getShutterState(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.SHUTTER_STATE, ShutterState.EMPTY);
     }
 
-    public void setShutterOpen(Level level, ItemStack stack, ShutterSpeed shutterSpeed, boolean flashHasFired) {
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putBoolean("ShutterOpen", true);
-        tag.putInt("ShutterTicks", Math.max(shutterSpeed.getTicks(), 1));
-        tag.putLong("ShutterCloseTimestamp", level.getGameTime() + Math.max(shutterSpeed.getTicks(), 1));
-        if (flashHasFired)
-            tag.putBoolean("FlashHasFired", true);
+    public void setShutterState(ItemStack stack, ShutterState shutterState) {
+        stack.set(Exposure.DataComponents.SHUTTER_STATE, shutterState);
     }
 
-    public void setShutterClosed(ItemStack stack) {
-        @Nullable CompoundTag tag = stack.getTag();
-        if (tag != null) {
-            tag.remove("ShutterOpen");
-            tag.remove("ShutterTicks");
-            tag.remove("ShutterCloseTimestamp");
-            tag.remove("ExposingFrame");
-            tag.remove("FlashHasFired");
-        }
-    }
+//    public boolean isShutterOpen(ItemStack stack) {
+//        getShutter(stack).isOpen()
+//        return stack.getOrDefault(Exposure.DataComponents.CAMERA_SHUTTER_OPEN, false);
+//    }
 
-    public void openShutter(Player player, Level level, ItemStack stack, ShutterSpeed shutterSpeed, boolean flashHasFired) {
-        setShutterOpen(player.level(), stack, shutterSpeed, flashHasFired);
+//    public void setShutterOpen(Level level, ItemStack stack, ShutterSpeed shutterSpeed, boolean flashHasFired) {
+//        CompoundTag tag = stack.getOrCreateTag();
+//        tag.putBoolean("ShutterOpen", true);
+//        tag.putInt("ShutterTicks", Math.max(shutterSpeed.getDurationTicks(), 1));
+//        tag.putLong("ShutterCloseTimestamp", level.getGameTime() + Math.max(shutterSpeed.getDurationTicks(), 1));
+//        if (flashHasFired)
+//            tag.putBoolean("FlashHasFired", true);
+//    }
+//
+//    public void setShutterClosed(ItemStack stack) {
+//        @Nullable CompoundTag tag = stack.getTag();
+//        if (tag != null) {
+//            tag.remove("ShutterOpen");
+//            tag.remove("ShutterTicks");
+//            tag.remove("ShutterCloseTimestamp");
+//            tag.remove("FlashHasFired");
+//        }
+//    }
+
+    public void openShutter(Player player, Level level, ItemStack stack, ShutterSpeed shutterSpeed) {
+        setShutterState(stack, ShutterState.open(level.getGameTime(), shutterSpeed.getDurationTicks()));
 
         player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
         playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_OPEN.get(), 0.7f, 1.1f, 0.2f);
-        if (shutterSpeed.getMilliseconds() > 500) // More than 1/2
+        if (shutterSpeed.getDurationMilliseconds() > 500) // More than 1/2
             OnePerPlayerSounds.playForAllClients(player, Exposure.SoundEvents.SHUTTER_TICKING.get(), SoundSource.PLAYERS, 1f, 1f);
     }
 
     public void closeShutter(Player player, ItemStack stack) {
-        long closedAtTimestamp = stack.getTag() != null ? stack.getTag().getLong("ShutterCloseTimestamp") : -1;
-        boolean flashHasFired = stack.getTag() != null && stack.getTag().getBoolean("FlashHasFired");
+        ShutterState shutterState = getShutterState(stack);
+        long closeTick = shutterState.openedAtTick() + shutterState.openDurationTicks();
+        boolean flashHasFired = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains(FLASH_HAS_FIRED_ON_LAST_SHOT);
 
-        setShutterClosed(stack);
+        setShutterState(stack, ShutterState.closed());
 
-        if (player.level().getGameTime() - closedAtTimestamp < 60) { // Skip effects if shutter "was closed" long ago
-            player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-            player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2);
-            playCameraSound(player, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
+        if (player.level().getGameTime() - closeTick >= 30 /*1.5 sec*/) {
+            // Skip effects if shutter was closed long ago
+            return;
+        }
 
-            getFilm(stack).ifPresent(f -> {
-                float fullness = (float) f.getItem().getExposedFramesCount(f.getStack()) / f.getItem().getMaxFrameCount(f.getStack());
-                boolean lastFrame = fullness == 1f;
+        player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+        player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2);
+        playCameraSound(player, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
 
-                if (lastFrame)
-                    OnePerPlayerSounds.play(player, Exposure.SoundEvents.FILM_ADVANCE_LAST.get(), SoundSource.PLAYERS, 1f, 1f);
-                else {
-                    OnePerPlayerSounds.play(player, Exposure.SoundEvents.FILM_ADVANCING.get(), SoundSource.PLAYERS,
-                            1f, 0.9f + 0.1f * fullness);
-                }
-            });
+        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        if (filmStack.getItem() instanceof FilmRollItem filmRollItem) {
+            float fullness = filmRollItem.getFullness(filmStack.getForReading());
+            boolean isFull = fullness == 1f;
+
+            if (isFull)
+                OnePerPlayerSounds.play(player, Exposure.SoundEvents.FILM_ADVANCE_LAST.get(), SoundSource.PLAYERS, 1f, 1f);
+            else {
+                OnePerPlayerSounds.play(player, Exposure.SoundEvents.FILM_ADVANCING.get(), SoundSource.PLAYERS,
+                        1f, 0.9f + 0.1f * fullness);
+            }
         }
     }
 
@@ -355,10 +376,11 @@ public class CameraItem extends Item {
         playCameraSound(player, player, sound, volume, pitch, pitchVariety);
     }
 
-    public void playCameraSound(@Nullable Player player, @NotNull Player originPlayer, SoundEvent sound, float volume, float pitch, float pitchVariety) {
+    public void playCameraSound(@Nullable Player player, @NotNull Entity origin, SoundEvent sound,
+                                float volume, float pitch, float pitchVariety) {
         if (pitchVariety > 0f)
-            pitch = pitch - (pitchVariety / 2f) + (originPlayer.getRandom().nextFloat() * pitchVariety);
-        originPlayer.level().playSound(player, originPlayer, sound, SoundSource.PLAYERS, volume, pitch);
+            pitch = pitch - (pitchVariety / 2f) + (origin.getRandom().nextFloat() * pitchVariety);
+        origin.level().playSound(player, origin, sound, SoundSource.PLAYERS, volume, pitch);
     }
 
     @Override
@@ -366,18 +388,10 @@ public class CameraItem extends Item {
         if (!(entity instanceof Player player))
             return;
 
-        if (isShutterOpen(stack)) {
-            if (stack.getTag() != null && stack.getTag().contains("ShutterTicks")) {
-                int ticks = stack.getTag().getInt("ShutterTicks");
-                if (ticks <= 0)
-                    closeShutter(player, stack);
-                else {
-                    ticks--;
-                    stack.getTag().putInt("ShutterTicks", ticks);
-                }
-            } else {
-                closeShutter(player, stack);
-            }
+        ShutterState shutterState = getShutterState(stack);
+
+        if (shutterState.isOpen() && level.getGameTime() >= shutterState.getCloseTick()) {
+            closeShutter(player, stack);
         }
 
         boolean inOffhand = player.getOffhandItem().equals(stack);
@@ -407,11 +421,12 @@ public class CameraItem extends Item {
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
-        if (hand == InteractionHand.MAIN_HAND && Camera.getCamera(player)
-                .filter(c -> c instanceof CameraInHand<?>)
-                .map(c -> ((CameraInHand<?>) c).getHand() == InteractionHand.OFF_HAND).orElse(false)) {
-            return InteractionResultHolder.pass(player.getItemInHand(hand));
-        }
+        //TODO: both hands
+//        if (hand == InteractionHand.MAIN_HAND && Camera.getCamera(player)
+//                .filter(c -> c instanceof CameraInHand<?>)
+//                .map(c -> ((CameraInHand<?>) c).getHand() == InteractionHand.OFF_HAND).orElse(false)) {
+//            return InteractionResultHolder.pass(player.getItemInHand(hand));
+//        }
 
         useCamera(player, hand);
         return InteractionResultHolder.consume(player.getItemInHand(hand));
@@ -428,7 +443,7 @@ public class CameraItem extends Item {
         boolean active = isActive(cameraStack);
 
         if (!active && player.isSecondaryUseActive()) {
-            if (isShutterOpen(cameraStack)) {
+            if (getShutterState(cameraStack).isOpen()) {
                 player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.shutter_open")
                         .withStyle(ChatFormatting.RED), true);
                 return InteractionResult.FAIL;
@@ -444,6 +459,7 @@ public class CameraItem extends Item {
 
         if (!active) {
             activate(player, cameraStack);
+            CameraClient.activateCamera(CameraAccessors.ofHand(hand));
             player.getCooldowns().addCooldown(this, 4);
 
             if (player.level().isClientSide) {
@@ -455,87 +471,55 @@ public class CameraItem extends Item {
         }
 
 
-        // Taking a shot:
+        // All server-side below this point
 
-        if (!(player instanceof ServerPlayer))
+        if (!(player instanceof ServerPlayer serverPlayer))
             return InteractionResult.CONSUME;
 
         playCameraSound(null, player, Exposure.SoundEvents.CAMERA_RELEASE_BUTTON_CLICK.get(), 0.3f, 1f, 0.1f);
 
-        Optional<ItemAndStack<FilmRollItem>> filmAttachment = getFilm(cameraStack);
+        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
 
-        if (filmAttachment.isEmpty())
+        if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem))
             return InteractionResult.FAIL;
 
-        ItemAndStack<FilmRollItem> film = filmAttachment.get();
-        boolean exposingFilm = film.getItem().canAddFrame(film.getStack());
+        boolean exposingFilm = filmItem.canAddFrame(filmStack.getForReading());
 
         if (!exposingFilm)
             return InteractionResult.FAIL;
 
-        if (isShutterOpen(cameraStack))
+        if (getShutterState(cameraStack).isOpen())
             return InteractionResult.FAIL;
 
         int lightLevel = LevelUtil.getLightLevelAt(player.level(), player.blockPosition());
         boolean shouldFlashFire = shouldFlashFire(player, cameraStack, lightLevel);
         ShutterSpeed shutterSpeed = getShutterSpeed(cameraStack);
 
-        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevel, shouldFlashFire))
-            return InteractionResult.FAIL; // Canceled
+//        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevel, shouldFlashFire))
+//            return InteractionResult.FAIL; // Canceled
 
         boolean flashHasFired = shouldFlashFire && tryUseFlash(player, cameraStack);
 
-        openShutter(player, player.level(), cameraStack, shutterSpeed, flashHasFired);
+        openShutter(player, player.level(), cameraStack, shutterSpeed);
 
-        if (player instanceof ServerPlayer serverPlayer) {
-            Packets.sendToClient(new StartExposureS2CP(createExposureId(player), hand, flashHasFired, lightLevel), serverPlayer);
-        }
+        String exposureId = createExposureId(player);
 
-        return InteractionResult.CONSUME; // Consume to not play animation
+        CustomData.update(DataComponents.CUSTOM_DATA, cameraStack, tag -> {
+            tag.putString(ID_OF_LAST_SHOT, exposureId);
+            tag.putBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT, flashHasFired);
+            tag.putInt(LIGHT_LEVEL_ON_LAST_SHOT, lightLevel);
+        });
+
+        ExposureServer.awaitExposure(exposureId, filmItem.getType(), player.getScoreboardName());
+
+        CameraAccessor cameraAccessor = CameraAccessors.ofHand(hand);
+        Packets.sendToClient(new StartExposureS2CP(exposureId, cameraAccessor, flashHasFired, lightLevel), serverPlayer);
+
+        return InteractionResult.CONSUME; // Consume to not play swing animation
     }
 
-    public void exposeFrameClientside(Player player, InteractionHand hand, String exposureId, boolean flashHasFired, int lightLevel) {
-        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
-
-        ItemStack cameraStack = player.getItemInHand(hand);
-
-        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevel, flashHasFired))
-            return; // Canceled
-
+    public ExposureFrameDataFromClient getClientSideFrameData(Player player, ItemStack cameraStack) {
         boolean projectingFile = hasInterplanarProjectorFilter(cameraStack) && ExposureClient.isShaderActive();
-
-        CompoundTag frame = new CompoundTag();
-
-        if (projectingFile) {
-            frame.putBoolean(FrameData.PROJECTED, true);
-        }
-
-        // Base properties. It's easier to add them client-side.
-        frame.putString(FrameData.ID, exposureId);
-        frame.putString(FrameData.TIMESTAMP, Util.getFilenameFormattedDateTime());
-
-        if (!projectingFile) {
-            frame.putInt(FrameData.FOCAL_LENGTH, Mth.ceil(getFocalLength(cameraStack)));
-            frame.putInt(FrameData.LIGHT_LEVEL, lightLevel);
-            frame.putFloat(FrameData.SUN_ANGLE, player.level().getSunAngle(0));
-            if (flashHasFired)
-                frame.putBoolean(FrameData.FLASH, true);
-            if (isInSelfieMode(cameraStack))
-                frame.putBoolean(FrameData.SELFIE, true);
-
-            if (ExposureClient.isShaderActive()) {
-                // Chromatic only for black and white:
-                boolean isBW = getAttachment(cameraStack, FILM_ATTACHMENT)
-                        .map(f -> f.getItem() instanceof IFilmItem filmItem && filmItem.getType() == FilmType.BLACK_AND_WHITE)
-                        .orElse(false);
-                if (isBW) {
-                    getAttachment(cameraStack, FILTER_ATTACHMENT).flatMap(ColorChannel::fromStack).ifPresent(c -> {
-                        frame.putBoolean(FrameData.CHROMATIC, true);
-                        frame.putString(FrameData.CHROMATIC_CHANNEL, c.getSerializedName());
-                    });
-                }
-            }
-        }
 
         List<UUID> entitiesInFrame;
 
@@ -548,22 +532,61 @@ public class CameraItem extends Item {
                     .toList();
         }
 
-        Packets.sendToServer(new CameraAddFrameC2SP(hand, frame, entitiesInFrame));
+        CompoundTag extraData = new CompoundTag();
+        //TODO: get additional data event
 
-        startCapture(player, cameraStack, exposureId, flashHasFired);
+        return new ExposureFrameDataFromClient(projectingFile, entitiesInFrame, extraData);
+    }
+
+    public void exposeFrameClientside(Player player, NewCamera camera, String exposureId, boolean flashHasFired) {
+
+//        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
+
+//        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevelBeforeShot, flashHasFired))
+//            return; // Canceled
+
+//        frame.getAdditionalData().update(tag -> tag.put)
+
+//        // Base properties. It's easier to add them client-side.
+//        frame.putString(FrameProperties.TIMESTAMP, Util.getFilenameFormattedDateTime());
+//
+//        if (!projectingFile) {
+//            frame.putInt(FrameProperties.FOCAL_LENGTH, Mth.ceil(getZoom(cameraStack)));
+//            frame.putInt(FrameProperties.LIGHT_LEVEL, lightLevelBeforeShot);
+//            frame.putFloat(FrameProperties.SUN_ANGLE, player.level().getSunAngle(0));
+//            if (flashHasFired)
+//                frame.putBoolean(FrameProperties.FLASH, true);
+//            if (isInSelfieMode(cameraStack))
+//                frame.putBoolean(FrameProperties.SELFIE, true);
+//
+//            if (ExposureClient.isShaderActive()) {
+//                // Chromatic only for black and white:
+//                boolean isBW = getAttachment(cameraStack, AttachmentType.FILM).getItem() instanceof IFilmItem filmItem
+//                        && filmItem.getType() == ExposureType.BLACK_AND_WHITE;
+//
+//                if (isBW) {
+//                    ItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
+//                    ColorChannel.fromStack(filterStack).ifPresent(channel -> {
+//                        frame.putBoolean(FrameProperties.CHROMATIC, true);
+//                        frame.putString(FrameProperties.CHROMATIC_CHANNEL, channel.getSerializedName());
+//                    });
+//                }
+//            }
+//        }
+
+        startCapture(player, camera.getItemStack(), exposureId, flashHasFired);
     }
 
     protected void startCapture(Player player, ItemStack cameraStack, String exposureId, boolean flashHasFired) {
         Capture capture;
 
-        Optional<ItemAndStack<InterplanarProjectorItem>> projector = getAttachment(cameraStack, FILTER_ATTACHMENT)
-                .map(filter -> filter.getItem() instanceof InterplanarProjectorItem ? new ItemAndStack<>(filter) : null);
+        StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
 
-        if (projector.isPresent() && ExposureClient.isShaderActive()) {
-            ItemAndStack<InterplanarProjectorItem> filter = projector.get();
-            String filepath = filter.getItem().getFilename(filter.getStack()).orElse("");
+        if (filterStack.getItem() instanceof InterplanarProjectorItem projector && ExposureClient.isShaderActive()) {
+            String filepath = projector.getFilepath(filterStack.getForReading()).orElse("");
+            boolean dither = projector.getMode(filterStack.getForReading()) == InterplanarProjectorMode.DITHERED;
 
-            capture = createFileCapture(player, cameraStack, exposureId, filepath, filter.getItem().isDithered(filter.getStack()))
+            capture = createFileCapture(player, cameraStack, exposureId, filepath, dither)
                     .onCapturingFailed(() -> {
                         Capture regularCapture = createRegularCapture(player, cameraStack, exposureId, flashHasFired);
                         regularCapture.onImageCaptured(() -> {
@@ -597,18 +620,22 @@ public class CameraItem extends Item {
     }
 
     protected Capture createRegularCapture(Player player, ItemStack cameraStack, String exposureId, boolean flash) {
-        ItemAndStack<FilmRollItem> film = getFilm(cameraStack).orElseThrow();
-        int frameSize = film.getItem().getFrameSize(film.getStack());
+        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
+        if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
+            throw new IllegalStateException("Film attachment should be present at the time of capture.");
+        }
+
+        int frameSize = filmItem.getFrameSize(filmStack.getForReading());
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
 
         Capture capture = new ScreenshotCapture()
-                .setFilmType(film.getItem().getType())
+                .setFilmType(filmItem.getType())
                 .setSize(frameSize)
                 .setBrightnessStops(brightnessStops)
                 .setConverter(new DitheringColorConverter());
 
         capture.addComponent(new BaseComponent());
-        capture.addComponent(new ExposureStorageSaveComponent(exposureId, true));
+        capture.addComponent(new ExposureUploaderComponent(exposureId));
 
         if (flash) {
             capture.addComponent(new FlashComponent());
@@ -616,9 +643,9 @@ public class CameraItem extends Item {
         if (brightnessStops != 0) {
             capture.addComponent(new BrightnessComponent(brightnessStops));
         }
-        if (film.getItem().getType() == FilmType.BLACK_AND_WHITE) {
-            Optional<ItemStack> filter = getAttachment(cameraStack, FILTER_ATTACHMENT);
-            filter.flatMap(ColorChannel::fromStack).ifPresentOrElse(
+        if (filmItem.getType() == ExposureType.BLACK_AND_WHITE) {
+            StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
+            ColorChannel.fromStack(filterStack.getForReading()).ifPresentOrElse(
                     channel -> capture.addComponent(new SelectiveChannelBlackAndWhiteComponent(channel)),
                     () -> capture.addComponent(new BlackAndWhiteComponent()));
         }
@@ -628,71 +655,183 @@ public class CameraItem extends Item {
 
     protected Capture createFileCapture(Player player, ItemStack cameraStack, String exposureId,
                                         String filepath, boolean dither) {
-        ItemAndStack<FilmRollItem> film = getFilm(cameraStack).orElseThrow();
-        FilmType filmType = film.getItem().getType();
-        int frameSize = film.getItem().getFrameSize(film.getStack());
+        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
+        if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
+            throw new IllegalStateException("Film attachment should be present at the time of capture.");
+        }
+
+        ExposureType exposureType = filmItem.getType();
+        int frameSize = filmItem.getFrameSize(filmStack.getForReading());
 
         Capture capture = new FileCapture(filepath,
                 error -> player.displayClientMessage(error.getCasualTranslation().withStyle(ChatFormatting.RED), false))
-                .setFilmType(filmType)
+                .setFilmType(exposureType)
                 .setSize(frameSize)
-                .addComponent(new ExposureStorageSaveComponent(exposureId, true))
+                .addComponent(new ExposureUploaderComponent(exposureId))
                 .setConverter(dither ? new DitheringColorConverter() : new SimpleColorConverter())
                 .cropFactor(1)
                 .setAsyncCapturing(true);
 
-        if (filmType == FilmType.BLACK_AND_WHITE) {
+        if (exposureType == ExposureType.BLACK_AND_WHITE) {
             capture.addComponent(new BlackAndWhiteComponent());
         }
 
         return capture;
     }
 
-    public void addFrame(ServerPlayer player, ItemStack cameraStack, CompoundTag frameTag, List<Entity> entities) {
-        frameTag.putString(FrameData.PHOTOGRAPHER, player.getScoreboardName());
-        frameTag.putUUID(FrameData.PHOTOGRAPHER_ID, player.getUUID());
+    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrameDataFromClient dataFromClient) {
+        CompoundTag cameraCustomData = cameraStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 
-        if (!frameTag.getBoolean(FrameData.PROJECTED)) {
-            addFrameData(player, cameraStack, frameTag, entities);
+        String id = cameraCustomData.getString(ID_OF_LAST_SHOT);
+
+        if (StringUtil.isBlank(id)) {
+            Exposure.LOGGER.error("Cannot create an exposure frame: '{}' is missing or empty in Camera's custom data.", ID_OF_LAST_SHOT);
+            return ExposureFrame.EMPTY;
         }
 
-        PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frameTag, entities);
+        ExposureType type = getAttachment(cameraStack, AttachmentType.FILM).getItem() instanceof IFilmItem filmItem
+                ? filmItem.getType() : ExposureType.COLOR;
 
-        player.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);
-        Exposure.Advancements.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frameTag, entities);
+        ExposureFrameTag tag = new ExposureFrameTag();
 
-        addFrameToFilm(cameraStack, frameTag);
-        onFrameAdded(player, cameraStack, frameTag, entities);
-        PlatformHelper.fireFrameAddedEvent(player, cameraStack, frameTag);
-        Packets.sendToClient(new OnFrameAddedS2CP(frameTag), player);
+        if (cameraCustomData.getBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT)) {
+            tag.putBoolean(ExposureFrameTag.FLASH, true);
+        }
+
+        int lightLevel = cameraCustomData.getInt(LIGHT_LEVEL_ON_LAST_SHOT);
+        if (lightLevel >= 0) {
+            tag.putInt(ExposureFrameTag.LIGHT_LEVEL, lightLevel);
+        }
+
+        // Do not forget to add data from client:
+        tag.merge(dataFromClient.extraData());
+
+
+
+
+
+        //TODO: ... other properties
+        Level level = player.level();
+//
+//        ListTag pos = new ListTag();
+//        pos.add(IntTag.valueOf(player.blockPosition().getX()));
+//        pos.add(IntTag.valueOf(player.blockPosition().getY()));
+//        pos.add(IntTag.valueOf(player.blockPosition().getZ()));
+//        frame.put(FrameProperties.POSITION, pos);
+//
+//        frame.putInt(FrameProperties.DAYTIME, (int) level.getDayTime());
+//
+//        frame.putString(FrameProperties.DIMENSION, player.level().dimension().location().toString());
+//
+//        player.level().getBiome(player.blockPosition()).unwrapKey().map(ResourceKey::location)
+//                .ifPresent(biome -> frame.putString(FrameProperties.BIOME, biome.toString()));
+//
+//        int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, player.getBlockX(), player.getBlockZ());
+//        level.updateSkyBrightness();
+//        int skyLight = level.getBrightness(LightLayer.SKY, player.blockPosition());
+//
+//        if (player.isUnderWater())
+//            frame.putBoolean(FrameProperties.UNDERWATER, true);
+//
+//        if (player.getBlockY() < surfaceHeight && skyLight < 2)
+//            frame.putBoolean(FrameProperties.IN_CAVE, true);
+//        else if (!player.isUnderWater()) {
+//            Biome.Precipitation precipitation = level.getBiome(player.blockPosition()).value().getPrecipitationAt(player.blockPosition());
+//            if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
+//                frame.putString(FrameProperties.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
+//            else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
+//                frame.putString(FrameProperties.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
+//            else
+//                frame.putString(FrameProperties.WEATHER, "Clear");
+//        }
+//
+//        addStructuresInfo(player, frame);
+//
+//        if (!entitiesInFrameIds.isEmpty()) {
+//            ListTag entities = new ListTag();
+//
+//            for (Entity entity : entitiesInFrameIds) {
+//                if (entity instanceof EnderMan enderMan && player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player)) {
+//                    // I wanted to implement this in a predicate,
+//                    // but it's tricky because EntitySubPredicates do not get the player in their 'match' method.
+//                    // So it's just easier to hardcode it like this.
+//                    Exposure.CriteriaTriggers.PHOTOGRAPH_ENDERMAN_EYES.trigger(player);
+//                }
+//
+//                CompoundTag entityInfoTag = createEntityInFrameTag(entity, player, cameraStack);
+//                if (entityInfoTag.isEmpty())
+//                    continue;
+//
+//                entities.add(entityInfoTag);
+//
+//                // Duplicate entity exposureId as a separate field in the tag.
+//                // Can then be used by FTBQuests nbt matching (it's hard to match from a list), for example.
+
+//                frame.putBoolean(entityInfoTag.getString(FrameProperties.ENTITY_ID), true);
+//            }
+//
+//            if (!entities.isEmpty())
+//                frame.put(FrameProperties.ENTITIES_IN_FRAME, entities);
+//        }
+
+        //TODO: add entities separately
+//        List<Entity> entitiesInFrameIds = dataFromClient.getEntitiesInFrame(player.serverLevel());
+        List<EntityInFrame> entitiesInFrame = new ArrayList<>();
+
+        //TODO: modifyFrameData event
+//        PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frame, entities);
+        //TODO: modifyEntityInFrameData event
+
+
+        return new ExposureFrame(new ExposureIdentifier(id), type, dataFromClient.loadingFromFile(),
+                false, new Photographer(player), entitiesInFrame, CustomData.of(tag));
     }
 
-    public void onFrameAdded(ServerPlayer player, ItemStack cameraStack, CompoundTag frame, List<Entity> entities) {
-        if (frame.getBoolean(FrameData.PROJECTED)) {
-            getAttachment(cameraStack, CameraItem.FILTER_ATTACHMENT).ifPresent(filter -> {
-                if (!(filter.getItem() instanceof InterplanarProjectorItem interplanarProjector)) return;
+    public void addFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrame exposureFrame) {
+        //TODO: modifyEntityInFrameData event
+//        PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frame, entities);
 
+        player.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);
+        //TODO: advancement trigger
+//        Exposure.CriteriaTriggers.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frame, entities);
+
+        addFrameToFilm(cameraStack, exposureFrame);
+        onFrameAdded(player, cameraStack, exposureFrame);
+//        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
+        Packets.sendToClient(new OnFrameAddedS2CP(exposureFrame), player);
+    }
+
+    public void onFrameAdded(ServerPlayer player, ItemStack cameraStack, ExposureFrame frame) {
+        if (frame.isFromFile()) {
+            StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
+            if (!filterStack.isEmpty() && filterStack.getItem() instanceof InterplanarProjectorItem interplanarProjector) {
                 player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
                         SoundSource.PLAYERS, 0.8f, 1f);
 
-                if (interplanarProjector.isConsumable(filter)) {
-                    filter.shrink(1);
-                    setAttachment(cameraStack, CameraItem.FILTER_ATTACHMENT, filter);
+                if (interplanarProjector.isConsumable(filterStack.getForReading())) {
+                    ItemStack filterCopy = filterStack.getCopy();
+                    filterCopy.shrink(1);
+                    setAttachment(cameraStack, AttachmentType.FILTER, filterCopy);
                 }
-            });
+            }
         }
     }
 
-    public void addFrameToFilm(ItemStack cameraStack, CompoundTag frame) {
-        ItemAndStack<FilmRollItem> film = getFilm(cameraStack)
-                .orElseThrow(() -> new IllegalStateException("Camera should have film inserted. " + cameraStack));
+    public void addFrameToFilm(ItemStack cameraStack, ExposureFrame frame) {
+        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
+        if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
+            Exposure.LOGGER.error("Cannot add frame: no film attachment is present.");
+            return;
+        }
 
-        film.getItem().addFrame(film.getStack(), frame);
-        setFilm(cameraStack, film.getStack());
+        ItemStack filmStackCopy = filmStack.getCopy();
+
+        filmItem.addFrame(filmStackCopy, frame);
+        setAttachment(cameraStack, AttachmentType.FILM, filmStackCopy);
     }
 
     protected boolean shouldFlashFire(Player player, ItemStack cameraStack, int lightLevel) {
-        if (getAttachment(cameraStack, FLASH_ATTACHMENT).isEmpty())
+        if (getAttachment(cameraStack, AttachmentType.FLASH).isEmpty())
             return false;
 
         return switch (getFlashMode(cameraStack)) {
@@ -702,7 +841,6 @@ public class CameraItem extends Item {
         };
     }
 
-    @SuppressWarnings("unused")
     public boolean tryUseFlash(Player player, ItemStack cameraStack) {
         Level level = player.level();
         BlockPos playerHeadPos = player.blockPosition().above();
@@ -751,70 +889,6 @@ public class CameraItem extends Item {
         return true;
     }
 
-    public void addFrameData(ServerPlayer player, ItemStack cameraStack, CompoundTag frame, List<Entity> entitiesInFrame) {
-        Level level = player.level();
-
-        ListTag pos = new ListTag();
-        pos.add(IntTag.valueOf(player.blockPosition().getX()));
-        pos.add(IntTag.valueOf(player.blockPosition().getY()));
-        pos.add(IntTag.valueOf(player.blockPosition().getZ()));
-        frame.put(FrameData.POSITION, pos);
-
-        frame.putInt(FrameData.DAYTIME, (int) level.getDayTime());
-
-        frame.putString(FrameData.DIMENSION, player.level().dimension().location().toString());
-
-        player.level().getBiome(player.blockPosition()).unwrapKey().map(ResourceKey::location)
-                .ifPresent(biome -> frame.putString(FrameData.BIOME, biome.toString()));
-
-        int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, player.getBlockX(), player.getBlockZ());
-        level.updateSkyBrightness();
-        int skyLight = level.getBrightness(LightLayer.SKY, player.blockPosition());
-
-        if (player.isUnderWater())
-            frame.putBoolean(FrameData.UNDERWATER, true);
-
-        if (player.getBlockY() < surfaceHeight && skyLight < 2)
-            frame.putBoolean(FrameData.IN_CAVE, true);
-        else if (!player.isUnderWater()) {
-            Biome.Precipitation precipitation = level.getBiome(player.blockPosition()).value().getPrecipitationAt(player.blockPosition());
-            if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
-                frame.putString(FrameData.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
-            else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
-                frame.putString(FrameData.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
-            else
-                frame.putString(FrameData.WEATHER, "Clear");
-        }
-
-        addStructuresInfo(player, frame);
-
-        if (!entitiesInFrame.isEmpty()) {
-            ListTag entities = new ListTag();
-
-            for (Entity entity : entitiesInFrame) {
-                if (entity instanceof EnderMan enderMan && player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player)) {
-                    // I wanted to implement this in a predicate,
-                    // but it's tricky because EntitySubPredicates do not get the player in their 'match' method.
-                    // So it's just easier to hardcode it like this.
-                    Exposure.Advancements.PHOTOGRAPH_ENDERMAN_EYES.trigger(player);
-                }
-
-                CompoundTag entityInfoTag = createEntityInFrameTag(entity, player, cameraStack);
-                if (entityInfoTag.isEmpty())
-                    continue;
-
-                entities.add(entityInfoTag);
-
-                // Duplicate entity id as a separate field in the tag.
-                // Can then be used by FTBQuests nbt matching (it's hard to match from a list), for example.
-                frame.putBoolean(entityInfoTag.getString(FrameData.ENTITY_ID), true);
-            }
-
-            if (!entities.isEmpty())
-                frame.put(FrameData.ENTITIES_IN_FRAME, entities);
-        }
-    }
-
     protected void addStructuresInfo(@NotNull ServerPlayer player, CompoundTag frame) {
         Map<Structure, LongSet> allStructuresAt = player.serverLevel().structureManager().getAllStructuresAt(player.blockPosition());
 
@@ -845,18 +919,18 @@ public class CameraItem extends Item {
         CompoundTag tag = new CompoundTag();
         ResourceLocation entityRL = BuiltInRegistries.ENTITY_TYPE.getKey(entity.getType());
 
-        tag.putString(FrameData.ENTITY_ID, entityRL.toString());
+        tag.putString(FrameProperties.ENTITY_ID, entityRL.toString());
 
         ListTag pos = new ListTag();
         pos.add(IntTag.valueOf((int) entity.getX()));
         pos.add(IntTag.valueOf((int) entity.getY()));
         pos.add(IntTag.valueOf((int) entity.getZ()));
-        tag.put(FrameData.ENTITY_POSITION, pos);
+        tag.put(FrameProperties.ENTITY_POSITION, pos);
 
-        tag.putFloat(FrameData.ENTITY_DISTANCE, photographer.distanceTo(entity));
+        tag.putFloat(FrameProperties.ENTITY_DISTANCE, photographer.distanceTo(entity));
 
         if (entity instanceof Player player)
-            tag.putString(FrameData.ENTITY_PLAYER_NAME, player.getScoreboardName());
+            tag.putString(FrameProperties.ENTITY_PLAYER_NAME, player.getScoreboardName());
 
         return tag;
     }
@@ -870,7 +944,8 @@ public class CameraItem extends Item {
             MenuProvider menuProvider = new MenuProvider() {
                 @Override
                 public @NotNull Component getDisplayName() {
-                    return stack.hasCustomHoverName() ? stack.getHoverName() : Component.translatable("container.exposure.camera");
+                    return stack.get(DataComponents.CUSTOM_NAME) != null
+                            ? stack.getHoverName() : Component.translatable("container.exposure.camera");
                 }
 
                 @Override
@@ -899,7 +974,12 @@ public class CameraItem extends Item {
     }
 
     public FocalRange getFocalRange(ItemStack cameraStack) {
-        return getAttachment(cameraStack, LENS_ATTACHMENT).map(FocalRange::ofStack).orElse(getDefaultFocalRange());
+        StoredItemStack lensStack = getAttachment(cameraStack, AttachmentType.LENS);
+        if (lensStack.isEmpty()) {
+            return getDefaultFocalRange();
+        }
+
+        return FocalRange.ofStack(lensStack.getForReading());
     }
 
     public FocalRange getDefaultFocalRange() {
@@ -931,115 +1011,82 @@ public class CameraItem extends Item {
 
     // ---
 
-    @SuppressWarnings("unused")
-    public List<AttachmentType> getAttachmentTypes(ItemStack cameraStack) {
-        return ATTACHMENTS;
+//    @SuppressWarnings("unused")
+//    public List<AttachmentType> getAttachmentTypes(ItemStack cameraStack) {
+//        return ATTACHMENTS;
+//    }
+//
+//    public Optional<AttachmentType> getAttachmentTypeForSlot(ItemStack cameraStack, int slot) {
+//        List<AttachmentType> attachmentTypes = getAttachmentTypes(cameraStack);
+//        for (AttachmentType attachmentType : attachmentTypes) {
+//            if (attachmentType.slot() == slot)
+//                return Optional.of(attachmentType);
+//        }
+//        return Optional.empty();
+//    }
+//
+//    public Optional<ItemAndStack<FilmRollItem>> getFilm(ItemStack cameraStack) {
+//        return getAttachment(cameraStack, FILM_ATTACHMENT).map(ItemAndStack::new);
+//    }
+//
+//    public void setFilm(ItemStack cameraStack, ItemStack filmStack) {
+//        setAttachment(cameraStack, FILM_ATTACHMENT, filmStack);
+//    }
+
+    public StoredItemStack getAttachment(ItemStack stack, AttachmentType type) {
+        return stack.getOrDefault(type.componentType(), StoredItemStack.EMPTY);
     }
 
-    public Optional<AttachmentType> getAttachmentTypeForSlot(ItemStack cameraStack, int slot) {
-        List<AttachmentType> attachmentTypes = getAttachmentTypes(cameraStack);
-        for (AttachmentType attachmentType : attachmentTypes) {
-            if (attachmentType.slot() == slot)
-                return Optional.of(attachmentType);
-        }
-        return Optional.empty();
-    }
-
-    public Optional<ItemAndStack<FilmRollItem>> getFilm(ItemStack cameraStack) {
-        return getAttachment(cameraStack, FILM_ATTACHMENT).map(ItemAndStack::new);
-    }
-
-    public void setFilm(ItemStack cameraStack, ItemStack filmStack) {
-        setAttachment(cameraStack, FILM_ATTACHMENT, filmStack);
-    }
-
-    public Optional<ItemStack> getAttachment(ItemStack cameraStack, AttachmentType attachmentType) {
-        if (cameraStack.getTag() != null && cameraStack.getTag().contains(attachmentType.id(), Tag.TAG_COMPOUND)) {
-            ItemStack itemStack = ItemStack.of(cameraStack.getTag().getCompound(attachmentType.id()));
-            if (!itemStack.isEmpty())
-                return Optional.of(itemStack);
-        }
-        return Optional.empty();
-    }
-
-    public void setAttachment(ItemStack cameraStack, AttachmentType attachmentType, ItemStack attachmentStack) {
-        Preconditions.checkState(attachmentStack.isEmpty() || attachmentType.matches(attachmentStack),
-                attachmentStack + " is not valid for the '" + attachmentType + "' attachment type.");
-
-        CompoundTag cameraTag = cameraStack.getOrCreateTag();
-
-        boolean hasChanged = getAttachment(cameraStack, attachmentType)
-                .map(stack -> !stack.equals(attachmentStack))
-                .orElse(!attachmentStack.isEmpty());
-
+    public void setAttachment(ItemStack stack, AttachmentType type, ItemStack attachmentStack) {
         if (attachmentStack.isEmpty()) {
-            cameraTag.remove(attachmentType.id());
+            stack.remove(type.componentType());
         } else {
-            cameraTag.put(attachmentType.id(), attachmentStack.save(new CompoundTag()));
-        }
-
-        if (hasChanged) {
-            onAttachmentChanged(cameraStack, attachmentType);
+            stack.set(type.componentType(), new StoredItemStack(attachmentStack));
         }
     }
 
-    public void onAttachmentChanged(ItemStack cameraStack, AttachmentType attachmentType) {
-        if (attachmentType == LENS_ATTACHMENT) {
-            setZoom(cameraStack, getFocalRange(cameraStack).min());
-        }
+    public ShutterSpeed getShutterSpeed(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.SHUTTER_SPEED, ShutterSpeed.DEFAULT);
     }
 
-    // ---
-
-    /**
-     * Returns all possible Shutter Speeds for this camera.
-     */
-    @SuppressWarnings("unused")
-    public List<ShutterSpeed> getAllShutterSpeeds(ItemStack cameraStack) {
-        return SHUTTER_SPEEDS;
+    public void setShutterSpeed(ItemStack stack, ShutterSpeed shutterSpeed) {
+        stack.set(Exposure.DataComponents.SHUTTER_SPEED, shutterSpeed);
     }
 
-    public ShutterSpeed getShutterSpeed(ItemStack cameraStack) {
-        return ShutterSpeed.loadOrDefault(cameraStack.getOrCreateTag());
+    public double getZoom(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.ZOOM, 0.0);
     }
 
-    public void setShutterSpeed(ItemStack cameraStack, ShutterSpeed shutterSpeed) {
-        shutterSpeed.save(cameraStack.getOrCreateTag());
+    public void setZoom(ItemStack stack, double zoom) {
+        stack.set(Exposure.DataComponents.ZOOM, Mth.clamp(zoom, 0.0, 1.0));
     }
 
-    public float getFocalLength(ItemStack cameraStack) {
-        return cameraStack.hasTag() ? cameraStack.getOrCreateTag().getFloat("Zoom") : getFocalRange(cameraStack).min();
+    public CompositionGuide getCompositionGuide(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.COMPOSITION_GUIDE, CompositionGuides.NONE);
     }
 
-    public void setZoom(ItemStack cameraStack, double focalLength) {
-        cameraStack.getOrCreateTag().putDouble("Zoom", focalLength);
+    public void setCompositionGuide(ItemStack stack, CompositionGuide compositionGuide) {
+        stack.set(Exposure.DataComponents.COMPOSITION_GUIDE, compositionGuide);
     }
 
-    public CompositionGuide getCompositionGuide(ItemStack cameraStack) {
-        if (!cameraStack.hasTag() || !cameraStack.getOrCreateTag().contains("CompositionGuide", Tag.TAG_STRING))
-            return CompositionGuides.NONE;
-
-        return CompositionGuides.byIdOrNone(cameraStack.getOrCreateTag().getString("CompositionGuide"));
+    public FlashMode getFlashMode(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.FLASH_MODE, FlashMode.OFF);
     }
 
-    public void setCompositionGuide(ItemStack cameraStack, CompositionGuide guide) {
-        cameraStack.getOrCreateTag().putString("CompositionGuide", guide.getId());
-    }
-
-    public FlashMode getFlashMode(ItemStack cameraStack) {
-        if (!cameraStack.hasTag() || !cameraStack.getOrCreateTag().contains("FlashMode", Tag.TAG_STRING))
-            return FlashMode.OFF;
-
-        return FlashMode.byIdOrOff(cameraStack.getOrCreateTag().getString("FlashMode"));
-    }
-
-    public void setFlashMode(ItemStack cameraStack, FlashMode flashMode) {
-        cameraStack.getOrCreateTag().putString("FlashMode", flashMode.getId());
+    public void setFlashMode(ItemStack stack, FlashMode flashMode) {
+        stack.set(Exposure.DataComponents.FLASH_MODE, flashMode);
     }
 
     public boolean hasInterplanarProjectorFilter(ItemStack cameraStack) {
-        return getAttachment(cameraStack, FILTER_ATTACHMENT)
-                .map(stack -> stack.getItem() instanceof InterplanarProjectorItem)
-                .orElse(false);
+        StoredItemStack filter = getAttachment(cameraStack, AttachmentType.FILTER);
+        return !filter.isEmpty() && filter.getItem() instanceof InterplanarProjectorItem;
+    }
+
+    protected void setOrRemoveBooleanComponent(ItemStack stack, DataComponentType<Boolean> component, boolean value) {
+        if (value) {
+            stack.set(component, true);
+        } else {
+            stack.remove(component);
+        }
     }
 }

@@ -1,6 +1,8 @@
 package io.github.mortuusars.exposure.advancement.trigger;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.advancement.predicate.CameraPredicate;
 import io.github.mortuusars.exposure.advancement.predicate.ExposurePredicate;
@@ -14,51 +16,34 @@ import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
 
 public class FrameExposedTrigger extends SimpleCriterionTrigger<FrameExposedTrigger.TriggerInstance> {
-    public static final ResourceLocation ID = Exposure.resource("frame_exposed");
-
-    public @NotNull ResourceLocation getId() {
-        return ID;
-    }
-
     @Override
-    protected @NotNull TriggerInstance createInstance(JsonObject json, @NotNull ContextAwarePredicate predicate,
-                                                      @NotNull DeserializationContext deserializationContext) {
-        CameraPredicate camera = CameraPredicate.fromJson(json.get("camera"));
-        ExposurePredicate exposure = ExposurePredicate.fromJson(json.get("exposure"));
-        LocationPredicate location = LocationPredicate.fromJson(json.get("location"));
-        return new TriggerInstance(predicate, camera, exposure, location);
+    public @NotNull Codec<TriggerInstance> codec() {
+        return TriggerInstance.CODEC;
     }
 
     public void trigger(ServerPlayer player, ItemAndStack<CameraItem> camera, CompoundTag frame, List<Entity> entitiesInFrame) {
         this.trigger(player, triggerInstance -> triggerInstance.matches(player, camera, frame, entitiesInFrame));
     }
 
-    public static class TriggerInstance extends AbstractCriterionTriggerInstance {
-        private final CameraPredicate cameraPredicate;
-        private final ExposurePredicate exposurePredicate;
-        private final LocationPredicate locationPredicate;
-
-        public TriggerInstance(ContextAwarePredicate predicate, CameraPredicate cameraPredicate, ExposurePredicate exposurePredicate, LocationPredicate locationPredicate) {
-            super(ID, predicate);
-            this.cameraPredicate = cameraPredicate;
-            this.exposurePredicate = exposurePredicate;
-            this.locationPredicate = locationPredicate;
-        }
+    public record TriggerInstance(Optional<ContextAwarePredicate> player,
+                                  Optional<CameraPredicate> camera,
+//                                  Optional<ExposurePredicate> exposure,
+                                  Optional<LocationPredicate> location) implements SimpleCriterionTrigger.SimpleInstance {
+        public static final Codec<TriggerInstance> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                        EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(TriggerInstance::player),
+                        CameraPredicate.CODEC.optionalFieldOf("camera").forGetter(TriggerInstance::camera),
+//                        ExposurePredicate.CODEC.optionalFieldOf("exposure").forGetter(TriggerInstance::exposure),
+                        LocationPredicate.CODEC.optionalFieldOf("location").forGetter(TriggerInstance::location))
+                .apply(instance, TriggerInstance::new));
 
         public boolean matches(ServerPlayer player, ItemAndStack<CameraItem> camera, CompoundTag frame, List<Entity> entitiesInFrame) {
-            return cameraPredicate.matches(camera)
-                    && exposurePredicate.matches(player, frame, entitiesInFrame)
-                    && locationPredicate.matches(player.serverLevel(), player.getX(), player.getY(), player.getZ());
-        }
-
-        public @NotNull JsonObject serializeToJson(@NotNull SerializationContext conditions) {
-            JsonObject jsonobject = super.serializeToJson(conditions);
-            jsonobject.add("camera", this.cameraPredicate.serializeToJson());
-            jsonobject.add("exposure", this.exposurePredicate.serializeToJson());
-            jsonobject.add("location", this.locationPredicate.serializeToJson());
-            return jsonobject;
+            //TODO: finish
+            return false; /*camera.matches(camera)
+                    && exposure.matches(player, frame, entitiesInFrameIds)
+                    && location.matches(player.serverLevel(), player.getX(), player.getY(), player.getZ());*/
         }
     }
 }

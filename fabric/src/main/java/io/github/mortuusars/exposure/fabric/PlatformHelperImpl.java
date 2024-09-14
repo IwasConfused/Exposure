@@ -7,6 +7,7 @@ import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
@@ -32,8 +33,13 @@ public class PlatformHelperImpl {
         return stack.getItem() instanceof AxeItem;
     }
 
-    public static void openMenu(ServerPlayer serverPlayer, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataWriter) {
+    public static void openMenu(ServerPlayer serverPlayer, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataWriter) {
         ExtendedScreenHandlerFactory extendedScreenHandlerFactory = new ExtendedScreenHandlerFactory() {
+            @Override
+            public Object getScreenOpeningData(ServerPlayer player) {
+                return null;
+            }
+
             @Nullable
             @Override
             public AbstractContainerMenu createMenu(int i, @NotNull Inventory inventory, @NotNull Player player) {
@@ -45,10 +51,12 @@ public class PlatformHelperImpl {
                 return menuProvider.getDisplayName();
             }
 
-            @Override
-            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buffer) {
-                extraDataWriter.accept(buffer);
-            }
+
+
+//            @Override
+//            public void writeScreenOpeningData(ServerPlayer player, FriendlyByteBuf buffer) {
+//                extraDataWriter.accept(buffer);
+//            }
         };
 
         serverPlayer.openMenu(extendedScreenHandlerFactory);

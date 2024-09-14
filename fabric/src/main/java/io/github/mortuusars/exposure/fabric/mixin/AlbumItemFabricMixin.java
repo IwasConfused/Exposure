@@ -12,8 +12,9 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class AlbumItemFabricMixin implements FabricItem {
     @Shadow
     abstract boolean shouldPlayEquipAnimation(ItemStack oldStack, ItemStack newStack);
+
     @Override
-    public boolean allowNbtUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
+    public boolean allowComponentsUpdateAnimation(Player player, InteractionHand hand, ItemStack oldStack, ItemStack newStack) {
         return shouldPlayEquipAnimation(oldStack, newStack);
     }
 }

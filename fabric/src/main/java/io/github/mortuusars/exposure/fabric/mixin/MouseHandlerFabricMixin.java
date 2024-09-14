@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
-import io.github.mortuusars.exposure.camera.infrastructure.ZoomDirection;
+import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;

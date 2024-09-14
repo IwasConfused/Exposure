@@ -1,56 +1,50 @@
 package io.github.mortuusars.exposure.item;
 
-import io.github.mortuusars.exposure.ExposureConstants;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.util.Mth;
+import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Collections;
+import java.util.List;
+
 public interface IFilmItem {
-    String FRAME_COUNT_TAG = "FrameCount";
-    String FRAME_SIZE_TAG = "FrameSize";
-    String FRAMES_TAG = "Frames";
+    ExposureType getType();
 
-    FilmType getType();
-
-    default int getDefaultMaxFrameCount(ItemStack filmStack) {
+    default int getDefaultMaxFrameCount(ItemStack stack) {
         return 16;
     }
 
-    default int getMaxFrameCount(ItemStack filmStack) {
-        if (filmStack.getTag() != null && filmStack.getTag().contains(FRAME_COUNT_TAG, Tag.TAG_INT))
-            return filmStack.getTag().getInt(FRAME_COUNT_TAG);
-        else
-            return getDefaultMaxFrameCount(filmStack);
+    default int getDefaultFrameSize(ItemStack stack) {
+        return 320;
     }
 
-    default int getDefaultFrameSize() {
-        return ExposureConstants.DEFAULT_FRAME_SIZE;
+    default int getMaxFrameCount(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.FILM_FRAME_COUNT, getDefaultMaxFrameCount(stack));
     }
 
-    default int getFrameSize(ItemStack filmStack) {
-        if (filmStack.getTag() != null && filmStack.getTag().contains(FRAME_SIZE_TAG, Tag.TAG_INT))
-            return Mth.clamp(filmStack.getOrCreateTag().getInt(FRAME_SIZE_TAG), 1, 2048);
-        else
-            return getDefaultFrameSize();
+    default int getFrameSize(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.FILM_FRAME_SIZE, getDefaultFrameSize(stack));
+    }
+
+    default List<ExposureFrame> getStoredFrames(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.FILM_FRAMES, Collections.emptyList());
+    }
+
+    default int getStoredFramesCount(ItemStack stack) {
+        return getStoredFrames(stack).size();
+    }
+
+    default boolean hasFrames(ItemStack stack) {
+        return !getStoredFrames(stack).isEmpty();
     }
 
     @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-    default boolean hasExposedFrame(ItemStack filmStack, int index) {
-        if (index < 0 || filmStack.getTag() == null || !filmStack.getTag().contains(FRAMES_TAG, Tag.TAG_LIST))
-            return false;
-
-        ListTag list = filmStack.getTag().getList(FRAMES_TAG, Tag.TAG_COMPOUND);
-        return index < list.size();
+    default boolean hasFrameAt(ItemStack stack, int index) {
+        return getStoredFrames(stack).size() > index;
     }
 
-    default int getExposedFramesCount(ItemStack stack) {
-        return stack.getTag() != null && stack.getTag().contains(FRAMES_TAG, Tag.TAG_LIST) ?
-                stack.getTag().getList(FRAMES_TAG, Tag.TAG_COMPOUND).size() : 0;
-    }
-
-    default ListTag getExposedFrames(ItemStack filmStack) {
-        return filmStack.getTag() != null ? filmStack.getTag().getList(FRAMES_TAG, Tag.TAG_COMPOUND) : new ListTag();
+    default float getFullness(ItemStack stack) {
+        return (float) getStoredFramesCount(stack) / getMaxFrameCount(stack);
     }
 }

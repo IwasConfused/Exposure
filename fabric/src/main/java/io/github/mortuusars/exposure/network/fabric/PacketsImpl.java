@@ -1,41 +1,35 @@
 package io.github.mortuusars.exposure.network.fabric;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.network.PacketDirection;
-import io.github.mortuusars.exposure.network.packet.ExposureDataPartPacket;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.server.*;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.function.Function;
-
 public class PacketsImpl {
-    
     @Nullable
     private static MinecraftServer server;
 
     public static void registerC2SPackets() {
-        ServerPlayNetworking.registerGlobalReceiver(ExposureDataPartPacket.ID, new ServerHandler(ExposureDataPartPacket::fromBuffer));
+        ServerPlayNetworking.registerGlobalReceiver(AlbumSignC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(AlbumSyncNoteC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(CameraAddFrameC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(CameraSetCompositionGuideC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(CameraSetFlashModeC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(CameraSetSelfieModeC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(CameraSetShutterSpeedC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(CameraSetZoomC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(DeactivateCameraC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(ExposureDataPartC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+        ServerPlayNetworking.registerGlobalReceiver(QueryExposureDataC2SP.TYPE, PacketsImpl::handleServerboundPacket);
+    }
 
-        ServerPlayNetworking.registerGlobalReceiver(OpenCameraAttachmentsPacketC2SP.ID, new ServerHandler(OpenCameraAttachmentsPacketC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(DeactivateCameraC2SP.ID, new ServerHandler(DeactivateCameraC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetZoomC2SP.ID, new ServerHandler(CameraSetZoomC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetCompositionGuideC2SP.ID, new ServerHandler(CameraSetCompositionGuideC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetFlashModeC2SP.ID, new ServerHandler(CameraSetFlashModeC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetShutterSpeedC2SP.ID, new ServerHandler(CameraSetShutterSpeedC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(CameraAddFrameC2SP.ID, new ServerHandler(CameraAddFrameC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetSelfieModeC2SP.ID, new ServerHandler(CameraSetSelfieModeC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(QueryExposureDataC2SP.ID, new ServerHandler(QueryExposureDataC2SP::fromBuffer));
-
-        ServerPlayNetworking.registerGlobalReceiver(AlbumSyncNoteC2SP.ID, new ServerHandler(AlbumSyncNoteC2SP::fromBuffer));
-        ServerPlayNetworking.registerGlobalReceiver(AlbumSignC2SP.ID, new ServerHandler(AlbumSignC2SP::fromBuffer));
+    private static <T extends IPacket> void handleServerboundPacket(T payload, ServerPlayNetworking.Context context) {
+        payload.handle(PacketFlow.SERVERBOUND, context.player());
     }
 
     public static void registerS2CPackets() {
@@ -47,7 +41,7 @@ public class PacketsImpl {
     }
 
     public static void sendToClient(IPacket packet, ServerPlayer player) {
-        ServerPlayNetworking.send(player, packet.getId(), packet.toBuffer(PacketByteBufs.create()));
+        ServerPlayNetworking.send(player, packet);
     }
 
     public static void sendToAllClients(IPacket packet) {
@@ -56,9 +50,8 @@ public class PacketsImpl {
             return;
         }
 
-        FriendlyByteBuf packetBuffer = packet.toBuffer(PacketByteBufs.create());
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            ServerPlayNetworking.send(player, packet.getId(), packetBuffer);
+            ServerPlayNetworking.send(player, packet);
         }
     }
 
@@ -69,13 +62,5 @@ public class PacketsImpl {
 
     public static void onServerStopped(MinecraftServer server) {
         PacketsImpl.server = null;
-    }
-
-    private record ServerHandler(Function<FriendlyByteBuf, IPacket> decodeFunction) implements ServerPlayNetworking.PlayChannelHandler {
-        @Override
-        public void receive(MinecraftServer server, ServerPlayer player, ServerGamePacketListenerImpl handler, FriendlyByteBuf buf, PacketSender responseSender) {
-            IPacket packet = decodeFunction.apply(buf);
-            packet.handle(PacketDirection.TO_SERVER, player);
-        }
     }
 }

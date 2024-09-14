@@ -4,19 +4,21 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.datafixers.util.Either;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
-import io.github.mortuusars.exposure.camera.infrastructure.FrameData;
-import io.github.mortuusars.exposure.gui.screen.element.ChromaticProcessToggleButton;
+import io.github.mortuusars.exposure.core.frame.FrameProperties;
+import io.github.mortuusars.exposure.core.FilmColor;
+import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.print.PrintingMode;
+import io.github.mortuusars.exposure.gui.screen.element.ToggleImageButton;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
-import io.github.mortuusars.exposure.render.image.RenderedImageProvider;
-import io.github.mortuusars.exposure.render.modifiers.ExposurePixelModifiers;
+import io.github.mortuusars.exposure.client.render.image.RenderedImageProvider;
+import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
 import io.github.mortuusars.exposure.util.ColorChannel;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.ChatFormatting;
@@ -25,6 +27,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
@@ -33,6 +36,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -50,17 +54,34 @@ import java.util.*;
 public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     public static final ResourceLocation MAIN_TEXTURE = Exposure.resource("textures/gui/lightroom.png");
     public static final ResourceLocation FILM_OVERLAYS_TEXTURE = Exposure.resource("textures/gui/lightroom_film_overlays.png");
+
+    public static final WidgetSprites PRINT_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("lightroom/print"),
+            Exposure.resource("lightroom/print_disabled"),
+            Exposure.resource("lightroom/print_highlighted"));
+
+    public static final WidgetSprites PRINTING_MODE_TOGGLE_REGULAR_SPRITES = new WidgetSprites(
+            Exposure.resource("lightroom/printing_mode_regular"),
+            Exposure.resource("lightroom/printing_mode_regular_highlighted"));
+
+    public static final WidgetSprites PRINTING_MODE_TOGGLE_CHROMATIC_SPRITES = new WidgetSprites(
+            Exposure.resource("lightroom/printing_mode_chromatic"),
+            Exposure.resource("lightroom/printing_mode_chromatic_highlighted"));
+
     public static final int FRAME_SIZE = 54;
 
     protected Player player;
     protected Button printButton;
-    protected ChromaticProcessToggleButton processToggleButton;
+    protected PrintingMode mode;
+    protected ToggleImageButton chromaticModeToggleButton;
 
     protected Map<Integer, Rect2i> slotPlaceholders = Collections.emptyMap();
 
     public LightroomScreen(LightroomMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
         this.player = playerInventory.player;
+
+        this.mode = getMenu().getBlockEntity().getPrintingMode();
     }
 
     @Override
@@ -79,9 +100,8 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
                 Lightroom.BLACK_SLOT, new Rect2i(238, 90, 18, 18)
         );
 
-        printButton = new ImageButton(leftPos + 117, topPos + 89, 22, 22, 176, 17,
-                22, MAIN_TEXTURE, 256, 256, this::onPrintButtonPressed,
-                Component.translatable("gui.exposure.lightroom.print"));
+        printButton = new ImageButton(leftPos + 117, topPos + 89, 22, 22, PRINT_BUTTON_SPRITES,
+                this::onPrintButtonPressed, Component.translatable("gui.exposure.lightroom.print"));
 
         MutableComponent tooltip = Component.translatable("gui.exposure.lightroom.print");
         if (player.isCreative()) {
@@ -92,10 +112,17 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         printButton.setTooltip(Tooltip.create(tooltip));
         addRenderableWidget(printButton);
 
-        processToggleButton = new ChromaticProcessToggleButton(leftPos - 19, topPos + 91,
-                this::onProcessToggleButtonPressed, () -> getMenu().getBlockEntity().getProcess());
-        processToggleButton.setTooltip(Tooltip.create(Component.translatable("gui.exposure.lightroom.current_frame")));
-        addRenderableWidget(processToggleButton);
+        MutableComponent regularModeTooltip = Component.translatable("gui.exposure.lightroom.mode.regular");
+        MutableComponent chromaticModeTooltip = Component.translatable("gui.exposure.lightroom.mode.chromatic")
+                .append(CommonComponents.NEW_LINE)
+                .append(Component.translatable("gui.exposure.lightroom.mode.chromatic.info").withStyle(ChatFormatting.GRAY));
+
+        chromaticModeToggleButton = new ToggleImageButton(leftPos - 19, topPos + 91, 18, 18,
+                PRINTING_MODE_TOGGLE_REGULAR_SPRITES, PRINTING_MODE_TOGGLE_CHROMATIC_SPRITES, isOn -> {
+            Component tooltipComponent = isOn ? chromaticModeTooltip : regularModeTooltip;
+            chromaticModeToggleButton.setTooltip(Tooltip.create(tooltipComponent));
+        });
+        addRenderableWidget(chromaticModeToggleButton);
 
         updateButtons();
     }
@@ -118,7 +145,6 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         updateButtons();
 
-        renderBackground(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
@@ -127,8 +153,8 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         printButton.active = getMenu().getBlockEntity().canPrint() || (player.isCreative() && Screen.hasShiftDown() && getMenu().getBlockEntity().canPrintInCreativeMode());
         printButton.visible = !getMenu().isPrinting();
 
-        processToggleButton.active = true;
-        processToggleButton.visible = getMenu().canChangeProcess();
+        chromaticModeToggleButton.active = true;
+        chromaticModeToggleButton.visible = getMenu().canChangeProcess();
     }
 
     @Override
@@ -149,7 +175,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
             guiGraphics.blit(MAIN_TEXTURE, leftPos + 116, topPos + 91, 176, 0, width, 17);
         }
 
-        ListTag frames = getMenu().getExposedFrames();
+        List<ExposureFrame> frames = getMenu().getExposedFrames();
         if (frames.isEmpty()) {
             guiGraphics.blit(FILM_OVERLAYS_TEXTURE, leftPos + 4, topPos + 15, 0, 136, 168, 68);
             return;
@@ -159,14 +185,15 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         if (!(filmStack.getItem() instanceof DevelopedFilmItem film))
             return;
 
-        FilmType negative = film.getType();
+        ExposureType exposureType = film.getType();
+        FilmColor filmColor = exposureType.getFilmColor();
 
         int selectedFrame = getMenu().getSelectedFrame();
-        @Nullable CompoundTag leftFrame = getMenu().getFrameIdByIndex(selectedFrame - 1);
-        @Nullable CompoundTag centerFrame = getMenu().getFrameIdByIndex(selectedFrame);
-        @Nullable CompoundTag rightFrame = getMenu().getFrameIdByIndex(selectedFrame + 1);
+        @Nullable ExposureFrame leftFrame = getMenu().getFrameIdByIndex(selectedFrame - 1);
+        @Nullable ExposureFrame centerFrame = getMenu().getFrameIdByIndex(selectedFrame);
+        @Nullable ExposureFrame rightFrame = getMenu().getFrameIdByIndex(selectedFrame + 1);
 
-        RenderSystem.setShaderColor(negative.filmR, negative.filmG, negative.filmB, negative.filmA);
+        RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
 
         // Left film part
         guiGraphics.blit(FILM_OVERLAYS_TEXTURE, leftPos + 1, topPos + 15, 0, leftFrame != null ? 68 : 0, 54, 68);
@@ -182,13 +209,13 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         PoseStack poseStack = guiGraphics.pose();
 
         if (leftFrame != null)
-            renderFrame(leftFrame, poseStack, leftPos + 6, topPos + 22, FRAME_SIZE, isOverLeftFrame(mouseX, mouseY) ? 0.8f : 0.25f, negative);
+            renderFrame(leftFrame, poseStack, leftPos + 6, topPos + 22, FRAME_SIZE, isOverLeftFrame(mouseX, mouseY) ? 0.8f : 0.25f, exposureType);
         if (centerFrame != null)
-            renderFrame(centerFrame, poseStack, leftPos + 61, topPos + 22, FRAME_SIZE, 0.9f, negative);
+            renderFrame(centerFrame, poseStack, leftPos + 61, topPos + 22, FRAME_SIZE, 0.9f, exposureType);
         if (rightFrame != null)
-            renderFrame(rightFrame, poseStack, leftPos + 116, topPos + 22, FRAME_SIZE, isOverRightFrame(mouseX, mouseY) ? 0.8f : 0.25f, negative);
+            renderFrame(rightFrame, poseStack, leftPos + 116, topPos + 22, FRAME_SIZE, isOverRightFrame(mouseX, mouseY) ? 0.8f : 0.25f, exposureType);
 
-        RenderSystem.setShaderColor(negative.filmR, negative.filmG, negative.filmB, negative.filmA);
+        RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
 
         if (getMenu().getBlockEntity().isAdvancingFrameOnPrint()) {
             poseStack.pushPose();
@@ -249,15 +276,14 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     private void addFrameInfoTooltipLines(List<Component> tooltipLines, int frameIndex, boolean isAdvancedTooltips) {
-        @Nullable CompoundTag frame = getMenu().getFrameIdByIndex(frameIndex);
+        @Nullable ExposureFrame frame = getMenu().getFrameIdByIndex(frameIndex);
         if (frame != null) {
-            ColorChannel.fromString(frame.getString(FrameData.CHROMATIC_CHANNEL)).ifPresent(c ->
+            ColorChannel.fromString(frame.additionalData().getUnsafe().getString(FrameProperties.CHROMATIC_CHANNEL)).ifPresent(c ->
                     tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
                         .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
 
             if (isAdvancedTooltips) {
-                Either<String, ResourceLocation> idOrTexture = FrameData.getIdOrTexture(frame);
-                MutableComponent component = idOrTexture.map(
+                Component component = frame.identifier().map(
                                 id -> !id.isEmpty() ? Component.translatable("gui.exposure.frame.id",
                                         Component.literal(id).withStyle(ChatFormatting.GRAY)) : Component.empty(),
                                 texture -> Component.translatable("gui.exposure.frame.texture",
@@ -269,34 +295,33 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     private boolean isOverLeftFrame(int mouseX, int mouseY) {
-        ListTag frames = getMenu().getExposedFrames();
+        List<ExposureFrame> frames = getMenu().getExposedFrames();
         int selectedFrame = getMenu().getSelectedFrame();
         return selectedFrame - 1 >= 0 && selectedFrame - 1 < frames.size() && isHovering(6, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
     private boolean isOverCenterFrame(int mouseX, int mouseY) {
-        ListTag frames = getMenu().getExposedFrames();
+        List<ExposureFrame> frames = getMenu().getExposedFrames();
         int selectedFrame = getMenu().getSelectedFrame();
         return selectedFrame >= 0 && selectedFrame < frames.size() && isHovering(61, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
     private boolean isOverRightFrame(int mouseX, int mouseY) {
-        ListTag frames = getMenu().getExposedFrames();
+        List<ExposureFrame> frames = getMenu().getExposedFrames();
         int selectedFrame = getMenu().getSelectedFrame();
         return selectedFrame + 1 >= 0 && selectedFrame + 1 < frames.size() && isHovering(116, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
-    public void renderFrame(@Nullable CompoundTag frame, PoseStack poseStack, float x, float y, float size, float alpha, FilmType negative) {
-        if (frame == null)
-            return;
-
+    public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
+                            float x, float y, float size, float alpha, ExposureType exposureType) {
         poseStack.pushPose();
         poseStack.translate(x, y, 0);
 
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        ExposureClient.getExposureRenderer().render(RenderedImageProvider.fromFrame(frame),
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        ExposureClient.exposureRenderer().render(RenderedImageProvider.fromFrame(frame),
                 ExposurePixelModifiers.NEGATIVE_FILM, poseStack, bufferSource, 0, 0, size, size, LightTexture.FULL_BRIGHT,
-                negative.frameR, negative.frameG, negative.frameB, Mth.clamp((int) Math.ceil(alpha * 255), 0, 255));
+                exposureType.getImageColor().getRed(), exposureType.getImageColor().getGreen(), exposureType.getImageColor().getBlue(),
+                Mth.clamp((int) Math.ceil(alpha * 255), 0, 255));
         bufferSource.endBatch();
 
         poseStack.popPose();
@@ -319,11 +344,11 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        boolean handled = super.mouseScrolled(mouseX, mouseY, delta);
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        boolean handled = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
 
         if (!handled) {
-            if (delta >= 0.0 && isOverCenterFrame((int) mouseX, (int) mouseY)) // Scroll Up
+            if (scrollY >= 0.0 && isOverCenterFrame((int) mouseX, (int) mouseY)) // Scroll Up
                 enterFrameInspectMode();
         }
 
@@ -369,7 +394,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
                 .getRandom().nextFloat() * 0.4f + 0.8f);
 
         // Update block entity clientside to faster update advance frame arrows:
-        getMenu().getBlockEntity().setSelectedFrame(getMenu().getBlockEntity().getSelectedFrameIndex() + (navigation == PagingDirection.NEXT ? 1 : -1));
+        getMenu().getBlockEntity().setSelectedFrameIndex(getMenu().getBlockEntity().getSelectedFrameIndex() + (navigation == PagingDirection.NEXT ? 1 : -1));
     }
 
     private void enterFrameInspectMode() {

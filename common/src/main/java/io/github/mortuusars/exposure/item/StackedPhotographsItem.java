@@ -1,17 +1,15 @@
 package io.github.mortuusars.exposure.item;
 
 import com.google.common.base.Preconditions;
-import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.infrastructure.FrameData;
 import io.github.mortuusars.exposure.gui.ClientGUI;
 import io.github.mortuusars.exposure.gui.component.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -25,7 +23,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -33,7 +30,18 @@ import java.util.List;
 import java.util.Optional;
 
 public class StackedPhotographsItem extends Item {
-    public static final String PHOTOGRAPHS_TAG = "Photographs";
+    public static final Codec<ItemAndStack<PhotographItem>> PHOTOGRAPH_ITEM_AND_STACK_CODEC = ItemStack.CODEC.comapFlatMap(stack -> {
+        if (stack.getItem() instanceof PhotographItem) {
+            return DataResult.success(new ItemAndStack<>(stack));
+        } else {
+            return DataResult.error(() -> "'stacked_photographs' can only hold items of type PhotographItem.");
+        }
+    }, ItemAndStack::getItemStack);
+
+    public static final StreamCodec<RegistryFriendlyByteBuf, ItemAndStack<PhotographItem>> PHOTOGRAPH_ITEM_AND_STACK_STREAM_CODEC =
+            ItemStack.STREAM_CODEC.map(
+                    ItemAndStack::new, ItemAndStack::getItemStack
+            );
 
     public StackedPhotographsItem(Properties properties) {
         super(properties);
@@ -46,37 +54,28 @@ public class StackedPhotographsItem extends Item {
         return Config.Common.STACKED_PHOTOGRAPHS_MAX_SIZE.get();
     }
 
-    public int getPhotographsCount(ItemStack stack) {
-        return getOrCreatePhotographsListTag(stack).size();
-    }
-
     public List<ItemAndStack<PhotographItem>> getPhotographs(ItemStack stack) {
-        return getPhotographs(stack, getStackLimit());
+        return stack.getOrDefault(Exposure.DataComponents.STACKED_PHOTOGRAPHS, Collections.emptyList());
     }
 
-    public List<ItemAndStack<PhotographItem>> getPhotographs(ItemStack stack, int limit) {
-        ListTag listTag = getOrCreatePhotographsListTag(stack);
-        if (listTag.isEmpty())
-            return Collections.emptyList();
-
-        List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>();
-        for (int i = 0; i < Math.min(listTag.size(), limit); i++) {
-            photographs.add(getPhotograph(listTag, i));
-        }
-
-        return photographs;
+    public void setPhotographs(ItemStack stack, List<ItemAndStack<PhotographItem>> photographs) {
+        stack.set(Exposure.DataComponents.STACKED_PHOTOGRAPHS, photographs);
     }
 
     public boolean canAddPhotograph(ItemStack stack) {
-        return getPhotographsCount(stack) < getStackLimit();
+        return getPhotographs(stack).size() < getStackLimit();
     }
 
     public void addPhotograph(ItemStack stack, ItemStack photographStack, int index) {
-        Preconditions.checkState(index >= 0 && index <= getPhotographsCount(stack), index + " is out of bounds. Count: " + getPhotographsCount(stack));
-        Preconditions.checkState(canAddPhotograph(stack), "Cannot add more photographs than this photo can store. Max count: " + getStackLimit());
-        ListTag listTag = getOrCreatePhotographsListTag(stack);
-        listTag.add(index, photographStack.save(new CompoundTag()));
-        stack.getOrCreateTag().put(PHOTOGRAPHS_TAG, listTag);
+        Preconditions.checkElementIndex(index, getPhotographs(stack).size() + 1);
+        Preconditions.checkState(canAddPhotograph(stack),
+                "Cannot add more photographs than this photo can store. Max count: " + getStackLimit());
+        Preconditions.checkArgument(photographStack.getItem() instanceof PhotographItem, "Only PhotographItem can be stacked.");
+
+        ArrayList<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(getPhotographs(stack));
+        photographs.add(index, new ItemAndStack<>(photographStack));
+
+        setPhotographs(stack, photographs);
     }
 
     public void addPhotographOnTop(ItemStack stack, ItemStack photographStack) {
@@ -84,17 +83,18 @@ public class StackedPhotographsItem extends Item {
     }
 
     public void addPhotographToBottom(ItemStack stack, ItemStack photographStack) {
-        addPhotograph(stack, photographStack, getPhotographsCount(stack));
+        addPhotograph(stack, photographStack, getPhotographs(stack).size());
     }
 
     public ItemAndStack<PhotographItem> removePhotograph(ItemStack stack, int index) {
-        Preconditions.checkState(index >= 0 && index < getPhotographsCount(stack), index + " is out of bounds. Count: " + getPhotographsCount(stack));
+        Preconditions.checkElementIndex(index, getPhotographs(stack).size());
 
-        ListTag listTag = getOrCreatePhotographsListTag(stack);
-        ItemStack photographStack = ItemStack.of((CompoundTag)listTag.remove(index));
-        stack.getOrCreateTag().put(PHOTOGRAPHS_TAG, listTag);
+        ArrayList<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(getPhotographs(stack));
+        ItemAndStack<PhotographItem> removedPhotograph = photographs.remove(index);
 
-        return new ItemAndStack<>(photographStack);
+        setPhotographs(stack, photographs);
+
+        return removedPhotograph;
     }
 
     public ItemAndStack<PhotographItem> removeTopPhotograph(ItemStack stack) {
@@ -102,65 +102,7 @@ public class StackedPhotographsItem extends Item {
     }
 
     public ItemAndStack<PhotographItem> removeBottomPhotograph(ItemStack stack) {
-        return removePhotograph(stack, getPhotographsCount(stack) - 1);
-    }
-
-    private ListTag getOrCreatePhotographsListTag(ItemStack stack) {
-        return stack.getTag() != null ? stack.getOrCreateTag().getList(PHOTOGRAPHS_TAG, Tag.TAG_COMPOUND) : new ListTag();
-    }
-
-    private ItemAndStack<PhotographItem> getPhotograph(ListTag photographsList, int index) {
-        CompoundTag stackTag = photographsList.getCompound(index);
-        ItemStack stack = ItemStack.of(stackTag);
-        return new ItemAndStack<>(stack);
-    }
-
-    public @Nullable Either<String, ResourceLocation> getFirstIdOrTexture(ItemStack stack) {
-        ListTag listTag = getOrCreatePhotographsListTag(stack);
-        if (listTag.isEmpty())
-            return null;
-
-        CompoundTag first = listTag.getCompound(0).getCompound("tag");
-        String id = first.getString(FrameData.ID);
-        if (!id.isEmpty())
-            return Either.left(id);
-
-        String resource = first.getString(FrameData.TEXTURE);
-        if (!resource.isEmpty())
-            return Either.right(new ResourceLocation(resource));
-
-        return null;
-    }
-
-    public List<@Nullable Either<String, ResourceLocation>> getTopPhotographs(ItemStack stack, int count) {
-        Preconditions.checkArgument(count > 0, "count '{}' is not valid. > 0", count);
-
-        List<@Nullable Either<String, ResourceLocation>> photographs = new ArrayList<>();
-        ListTag listTag = getOrCreatePhotographsListTag(stack);
-
-        for (int i = 0; i < Math.min(listTag.size(), count); i++) {
-            CompoundTag photographTag = listTag.getCompound(i).getCompound("tag");
-
-            String id = photographTag.getString(FrameData.ID);
-            if (!id.isEmpty()) {
-                photographs.add(Either.left(id));
-                continue;
-            }
-
-            String resource = photographTag.getString(FrameData.TEXTURE);
-            if (!resource.isEmpty()) {
-                photographs.add(Either.right(new ResourceLocation(resource)));
-                continue;
-            }
-
-            photographs.add(null);
-        }
-
-        while (photographs.size() < count) {
-            photographs.add(null);
-        }
-
-        return photographs;
+        return removePhotograph(stack, getPhotographs(stack).size() - 1);
     }
 
     // ---
@@ -171,21 +113,21 @@ public class StackedPhotographsItem extends Item {
         if (photographs.isEmpty())
             return Optional.empty();
 
-        return Optional.of(new PhotographTooltip(new ItemAndStack<>(stack)));
+        return Optional.of(new PhotographTooltip(photographs));
     }
 
     @Override
     public boolean overrideStackedOnOther(@NotNull ItemStack stack, @NotNull Slot slot, @NotNull ClickAction action, @NotNull Player player) {
-        if (action != ClickAction.SECONDARY || getPhotographsCount(stack) == 0 || !slot.mayPlace(new ItemStack(Exposure.Items.PHOTOGRAPH.get())))
+        if (action != ClickAction.SECONDARY || getPhotographs(stack).isEmpty() || !slot.mayPlace(new ItemStack(Exposure.Items.PHOTOGRAPH.get())))
             return false;
 
         ItemStack slotItem = slot.getItem();
         if (slotItem.isEmpty()) {
             ItemAndStack<PhotographItem> photograph = removeBottomPhotograph(stack);
-            slot.set(photograph.getStack());
+            slot.set(photograph.getItemStack());
 
-            if (getPhotographsCount(stack) == 1)
-                player.containerMenu.setCarried(removeTopPhotograph(stack).getStack());
+            if (getPhotographs(stack).size() == 1)
+                player.containerMenu.setCarried(removeTopPhotograph(stack).getItemStack());
 
             playRemoveSoundClientside(player);
 
@@ -209,13 +151,13 @@ public class StackedPhotographsItem extends Item {
         if (action != ClickAction.SECONDARY || !slot.mayPlace(new ItemStack(Exposure.Items.PHOTOGRAPH.get())))
             return false;
 
-        if (getPhotographsCount(stack) > 0 && other.isEmpty()) {
+        if (!getPhotographs(stack).isEmpty() && other.isEmpty()) {
             ItemAndStack<PhotographItem> photograph = removeTopPhotograph(stack);
-            access.set(photograph.getStack());
+            access.set(photograph.getItemStack());
 
-            if (getPhotographsCount(stack) == 1) {
+            if (getPhotographs(stack).size() == 1) {
                 ItemAndStack<PhotographItem> lastPhotograph = removeTopPhotograph(stack);
-                slot.set(lastPhotograph.getStack());
+                slot.set(lastPhotograph.getItemStack());
             }
 
             playRemoveSoundClientside(player);
@@ -231,26 +173,25 @@ public class StackedPhotographsItem extends Item {
                 playAddSoundClientside(player);
 
                 return true;
-            }
-            else
+            } else
                 return false;
         }
 
         if (other.getItem() instanceof StackedPhotographsItem otherStackedItem) {
-            int otherCount = otherStackedItem.getPhotographsCount(other);
+            int otherCount = otherStackedItem.getPhotographs(other).size();
             int addedCount = 0;
             for (int i = 0; i < otherCount; i++) {
                 if (canAddPhotograph(stack)) {
                     ItemAndStack<PhotographItem> photograph = otherStackedItem.removeBottomPhotograph(other);
-                    addPhotographOnTop(stack, photograph.getStack());
+                    addPhotographOnTop(stack, photograph.getItemStack());
                     addedCount++;
                 }
             }
 
-            if (otherStackedItem.getPhotographsCount(other) == 0)
+            if (otherStackedItem.getPhotographs(other).isEmpty())
                 access.set(ItemStack.EMPTY);
-            else if (otherStackedItem.getPhotographsCount(other) == 1)
-                access.set(otherStackedItem.removeTopPhotograph(other).getStack());
+            else if (otherStackedItem.getPhotographs(other).size() == 1)
+                access.set(otherStackedItem.removeTopPhotograph(other).getItemStack());
 
             if (addedCount > 0)
                 playAddSoundClientside(player);
@@ -265,8 +206,10 @@ public class StackedPhotographsItem extends Item {
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand hand) {
         ItemStack itemInHand = player.getItemInHand(hand);
 
-        if (player.isSecondaryUseActive()) {
-            cyclePhotographs(itemInHand, player);
+        if (player.isSecondaryUseActive() && cyclePhotographs(itemInHand)) {
+            player.level().playSound(player, player, Exposure.SoundEvents.PHOTOGRAPH_RUSTLE.get(), SoundSource.PLAYERS, 0.6f,
+                    player.level().getRandom().nextFloat() * 0.2f + 1.2f);
+            player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
             return InteractionResultHolder.success(itemInHand);
         }
 
@@ -282,17 +225,12 @@ public class StackedPhotographsItem extends Item {
         return InteractionResultHolder.fail(itemInHand);
     }
 
-    public boolean cyclePhotographs(ItemStack stack, @Nullable Player player) {
-        if (getPhotographsCount(stack) < 2)
+    public boolean cyclePhotographs(ItemStack stack) {
+        if (getPhotographs(stack).size() < 2)
             return false;
 
         ItemAndStack<PhotographItem> topPhotograph = removeTopPhotograph(stack);
-        addPhotographToBottom(stack, topPhotograph.getStack());
-        if (player != null) {
-            player.level().playSound(player, player, Exposure.SoundEvents.PHOTOGRAPH_RUSTLE.get(), SoundSource.PLAYERS, 0.6f,
-                player.level().getRandom().nextFloat() * 0.2f + 1.2f);
-            player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-        }
+        addPhotographToBottom(stack, topPhotograph.getItemStack());
 
         return true;
     }

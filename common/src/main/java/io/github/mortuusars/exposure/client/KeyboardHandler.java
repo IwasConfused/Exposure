@@ -3,18 +3,15 @@ package io.github.mortuusars.exposure.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.camera.infrastructure.ZoomDirection;
+import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.gui.ClientGUI;
-import io.github.mortuusars.exposure.gui.screen.camera.ViewfinderControlsScreen;
+import io.github.mortuusars.exposure.gui.screen.camera.CameraControlsScreen;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Optional;
 
 public class KeyboardHandler {
     public static boolean handleViewfinderKeyPress(long windowId, int key, int scanCode, int action, int modifiers) {
@@ -24,14 +21,13 @@ public class KeyboardHandler {
             return false;
         }
 
-        Optional<Camera<?>> cameraOptional = CameraClient.getCamera();
-        if (cameraOptional.isEmpty()) {
+        if (CameraClient.getActiveCamera().isEmpty()) {
             return false;
         }
 
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
                 && Minecraft.getInstance().options.keyAttack.matches(key, scanCode)
-                && !(Minecraft.getInstance().screen instanceof ViewfinderControlsScreen)) {
+                && !(Minecraft.getInstance().screen instanceof CameraControlsScreen)) {
             return true; // Block attacks
         }
 
@@ -47,13 +43,12 @@ public class KeyboardHandler {
             return true;
         }
 
-
         if (key == InputConstants.KEY_ESCAPE || minecraft.options.keyInventory.matches(key, scanCode)) {
             if (action == InputConstants.PRESS) { // TODO: Check if activating on release is not causing problems
-                if (minecraft.screen instanceof ViewfinderControlsScreen viewfinderControlsScreen) {
+                if (minecraft.screen instanceof CameraControlsScreen viewfinderControlsScreen) {
                     viewfinderControlsScreen.onClose();
                 } else {
-                    CameraClient.deactivate(player);
+                    CameraClient.deactivateCamera();
                 }
             }
             return true;
@@ -62,7 +57,7 @@ public class KeyboardHandler {
         if (!Viewfinder.isLookingThrough())
             return false;
 
-        if (!(minecraft.screen instanceof ViewfinderControlsScreen)) {
+        if (!(minecraft.screen instanceof CameraControlsScreen)) {
             if (ExposureClient.getCameraControlsKey().matches(key, scanCode)) {
                 ClientGUI.openViewfinderControlsScreen();
                 return false; // Do not handle to keep sneaking

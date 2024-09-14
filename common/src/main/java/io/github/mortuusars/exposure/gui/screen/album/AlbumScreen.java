@@ -8,22 +8,17 @@ import io.github.mortuusars.exposure.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.gui.screen.element.TextBlock;
 import io.github.mortuusars.exposure.gui.screen.element.textbox.HorizontalAlignment;
 import io.github.mortuusars.exposure.gui.screen.element.textbox.TextBox;
-import io.github.mortuusars.exposure.item.AlbumPage;
 import io.github.mortuusars.exposure.item.PhotographItem;
+import io.github.mortuusars.exposure.item.component.album.AlbumPage;
 import io.github.mortuusars.exposure.menu.AlbumMenu;
 import io.github.mortuusars.exposure.menu.AlbumPlayerInventorySlot;
-import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.server.AlbumSyncNoteC2SP;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import io.github.mortuusars.exposure.util.Side;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
-import net.minecraft.client.gui.components.Button;
-import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.renderer.GameRenderer;
@@ -48,7 +43,13 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
-    
+    public static final WidgetSprites PREVIOUS_PAGE_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("album/previous_page"), Exposure.resource("album/previous_page_highlighted"));
+    public static final WidgetSprites NEXT_PAGE_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("album/next_page"), Exposure.resource("album/next_page_highlighted"));
+    public static final WidgetSprites SIGN_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("album/sign"), Exposure.resource("album/sign_disabled"), Exposure.resource("album/sign_highlighted"));
+
     public static final ResourceLocation TEXTURE = Exposure.resource("textures/gui/album.png");
     public static final int MAIN_FONT_COLOR = 0xFFB59774;
     public static final int SECONDARY_FONT_COLOR = 0xFFEFE4CA;
@@ -103,33 +104,30 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         Page leftPage = createPage(Side.LEFT, 0);
         pages.add(leftPage);
 
-        ImageButton previousButton = new ImageButton(leftPos + 12, topPos + 164, 13, 15,
-                216, 188, 15, TEXTURE, 512, 512,
-                button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
-        previousButton.setTooltip(Tooltip.create(Component.translatable("gui.exposure.previous_page")));
-        addRenderableWidget(previousButton);
+        ImageButton previousPageButton = new ImageButton(leftPos + 12, topPos + 164, 13, 15,
+                PREVIOUS_PAGE_BUTTON_SPRITES, button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
+        previousPageButton.setTooltip(Tooltip.create(Component.translatable("gui.exposure.previous_page")));
+        addRenderableWidget(previousPageButton);
 
         // RIGHT:
         Page rightPage = createPage(Side.RIGHT, 140);
         pages.add(rightPage);
 
-        ImageButton nextButton = new ImageButton(leftPos + 273, topPos + 164, 13, 15,
-                229, 188, 15, TEXTURE, 512, 512,
-                button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
-        nextButton.setTooltip(Tooltip.create(Component.translatable("gui.exposure.next_page")));
-        addRenderableWidget(nextButton);
+        ImageButton nextPageButton = new ImageButton(leftPos + 273, topPos + 164, 13, 15,
+                NEXT_PAGE_BUTTON_SPRITES, button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
+        nextPageButton.setTooltip(Tooltip.create(Component.translatable("gui.exposure.next_page")));
+        addRenderableWidget(nextPageButton);
 
         // MISC:
         if (getMenu().isAlbumEditable()) {
-            enterSignModeButton = new ImageButton(leftPos - 23, topPos + 17, 22, 22, 242, 188,
-                    22, TEXTURE, 512, 512,
-                    b -> enterSignMode(), Component.translatable("gui.exposure.album.sign"));
+            enterSignModeButton = new ImageButton(leftPos - 23, topPos + 17, 22, 22,
+                    SIGN_BUTTON_SPRITES, b -> enterSignMode(), Component.translatable("gui.exposure.album.sign"));
             enterSignModeButton.setTooltip(Tooltip.create(Component.translatable("gui.exposure.album.sign")));
             addRenderableWidget(enterSignModeButton);
         }
 
         int spreadsCount = (int) Math.ceil(getMenu().getPages().size() / 2f);
-        pager.init(spreadsCount, false, previousButton, nextButton);
+        pager.init(spreadsCount, false, previousPageButton, nextPageButton);
     }
 
     protected Page createPage(Side side, int xOffset) {
@@ -142,7 +140,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         Rect2i note = new Rect2i(x + 22, y + 133, 114, 27);
 
         PhotographSlotButton photographButton = new PhotographSlotButton(exposure, photo.getX(), photo.getY(),
-                photo.getWidth(), photo.getHeight(), 0, 188, 108, TEXTURE, 512, 512,
+                photo.getWidth(), photo.getHeight(),
                 b -> {
                     PhotographSlotButton button = (PhotographSlotButton) b;
                     ItemStack photograph = button.getPhotograph();
@@ -177,7 +175,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         Either<TextBox, TextBlock> noteWidget;
         if (getMenu().isAlbumEditable()) {
             TextBox textBox = new TextBox(font, note.getX(), note.getY(), note.getWidth(), note.getHeight(),
-                    () -> getMenu().getPage(side).map(p -> p.getNote().left().orElseThrow()).orElse(""),
+                    () -> getMenu().getPage(side).map(AlbumPage::note).orElse(""),
                     text -> onNoteChanged(side, text))
                     .setFontColor(MAIN_FONT_COLOR, MAIN_FONT_COLOR)
                     .setSelectionColor(SELECTION_COLOR, SELECTION_UNFOCUSED_COLOR);
@@ -201,11 +199,11 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
     }
 
     protected void onNoteChanged(Side side, String noteText) {
-        getMenu().getPage(side).ifPresent(page -> {
-            page.setNote(Either.left(noteText));
-            int pageIndex = getMenu().getCurrentSpreadIndex() * 2 + side.getIndex();
-            Packets.sendToServer(new AlbumSyncNoteC2SP(pageIndex, noteText));
-        });
+//        getMenu().getPage(side).ifPresent(page -> {
+//            page.setNote(Either.left(noteText));
+//            int pageIndex = getMenu().getCurrentSpreadIndex() * 2 + side.getIndex();
+//            Packets.sendToServer(new AlbumSyncNoteC2SP(pageIndex, noteText));
+//        });
     }
 
     
@@ -228,9 +226,9 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
                     || (!isInAddingPhotographMode && getMenu().isAlbumEditable());
         }
 
-        inventoryLabelY = isInAddingPhotographMode ? getMenu().getPlayerInventorySlots().get(0).y - 12 : -999;
+        inventoryLabelY = isInAddingPhotographMode ? getMenu().getPlayerInventorySlots().getFirst().y - 12 : -999;
 
-        this.renderBackground(guiGraphics);
+        this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         for (Page page : pages) {
@@ -336,7 +334,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
                 }
             }
 
-            AlbumPlayerInventorySlot firstSlot = getMenu().getPlayerInventorySlots().get(0);
+            AlbumPlayerInventorySlot firstSlot = getMenu().getPlayerInventorySlots().getFirst();
             int x = firstSlot.x - 8;
             int y = firstSlot.y - 18;
             guiGraphics.blit(TEXTURE, leftPos + x, topPos + y, 10, 0, 404, 176, 100, 512, 512);
@@ -463,7 +461,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         if (!isInAddingMode())
             return false;
 
-        AlbumPlayerInventorySlot firstSlot = getMenu().getPlayerInventorySlots().get(0);
+        AlbumPlayerInventorySlot firstSlot = getMenu().getPlayerInventorySlots().getFirst();
         int x = firstSlot.x - 8;
         int y = firstSlot.y - 18;
         return isHovering(x, y, 176, 100, mouseX, mouseY);
@@ -559,10 +557,9 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
     }
 
     @NotNull
-    protected Component getNoteComponent(Side page) {
-        return getMenu().getPage(page)
-                .map(AlbumPage::getNote)
-                .map(n -> n.map(Component::literal, comp -> comp))
+    protected Component getNoteComponent(Side side) {
+        return getMenu().getPage(side)
+                .map(page -> Component.literal(page.note()))
                 .orElse(Component.empty());
     }
 

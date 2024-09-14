@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
+import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.IFilmItem;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -21,6 +21,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class LightroomMenu extends AbstractContainerMenu {
@@ -33,7 +35,7 @@ public class LightroomMenu extends AbstractContainerMenu {
     private final LightroomBlockEntity lightroomBlockEntity;
     private final ContainerData data;
 
-    private ListTag frames = new ListTag();
+    private List<ExposureFrame> frames = Collections.emptyList();
 
     public LightroomMenu(int containerId, final Inventory playerInventory, final LightroomBlockEntity blockEntity, ContainerData containerData) {
         super(Exposure.MenuTypes.LIGHTROOM.get(), containerId);
@@ -50,9 +52,10 @@ public class LightroomMenu extends AbstractContainerMenu {
                 @Override
                 public void setChanged() {
                     frames = getItem().getItem() instanceof DevelopedFilmItem developedFilm ?
-                            developedFilm.getExposedFrames(getItem()) : new ListTag();
-                    if (lightroomBlockEntity.getLevel() != null && !lightroomBlockEntity.getLevel().isClientSide)
+                            developedFilm.getStoredFrames(getItem()) : Collections.emptyList();
+                    if (lightroomBlockEntity.getLevel() != null && !lightroomBlockEntity.getLevel().isClientSide) {
                         data.set(LightroomBlockEntity.CONTAINER_DATA_SELECTED_FRAME_ID, 0);
+                    }
                     super.setChanged();
                 }
             });
@@ -138,12 +141,12 @@ public class LightroomMenu extends AbstractContainerMenu {
         return data;
     }
 
-    public ListTag getExposedFrames() {
+    public List<ExposureFrame> getExposedFrames() {
         return frames;
     }
 
-    public @Nullable CompoundTag getFrameIdByIndex(int index) {
-        return index >= 0 && index < getExposedFrames().size() ? getExposedFrames().getCompound(index) : null;
+    public @Nullable ExposureFrame getFrameIdByIndex(int index) {
+        return index >= 0 && index < getExposedFrames().size() ? getExposedFrames().get(index) : null;
     }
 
     public int getSelectedFrame() {
@@ -156,11 +159,11 @@ public class LightroomMenu extends AbstractContainerMenu {
 
     public int getTotalFrames() {
         ItemStack filmStack = getBlockEntity().getItem(Lightroom.FILM_SLOT);
-        return (!filmStack.isEmpty() && filmStack.getItem() instanceof IFilmItem filmItem) ? filmItem.getExposedFramesCount(filmStack) : 0;
+        return (!filmStack.isEmpty() && filmStack.getItem() instanceof IFilmItem filmItem) ? filmItem.getStoredFramesCount(filmStack) : 0;
     }
 
     public boolean canChangeProcess() {
-        return getBlockEntity().canPrintChromatic(getBlockEntity().getItem(Lightroom.FILM_SLOT), getSelectedFrame());
+        return getBlockEntity().canPrintChromatic();
     }
 
     @Override
@@ -183,8 +186,8 @@ public class LightroomMenu extends AbstractContainerMenu {
         }
 
         if (buttonId == TOGGLE_PROCESS_BUTTON_ID) {
-            Lightroom.Process currentProcess = getBlockEntity().getProcess();
-            getBlockEntity().setProcess(currentProcess == Lightroom.Process.CHROMATIC ? Lightroom.Process.REGULAR : Lightroom.Process.CHROMATIC);
+            PrintingMode currentProcess = getBlockEntity().getPrintingMode();
+            getBlockEntity().setPrintMode(currentProcess == PrintingMode.CHROMATIC ? PrintingMode.REGULAR : PrintingMode.CHROMATIC);
         }
 
         if (buttonId == PRINT_BUTTON_ID) {
@@ -194,7 +197,7 @@ public class LightroomMenu extends AbstractContainerMenu {
 
         if (buttonId == PRINT_CREATIVE_BUTTON_ID) {
             if (player.isCreative())
-                getBlockEntity().printInCreativeMode();
+                getBlockEntity().printFrameInCreative();
         }
 
         return false;
@@ -242,7 +245,7 @@ public class LightroomMenu extends AbstractContainerMenu {
             while (!movedStack.isEmpty() && !(!reverseDirection ? i >= endIndex : i < startIndex)) {
                 Slot slot = this.slots.get(i);
                 ItemStack slotStack = slot.getItem();
-                if (!slotStack.isEmpty() && ItemStack.isSameItemSameTags(movedStack, slotStack)) {
+                if (!slotStack.isEmpty() && ItemStack.isSameItemSameComponents(movedStack, slotStack)) {
                     int maxSize;
                     int j = slotStack.getCount() + movedStack.getCount();
                     if (j <= (maxSize = Math.min(slot.getMaxStackSize(), movedStack.getMaxStackSize()))) {

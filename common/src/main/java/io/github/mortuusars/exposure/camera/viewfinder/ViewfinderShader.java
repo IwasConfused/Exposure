@@ -2,12 +2,16 @@ package io.github.mortuusars.exposure.camera.viewfinder;
 
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.camera.Camera;
+import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.data.filter.Filter;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -19,7 +23,7 @@ public class ViewfinderShader {
     public static Optional<ResourceLocation> getCurrent() {
         PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
         if (effect != null) {
-            return Optional.of(new ResourceLocation(effect.getName()));
+            return Optional.of(ResourceLocation.parse(effect.getName()));
         }
 
         return Optional.empty();
@@ -50,17 +54,10 @@ public class ViewfinderShader {
     }
 
     public static void update() {
-        Optional<Camera<?>> camera = Camera.getCamera(Minecraft.getInstance().player);
-
-        if (camera.isEmpty()) {
-            removeShader();
-            return;
-        }
-
-        ItemAndStack<? extends CameraItem> cameraItemAndStack = camera.get().get();
-        cameraItemAndStack.getItem().getAttachment(cameraItemAndStack.getStack(), CameraItem.FILTER_ATTACHMENT)
-                    .flatMap(Filters::getShaderOf)
-                    .ifPresentOrElse(ViewfinderShader::applyShader, ViewfinderShader::removeShader);
+        CameraClient.getActiveCamera().ifPresentOrElse(camera -> {
+            ItemStack filterStack = camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILTER).getForReading();
+            Filters.getShaderOf(filterStack).ifPresentOrElse(ViewfinderShader::applyShader, ViewfinderShader::removeShader);
+        }, ViewfinderShader::removeShader);
     }
 
     public static boolean shouldRestorePreviousShaderEffect() {

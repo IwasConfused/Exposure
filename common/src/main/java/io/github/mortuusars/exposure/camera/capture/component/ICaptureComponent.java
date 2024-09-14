@@ -67,7 +67,7 @@ public interface ICaptureComponent {
      */
     default void teardown(Capture capture) { }
 
-    default boolean save(byte[] MapColorPixels, int width, int height, CompoundTag properties) {
+    default boolean save(int width, int height, byte[] pixels, CompoundTag extraData) {
         return true;
     }
 

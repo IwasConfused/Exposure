@@ -4,6 +4,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
@@ -15,13 +16,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Gui.class)
 public abstract class GuiMixin {
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
-    private void renderGui(GuiGraphics guiGraphics, float partialTick, CallbackInfo ci) {
+    private void renderGui(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (Viewfinder.isLookingThrough())
             ci.cancel();
     }
 
     @Inject(method = "renderCrosshair", at = @At(value = "HEAD"), cancellable = true)
-    private void renderCrosshair(GuiGraphics guiGraphics, CallbackInfo ci) {
+    private void renderCrosshair(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (Config.Client.PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR.get() && mc.player != null && mc.player.getXRot() > 25f
                 && (mc.player.getMainHandItem().getItem() instanceof PhotographItem || mc.player.getMainHandItem().getItem() instanceof StackedPhotographsItem)

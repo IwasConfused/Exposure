@@ -1,49 +1,43 @@
 package io.github.mortuusars.exposure.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.gui.screen.element.IElementWithTooltip;
+import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.item.FilmRollItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.WidgetSprites;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-public class FrameCounterButton extends ImageButton implements IElementWithTooltip {
+public class FrameCounterButton extends ImageButton {
     private final int secondaryFontColor;
     private final int mainFontColor;
 
-    public FrameCounterButton(Screen screen, int x, int y, int width, int height, int u, int v, ResourceLocation texture) {
-        super(x, y, width, height, u, v, height, texture, 256, 256, button -> {}, Component.empty());
+    public FrameCounterButton(int x, int y, int width, int height, WidgetSprites sprites) {
+        super(x, y, width, height, sprites, button -> {});
         secondaryFontColor = Config.Client.getSecondaryFontColor();
         mainFontColor = Config.Client.getMainFontColor();
     }
 
     @Override
-    public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float pPartialTick) {
-        super.render(guiGraphics, mouseX, mouseY, pPartialTick);
-    }
-
-    @Override
     public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float pPartialTick) {
+        MutableComponent tooltipComponent = Component.translatable("gui.exposure.camera_controls.film_frame_counter.tooltip");
+        if (!cameraHasFilmRoll()) {
+            tooltipComponent.append(CommonComponents.NEW_LINE)
+                    .append(Component.translatable("gui.exposure.camera_controls.film_frame_counter.tooltip.no_film")
+                            .withStyle(Style.EMPTY.withColor(0xdd6357)));
+        }
+
         super.renderWidget(guiGraphics, mouseX, mouseY, pPartialTick);
 
-        Camera<?> camera = CameraClient.getCamera().orElseThrow();
-
-        String text = camera.get().getItem().getFilm(camera.get().getStack()).map(film -> {
-            int exposedFrames = film.getItem().getExposedFrames(film.getStack()).size();
-            int totalFrames = film.getItem().getMaxFrameCount(film.getStack());
-            return exposedFrames + "/" + totalFrames;
-        }).orElse("-");
+        String text = createText();
 
         Font font = Minecraft.getInstance().font;
         int textWidth = font.width(text);
@@ -53,15 +47,22 @@ public class FrameCounterButton extends ImageButton implements IElementWithToolt
         guiGraphics.drawString(font, text, getX() + xPos, getY() + 7, mainFontColor, false);
     }
 
-    public void renderToolTip(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        List<Component> components = new ArrayList<>();
-        components.add(Component.translatable("gui.exposure.viewfinder.film_frame_counter.tooltip"));
+    protected String createText() {
+        return CameraClient.getActiveCamera().map(camera -> {
+            ItemStack filmStack = camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILM).getForReading();
+            if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
+                return "-";
+            }
 
-        Camera<?> camera = CameraClient.getCamera().orElseThrow();
-        if (camera.get().getItem().getFilm(camera.get().getStack()).isEmpty()) {
-            components.add(Component.translatable("gui.exposure.viewfinder.film_frame_counter.tooltip.no_film").withStyle(Style.EMPTY.withColor(0xdd6357)));
-        }
+            int exposedFrames = filmItem.getStoredFrames(filmStack).size();
+            int totalFrames = filmItem.getMaxFrameCount(filmStack);
+            return exposedFrames + "/" + totalFrames;
+        }).orElse("-");
+    }
 
-        guiGraphics.renderTooltip(Minecraft.getInstance().font, components, Optional.empty(), mouseX, mouseY);
+    protected boolean cameraHasFilmRoll() {
+        return CameraClient.getActiveCamera().map(camera ->
+                        camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILM).isEmpty())
+                .orElse(false);
     }
 }

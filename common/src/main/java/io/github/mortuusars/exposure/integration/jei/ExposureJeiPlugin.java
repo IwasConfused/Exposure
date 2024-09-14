@@ -5,7 +5,7 @@ import dev.architectury.injectables.annotations.ExpectPlatform;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
+import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.gui.screen.ItemRenameScreen;
 import io.github.mortuusars.exposure.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.integration.jei.category.PhotographPrintingCategory;
@@ -59,8 +59,8 @@ public class ExposureJeiPlugin implements IModPlugin {
     @Override
     public void registerRecipes(@NotNull IRecipeRegistration registration) {
         registration.addRecipes(PHOTOGRAPH_PRINTING_RECIPE_TYPE, ImmutableList.of(
-                new PhotographPrintingJeiRecipe(FilmType.BLACK_AND_WHITE),
-                new PhotographPrintingJeiRecipe(FilmType.COLOR)
+                new PhotographPrintingJeiRecipe(ExposureType.BLACK_AND_WHITE),
+                new PhotographPrintingJeiRecipe(ExposureType.COLOR)
         ));
 
         registration.addRecipes(PHOTOGRAPH_STACKING_RECIPE_TYPE, ImmutableList.of(
@@ -85,12 +85,9 @@ public class ExposureJeiPlugin implements IModPlugin {
 
     @Override
     public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
-        registration.getCraftingCategory()
-                .addCategoryExtension(FilmDevelopingRecipe.class, NbtTransferringShapelessExtension::new);
-        registration.getCraftingCategory()
-                .addCategoryExtension(PhotographCopyingRecipe.class, NbtTransferringShapelessExtension::new);
-        registration.getCraftingCategory()
-                .addCategoryExtension(PhotographAgingRecipe.class, NbtTransferringShapelessExtension::new);
+        registration.getCraftingCategory().addExtension(FilmDevelopingRecipe.class, new NbtTransferringShapelessExtension());
+        registration.getCraftingCategory().addExtension(PhotographCopyingRecipe.class, new NbtTransferringShapelessExtension());
+        registration.getCraftingCategory().addExtension(PhotographAgingRecipe.class, new NbtTransferringShapelessExtension());
     }
 
     @Override

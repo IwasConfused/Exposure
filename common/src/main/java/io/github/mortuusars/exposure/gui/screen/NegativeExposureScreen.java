@@ -2,22 +2,24 @@ package io.github.mortuusars.exposure.gui.screen;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.datafixers.util.Either;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.infrastructure.FilmType;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.gui.screen.element.Pager;
-import io.github.mortuusars.exposure.render.image.RenderedImageProvider;
-import io.github.mortuusars.exposure.render.image.ExposureDataImage;
-import io.github.mortuusars.exposure.render.image.IImage;
-import io.github.mortuusars.exposure.render.image.TextureImage;
-import io.github.mortuusars.exposure.data.storage.ExposureSavedData;
-import io.github.mortuusars.exposure.render.modifiers.ExposurePixelModifiers;
+import io.github.mortuusars.exposure.client.render.image.RenderedImageProvider;
+import io.github.mortuusars.exposure.core.image.ExposureDataImage;
+import io.github.mortuusars.exposure.core.image.IImage;
+import io.github.mortuusars.exposure.client.render.image.TextureImage;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -29,13 +31,24 @@ import java.util.List;
 
 public class NegativeExposureScreen extends ZoomableScreen {
     public static final ResourceLocation TEXTURE = Exposure.resource("textures/gui/film_frame_inspect.png");
+
+    public static final WidgetSprites PREV_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("widgets/previous_button"),
+            Exposure.resource("widgets/previous_button_disabled"),
+            Exposure.resource("widgets/previous_button_highlighted"));
+
+    public static final WidgetSprites NEXT_BUTTON_SPRITES = new WidgetSprites(
+            Exposure.resource("widgets/next_button"),
+            Exposure.resource("widgets/next_button_disabled"),
+            Exposure.resource("widgets/next_button_highlighted"));
+
     public static final int BG_SIZE = 78;
     public static final int FRAME_SIZE = 54;
 
     private final Pager pager = new Pager(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get());
-    private final List<Either<String, ResourceLocation>> exposures;
+    private final List<ExposureIdentifier> exposures;
 
-    public NegativeExposureScreen(List<Either<String, ResourceLocation>> exposures) {
+    public NegativeExposureScreen(List<ExposureIdentifier> exposures) {
         super(Component.empty());
         this.exposures = exposures;
         Preconditions.checkArgument(exposures != null && !exposures.isEmpty());
@@ -57,12 +70,12 @@ public class NegativeExposureScreen extends ZoomableScreen {
         super.init();
         zoomFactor = 1f / (minecraft.options.guiScale().get() + 1);
         ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
-                0, 0, 16, PhotographScreen.WIDGETS_TEXTURE, 256, 256,
+                PREV_BUTTON_SPRITES,
                 button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
         addRenderableWidget(previousButton);
 
         ImageButton nextButton = new ImageButton(width - 16, (int) (height / 2f - 16 / 2f), 16, 16,
-                16, 0, 16, PhotographScreen.WIDGETS_TEXTURE, 256, 256,
+                NEXT_BUTTON_SPRITES,
                 button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
         addRenderableWidget(nextButton);
 
@@ -73,22 +86,22 @@ public class NegativeExposureScreen extends ZoomableScreen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         pager.update();
 
-        renderBackground(guiGraphics);
+        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        Either<String, ResourceLocation> idOrTexture = exposures.get(pager.getCurrentPage());
+        ExposureIdentifier exposureIdentifier = exposures.get(pager.getCurrentPage());
 
-        @Nullable FilmType type = idOrTexture.map(
-                id -> ExposureClient.getExposureStorage().getOrQuery(id).map(ExposureSavedData::getType)
-                        .orElse(FilmType.BLACK_AND_WHITE),
+        @Nullable ExposureType type = exposureIdentifier.map(
+                id -> ExposureClient.exposureCache().getOrQuery(id).map(ExposureData::getType)
+                        .orElse(ExposureType.BLACK_AND_WHITE),
                 texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath()
-                        .endsWith("_bw")) ? FilmType.COLOR : FilmType.BLACK_AND_WHITE);
+                        .endsWith("_bw")) ? ExposureType.COLOR : ExposureType.BLACK_AND_WHITE);
         if (type == null)
-            type = FilmType.BLACK_AND_WHITE;
+            type = ExposureType.BLACK_AND_WHITE;
 
-        @Nullable IImage image = idOrTexture.map(
-                id -> ExposureClient.getExposureStorage().getOrQuery(id)
+        @Nullable IImage image = exposureIdentifier.map(
+                id -> ExposureClient.exposureCache().getOrQuery(id)
                         .map(data -> new ExposureDataImage(id, data)).orElse(null),
                 TextureImage::getTexture
         );
@@ -116,7 +129,8 @@ public class NegativeExposureScreen extends ZoomableScreen {
 
             GuiUtil.blit(guiGraphics.pose(), 0, 0, BG_SIZE, BG_SIZE, 0, 0, 256, 256, 0);
 
-            RenderSystem.setShaderColor(type.filmR, type.filmG, type.filmB, type.filmA);
+            FilmColor filmColor = type.getFilmColor();
+            RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
             GuiUtil.blit(guiGraphics.pose(), 0, 0, BG_SIZE, BG_SIZE, 0, BG_SIZE, 256, 256, 0);
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -124,10 +138,10 @@ public class NegativeExposureScreen extends ZoomableScreen {
             guiGraphics.pose().popPose();
         }
 
-        MultiBufferSource.BufferSource bufferSource = MultiBufferSource.immediate(Tesselator.getInstance().getBuilder());
-        ExposureClient.getExposureRenderer().render(new RenderedImageProvider(image), ExposurePixelModifiers.NEGATIVE_FILM,
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        ExposureClient.exposureRenderer().render(new RenderedImageProvider(image), ExposurePixelModifiers.NEGATIVE_FILM,
                 guiGraphics.pose(), bufferSource, 0, 0, width, height, 0, 0, 1, 1,
-                LightTexture.FULL_BRIGHT, type.frameR, type.frameG, type.frameB, 255);
+                LightTexture.FULL_BRIGHT, type.getImageColor().getRed(), type.getImageColor().getGreen(), type.getImageColor().getBlue(), 255);
         bufferSource.endBatch();
 
         guiGraphics.pose().popPose();

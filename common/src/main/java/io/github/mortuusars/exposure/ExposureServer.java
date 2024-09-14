@@ -1,36 +1,38 @@
 package io.github.mortuusars.exposure;
 
-import io.github.mortuusars.exposure.data.storage.IServersideExposureStorage;
-import io.github.mortuusars.exposure.data.storage.ServersideExposureStorage;
-import io.github.mortuusars.exposure.data.transfer.ExposureReceiver;
-import io.github.mortuusars.exposure.data.transfer.ExposureSender;
-import io.github.mortuusars.exposure.data.transfer.IExposureReceiver;
-import io.github.mortuusars.exposure.data.transfer.IExposureSender;
-import io.github.mortuusars.exposure.network.Packets;
+import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.warehouse.server.ServersideExposureSender;
+import io.github.mortuusars.exposure.warehouse.server.ServersideExposureStorage;
+import io.github.mortuusars.exposure.warehouse.server.ServersideExposureReceiver;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.storage.LevelResource;
 
 public class ExposureServer {
-    private static IServersideExposureStorage exposureStorage;
-    private static IExposureSender exposureSender;
-    private static IExposureReceiver exposureReceiver;
+    private static ServersideExposureStorage exposureStorage;
+    private static ServersideExposureSender exposureSender;
+    private static ServersideExposureReceiver exposureReceiver;
+
     public static void init(MinecraftServer server) {
         exposureStorage = new ServersideExposureStorage(server);
-        exposureSender = new ExposureSender((packet, player) -> Packets.sendToClient(packet, ((ServerPlayer) player)),
-                ExposureSender.TO_CLIENT_PACKET_SPLIT_THRESHOLD);
-        exposureReceiver = new ExposureReceiver(exposureStorage);
+        exposureSender = new ServersideExposureSender();
+        exposureReceiver = new ServersideExposureReceiver(exposureStorage);
     }
 
-    public static IServersideExposureStorage getExposureStorage() {
+    public static ServersideExposureStorage exposureStorage() {
         return exposureStorage;
     }
-
-    public static IExposureSender getExposureSender() {
+    public static ServersideExposureSender exposureSender() {
         return exposureSender;
     }
-
-    public static IExposureReceiver getExposureReceiver() {
+    public static ServersideExposureReceiver exposureReceiver() {
         return exposureReceiver;
+    }
+
+    public static ExposureData getExposure(String exposureId) {
+        return exposureStorage().get(exposureId);
+    }
+
+    public static void awaitExposure(String exposureId, ExposureType type, String creator) {
+        exposureReceiver().waitForExposure(exposureId, type, creator);
     }
 }

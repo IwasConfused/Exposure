@@ -4,12 +4,14 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ItemAndStack<T extends Item> {
     private final T item;
     private final ItemStack stack;
 
-    @SuppressWarnings("unchecked")
     public ItemAndStack(ItemStack stack) {
         this.stack = stack;
         this.item = (T) stack.getItem();
@@ -19,7 +21,7 @@ public class ItemAndStack<T extends Item> {
         return item;
     }
 
-    public ItemStack getStack() {
+    public ItemStack getItemStack() {
         return stack;
     }
 
@@ -31,5 +33,49 @@ public class ItemAndStack<T extends Item> {
     @Override
     public String toString() {
         return "ItemAndStack{" + stack.toString() + '}';
+    }
+
+    public static <T extends Item> void executeIfItemMatches(Class<T> c, Item item, Consumer<T> ifMatches) {
+        if (c.isInstance(item)) {
+            //noinspection unchecked
+            ifMatches.accept(((T)item));
+        }
+    }
+
+    public static <T extends Item> void executeIfItemMatches(Class<T> c, Item item, Consumer<T> ifMatches, Runnable ifNot) {
+        if (c.isInstance(item)) {
+            //noinspection unchecked
+            ifMatches.accept(((T)item));
+        }
+        else {
+            ifNot.run();
+        }
+    }
+
+    public static <T extends Item> void executeIfItemMatches(Class<T> c, ItemStack stack, Consumer<T> ifMatches) {
+        if (c.isInstance(stack.getItem())) {
+            //noinspection unchecked
+            ifMatches.accept(((T)stack.getItem()));
+        }
+    }
+
+    public static <T extends Item> void executeIfItemMatches(Class<T> c, ItemStack stack, Consumer<T> ifMatches, Runnable ifNot) {
+        if (c.isInstance(stack.getItem())) {
+            //noinspection unchecked
+            ifMatches.accept(((T)stack.getItem()));
+        }
+        else {
+            ifNot.run();
+        }
+    }
+
+    public static <T extends Item, R> R mapIfItemMatches(Class<T> c, ItemStack stack, Function<T, R> ifMatches, Supplier<R> ifNot) {
+        if (c.isInstance(stack.getItem())) {
+            //noinspection unchecked
+            return ifMatches.apply(((T)stack.getItem()));
+        }
+        else {
+            return ifNot.get();
+        }
     }
 }

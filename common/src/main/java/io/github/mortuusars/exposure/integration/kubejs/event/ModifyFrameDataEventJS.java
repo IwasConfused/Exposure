@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.kubejs.event;
 
-import dev.latvian.mods.kubejs.player.PlayerEventJS;
+import dev.latvian.mods.kubejs.player.KubePlayerEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +12,7 @@ import java.util.List;
  * Can be used to add additional data to the frame or modify existing data. This data can be used in advancements or quests afterward.
  * Fired only on the server side.
  */
-public class ModifyFrameDataEventJS extends PlayerEventJS {
+public class ModifyFrameDataEventJS implements KubePlayerEvent {
     private final Player player;
     private final ItemStack cameraStack;
     private final CompoundTag frame;

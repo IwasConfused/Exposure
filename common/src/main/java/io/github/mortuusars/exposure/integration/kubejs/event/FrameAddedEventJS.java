@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.kubejs.event;
 
-import dev.latvian.mods.kubejs.player.PlayerEventJS;
+import dev.latvian.mods.kubejs.player.KubePlayerEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
  * Fired at the very end of a shot, when frame is added to the film.
  * Fired only on the server side.
  */
-public class FrameAddedEventJS extends PlayerEventJS {
+public class FrameAddedEventJS implements KubePlayerEvent {
     private final Player player;
     private final ItemStack cameraStack;
     private final CompoundTag frame;

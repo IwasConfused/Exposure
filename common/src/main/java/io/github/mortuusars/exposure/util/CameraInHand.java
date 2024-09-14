@@ -29,12 +29,12 @@ public class CameraInHand<T extends CameraItem> extends Camera<T> {
 
     @Override
     public void activate(Player player) {
-        get().getItem().activate(player, get().getStack());
+        get().getItem().activate(player, get().getItemStack());
     }
 
     @Override
     public void deactivate(Player player) {
-        get().getItem().deactivate(player, get().getStack());
+        get().getItem().deactivate(player, get().getItemStack());
     }
 
     @Override

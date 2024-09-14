@@ -1,46 +1,71 @@
 package io.github.mortuusars.exposure.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.camera.infrastructure.FlashMode;
+import io.github.mortuusars.exposure.core.NewCamera;
+import io.github.mortuusars.exposure.core.camera.FlashMode;
+import io.netty.util.collection.IntObjectHashMap;
+import io.netty.util.collection.IntObjectMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.SoundManager;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 public class FlashModeButton extends CycleButton {
+    public static final WidgetSprites FLASH_MODE_OFF_SPRITES = new WidgetSprites(
+            Exposure.resource("camera_controls/flash_mode_off"),
+            Exposure.resource("camera_controls/flash_mode_off_disabled"),
+            Exposure.resource("camera_controls/flash_mode_off_highlighted"));
 
-    private final List<FlashMode> flashModes;
+    public static final Component BASE_TOOLTIP = Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip");
 
-    public FlashModeButton(Screen screen, int x, int y, int width, int height, int u, int v, ResourceLocation texture) {
-        super(screen, x, y, width, height, u, v, height, texture);
-        flashModes = Arrays.stream(FlashMode.values()).toList();
+    public FlashModeButton(int x, int y, int width, int height) {
+        super(x, y, width, height, FlashMode.values().length, getCurrentFlashModeIndex(), true,
+                FLASH_MODE_OFF_SPRITES, createFlashModeSpriteMap(), Tooltip.create(BASE_TOOLTIP), createTooltipMap());
+    }
 
-        Camera<?> camera = CameraClient.getCamera().orElseThrow();
-        FlashMode guide = camera.get().getItem().getFlashMode(camera.get().getStack());
+    private static int getCurrentFlashModeIndex() {
+        Optional<NewCamera> activeCamera = CameraClient.getActiveCamera();
+        return activeCamera.map(newCamera -> newCamera.getItem().getFlashMode(newCamera.getItemStack()).ordinal()).orElse(0);
+    }
 
-        int currentGuideIndex = 0;
+    private static IntObjectMap<WidgetSprites> createFlashModeSpriteMap() {
+        IntObjectMap<WidgetSprites> map = new IntObjectHashMap<>();
 
-        for (int i = 0; i < flashModes.size(); i++) {
-            if (flashModes.get(i).getId().equals(guide.getId())) {
-                currentGuideIndex = i;
-                break;
-            }
+        FlashMode[] modes = FlashMode.values();
+        for (int i = 0; i < modes.length; i++) {
+            FlashMode mode = modes[i];
+            WidgetSprites sprites = new WidgetSprites(
+                    Exposure.resource("camera_controls/flashMode_" + mode.getSerializedName()),
+                    Exposure.resource("camera_controls/flashMode_" + mode.getSerializedName() + "_disabled"),
+                    Exposure.resource("camera_controls/flashMode_" + mode.getSerializedName() + "_highlighted"));
+            map.put(i, sprites);
         }
 
-        setupButtonElements(flashModes.size(), currentGuideIndex);
+        return map;
+    }
+
+    private static IntObjectMap<Tooltip> createTooltipMap() {
+        IntObjectMap<Tooltip> map = new IntObjectHashMap<>();
+
+        FlashMode[] modes = FlashMode.values();
+        for (int i = 0; i < modes.length; i++) {
+            FlashMode mode = modes[i];
+            Component tooltipComponent = BASE_TOOLTIP.copy()
+                    .append(CommonComponents.NEW_LINE)
+                    .append(mode.translate().withStyle(ChatFormatting.GRAY));
+            map.put(i, Tooltip.create(tooltipComponent));
+        }
+
+        return map;
     }
 
     @Override
@@ -50,27 +75,12 @@ public class FlashModeButton extends CycleButton {
     }
 
     @Override
-    public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
-
-        // Icon
-        guiGraphics.blit(Exposure.resource("textures/gui/viewfinder/icon/flash_mode/" + flashModes.get(currentIndex).getId() + ".png"),
-                getX(), getY() + 4, 0, 0, 0, 15, 14, 15, 14);
-    }
-
-    @Override
-    public void renderToolTip(@NotNull GuiGraphics pGuiGraphics, int mouseX, int mouseY) {
-        pGuiGraphics.renderTooltip(Minecraft.getInstance().font, List.of(Component.translatable("gui.exposure.viewfinder.flash_mode.tooltip"),
-                ((MutableComponent) getMessage()).withStyle(ChatFormatting.GRAY)), Optional.empty(), mouseX, mouseY);
-    }
-
-    @Override
     public @NotNull Component getMessage() {
-        return flashModes.get(currentIndex).translate();
+        return FlashMode.values()[currentIndex].translate();
     }
 
     @Override
     protected void onCycle() {
-        CameraClient.setFlashMode(flashModes.get(currentIndex));
+        CameraClient.setFlashMode(FlashMode.values()[currentIndex]);
     }
 }

@@ -2,55 +2,55 @@ package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.data.storage.ClientsideExposureStorage;
-import io.github.mortuusars.exposure.data.storage.IClientsideExposureStorage;
-import io.github.mortuusars.exposure.data.transfer.ExposureReceiver;
-import io.github.mortuusars.exposure.data.transfer.ExposureSender;
-import io.github.mortuusars.exposure.data.transfer.IExposureReceiver;
-import io.github.mortuusars.exposure.data.transfer.IExposureSender;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader;
+import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureCache;
+import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureReceiver;
 import io.github.mortuusars.exposure.item.*;
-import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.render.ExposureRenderer;
+import io.github.mortuusars.exposure.client.render.ExposureRenderer;
+import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.component.DataComponents;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 public class ExposureClient {
-    private static final IClientsideExposureStorage exposureStorage = new ClientsideExposureStorage();
     private static final ExposureRenderer exposureRenderer = new ExposureRenderer();
 
-    private static IExposureSender exposureSender;
-    private static IExposureReceiver exposureReceiver;
+    private static ClientsideExposureCache exposureCache = new ClientsideExposureCache();
+    private static ClientsideExposureUploader exposureSender;
+    private static ClientsideExposureReceiver exposureReceiver;
 
     @Nullable
     private static KeyMapping openCameraControlsKey = null;
 
     public static void init() {
-        exposureSender = new ExposureSender((packet, player) -> Packets.sendToServer(packet), ExposureSender.TO_SERVER_PACKET_SPLIT_THRESHOLD);
-        exposureReceiver = new ExposureReceiver(exposureStorage);
+        exposureCache = new ClientsideExposureCache();
+        exposureSender = new ClientsideExposureUploader();
+        exposureReceiver = new ClientsideExposureReceiver(exposureCache);
 
         registerItemModelProperties();
     }
 
-    public static IClientsideExposureStorage getExposureStorage() {
-        return exposureStorage;
+    public static ClientsideExposureCache exposureCache() {
+        return exposureCache;
     }
-
-    public static IExposureSender getExposureSender() {
+    public static ClientsideExposureUploader exposureUploader() {
         return exposureSender;
     }
-
-    public static IExposureReceiver getExposureReceiver() {
+    public static ClientsideExposureReceiver exposureReceiver() {
         return exposureReceiver;
     }
 
-    public static ExposureRenderer getExposureRenderer() {
+    public static ExposureData getOrQuery(String exposureId) {
+        return exposureCache().getOrQueryAndEmpty(exposureId);
+    }
+
+    public static ExposureRenderer exposureRenderer() {
         return exposureRenderer;
     }
 
@@ -62,23 +62,19 @@ public class ExposureClient {
     }
 
     private static void registerItemModelProperties() {
-        ItemProperties.register(Exposure.Items.CAMERA.get(), new ResourceLocation("camera_state"), CameraItemClientExtensions::itemPropertyFunction);
-        ItemProperties.register(Exposure.Items.CHROMATIC_SHEET.get(), new ResourceLocation("channels"), (stack, clientLevel, livingEntity, seed) ->
+        ItemProperties.register(Exposure.Items.CAMERA.get(), Exposure.resource("camera_state"), CameraItemClientExtensions::itemPropertyFunction);
+        ItemProperties.register(Exposure.Items.CHROMATIC_SHEET.get(), Exposure.resource("channels"), (stack, clientLevel, livingEntity, seed) ->
                 stack.getItem() instanceof ChromaticSheetItem chromaticSheet ?
-                        chromaticSheet.getExposures(stack).size() / 10f : 0f);
-        ItemProperties.register(Exposure.Items.STACKED_PHOTOGRAPHS.get(), new ResourceLocation("count"),
+                        chromaticSheet.getLayers(stack).size() / 10f : 0f);
+        ItemProperties.register(Exposure.Items.STACKED_PHOTOGRAPHS.get(), Exposure.resource("count"),
                 (stack, clientLevel, livingEntity, seed) ->
                         stack.getItem() instanceof StackedPhotographsItem stackedPhotographsItem ?
-                                stackedPhotographsItem.getPhotographsCount(stack) / 100f : 0f);
-        ItemProperties.register(Exposure.Items.ALBUM.get(), new ResourceLocation("photos"),
+                                stackedPhotographsItem.getPhotographs(stack).size() / 100f : 0f);
+        ItemProperties.register(Exposure.Items.ALBUM.get(), Exposure.resource("photos"),
                 (stack, clientLevel, livingEntity, seed) ->
                         stack.getItem() instanceof AlbumItem albumItem ? albumItem.getPhotographsCount(stack) / 100f : 0f);
-        ItemProperties.register(Exposure.Items.INTERPLANAR_PROJECTOR.get(), new ResourceLocation("active"),
-                (stack, clientLevel, livingEntity, seed) -> stack.hasCustomHoverName() ? 1f : 0f);
-    }
-
-    public static void onScreenAdded(Screen screen) {
-
+        ItemProperties.register(Exposure.Items.INTERPLANAR_PROJECTOR.get(), Exposure.resource("active"),
+                (stack, clientLevel, livingEntity, seed) -> stack.has(DataComponents.CUSTOM_NAME) ? 1f : 0f);
     }
 
     public static KeyMapping getCameraControlsKey() {
@@ -94,18 +90,18 @@ public class ExposureClient {
 
     public static class Models {
         public static final ModelResourceLocation CAMERA_GUI =
-                new ModelResourceLocation(Exposure.ID, "camera_gui", "inventory");
+                new ModelResourceLocation(Exposure.resource("camera_gui"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_SMALL =
-                new ModelResourceLocation(Exposure.ID, "photograph_frame_small", "");
+                new ModelResourceLocation(Exposure.resource("photograph_frame_small"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_SMALL_STRIPPED =
-                new ModelResourceLocation(Exposure.ID, "photograph_frame_small_stripped", "");
+                new ModelResourceLocation(Exposure.resource("photograph_frame_small_stripped"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_MEDIUM =
-                new ModelResourceLocation(Exposure.ID, "photograph_frame_medium", "");
+                new ModelResourceLocation(Exposure.resource("photograph_frame_medium"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_MEDIUM_STRIPPED =
-                new ModelResourceLocation(Exposure.ID, "photograph_frame_medium_stripped", "");
+                new ModelResourceLocation(Exposure.resource("photograph_frame_medium_stripped"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_LARGE =
-                new ModelResourceLocation(Exposure.ID, "photograph_frame_large", "");
+                new ModelResourceLocation(Exposure.resource("photograph_frame_large"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_LARGE_STRIPPED =
-                new ModelResourceLocation(Exposure.ID, "photograph_frame_large_stripped", "");
+                new ModelResourceLocation(Exposure.resource("photograph_frame_large_stripped"), "standalone");
     }
 }

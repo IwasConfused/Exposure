@@ -1,28 +1,22 @@
 package io.github.mortuusars.exposure.camera.capture;
 
 import com.google.common.collect.ImmutableList;
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.infrastructure.FrameData;
-import net.minecraft.nbt.CompoundTag;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@SuppressWarnings("unused")
 public class CapturedFramesHistory {
     
-    private static final ArrayList<CompoundTag> lastExposures = new ArrayList<>();
+    private static final ArrayList<ExposureFrame> lastExposures = new ArrayList<>();
     private static int limit = 32;
 
-    public static List<CompoundTag> get() {
+    public static List<ExposureFrame> get() {
         return ImmutableList.copyOf(lastExposures);
     }
 
-    public static void add(CompoundTag frame) {
-        if (frame.getString(FrameData.ID).isEmpty())
-            Exposure.LOGGER.warn("{} - frame might not be valid. No ID is present.", frame);
-
-        lastExposures.add(0, frame);
+    public static void add(ExposureFrame frame) {
+        lastExposures.addFirst(frame);
 
         while (lastExposures.size() > limit) {
             lastExposures.remove(limit);

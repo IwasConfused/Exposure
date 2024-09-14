@@ -5,17 +5,15 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.command.suggestion.ExposureIdSuggestionProvider;
-import io.github.mortuusars.exposure.data.storage.ExposureSavedData;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.client.ShowExposureS2CP;
+import io.github.mortuusars.exposure.network.packet.client.ShowExposureCommandS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
-
-import java.util.Optional;
 
 public class ShowCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> get() {
@@ -48,7 +46,7 @@ public class ShowCommand {
             return 1;
         }
 
-        Packets.sendToClient(ShowExposureS2CP.latest(negative), player);
+        Packets.sendToClient(ShowExposureCommandS2CP.latest(negative), player);
         return 0;
     }
 
@@ -59,15 +57,15 @@ public class ShowCommand {
             return 1;
         }
 
-        Optional<ExposureSavedData> exposureData = ExposureServer.getExposureStorage().getOrQuery(id);
-        if (exposureData.isEmpty()) {
+        ExposureData exposureData = ExposureServer.exposureStorage().get(id);
+        if (exposureData.equals(ExposureData.EMPTY)) {
             stack.sendFailure(Component.translatable("command.exposure.show.error.not_found", id));
             return 0;
         }
 
-        ExposureServer.getExposureSender().sendTo(player, id, exposureData.get());
+        ExposureServer.exposureSender().sendTo(id, exposureData, player);
 
-        Packets.sendToClient(ShowExposureS2CP.id(id, negative), player);
+        Packets.sendToClient(ShowExposureCommandS2CP.id(id, negative), player);
 
         return 0;
     }
@@ -79,7 +77,7 @@ public class ShowCommand {
             return 1;
         }
 
-        Packets.sendToClient(ShowExposureS2CP.texture(path.toString(), negative), player);
+        Packets.sendToClient(ShowExposureCommandS2CP.texture(path, negative), player);
 
         return 0;
     }

@@ -34,7 +34,7 @@ public class DitheringColorConverter implements IImageToMapColorsConverter {
 //        int height = image.getHeight();
 //        MapColor[] mapColors = Arrays.stream(getMapColors()).filter(Objects::nonNull).toArray(MapColor[]::new);
 //
-//        byte[] bytes = new byte[width * height];
+//        byte[] partBytes = new byte[width * height];
 //
 //        for (int x = 0; x < width; x++) {
 //            for (int y = 0; y < height; y++) {
@@ -43,13 +43,13 @@ public class DitheringColorConverter implements IImageToMapColorsConverter {
 //                byte b = (byte) floydDither(mapColors, pixels, x, y, imageColor);
 //
 //                if (imageColor.getAlpha() == 0)
-//                    b = (byte)MapColor.NONE.id;
+//                    b = (byte)MapColor.NONE.exposureId;
 //
-//                bytes[x + y * width] = b;
+//                partBytes[x + y * width] = b;
 //            }
 //        }
 //
-//        return bytes;
+//        return partBytes;
     }
 
     public byte[] convert(int[][] pixels) {

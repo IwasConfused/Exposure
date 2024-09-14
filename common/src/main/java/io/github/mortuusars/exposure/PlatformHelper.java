@@ -1,8 +1,10 @@
 package io.github.mortuusars.exposure;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
@@ -24,7 +26,7 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static void openMenu(ServerPlayer serverPlayer, MenuProvider menuProvider, Consumer<FriendlyByteBuf> extraDataWriter) {
+    public static void openMenu(ServerPlayer serverPlayer, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataWriter) {
         throw new AssertionError();
     }
 
@@ -50,12 +52,12 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static void fireModifyFrameDataEvent(ServerPlayer player, ItemStack cameraStack, CompoundTag frame, List<Entity> entitiesInFrame) {
+    public static void fireModifyFrameDataEvent(ServerPlayer player, ItemStack cameraStack, ExposureFrame.Mutable frame, List<Entity> entitiesInFrame) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static void fireFrameAddedEvent(ServerPlayer player, ItemStack cameraStack, CompoundTag frame) {
+    public static void fireFrameAddedEvent(ServerPlayer player, ItemStack cameraStack, ExposureFrame frame) {
         throw new AssertionError();
     }
 }

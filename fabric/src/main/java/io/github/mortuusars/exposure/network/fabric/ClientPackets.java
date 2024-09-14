@@ -1,46 +1,34 @@
 package io.github.mortuusars.exposure.network.fabric;
 
-import io.github.mortuusars.exposure.network.PacketDirection;
-import io.github.mortuusars.exposure.network.packet.ExposureDataPartPacket;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.client.*;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientPacketListener;
-import net.minecraft.network.FriendlyByteBuf;
-
-import java.util.function.Function;
+import net.minecraft.network.protocol.PacketFlow;
 
 public class ClientPackets {
     public static void registerS2CPackets() {
-        ClientPlayNetworking.registerGlobalReceiver(ExposureDataPartPacket.ID, new ClientHandler(ExposureDataPartPacket::fromBuffer));
+        ClientPlayNetworking.registerGlobalReceiver(ApplyShaderS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(ClearRenderingCacheS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(CreateChromaticExposureS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(ExposeCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(ExposureChangedS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(ExposureDataPartS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(ExposureDataS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(LoadExposureFromFileCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(OnFrameAddedS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(PlayOnePerPlayerSoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(ShowExposureCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(StartExposureS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(StopOnePerPlayerSoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(SyncLensesDataS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(WaitForExposureChangeS2CP.TYPE, ClientPackets::handleClientboundPacket);
+    }
 
-        ClientPlayNetworking.registerGlobalReceiver(ApplyShaderS2CP.ID, new ClientHandler(ApplyShaderS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(StartExposureS2CP.ID, new ClientHandler(StartExposureS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(LoadExposureCommandS2CP.ID, new ClientHandler(LoadExposureCommandS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(ShowExposureS2CP.ID, new ClientHandler(ShowExposureS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(ExposeCommandS2CP.ID, new ClientHandler(ExposeCommandS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(PlayOnePerPlayerSoundS2CP.ID, new ClientHandler(PlayOnePerPlayerSoundS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(StopOnePerPlayerSoundS2CP.ID, new ClientHandler(StopOnePerPlayerSoundS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(ClearRenderingCacheS2CP.ID, new ClientHandler(ClearRenderingCacheS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(SyncLensesS2CP.ID, new ClientHandler(SyncLensesS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(ExposureChangedS2CP.ID, new ClientHandler(ExposureChangedS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(WaitForExposureChangeS2CP.ID, new ClientHandler(WaitForExposureChangeS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(OnFrameAddedS2CP.ID, new ClientHandler(OnFrameAddedS2CP::fromBuffer));
-        ClientPlayNetworking.registerGlobalReceiver(CreateChromaticExposureS2CP.ID, new ClientHandler(CreateChromaticExposureS2CP::fromBuffer));
+    private static <T extends IPacket> void handleClientboundPacket(T payload, ClientPlayNetworking.Context context) {
+        payload.handle(PacketFlow.CLIENTBOUND, context.player());
     }
 
     public static void sendToServer(IPacket packet) {
-        ClientPlayNetworking.send(packet.getId(), packet.toBuffer(PacketByteBufs.create()));
-    }
-
-    private record ClientHandler(Function<FriendlyByteBuf, IPacket> decodeFunction) implements ClientPlayNetworking.PlayChannelHandler {
-        @Override
-        public void receive(Minecraft client, ClientPacketListener handler, FriendlyByteBuf buf, PacketSender responseSender) {
-            IPacket packet = decodeFunction.apply(buf);
-            packet.handle(PacketDirection.TO_CLIENT, null);
-        }
+        ClientPlayNetworking.send(packet);
     }
 }

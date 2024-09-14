@@ -1,13 +1,13 @@
 package io.github.mortuusars.exposure.fabric;
 
-import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
-import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
+import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.command.ExposureCommand;
 import io.github.mortuusars.exposure.command.ShaderCommand;
 import io.github.mortuusars.exposure.command.TestCommand;
-import io.github.mortuusars.exposure.data.Lenses;
+import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.fabric.integration.create.CreateFilmDeveloping;
 import io.github.mortuusars.exposure.fabric.resources.FabricLensesDataLoader;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
@@ -16,29 +16,28 @@ import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.fabricmc.fabric.api.loot.v2.LootTableEvents;
-import net.fabricmc.fabric.api.loot.v2.LootTableSource;
+import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
+import net.fabricmc.fabric.api.loot.v3.LootTableSource;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
-import net.minecraft.world.level.storage.loot.LootDataManager;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.entries.LootTableReference;
-import net.minecraftforge.fml.config.ModConfig;
+import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
+import net.neoforged.fml.config.ModConfig;
 
 public class ExposureFabric implements ModInitializer {
     @Override
     public void onInitialize() {
         Exposure.init();
 
-        ModConfigEvents.reloading(Exposure.ID).register(config -> {
+        NeoForgeModConfigEvents.reloading(Exposure.ID).register(config -> {
             if (config.getType() == ModConfig.Type.COMMON && FabricLoader.getInstance().isModLoaded("create")) {
-                CreateFilmDeveloping.clearCachedData();
+//                CreateFilmDeveloping.clearCachedData();
             }
 
             if (config.getType() == ModConfig.Type.CLIENT) {
@@ -46,8 +45,8 @@ public class ExposureFabric implements ModInitializer {
             }
         });
 
-        ForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.COMMON, Config.Common.SPEC);
-        ForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.CLIENT, Config.Client.SPEC);
+        NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.COMMON, Config.Common.SPEC);
+        NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.CLIENT, Config.Client.SPEC);
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             ExposureCommand.register(dispatcher);
@@ -73,7 +72,6 @@ public class ExposureFabric implements ModInitializer {
             content.accept(Exposure.Items.LIGHTROOM.get());
         });
 
-        Exposure.Advancements.register();
         Exposure.Stats.register();
 
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricLensesDataLoader());
@@ -91,34 +89,34 @@ public class ExposureFabric implements ModInitializer {
         PacketsImpl.registerC2SPackets();
     }
 
-    private static void modifyLoot(ResourceManager resourceManager, LootDataManager manager,
-                                   ResourceLocation table, LootTable.Builder builder, LootTableSource source) {
+    private static void modifyLoot(ResourceKey<LootTable> tableKey, LootTable.Builder builder,
+                                   LootTableSource source, HolderLookup.Provider provider) {
         if (!Config.Common.LOOT_ADDITION.get() || !source.isBuiltin())
             return;
 
-        if (BuiltInLootTables.SIMPLE_DUNGEON.equals(table)) {
+        if (BuiltInLootTables.SIMPLE_DUNGEON.equals(tableKey)) {
             builder.pool(LootPool.lootPool()
-                    .add(LootTableReference.lootTableReference(Exposure.resource("chests/simple_dungeon")))
+                    .add(NestedLootTable.lootTableReference(Exposure.LootTables.SIMPLE_DUNGEON_INJECT))
                     .build());
         }
-        if (BuiltInLootTables.ABANDONED_MINESHAFT.equals(table)) {
+        if (BuiltInLootTables.ABANDONED_MINESHAFT.equals(tableKey)) {
             builder.pool(LootPool.lootPool()
-                    .add(LootTableReference.lootTableReference(Exposure.resource("chests/abandoned_mineshaft")))
+                    .add(NestedLootTable.lootTableReference(Exposure.LootTables.ABANDONED_MINESHAFT_INJECT))
                     .build());
         }
-        if (BuiltInLootTables.STRONGHOLD_CROSSING.equals(table)) {
+        if (BuiltInLootTables.STRONGHOLD_CROSSING.equals(tableKey)) {
             builder.pool(LootPool.lootPool()
-                    .add(LootTableReference.lootTableReference(Exposure.resource("chests/stronghold")))
+                    .add(NestedLootTable.lootTableReference(Exposure.LootTables.STRONGHOLD_CROSSING_INJECT))
                     .build());
         }
-        if (BuiltInLootTables.VILLAGE_PLAINS_HOUSE.equals(table)) {
+        if (BuiltInLootTables.VILLAGE_PLAINS_HOUSE.equals(tableKey)) {
             builder.pool(LootPool.lootPool()
-                    .add(LootTableReference.lootTableReference(Exposure.resource("chests/village_plains_house")))
+                    .add(NestedLootTable.lootTableReference(Exposure.LootTables.VILLAGE_PLAINS_HOUSE_INJECT))
                     .build());
         }
-        if (BuiltInLootTables.SHIPWRECK_MAP.equals(table)) {
+        if (BuiltInLootTables.SHIPWRECK_MAP.equals(tableKey)) {
             builder.pool(LootPool.lootPool()
-                    .add(LootTableReference.lootTableReference(Exposure.resource("chests/shipwreck_map")))
+                    .add(NestedLootTable.lootTableReference(Exposure.LootTables.SHIPWRECK_MAP_INJECT))
                     .build());
         }
     }
