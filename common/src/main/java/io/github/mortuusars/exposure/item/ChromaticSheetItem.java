@@ -90,6 +90,9 @@ public class ChromaticSheetItem extends Item {
             if (exposures.size() >= 3) {
                 tooltipComponents.add(Component.translatable("item.exposure.chromatic_sheet.use_tooltip").withStyle(ChatFormatting.GRAY));
             }
+            else {
+                tooltipComponents.add(Component.translatable("item.exposure.chromatic_sheet.info").withStyle(ChatFormatting.GRAY));
+            }
         }
     }
 

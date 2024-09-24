@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.7.7 - 2024-09-24
+- Added small tooltip clarifications about using Interplanar Projector and Chromatic Sheet.
+- Added Turkish and German translations.
+- 1.21 is being worked on. Don't panic.
+
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.
 - Added es_es lang.
