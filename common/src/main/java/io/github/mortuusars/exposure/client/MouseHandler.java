@@ -4,8 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.Camera;
-import io.github.mortuusars.exposure.gui.ClientGUI;
-import io.github.mortuusars.exposure.gui.screen.camera.CameraControlsScreen;
+import io.github.mortuusars.exposure.client.gui.ClientGUI;
+import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 

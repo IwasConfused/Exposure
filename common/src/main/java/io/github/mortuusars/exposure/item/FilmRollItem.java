@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.gui.ClientGUI;
+import io.github.mortuusars.exposure.client.gui.ClientGUI;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.ItemRenameMenu;
 import net.minecraft.ChatFormatting;

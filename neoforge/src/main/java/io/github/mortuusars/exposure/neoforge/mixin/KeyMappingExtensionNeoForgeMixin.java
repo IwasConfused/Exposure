@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.mixin;
 
-import io.github.mortuusars.exposure.gui.screen.camera.CameraControlsScreen;
+import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import net.minecraft.client.Minecraft;
 import net.neoforged.neoforge.client.extensions.IKeyMappingExtension;
 import org.spongepowered.asm.mixin.Mixin;

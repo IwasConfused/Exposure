@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.core.NewCamera;
 import io.github.mortuusars.exposure.core.camera.AttachmentType;
-import io.github.mortuusars.exposure.gui.screen.camera.CameraControlsScreen;
+import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.util.GuiUtil;

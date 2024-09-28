@@ -15,6 +15,8 @@ public class ExposureIdSuggestionProvider implements SuggestionProvider<CommandS
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
         List<String> ids = ExposureServer.exposureStorage().getAllExposureIds();
+        // I wanted to add ID sorting by gameTime, but suggestions are sorted alphabetically down the line anyway.
+        // It can be done probably, but it's not worth the hassle
         return SharedSuggestionProvider.suggest(ids, builder);
     }
 }

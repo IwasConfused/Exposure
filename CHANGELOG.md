@@ -1,5 +1,8 @@
 # Changelog
 
+## UNRELEASED 1.21
+- Added `/exposure debug develop_film_in_hand` command.
+
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.
 - Added es_es lang.
