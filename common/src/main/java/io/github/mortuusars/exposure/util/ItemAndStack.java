@@ -3,10 +3,7 @@ package io.github.mortuusars.exposure.util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 
 public class ItemAndStack<T extends Item> {
     private final T item;
@@ -28,6 +25,10 @@ public class ItemAndStack<T extends Item> {
     public ItemAndStack<T> apply(BiConsumer<T, ItemStack> function) {
         function.accept(item, stack);
         return this;
+    }
+
+    public <R> R map(BiFunction<T, ItemStack, R> mappingFunction) {
+        return mappingFunction.apply(item, stack);
     }
 
     @Override

@@ -6,7 +6,7 @@ import com.mojang.serialization.DataResult;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
-import io.github.mortuusars.exposure.client.gui.component.PhotographTooltip;
+import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

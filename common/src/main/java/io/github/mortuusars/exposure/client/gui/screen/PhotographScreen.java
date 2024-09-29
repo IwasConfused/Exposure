@@ -99,6 +99,7 @@ public class PhotographScreen extends Screen {
         zoom.update();
         scale = zoom.get() * zoomFactor;
 
+//        renderTransparentBackground(guiGraphics);
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(0, 0, 500); // Otherwise exposure will overlap buttons
         RenderSystem.enableBlend();
@@ -109,7 +110,7 @@ public class PhotographScreen extends Screen {
         guiGraphics.pose().pushPose();
 
         guiGraphics.pose().translate(x, y, 0);
-        guiGraphics.pose().translate(width / 2f, height / 2f, 0);
+        guiGraphics.pose().translate(width / 2f, height / 2f, 10);
         guiGraphics.pose().scale(scale, scale, scale);
         guiGraphics.pose().translate(ExposureClient.exposureRenderer().getSize() / -2f, ExposureClient.exposureRenderer().getSize() / -2f, 0);
 

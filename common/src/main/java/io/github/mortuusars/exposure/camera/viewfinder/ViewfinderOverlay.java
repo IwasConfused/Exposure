@@ -25,8 +25,8 @@ import java.util.Optional;
 
 public class ViewfinderOverlay {
     public static final ResourceLocation VIEWFINDER_TEXTURE = Exposure.resource("textures/gui/viewfinder/viewfinder.png");
-    public static final ResourceLocation NO_FILM_ICON_TEXTURE = Exposure.resource("textures/gui/viewfinder/icon/no_film.png");
-    public static final ResourceLocation REMAINING_FRAMES_ICON_TEXTURE = Exposure.resource("textures/gui/viewfinder/icon/remaining_frames.png");
+    public static final ResourceLocation NO_FILM_ICON_TEXTURE = Exposure.resource("textures/gui/viewfinder/no_film_icon.png");
+    public static final ResourceLocation REMAINING_FRAMES_ICON_TEXTURE = Exposure.resource("textures/gui/viewfinder/remaining_frames_icon.png");
 
     public static Rect2f opening = new Rect2f(0, 0, 0, 0);
 

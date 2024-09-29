@@ -1,8 +1,9 @@
-package io.github.mortuusars.exposure.client.gui.component;
+package io.github.mortuusars.exposure.client.gui.tooltip;
 
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.client.render.PhotographRenderer;
+import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -15,12 +16,14 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class PhotographTooltip implements ClientTooltipComponent, TooltipComponent {
+public class PhotographClientTooltip implements ClientTooltipComponent {
     public static final int SIZE = 72;
-    private final List<ItemAndStack<PhotographItem>> photographs;
+    protected final PhotographTooltip tooltip;
+    protected final List<ItemAndStack<PhotographItem>> photographs;
 
-    public PhotographTooltip(List<ItemAndStack<PhotographItem>> photographs) {
-        this.photographs = photographs;
+    public PhotographClientTooltip(PhotographTooltip tooltip) {
+        this.tooltip = tooltip;
+        this.photographs = tooltip.photographs();
     }
 
     @Override

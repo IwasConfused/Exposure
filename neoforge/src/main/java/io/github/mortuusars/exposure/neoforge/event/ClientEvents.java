@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
 import io.github.mortuusars.exposure.client.MouseHandler;
 import io.github.mortuusars.exposure.data.filter.Filters;
-import io.github.mortuusars.exposure.client.gui.component.PhotographTooltip;
+import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
 import io.github.mortuusars.exposure.client.gui.screen.ItemRenameScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
@@ -17,6 +17,7 @@ import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsS
 import io.github.mortuusars.exposure.client.gui.screen.LightroomScreen;
 import io.github.mortuusars.exposure.client.render.ItemFramePhotographRenderer;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
+import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -49,7 +50,7 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void registerTooltipComponents(RegisterClientTooltipComponentFactoriesEvent event) {
-            event.register(PhotographTooltip.class, photographTooltip -> photographTooltip);
+            event.register(PhotographTooltip.class, PhotographClientTooltip::new);
         }
 
         @SubscribeEvent

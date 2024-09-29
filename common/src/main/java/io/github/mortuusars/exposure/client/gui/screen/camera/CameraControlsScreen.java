@@ -6,29 +6,41 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.client.gui.Tooltips;
+import io.github.mortuusars.exposure.client.gui.Widgets;
+import io.github.mortuusars.exposure.client.gui.component.CycleButton1;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.CameraAccessors;
 import io.github.mortuusars.exposure.core.NewCamera;
-import io.github.mortuusars.exposure.core.camera.AttachmentType;
-import io.github.mortuusars.exposure.core.camera.ZoomDirection;
+import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderOverlay;
 import io.github.mortuusars.exposure.client.MouseHandler;
+import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
+import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class CameraControlsScreen extends Screen {
     public static final WidgetSprites SHUTTER_SPEED_SPRITES = new WidgetSprites(
@@ -46,15 +58,22 @@ public class CameraControlsScreen extends Screen {
             Exposure.resource("camera_controls/frame_counter_disabled"),
             Exposure.resource("camera_controls/frame_counter_highlighted"));
 
+    public static final ResourceLocation SEPARATOR_SPRITE = Exposure.resource("camera_controls/button_separator");
+
     public static final WidgetSprites SEPARATOR_SPRITES = new WidgetSprites(
             Exposure.resource("camera_controls/button_separator"),
             Exposure.resource("camera_controls/button_separator"));
     public static final int SEPARATOR_WIDTH = 1;
+    private static final int BUTTON_HEIGHT = 18;
+    private static final int SIDE_BUTTONS_WIDTH = 48;
+    private static final int BUTTON_WIDTH = 15;
 
     private final Player player;
     private final ClientLevel level;
     private final long openedAtTimestamp;
     private final NewCamera camera;
+    private int leftPos;
+    private int topPos;
 
     public CameraControlsScreen() {
         super(Component.empty());
@@ -83,30 +102,29 @@ public class CameraControlsScreen extends Screen {
         super.init();
         refreshMovementKeys();
 
-        int leftPos = (width - 256) / 2;
-        int topPos = Math.round(ViewfinderOverlay.opening.y + ViewfinderOverlay.opening.height - 256);
+        leftPos = (width - 256) / 2;
+        topPos = Math.round(ViewfinderOverlay.opening.y + ViewfinderOverlay.opening.height - 256);
 
-        boolean hasFlash = !camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FLASH).isEmpty();
+        boolean hasFlash = camera.getItem().hasFlash(camera.getItemStack());
 
-        int sideButtonsWidth = 48;
-        int buttonWidth = 15;
-
-        int elementX = leftPos + 128 - (sideButtonsWidth + 1 + buttonWidth + 1 + (hasFlash ? buttonWidth + 1 : 0) + sideButtonsWidth) / 2;
+        int elementX = leftPos + 128 - (SIDE_BUTTONS_WIDTH + 1 + BUTTON_WIDTH + 1 + (hasFlash ? BUTTON_WIDTH + 1 : 0) + SIDE_BUTTONS_WIDTH) / 2;
         int elementY = topPos + 238;
 
         // Order of adding influences TAB key behavior
 
-        ShutterSpeedButton shutterSpeedButton = new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, SHUTTER_SPEED_SPRITES);
+        Button shutterSpeedButton = createShutterSpeedButton();
         addRenderableWidget(shutterSpeedButton);
 
-        FocalLengthButton focalLengthButton = new FocalLengthButton(elementX, elementY, 48, 18, FOCAL_LENGTH_SPRITES);
+        FocalLengthButton focalLengthButton = new FocalLengthButton(elementX, elementY, SIDE_BUTTONS_WIDTH, BUTTON_HEIGHT, FOCAL_LENGTH_SPRITES);
         addRenderableOnly(focalLengthButton);
         elementX += focalLengthButton.getWidth();
 
         addSeparator(elementX, elementY);
         elementX += SEPARATOR_WIDTH;
 
-        CompositionGuideButton compositionGuideButton = new CompositionGuideButton(elementX, elementY, 15, 18);
+        Button compositionGuideButton = createCompositionGuideButton();
+        compositionGuideButton.setX(elementX);
+        compositionGuideButton.setY(elementY);
         addRenderableWidget(compositionGuideButton);
         elementX += compositionGuideButton.getWidth();
 
@@ -114,7 +132,9 @@ public class CameraControlsScreen extends Screen {
         elementX += SEPARATOR_WIDTH;
 
         if (hasFlash) {
-            FlashModeButton flashModeButton = new FlashModeButton(elementX, elementY, 15, 18);
+            Button flashModeButton = createFlashModeButton();
+            flashModeButton.setX(elementX);
+            flashModeButton.setY(elementY);
             addRenderableWidget(flashModeButton);
             elementX += flashModeButton.getWidth();
 
@@ -122,8 +142,57 @@ public class CameraControlsScreen extends Screen {
             elementX += SEPARATOR_WIDTH;
         }
 
-        FrameCounterButton frameCounterButton = new FrameCounterButton(elementX, elementY, 48, 18, FRAME_COUNTER_SPRITES);
+        FrameCounterButton frameCounterButton = new FrameCounterButton(elementX, elementY, SIDE_BUTTONS_WIDTH, BUTTON_HEIGHT, FRAME_COUNTER_SPRITES);
         addRenderableOnly(frameCounterButton);
+    }
+
+    protected @NotNull Button createShutterSpeedButton() {
+        List<ShutterSpeed> shutterSpeeds = CameraClient.getActiveCamera()
+                .map(camera -> camera.getItem().getShutterSpeeds(camera.getItemStack()))
+                .orElse(List.of(ShutterSpeed.DEFAULT));
+        ShutterSpeed currentShutterSpeed = CameraClient.getActiveCamera()
+                .map(camera -> camera.getItem().getShutterSpeed(camera.getItemStack()))
+                .orElse(ShutterSpeed.DEFAULT);
+
+        return new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, shutterSpeeds,
+                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> CameraClient.setShutterSpeed(speed))
+                .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.shutter_speed.tooltip")))
+                .setTooltips(Collections.emptyMap())
+                .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
+    }
+
+    protected @NotNull Button createCompositionGuideButton() {
+        List<CompositionGuide> guides = CompositionGuides.getGuides();
+        CompositionGuide currentGuide = CameraClient.getActiveCamera()
+                .map(camera -> camera.getItem().getCompositionGuide(camera.getItemStack()))
+                .orElse(CompositionGuides.NONE);
+        Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(
+                Exposure.resource("camera_controls/composition_guide/" + guide.name()));
+
+        return new CycleButton1<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
+                currentGuide, spritesFunc, (b, guide) -> CameraClient.setCompositionGuide(guide))
+                .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")))
+                .setTooltips(guide -> Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")
+                        .append(CommonComponents.NEW_LINE)
+                        .append(guide.translate().withStyle(ChatFormatting.GRAY)))
+                .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
+    }
+
+    protected @NotNull Button createFlashModeButton() {
+        List<FlashMode> modes = Arrays.asList(FlashMode.values());
+        FlashMode currentMode = CameraClient.getActiveCamera()
+                .map(camera -> camera.getItem().getFlashMode(camera.getItemStack()))
+                .orElse(FlashMode.OFF);
+        Function<FlashMode, WidgetSprites> spritesFunc = mode -> Widgets.threeStateSprites(
+                Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
+
+        return new CycleButton1<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
+                currentMode, spritesFunc, (b, mode) -> CameraClient.setFlashMode(mode))
+                .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")))
+                .setTooltips(mode -> Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")
+                        .append(CommonComponents.NEW_LINE)
+                        .append(mode.translate().withStyle(ChatFormatting.GRAY)))
+                .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
     }
 
     protected boolean cameraHasAvailableFrames() {
@@ -137,7 +206,10 @@ public class CameraControlsScreen extends Screen {
     }
 
     protected void addSeparator(int x, int y) {
-        addRenderableOnly(new ImageButton(x, y, 1, 18, SEPARATOR_SPRITES, pButton -> {}));
+        ImageWidget sprite = ImageWidget.sprite(SEPARATOR_WIDTH, BUTTON_HEIGHT, SEPARATOR_SPRITE);
+        sprite.setX(x);
+        sprite.setY(y);
+        addRenderableOnly(sprite);
     }
 
     /**

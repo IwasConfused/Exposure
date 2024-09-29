@@ -20,31 +20,18 @@ public enum FlashMode implements StringRepresentable {
     public static final StreamCodec<ByteBuf, FlashMode> STREAM_CODEC = ByteBufCodecs.idMapper(
             ByIdMap.continuous(FlashMode::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO), FlashMode::ordinal);
 
-    private final String id;
+    private final String name;
 
-    FlashMode(String id) {
-        this.id = id;
-    }
-
-    public static FlashMode byIdOrOff(String id) {
-        for (FlashMode guide : values()) {
-            if (guide.id.equals(id))
-                return guide;
-        }
-
-        return OFF;
-    }
-
-    public String getId() {
-        return id;
+    FlashMode(String name) {
+        this.name = name;
     }
 
     @Override
     public @NotNull String getSerializedName() {
-        return id;
+        return name;
     }
 
     public MutableComponent translate() {
-        return Component.translatable("gui." + Exposure.ID + ".flash_mode." + id);
+        return Component.translatable("gui." + Exposure.ID + ".flash_mode." + name);
     }
 }

@@ -98,20 +98,20 @@ public class CameraItem extends Item {
 
     protected List<ShutterSpeed> defineShutterSpeeds() {
         return List.of(
-                new ShutterSpeed("15\""),
-                new ShutterSpeed("8\""),
-                new ShutterSpeed("4\""),
-                new ShutterSpeed("2\""),
-                new ShutterSpeed("1\""),
-                new ShutterSpeed("1/2"),
-                new ShutterSpeed("1/4"),
-                new ShutterSpeed("1/8"),
-                new ShutterSpeed("1/15"),
-                new ShutterSpeed("1/30"),
-                new ShutterSpeed("1/60"),
-                new ShutterSpeed("1/125"),
+                new ShutterSpeed("1/500"),
                 new ShutterSpeed("1/250"),
-                new ShutterSpeed("1/500")
+                new ShutterSpeed("1/125"),
+                new ShutterSpeed("1/60"),
+                new ShutterSpeed("1/30"),
+                new ShutterSpeed("1/15"),
+                new ShutterSpeed("1/8"),
+                new ShutterSpeed("1/4"),
+                new ShutterSpeed("1/2"),
+                new ShutterSpeed("1\""),
+                new ShutterSpeed("2\""),
+                new ShutterSpeed("4\""),
+                new ShutterSpeed("8\""),
+                new ShutterSpeed("15\"")
         );
     }
 
@@ -831,7 +831,7 @@ public class CameraItem extends Item {
     }
 
     protected boolean shouldFlashFire(Player player, ItemStack cameraStack, int lightLevel) {
-        if (getAttachment(cameraStack, AttachmentType.FLASH).isEmpty())
+        if (!hasFlash(cameraStack))
             return false;
 
         return switch (getFlashMode(cameraStack)) {
@@ -1043,6 +1043,10 @@ public class CameraItem extends Item {
         } else {
             stack.set(type.componentType(), new StoredItemStack(attachmentStack));
         }
+    }
+
+    public boolean hasFlash(ItemStack stack) {
+        return !getAttachment(stack, AttachmentType.FLASH).isEmpty();
     }
 
     public ShutterSpeed getShutterSpeed(ItemStack stack) {

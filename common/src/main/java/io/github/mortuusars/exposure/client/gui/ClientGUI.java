@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+//TODO: Redesign. Maybe put methods in ExposureClient
 public class ClientGUI {
     public static final WidgetSprites EMPTY_SPRITES = new WidgetSprites(Exposure.resource("empty"), Exposure.resource("empty"));
 

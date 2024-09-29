@@ -5,12 +5,13 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.fabric.resources.ExposureFabricClientReloadListener;
 import io.github.mortuusars.exposure.fabric.resources.FabricFiltersLoader;
-import io.github.mortuusars.exposure.client.gui.component.PhotographTooltip;
+import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
 import io.github.mortuusars.exposure.client.gui.screen.ItemRenameScreen;
 import io.github.mortuusars.exposure.client.gui.screen.LightroomScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsScreen;
+import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.network.fabric.PacketsImpl;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -50,7 +51,8 @@ public class ExposureFabricClient implements ClientModInitializer {
 
         EntityRendererRegistry.register(Exposure.EntityTypes.PHOTOGRAPH_FRAME.get(), PhotographFrameEntityRenderer::new);
 
-        TooltipComponentCallback.EVENT.register(data -> data instanceof PhotographTooltip photographTooltip ? photographTooltip : null);
+        TooltipComponentCallback.EVENT.register(data -> data instanceof PhotographTooltip photographTooltip
+                ? new PhotographClientTooltip(photographTooltip) : null);
         ClientTickEvents.END_CLIENT_TICK.register(client -> ClientTrichromeFinalizer.clientTick());
 
         PacketsImpl.registerS2CPackets();
