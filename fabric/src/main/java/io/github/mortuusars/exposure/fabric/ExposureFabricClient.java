@@ -38,7 +38,8 @@ public class ExposureFabricClient implements ClientModInitializer {
         MenuScreens.register(Exposure.MenuTypes.ITEM_RENAME.get(), ItemRenameScreen::new);
 
         ModelLoadingPlugin.register(pluginContext ->
-                pluginContext.addModels(ExposureClient.Models.CAMERA_GUI.id(),
+                pluginContext.addModels(
+                        ExposureClient.Models.CAMERA_GUI.id(),
                         ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL.id(),
                         ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL_STRIPPED.id(),
                         ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM.id(),

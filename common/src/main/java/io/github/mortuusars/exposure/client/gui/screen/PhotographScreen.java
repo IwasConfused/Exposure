@@ -96,23 +96,31 @@ public class PhotographScreen extends Screen {
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         pager.update();
 
+        zoomFactor = 0.8f;
         zoom.update();
         scale = zoom.get() * zoomFactor;
 
-//        renderTransparentBackground(guiGraphics);
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 500); // Otherwise exposure will overlap buttons
+
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+
+        guiGraphics.pose().pushPose();
+        renderBlurredBackground(partialTick);
+        renderTransparentBackground(guiGraphics);
+        guiGraphics.pose().popPose();
+
+        guiGraphics.pose().pushPose();
+        // Places widgets about photograph, because they will be covered when photo is zoomed in
+        guiGraphics.pose().translate(0, 0, 500);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.pose().popPose();
 
         guiGraphics.pose().pushPose();
 
         guiGraphics.pose().translate(x, y, 0);
-        guiGraphics.pose().translate(width / 2f, height / 2f, 10);
+        guiGraphics.pose().translate(width / 2f, height / 2f, 0);
         guiGraphics.pose().scale(scale, scale, scale);
-        guiGraphics.pose().translate(ExposureClient.exposureRenderer().getSize() / -2f, ExposureClient.exposureRenderer().getSize() / -2f, 0);
+        guiGraphics.pose().translate(ExposureClient.exposureRenderer().getSize() / -2f, ExposureClient.exposureRenderer().getSize() / -2f, 100);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
@@ -132,8 +140,14 @@ public class PhotographScreen extends Screen {
             trySaveToFile(photograph);
     }
 
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // Background is rendered manually in #render method.
+        // Otherwise, background will be rendered on top of a photograph due to 'super.render' z-offset.
+    }
+
     private void renderFrameInfoHint(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, ItemAndStack<PhotographItem> photograph) {
-        if (minecraft.player == null || !minecraft.player.isCreative()) {
+        if (Minecraft.getInstance().player == null || !Minecraft.getInstance().player.isCreative()) {
             return;
         }
 
@@ -164,8 +178,7 @@ public class PhotographScreen extends Screen {
 
         ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
 
-        assert minecraft != null;
-        if (minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+        if (Minecraft.getInstance().options.keyInventory.matches(keyCode, scanCode)) {
             this.onClose();
             return true;
         } else if (keyCode == InputConstants.KEY_ADD || keyCode == InputConstants.KEY_EQUALS) {
@@ -186,7 +199,7 @@ public class PhotographScreen extends Screen {
                 if (Minecraft.getInstance().gameMode != null) {
                     Minecraft.getInstance().gameMode.handleCreativeModeItemDrop(photograph.getItemStack().copy());
                     player.displayClientMessage(Component.translatable("gui.exposure.photograph_screen.item_dropped_message",
-                            photograph.getItemStack().toString()), false);
+                            photograph.getItemStack().getDisplayName()), false);
                 }
                 return true;
             }

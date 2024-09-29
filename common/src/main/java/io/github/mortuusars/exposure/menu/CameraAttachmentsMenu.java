@@ -7,6 +7,7 @@ import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerListener;
 import net.minecraft.world.SimpleContainer;
@@ -265,7 +266,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         return ItemStack.isSameItemSameComponents(player.getInventory().getItem(cameraSlotIndex), camera.getItemStack());
     }
 
-    public static CameraAttachmentsMenu fromBuffer(int containerId, Inventory playerInventory, FriendlyByteBuf buffer) {
+    public static CameraAttachmentsMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
         return new CameraAttachmentsMenu(containerId, playerInventory, buffer.readInt());
     }
 }

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.SimpleContainer;
@@ -47,7 +48,7 @@ public class ItemRenameMenu extends AbstractContainerMenu {
         });
     }
 
-    public static ItemRenameMenu fromBuffer(int containerId, Inventory playerInventory, FriendlyByteBuf buffer) {
+    public static ItemRenameMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
         return new ItemRenameMenu(containerId, playerInventory, buffer.readInt());
     }
 

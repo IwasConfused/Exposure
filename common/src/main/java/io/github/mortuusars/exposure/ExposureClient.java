@@ -103,5 +103,7 @@ public class ExposureClient {
                 new ModelResourceLocation(Exposure.resource("photograph_frame_large"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_LARGE_STRIPPED =
                 new ModelResourceLocation(Exposure.resource("photograph_frame_large_stripped"), "standalone");
+
+
     }
 }

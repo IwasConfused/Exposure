@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.fabric;
 import com.mojang.brigadier.arguments.ArgumentType;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.Register;
+import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.advancements.CriterionTrigger;
@@ -12,7 +13,9 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.Entity;
@@ -30,6 +33,7 @@ import net.minecraft.world.level.levelgen.feature.Feature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class RegisterImpl {
@@ -70,10 +74,19 @@ public class RegisterImpl {
         return () -> obj;
     }
 
-    public static <T extends MenuType<E>, E extends AbstractContainerMenu> Supplier<MenuType<E>> menuType(String id, Register.MenuTypeSupplier<E> supplier, StreamCodec<RegistryFriendlyByteBuf, RegistryFriendlyByteBuf> packetCodec) {
-        ExtendedScreenHandlerType<E, RegistryFriendlyByteBuf> type = Registry.register(BuiltInRegistries.MENU, Exposure.resource(id),
-                new ExtendedScreenHandlerType<>(supplier::create, packetCodec));
-        return () -> type;
+    public static <T extends MenuType<E>, E extends AbstractContainerMenu> Supplier<MenuType<E>> menuType(String id, Register.MenuTypeSupplier<E> supplier) {
+        ExtendedScreenHandlerType<E, byte[]> type = new ExtendedScreenHandlerType<>((syncId, inventory, data) -> {
+            RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.wrappedBuffer(data), inventory.player.registryAccess());
+            E menu = supplier.create(syncId, inventory, buffer);
+            buffer.release();
+            return menu;
+        }, ByteBufCodecs.BYTE_ARRAY.mapStream(Function.identity()));
+
+        Registry.register(BuiltInRegistries.MENU, Exposure.resource(id), type);
+
+        return () -> {
+            return type;
+        };
     }
 
     public static Supplier<RecipeType<?>> recipeType(String id, Supplier<RecipeType<?>> supplier) {

@@ -100,8 +100,9 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void mouseScroll(InputEvent.MouseScrollingEvent event) {
-            if (Viewfinder.handleMouseScroll(event.getScrollDeltaY() > 0d ? ZoomDirection.IN : ZoomDirection.OUT))
+            if (Viewfinder.handleMouseScroll(event.getScrollDeltaY())) {
                 event.setCanceled(true);
+            }
         }
 
         @SubscribeEvent

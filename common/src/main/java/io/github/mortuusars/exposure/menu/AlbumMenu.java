@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.AlbumSignC2SP;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.Side;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -352,7 +353,7 @@ public class AlbumMenu extends AbstractContainerMenu {
         return player.getInventory().getItem(albumSlot).getItem() instanceof AlbumItem;
     }
 
-    public static AlbumMenu fromBuffer(int containerId, Inventory inventory, RegistryFriendlyByteBuf buffer) {
-        return new AlbumMenu(containerId, inventory, buffer.readVarInt());
+    public static AlbumMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
+        return new AlbumMenu(containerId, playerInventory, buffer.readVarInt());
     }
 }

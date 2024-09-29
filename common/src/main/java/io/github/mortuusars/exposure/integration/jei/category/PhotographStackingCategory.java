@@ -84,6 +84,7 @@ public class PhotographStackingCategory implements IRecipeCategory<PhotographSta
         return title;
     }
 
+    @SuppressWarnings("removal")
     @Override
     public @NotNull IDrawable getBackground() {
         return background;

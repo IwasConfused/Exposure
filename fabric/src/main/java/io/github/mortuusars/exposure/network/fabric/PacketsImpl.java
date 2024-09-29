@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.network.fabric;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.server.*;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
@@ -14,6 +15,20 @@ public class PacketsImpl {
     private static MinecraftServer server;
 
     public static void registerC2SPackets() {
+        PayloadTypeRegistry.playC2S().register(AlbumSignC2SP.TYPE, AlbumSignC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraAddFrameC2SP.TYPE, CameraAddFrameC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraSetCompositionGuideC2SP.TYPE, CameraSetCompositionGuideC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraSetFlashModeC2SP.TYPE, CameraSetFlashModeC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraSetSelfieModeC2SP.TYPE, CameraSetSelfieModeC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraSetShutterSpeedC2SP.TYPE, CameraSetShutterSpeedC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraSetZoomC2SP.TYPE, CameraSetZoomC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(DeactivateCameraC2SP.TYPE, DeactivateCameraC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(ExposureDataPartC2SP.TYPE, ExposureDataPartC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, OpenCameraAttachmentsInCreativePacketC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(QueryExposureDataC2SP.TYPE, QueryExposureDataC2SP.STREAM_CODEC);
+
+
         ServerPlayNetworking.registerGlobalReceiver(AlbumSignC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(AlbumSyncNoteC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(CameraAddFrameC2SP.TYPE, PacketsImpl::handleServerboundPacket);

@@ -3,6 +3,8 @@ package io.github.mortuusars.exposure.fabric;
 import io.github.mortuusars.exposure.fabric.api.event.FrameAddedCallback;
 import io.github.mortuusars.exposure.fabric.api.event.ModifyFrameDataCallback;
 import io.github.mortuusars.exposure.fabric.api.event.ShutterOpeningCallback;
+import io.netty.buffer.ByteBufUtil;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
@@ -34,10 +36,14 @@ public class PlatformHelperImpl {
     }
 
     public static void openMenu(ServerPlayer serverPlayer, MenuProvider menuProvider, Consumer<RegistryFriendlyByteBuf> extraDataWriter) {
-        ExtendedScreenHandlerFactory extendedScreenHandlerFactory = new ExtendedScreenHandlerFactory() {
+        ExtendedScreenHandlerFactory<byte[]> extendedScreenHandlerFactory = new ExtendedScreenHandlerFactory<byte[]>() {
             @Override
-            public Object getScreenOpeningData(ServerPlayer player) {
-                return null;
+            public byte[] getScreenOpeningData(ServerPlayer player) {
+                RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(PacketByteBufs.create(), player.registryAccess());
+                extraDataWriter.accept(buffer);
+                byte[] bytes = ByteBufUtil.getBytes(buffer);
+                buffer.release();
+                return bytes;
             }
 
             @Nullable

@@ -9,6 +9,7 @@ import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.IFilmItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -128,8 +129,8 @@ public class LightroomMenu extends AbstractContainerMenu {
         this.addDataSlots(data);
     }
 
-    public static LightroomMenu fromBuffer(int containerID, Inventory playerInventory, FriendlyByteBuf buffer) {
-        return new LightroomMenu(containerID, playerInventory, getBlockEntity(playerInventory, buffer),
+    public static LightroomMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
+        return new LightroomMenu(containerId, playerInventory, getBlockEntity(playerInventory, buffer),
                 new SimpleContainerData(LightroomBlockEntity.CONTAINER_DATA_SIZE));
     }
 

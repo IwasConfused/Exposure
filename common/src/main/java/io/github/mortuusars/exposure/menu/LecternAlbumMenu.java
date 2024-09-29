@@ -83,8 +83,9 @@ public class LecternAlbumMenu extends AlbumMenu {
                 && Container.stillValidBlockEntity(lecternBlockEntity, player);
     }
 
-    public static LecternAlbumMenu fromBuffer(int containerId, Inventory inventory, RegistryFriendlyByteBuf buffer) {
-        return new LecternAlbumMenu(containerId, buffer.readBlockPos(), inventory,
-                new ItemAndStack<>(ItemStack.STREAM_CODEC.decode(buffer)), new SimpleContainer(1), new SimpleContainerData(1));
+    public static LecternAlbumMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
+        return new LecternAlbumMenu(containerId, buffer.readBlockPos(), playerInventory,
+                new ItemAndStack<>(ItemStack.STREAM_CODEC.decode(buffer)),
+                new SimpleContainer(1), new SimpleContainerData(1));
     }
 }

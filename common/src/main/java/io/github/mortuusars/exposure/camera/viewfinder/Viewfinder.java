@@ -131,9 +131,9 @@ public class Viewfinder {
         return sensitivity * modifier;
     }
 
-    public static boolean handleMouseScroll(ZoomDirection direction) {
+    public static boolean handleMouseScroll(double yOffset) {
         if (isLookingThrough()) {
-            zoom(direction, false);
+            zoom(yOffset > 0 ? ZoomDirection.IN : ZoomDirection.OUT, false);
             return true;
         }
 
