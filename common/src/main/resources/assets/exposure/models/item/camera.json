@@ -64,19 +64,19 @@
 	"overrides": [
 		{
 			"predicate": {
-				"camera_state": 0.1
+				"exposure:camera_state": 0.1
 			},
 			"model": "exposure:item/camera_active"
 		},
 		{
 			"predicate": {
-				"camera_state": 0.2
+				"exposure:camera_state": 0.2
 			},
 			"model": "exposure:item/selfie_stick"
 		},
 		{
 			"predicate": {
-				"camera_state": 0.3
+				"exposure:camera_state": 0.3
 			},
 			"model": "exposure:item/camera_selfie"
 		}

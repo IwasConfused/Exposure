@@ -6,19 +6,19 @@
   "overrides": [
     {
       "predicate": {
-        "channels": 0.1
+        "exposure:channels": 0.1
       },
       "model": "exposure:item/chromatic_sheet_one"
     },
     {
       "predicate": {
-        "channels": 0.2
+        "exposure:channels": 0.2
       },
       "model": "exposure:item/chromatic_sheet_two"
     },
     {
       "predicate": {
-        "channels": 0.3
+        "exposure:channels": 0.3
       },
       "model": "exposure:item/chromatic_sheet_three"
     }
