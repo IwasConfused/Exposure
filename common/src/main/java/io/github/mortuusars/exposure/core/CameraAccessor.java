@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.Entity;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -17,13 +17,13 @@ public final class CameraAccessor {
             CameraAccessors::byId
     );
 
-    private final Function<Player, Optional<NewCamera>> accessFunction;
+    private final Function<Entity, Optional<NewCamera>> accessFunction;
 
-    public CameraAccessor(Function<Player, Optional<NewCamera>> accessFunction) {
+    public CameraAccessor(Function<Entity, Optional<NewCamera>> accessFunction) {
         this.accessFunction = accessFunction;
     }
 
-    public Optional<NewCamera> getCamera(Player player) {
-        return accessFunction.apply(player);
+    public Optional<NewCamera> getCamera(Entity entity) {
+        return accessFunction.apply(entity);
     }
 }

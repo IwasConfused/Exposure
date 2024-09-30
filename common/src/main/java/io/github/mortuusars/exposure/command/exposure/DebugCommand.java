@@ -40,7 +40,7 @@ public class DebugCommand {
     private static int clearRenderingCache(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
-        Packets.sendToClient(new ClearRenderingCacheS2CP(), player);
+        Packets.sendToClient(ClearRenderingCacheS2CP.INSTANCE, player);
         return 0;
     }
 

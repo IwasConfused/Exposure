@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.core.camera;
 
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.SharedConstants;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 
@@ -51,7 +52,11 @@ public class ShutterSpeed {
      * Should be at least 1 tick. Otherwise, it's probably not going to work correctly.
      */
     public int getDurationTicks() {
-        return Math.max(1, (int)(valueMilliseconds * 20 / 1000f));
+        return Math.max(1, (int)(valueMilliseconds / SharedConstants.MILLIS_PER_TICK));
+    }
+
+    public boolean shouldCauseTickingSound() {
+        return valueMilliseconds > 999; // 1" and above
     }
 
     public float getStopsDifference(ShutterSpeed relative) {

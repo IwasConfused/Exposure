@@ -1,6 +1,8 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.CameraAccessor;
+import io.github.mortuusars.exposure.core.CameraAccessors;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.sound.OnePerEntitySoundsClient;
 import net.minecraft.client.Minecraft;
@@ -20,18 +22,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public record PlayOnePerEntitySoundS2CP(UUID sourceEntityID, SoundEvent soundEvent, SoundSource source,
-                                        float volume, float pitch) implements IPacket {
-    public static final ResourceLocation ID = Exposure.resource("play_one_per_entity_sound");
-    public static final CustomPacketPayload.Type<PlayOnePerEntitySoundS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
+public record PlayOnePerEntityShutterTickingSoundS2CP(CameraAccessor cameraAccessor, UUID sourceEntityID,
+                                                      float volume, float pitch, int durationTicks) implements IPacket {
+    public static final ResourceLocation ID = Exposure.resource("play_one_per_entity_shutter_ticking_sound");
+    public static final Type<PlayOnePerEntityShutterTickingSoundS2CP> TYPE = new Type<>(ID);
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, PlayOnePerEntitySoundS2CP> STREAM_CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, PlayOnePerEntitySoundS2CP::sourceEntityID,
-            SoundEvent.DIRECT_STREAM_CODEC, PlayOnePerEntitySoundS2CP::soundEvent,
-            ByteBufCodecs.idMapper(i -> SoundSource.values()[i], SoundSource::ordinal), PlayOnePerEntitySoundS2CP::source,
-            ByteBufCodecs.FLOAT, PlayOnePerEntitySoundS2CP::volume,
-            ByteBufCodecs.FLOAT, PlayOnePerEntitySoundS2CP::pitch,
-            PlayOnePerEntitySoundS2CP::new
+    public static final StreamCodec<RegistryFriendlyByteBuf, PlayOnePerEntityShutterTickingSoundS2CP> STREAM_CODEC = StreamCodec.composite(
+            CameraAccessor.STREAM_CODEC, PlayOnePerEntityShutterTickingSoundS2CP::cameraAccessor,
+            UUIDUtil.STREAM_CODEC, PlayOnePerEntityShutterTickingSoundS2CP::sourceEntityID,
+            ByteBufCodecs.FLOAT, PlayOnePerEntityShutterTickingSoundS2CP::volume,
+            ByteBufCodecs.FLOAT, PlayOnePerEntityShutterTickingSoundS2CP::pitch,
+            ByteBufCodecs.VAR_INT, PlayOnePerEntityShutterTickingSoundS2CP::durationTicks,
+            PlayOnePerEntityShutterTickingSoundS2CP::new
     );
 
     @Override
@@ -44,7 +46,8 @@ public record PlayOnePerEntitySoundS2CP(UUID sourceEntityID, SoundEvent soundEve
         if (Minecraft.getInstance().level != null) {
             @Nullable Entity sourceEntity = Minecraft.getInstance().level.getEntities().get(sourceEntityID);
             if (sourceEntity != null) {
-                Minecraft.getInstance().execute(() -> OnePerEntitySoundsClient.play(sourceEntity, soundEvent, source, volume, pitch));
+                Minecraft.getInstance().execute(() ->
+                        OnePerEntitySoundsClient.playShutterTickingSound(cameraAccessor, sourceEntity, volume, pitch, durationTicks));
             } else {
                 Exposure.LOGGER.debug("Cannot play OnePerEntity sound. Source Entity was not found by it's UUID.");
             }

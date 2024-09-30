@@ -5,6 +5,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.CameraItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.HashMap;
@@ -15,15 +16,21 @@ public class CameraAccessors {
     private static final Map<ResourceLocation, CameraAccessor> ACCESSORS = new HashMap<>();
 
     public static final CameraAccessor MAIN_HAND = register(Exposure.resource("main_hand"),
-            new CameraAccessor(player -> {
-                ItemStack itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
-                return itemInHand.getItem() instanceof CameraItem ? Optional.of(new NewCamera(itemInHand)) : Optional.empty();
+            new CameraAccessor(entity -> {
+                if (entity instanceof LivingEntity livingEntity) {
+                    ItemStack itemInHand = livingEntity.getItemInHand(InteractionHand.MAIN_HAND);
+                    return itemInHand.getItem() instanceof CameraItem ? Optional.of(new NewCamera(itemInHand)) : Optional.empty();
+                }
+                return Optional.empty();
             }));
 
     public static final CameraAccessor OFF_HAND = register(Exposure.resource("off_hand"),
-            new CameraAccessor(player -> {
-                ItemStack itemInHand = player.getItemInHand(InteractionHand.OFF_HAND);
-                return itemInHand.getItem() instanceof CameraItem ? Optional.of(new NewCamera(itemInHand)) : Optional.empty();
+            new CameraAccessor(entity -> {
+                if (entity instanceof LivingEntity livingEntity) {
+                    ItemStack itemInHand = livingEntity.getItemInHand(InteractionHand.OFF_HAND);
+                    return itemInHand.getItem() instanceof CameraItem ? Optional.of(new NewCamera(itemInHand)) : Optional.empty();
+                }
+                return Optional.empty();
             }));
 
     public static CameraAccessor register(ResourceLocation id, CameraAccessor accessor) {

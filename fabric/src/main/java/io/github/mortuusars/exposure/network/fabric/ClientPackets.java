@@ -18,6 +18,7 @@ public class ClientPackets {
         PayloadTypeRegistry.playS2C().register(LoadExposureFromFileCommandS2CP.TYPE, LoadExposureFromFileCommandS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(OnFrameAddedS2CP.TYPE, OnFrameAddedS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(PlayOnePerEntityShutterTickingSoundS2CP.TYPE, PlayOnePerEntityShutterTickingSoundS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(StartExposureS2CP.TYPE, StartExposureS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(StopOnePerEntitySoundS2CP.TYPE, StopOnePerEntitySoundS2CP.STREAM_CODEC);
@@ -34,6 +35,7 @@ public class ClientPackets {
         ClientPlayNetworking.registerGlobalReceiver(LoadExposureFromFileCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(OnFrameAddedS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(PlayOnePerEntitySoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(PlayOnePerEntityShutterTickingSoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(ShowExposureCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(StartExposureS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(StopOnePerEntitySoundS2CP.TYPE, ClientPackets::handleClientboundPacket);

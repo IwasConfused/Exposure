@@ -52,6 +52,7 @@ public class CommonEvents {
             registrar.playToClient(LoadExposureFromFileCommandS2CP.TYPE, LoadExposureFromFileCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(OnFrameAddedS2CP.TYPE, OnFrameAddedS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC, PacketsImpl::handle);
+            registrar.playToClient(PlayOnePerEntityShutterTickingSoundS2CP.TYPE, PlayOnePerEntityShutterTickingSoundS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(StartExposureS2CP.TYPE, StartExposureS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(StopOnePerEntitySoundS2CP.TYPE, StopOnePerEntitySoundS2CP.STREAM_CODEC, PacketsImpl::handle);

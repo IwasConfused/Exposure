@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure;
 
 import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,10 +15,6 @@ public class CommonFunctionality {
         if (stack.getItem() instanceof CameraItem cameraItem) {
             if (cameraItem.isActive(stack)) {
                 cameraItem.deactivate(player, stack);
-            }
-
-            if (cameraItem.getShutterState(stack).isOpen()) {
-                OnePerEntitySounds.stopForAllClients(player, Exposure.SoundEvents.SHUTTER_TICKING.get());
             }
         }
     }
