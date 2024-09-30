@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.client.gui.component.CycleButton1;
+import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
-public class ShutterSpeedButton extends CycleButton1<ShutterSpeed> {
+public class ShutterSpeedButton extends CycleButton<ShutterSpeed> {
     protected final int secondaryFontColor;
     protected final int mainFontColor;
 

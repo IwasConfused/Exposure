@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
-import io.github.mortuusars.exposure.client.gui.component.CycleButton1;
+import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.CameraAccessors;
@@ -165,7 +165,7 @@ public class CameraControlsScreen extends Screen {
         Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/composition_guide/" + guide.name()));
 
-        return new CycleButton1<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
+        return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
                 currentGuide, spritesFunc, (b, guide) -> CameraClient.setCompositionGuide(guide))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")))
                 .setTooltips(guide -> Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")
@@ -182,7 +182,7 @@ public class CameraControlsScreen extends Screen {
         Function<FlashMode, WidgetSprites> spritesFunc = mode -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
 
-        return new CycleButton1<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
+        return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
                 currentMode, spritesFunc, (b, mode) -> CameraClient.setFlashMode(mode))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")))
                 .setTooltips(mode -> Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")

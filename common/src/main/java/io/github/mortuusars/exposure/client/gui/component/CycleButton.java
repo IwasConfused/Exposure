@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-public class CycleButton1<T> extends Button {
+public class CycleButton<T> extends Button {
     protected final List<T> values;
     protected final T startingValue;
     protected final Map<T, WidgetSprites> spritesMap;
@@ -39,8 +39,8 @@ public class CycleButton1<T> extends Button {
 
     protected int currentIndex;
 
-    public CycleButton1(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
-                        Map<T, WidgetSprites> spritesMap, OnCycle<T> onCycle) {
+    public CycleButton(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
+                       Map<T, WidgetSprites> spritesMap, OnCycle<T> onCycle) {
         super(x, y, width, height, CommonComponents.EMPTY, b -> {}, DEFAULT_NARRATION);
         Preconditions.checkArgument(!values.isEmpty(), "Cannot create a CycleButton with 0 possible values.");
         this.values = values;
@@ -52,32 +52,32 @@ public class CycleButton1<T> extends Button {
         this.currentIndex = Math.max(values.indexOf(startingValue), 0);
     }
 
-    public CycleButton1(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
-                        Function<T, WidgetSprites> spritesFunc, OnCycle<T> onCycle) {
+    public CycleButton(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
+                       Function<T, WidgetSprites> spritesFunc, OnCycle<T> onCycle) {
         this(x, y, width, height, values, startingValue, Widgets.createMap(values, spritesFunc), onCycle);
     }
 
-    public CycleButton1<T> setLooping(boolean loop) {
+    public CycleButton<T> setLooping(boolean loop) {
         this.loop = loop;
         return this;
     }
 
-    public CycleButton1<T> setDefaultTooltip(Tooltip tooltip) {
+    public CycleButton<T> setDefaultTooltip(Tooltip tooltip) {
         this.defaultTooltip = tooltip;
         return this;
     }
 
-    public CycleButton1<T> setTooltips(Map<T, Tooltip> tooltips) {
+    public CycleButton<T> setTooltips(Map<T, Tooltip> tooltips) {
         this.tooltips = tooltips;
         return this;
     }
 
-    public CycleButton1<T> setTooltips(Function<T, Component> tooltipFunc) {
+    public CycleButton<T> setTooltips(Function<T, Component> tooltipFunc) {
         this.tooltips = Tooltips.createMap(values, tooltipFunc);
         return this;
     }
 
-    public CycleButton1<T> setClickSound(SoundEvent soundEvent) {
+    public CycleButton<T> setClickSound(SoundEvent soundEvent) {
         this.soundEvent = soundEvent;
         return this;
     }
@@ -86,8 +86,13 @@ public class CycleButton1<T> extends Button {
         return values.get(Mth.clamp(currentIndex, 0, values.size() - 1));
     }
 
+    public void setCurrentValue(T value) {
+        setCurrentIndex(values.indexOf(value));
+    }
+
     public void setCurrentIndex(int index) {
         this.currentIndex = Mth.clamp(currentIndex, 0, values.size() - 1);
+        updateVisuals();
     }
 
     public void cycle(boolean reverse) {
@@ -105,8 +110,12 @@ public class CycleButton1<T> extends Button {
     }
 
     protected void onCycle() {
-        setTooltip(tooltips.getOrDefault(getCurrentValue(), defaultTooltip));
+        updateVisuals();
         onCycle.onCycle(this, getCurrentValue());
+    }
+
+    private void updateVisuals() {
+        setTooltip(tooltips.getOrDefault(getCurrentValue(), defaultTooltip));
     }
 
     @Override
@@ -156,6 +165,6 @@ public class CycleButton1<T> extends Button {
     }
 
     public interface OnCycle<T> {
-        void onCycle(CycleButton1<T> button, T newValue);
+        void onCycle(CycleButton<T> button, T newValue);
     }
 }

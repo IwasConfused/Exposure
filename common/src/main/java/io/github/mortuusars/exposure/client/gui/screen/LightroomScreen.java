@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
-import io.github.mortuusars.exposure.client.gui.screen.element.ToggleImageButton;
+import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
@@ -70,7 +70,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     protected Player player;
     protected Button printButton;
     protected PrintingMode mode;
-    protected ToggleImageButton chromaticModeToggleButton;
+    protected CycleButton<PrintingMode> printingModeToggleButton;
 
     protected Map<Integer, Rect2i> slotPlaceholders = Collections.emptyMap();
 
@@ -109,19 +109,24 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         printButton.setTooltip(Tooltip.create(tooltip));
         addRenderableWidget(printButton);
 
-        MutableComponent regularModeTooltip = Component.translatable("gui.exposure.lightroom.mode.regular");
-        MutableComponent chromaticModeTooltip = Component.translatable("gui.exposure.lightroom.mode.chromatic")
-                .append(CommonComponents.NEW_LINE)
-                .append(Component.translatable("gui.exposure.lightroom.mode.chromatic.info").withStyle(ChatFormatting.GRAY));
-
-        chromaticModeToggleButton = new ToggleImageButton(leftPos - 19, topPos + 91, 18, 18,
-                PRINTING_MODE_TOGGLE_REGULAR_SPRITES, PRINTING_MODE_TOGGLE_CHROMATIC_SPRITES, isOn -> {
-            Component tooltipComponent = isOn ? chromaticModeTooltip : regularModeTooltip;
-            chromaticModeToggleButton.setTooltip(Tooltip.create(tooltipComponent));
-        });
-        addRenderableWidget(chromaticModeToggleButton);
+        printingModeToggleButton = createPrintingModeToggleButton();
+        addRenderableWidget(printingModeToggleButton);
 
         updateButtons();
+    }
+
+    protected CycleButton<PrintingMode> createPrintingModeToggleButton() {
+        Map<PrintingMode, WidgetSprites> spritesMap = Map.of(PrintingMode.REGULAR, PRINTING_MODE_TOGGLE_REGULAR_SPRITES,
+                PrintingMode.CHROMATIC, PRINTING_MODE_TOGGLE_CHROMATIC_SPRITES);
+        Map<PrintingMode, Tooltip> tooltipMap = Map.of(
+                PrintingMode.REGULAR, Tooltip.create(Component.translatable("gui.exposure.lightroom.mode.regular")),
+                PrintingMode.CHROMATIC, Tooltip.create(Component.translatable("gui.exposure.lightroom.mode.chromatic")
+                        .append(CommonComponents.NEW_LINE)
+                        .append(Component.translatable("gui.exposure.lightroom.mode.chromatic.info").withStyle(ChatFormatting.GRAY))));
+        return new CycleButton<>(leftPos - 19, topPos + 91, 18, 18,
+                Arrays.asList(PrintingMode.values()), getMenu().getBlockEntity().getPrintingMode(),
+                spritesMap, (button, newMode) -> onPrintingModeToggleButtonPressed(button))
+                .setTooltips(tooltipMap);
     }
 
     protected void onPrintButtonPressed(Button button) {
@@ -133,9 +138,17 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         }
     }
 
-    protected void onProcessToggleButtonPressed(Button button) {
+    protected void onPrintingModeToggleButtonPressed(Button button) {
         if (Minecraft.getInstance().gameMode != null)
             Minecraft.getInstance().gameMode.handleInventoryButtonClick(getMenu().containerId, LightroomMenu.TOGGLE_PROCESS_BUTTON_ID);
+    }
+
+    @Override
+    protected void containerTick() {
+        PrintingMode currentMode = getMenu().getBlockEntity().getPrintingMode();
+        if (currentMode != printingModeToggleButton.getCurrentValue()) {
+            printingModeToggleButton.setCurrentValue(currentMode);
+        }
     }
 
     @Override
@@ -150,8 +163,8 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         printButton.active = getMenu().getBlockEntity().canPrint() || (player.isCreative() && Screen.hasShiftDown() && getMenu().getBlockEntity().canPrintInCreativeMode());
         printButton.visible = !getMenu().isPrinting();
 
-        chromaticModeToggleButton.active = true;
-        chromaticModeToggleButton.visible = getMenu().canChangeProcess();
+        printingModeToggleButton.active = true;
+        printingModeToggleButton.visible = getMenu().canChangeProcess();
     }
 
     @Override

@@ -188,7 +188,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
     /*
         Printing mode setting stays where it was set by the player, But if the frame does not support it -
-        image would be printed with supported process (probably regular), WITHOUT changing the mode setting -
+        image would be printed with supported process, WITHOUT changing the mode setting -
         this means that this mode will be used again if some other frame is supporting it.
 
         This was done to not reset mode in automated setups, if there were some image on a film that doesn't support selected mode.
