@@ -51,10 +51,10 @@ public class CommonEvents {
             registrar.playToClient(ExposureDataS2CP.TYPE, ExposureDataS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(LoadExposureFromFileCommandS2CP.TYPE, LoadExposureFromFileCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(OnFrameAddedS2CP.TYPE, OnFrameAddedS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(PlayOnePerPlayerSoundS2CP.TYPE, PlayOnePerPlayerSoundS2CP.STREAM_CODEC, PacketsImpl::handle);
+            registrar.playToClient(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(StartExposureS2CP.TYPE, StartExposureS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(StopOnePerPlayerSoundS2CP.TYPE, StopOnePerPlayerSoundS2CP.STREAM_CODEC, PacketsImpl::handle);
+            registrar.playToClient(StopOnePerEntitySoundS2CP.TYPE, StopOnePerEntitySoundS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(SyncLensesDataS2CP.TYPE, SyncLensesDataS2CP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToClient(WaitForExposureChangeS2CP.TYPE, WaitForExposureChangeS2CP.STREAM_CODEC, PacketsImpl::handle);
 

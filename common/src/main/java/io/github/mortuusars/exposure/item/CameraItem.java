@@ -28,8 +28,8 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
-import io.github.mortuusars.exposure.sound.OnePerPlayerSounds;
-import io.github.mortuusars.exposure.sound.OnePerPlayerSoundsClient;
+import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
+import io.github.mortuusars.exposure.sound.OnePerEntitySoundsClient;
 import io.github.mortuusars.exposure.util.CameraInHand;
 import io.github.mortuusars.exposure.util.ColorChannel;
 import io.github.mortuusars.exposure.util.LevelUtil;
@@ -211,7 +211,7 @@ public class CameraItem extends Item {
 
                     if (otherStack.getCount() > 1 && !currentAttachment.isEmpty()) {
                         if (player.level().isClientSide())
-                            OnePerPlayerSoundsClient.play(player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), SoundSource.PLAYERS, 0.9f, 1f);
+                            playCameraSound(player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f);
                         return true; // Cannot swap when holding more than one item
                     }
 
@@ -328,21 +328,23 @@ public class CameraItem extends Item {
 //        }
 //    }
 
-    public void openShutter(Player player, Level level, ItemStack stack, ShutterSpeed shutterSpeed) {
+    public void openShutter(ServerPlayer player, Level level, ItemStack stack, ShutterSpeed shutterSpeed) {
         setShutterState(stack, ShutterState.open(level.getGameTime(), shutterSpeed.getDurationTicks()));
 
         player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
         playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_OPEN.get(), 0.7f, 1.1f, 0.2f);
         if (shutterSpeed.getDurationMilliseconds() > 500) // More than 1/2
-            OnePerPlayerSounds.playForAllClients(player, Exposure.SoundEvents.SHUTTER_TICKING.get(), SoundSource.PLAYERS, 1f, 1f);
+            OnePerEntitySounds.playForAllClients(player, Exposure.SoundEvents.SHUTTER_TICKING.get(), SoundSource.PLAYERS, 1f, 1f);
     }
 
-    public void closeShutter(Player player, ItemStack stack) {
+    public void closeShutter(ServerPlayer player, ItemStack stack) {
         ShutterState shutterState = getShutterState(stack);
         long closeTick = shutterState.openedAtTick() + shutterState.openDurationTicks();
         boolean flashHasFired = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains(FLASH_HAS_FIRED_ON_LAST_SHOT);
 
         setShutterState(stack, ShutterState.closed());
+
+        OnePerEntitySounds.stopForAllClients(player, Exposure.SoundEvents.SHUTTER_TICKING.get());
 
         if (player.level().getGameTime() - closeTick >= 30 /*1.5 sec*/) {
             // Skip effects if shutter was closed long ago
@@ -351,7 +353,7 @@ public class CameraItem extends Item {
 
         player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
         player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2);
-        playCameraSound(player, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
+        playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
 
         StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
         if (filmStack.getItem() instanceof FilmRollItem filmRollItem) {
@@ -359,9 +361,9 @@ public class CameraItem extends Item {
             boolean isFull = fullness == 1f;
 
             if (isFull)
-                OnePerPlayerSounds.play(player, Exposure.SoundEvents.FILM_ADVANCE_LAST.get(), SoundSource.PLAYERS, 1f, 1f);
+                OnePerEntitySounds.play(null, player, Exposure.SoundEvents.FILM_ADVANCE_LAST.get(), SoundSource.PLAYERS, 1f, 1f);
             else {
-                OnePerPlayerSounds.play(player, Exposure.SoundEvents.FILM_ADVANCING.get(), SoundSource.PLAYERS,
+                OnePerEntitySounds.play(null, player, Exposure.SoundEvents.FILM_ADVANCING.get(), SoundSource.PLAYERS,
                         1f, 0.9f + 0.1f * fullness);
             }
         }
@@ -390,8 +392,8 @@ public class CameraItem extends Item {
 
         ShutterState shutterState = getShutterState(stack);
 
-        if (shutterState.isOpen() && level.getGameTime() >= shutterState.getCloseTick()) {
-            closeShutter(player, stack);
+        if (shutterState.isOpen() && level.getGameTime() >= shutterState.getCloseTick() && player instanceof ServerPlayer serverPlayer) {
+            closeShutter(serverPlayer, stack);
         }
 
         boolean inOffhand = player.getOffhandItem().equals(stack);
@@ -500,7 +502,7 @@ public class CameraItem extends Item {
 
         boolean flashHasFired = shouldFlashFire && tryUseFlash(player, cameraStack);
 
-        openShutter(player, player.level(), cameraStack, shutterSpeed);
+        openShutter(serverPlayer, player.level(), cameraStack, shutterSpeed);
 
         String exposureId = createExposureId(player);
 

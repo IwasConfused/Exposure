@@ -17,10 +17,10 @@ public class ClientPackets {
         PayloadTypeRegistry.playS2C().register(ExposureDataS2CP.TYPE, ExposureDataS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(LoadExposureFromFileCommandS2CP.TYPE, LoadExposureFromFileCommandS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(OnFrameAddedS2CP.TYPE, OnFrameAddedS2CP.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(PlayOnePerPlayerSoundS2CP.TYPE, PlayOnePerPlayerSoundS2CP.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(StartExposureS2CP.TYPE, StartExposureS2CP.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(StopOnePerPlayerSoundS2CP.TYPE, StopOnePerPlayerSoundS2CP.STREAM_CODEC);
+        PayloadTypeRegistry.playS2C().register(StopOnePerEntitySoundS2CP.TYPE, StopOnePerEntitySoundS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(SyncLensesDataS2CP.TYPE, SyncLensesDataS2CP.STREAM_CODEC);
         PayloadTypeRegistry.playS2C().register(WaitForExposureChangeS2CP.TYPE, WaitForExposureChangeS2CP.STREAM_CODEC);
 
@@ -33,10 +33,10 @@ public class ClientPackets {
         ClientPlayNetworking.registerGlobalReceiver(ExposureDataS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(LoadExposureFromFileCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(OnFrameAddedS2CP.TYPE, ClientPackets::handleClientboundPacket);
-        ClientPlayNetworking.registerGlobalReceiver(PlayOnePerPlayerSoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(PlayOnePerEntitySoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(ShowExposureCommandS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(StartExposureS2CP.TYPE, ClientPackets::handleClientboundPacket);
-        ClientPlayNetworking.registerGlobalReceiver(StopOnePerPlayerSoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
+        ClientPlayNetworking.registerGlobalReceiver(StopOnePerEntitySoundS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(SyncLensesDataS2CP.TYPE, ClientPackets::handleClientboundPacket);
         ClientPlayNetworking.registerGlobalReceiver(WaitForExposureChangeS2CP.TYPE, ClientPackets::handleClientboundPacket);
     }

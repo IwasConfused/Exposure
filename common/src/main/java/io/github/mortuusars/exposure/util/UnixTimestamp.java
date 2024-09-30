@@ -5,6 +5,10 @@ public class UnixTimestamp {
         public static long now() {
             return System.currentTimeMillis() / 1000;
         }
+
+        public static long fromNow(int seconds) {
+            return now() + seconds;
+        }
     }
 
     public static class Milliseconds {

@@ -9,7 +9,6 @@ import io.github.mortuusars.exposure.core.camera.FocalRange;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
-import io.github.mortuusars.exposure.sound.OnePerPlayerSounds;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -20,7 +19,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -61,7 +59,8 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
 
     @Override
     public void added() {
-        OnePerPlayerSounds.play(player, Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), SoundSource.PLAYERS, 0.9f, 0.9f);
+        getMenu().getCamera().getItem().playCameraSound(null, player,
+                Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 0.9f, 0.9f, 0.2f);
     }
 
     @Override
@@ -226,7 +225,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     protected @NotNull List<Component> getTooltipFromContainerItem(ItemStack stack) {
         List<Component> tooltip = super.getTooltipFromContainerItem(stack);
         if (stack.is(Exposure.Tags.Items.LENSES) && hoveredSlot != null && hoveredSlot.getItem().equals(stack)) {
-            tooltip.add(Component.translatable("gui.exposure.viewfinder.focal_length", FocalRange.ofStack(stack).getSerializedName())
+            tooltip.add(Component.translatable("gui.exposure.camera_controls.focal_length", FocalRange.ofStack(stack).getSerializedName())
                     .withStyle(ChatFormatting.GOLD));
         }
         return tooltip;
@@ -269,7 +268,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
                 protected List<Component> getTooltipFromContainerItem(ItemStack stack) {
                     List<Component> tooltip = super.getTooltipFromContainerItem(stack);
                     Lenses.getFocalRangeOf(stack).ifPresent(fr ->
-                            tooltip.add(Component.translatable("gui.exposure.viewfinder.focal_length", fr.getSerializedName())
+                            tooltip.add(Component.translatable("gui.exposure.camera_controls.focal_length", fr.getSerializedName())
                                     .withStyle(ChatFormatting.GOLD)));
                     return tooltip;
                 }

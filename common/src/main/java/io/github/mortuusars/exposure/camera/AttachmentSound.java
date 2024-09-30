@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.camera;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.sound.OnePerPlayerSounds;
+import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
@@ -50,7 +50,7 @@ public class AttachmentSound {
     public void playOnePerPlayer(Player player, boolean isRemoved) {
         @Nullable Supplier<SoundEvent> sound = isRemoved ? getRemoved() : getInserted();
         if (sound != null)
-            OnePerPlayerSounds.play(player, sound.get(), SoundSource.PLAYERS,
+            OnePerEntitySounds.play(null, player, sound.get(), SoundSource.PLAYERS,
                     isRemoved ? getRemovedVolume() : getInsertedVolume(), isRemoved ? getRemovedPitch() : getInsertedPitch());
     }
 
