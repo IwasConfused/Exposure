@@ -686,6 +686,9 @@ public class CameraItem extends Item {
                 .ifPresent(channel -> tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
         // Do not forget to add data from client:
+        if (dataFromClient.loadingFromFile()) {
+            tag.putBoolean(ExposureFrameTag.FROM_FILE, true);
+        }
         tag.merge(dataFromClient.extraData());
 
 
@@ -785,6 +788,7 @@ public class CameraItem extends Item {
         if (frame.isFromFile()) {
             StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
             if (!filterStack.isEmpty() && filterStack.getItem() instanceof InterplanarProjectorItem interplanarProjector) {
+                // Player sound to other players
                 player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
                         SoundSource.PLAYERS, 0.8f, 1f);
 
