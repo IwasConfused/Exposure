@@ -1,21 +1,10 @@
 package io.github.mortuusars.exposure.core;
 
-import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.item.component.EntityInFrame;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.component.CustomData;
-
-import java.util.List;
-import java.util.Optional;
 
 public class ExposureFrameTag extends CompoundTag {
-    public static final String ID = "id";
-    public static final String TYPE = "type";
-    public static final String IS_FROM_FILE = "is_from_file";
+    public static final String FROM_FILE = "from_file";
     public static final String CHROMATIC = "chromatic";
-    public static final String PHOTOGRAPHER_NAME = "photographer";
-    public static final String PHOTOGRAPHER_ID = "photographer_id";
 
     public static final String CHROMATIC_CHANNEL = "chromatic_channel";
 //    public static final String RED_CHANNEL = "red_channel";

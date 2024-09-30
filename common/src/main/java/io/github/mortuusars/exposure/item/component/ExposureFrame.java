@@ -2,9 +2,11 @@ package io.github.mortuusars.exposure.item.component;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.util.ChromaticChannel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -14,20 +16,17 @@ import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public record ExposureFrame(ExposureIdentifier identifier,
                             ExposureType type,
-                            boolean isFromFile,
-                            boolean isChromatic,
                             Photographer photographer,
                             List<EntityInFrame> entitiesInFrame,
                             CustomData additionalData) {
     public static final ExposureFrame EMPTY = new ExposureFrame(
             ExposureIdentifier.EMPTY,
             ExposureType.COLOR,
-            false,
-            false,
             Photographer.EMPTY,
             Collections.emptyList(),
             CustomData.EMPTY);
@@ -35,8 +34,6 @@ public record ExposureFrame(ExposureIdentifier identifier,
     public static final Codec<ExposureFrame> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     ExposureIdentifier.CODEC.fieldOf("id").forGetter(ExposureFrame::identifier),
                     ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(ExposureFrame::type),
-                    Codec.BOOL.optionalFieldOf("from_file", false).forGetter(ExposureFrame::isFromFile),
-                    Codec.BOOL.optionalFieldOf("chromatic", false).forGetter(ExposureFrame::isChromatic),
                     Photographer.CODEC.optionalFieldOf("photographer", Photographer.EMPTY).forGetter(ExposureFrame::photographer),
                     EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("captured_entities", Collections.emptyList()).forGetter(ExposureFrame::entitiesInFrame),
                     CustomData.CODEC.optionalFieldOf("additional_data", CustomData.EMPTY).forGetter(ExposureFrame::additionalData))
@@ -48,8 +45,6 @@ public record ExposureFrame(ExposureIdentifier identifier,
             return new ExposureFrame(
                     ExposureIdentifier.STREAM_CODEC.decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
-                    ByteBufCodecs.BOOL.decode(buffer),
-                    ByteBufCodecs.BOOL.decode(buffer),
                     Photographer.STREAM_CODEC.decode(buffer),
                     EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).decode(buffer),
                     CustomData.STREAM_CODEC.decode(buffer));
@@ -58,8 +53,6 @@ public record ExposureFrame(ExposureIdentifier identifier,
         public void encode(RegistryFriendlyByteBuf buffer, ExposureFrame frame) {
             ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.identifier());
             ExposureType.STREAM_CODEC.encode(buffer, frame.type());
-            ByteBufCodecs.BOOL.encode(buffer, frame.isFromFile());
-            ByteBufCodecs.BOOL.encode(buffer, frame.isChromatic());
             Photographer.STREAM_CODEC.encode(buffer, frame.photographer);
             EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).encode(buffer, frame.entitiesInFrame());
             CustomData.STREAM_CODEC.encode(buffer, frame.additionalData());
@@ -79,8 +72,6 @@ public record ExposureFrame(ExposureIdentifier identifier,
         }
 
         result.setType(getCommonValueOrDefault(objects, ExposureFrame::type));
-        result.setFromFile(getCommonValueOrDefault(objects, ExposureFrame::isFromFile));
-        result.setChromatic(getCommonValueOrDefault(objects, ExposureFrame::isChromatic));
         result.setPhotographer(getCommonValueOrDefault(objects, ExposureFrame::photographer));
 
         List<EntityInFrame> commonEntitiesInFrame = objects.stream()
@@ -97,7 +88,7 @@ public record ExposureFrame(ExposureIdentifier identifier,
         CompoundTag mergedTag = objects.stream()
                 .map(f -> f.additionalData.copyTag())
                 .reduce(new CompoundTag(), CompoundTag::merge);
-        result.setAdditionalData(CustomData.of(mergedTag));
+        result.setAdditionalDataTag(mergedTag);
 
         return result.toImmutable();
     }
@@ -116,28 +107,47 @@ public record ExposureFrame(ExposureIdentifier identifier,
         return photographer().matches(entity);
     }
 
+    /**
+     * Do not modify the tag here! It may cause unwanted side effects.
+     */
+    public CompoundTag getAdditionalDataTagForReading() {
+        //noinspection deprecation
+        return additionalData().getUnsafe();
+    }
+
+    public boolean isFromFile() {
+        return getAdditionalDataTagForReading().getBoolean(ExposureFrameTag.FROM_FILE);
+    }
+
+    public boolean isChromatic() {
+        return getAdditionalDataTagForReading().getBoolean(ExposureFrameTag.CHROMATIC);
+    }
+
+    public Optional<ChromaticChannel> getChromaticChannel() {
+        return ChromaticChannel.fromString(getAdditionalDataTagForReading().getString(ExposureFrameTag.CHROMATIC_CHANNEL));
+    }
+
+    public boolean wasTakenWithChromaticFilter() {
+        return getChromaticChannel().isPresent();
+    }
+
     public Mutable toMutable() {
         return new Mutable(this);
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public static class Mutable {
         private ExposureIdentifier identifier;
         private ExposureType type;
-        private boolean fromFile;
-        private boolean chromatic;
         private Photographer photographer;
         private List<EntityInFrame> entitiesInFrame;
-        private CustomData additionalData;
+        private CompoundTag additionalData;
 
         public Mutable(ExposureFrame photographData) {
             this.identifier = photographData.identifier();
             this.type = photographData.type();
-            this.fromFile = photographData.isFromFile();
-            this.chromatic = photographData.isChromatic();
             this.photographer = photographData.photographer();
             this.entitiesInFrame = new ArrayList<>(photographData.entitiesInFrame());
-            this.additionalData = CustomData.of(photographData.additionalData().copyTag());
+            this.additionalData = photographData.additionalData().copyTag();
         }
 
         public ExposureIdentifier getIdentifier() {
@@ -155,24 +165,6 @@ public record ExposureFrame(ExposureIdentifier identifier,
 
         public Mutable setType(ExposureType type) {
             this.type = type;
-            return this;
-        }
-
-        public boolean isFromFile() {
-            return fromFile;
-        }
-
-        public Mutable setFromFile(boolean fromFile) {
-            this.fromFile = fromFile;
-            return this;
-        }
-
-        public boolean isChromatic() {
-            return chromatic;
-        }
-
-        public Mutable setChromatic(boolean chromatic) {
-            this.chromatic = chromatic;
             return this;
         }
 
@@ -199,24 +191,31 @@ public record ExposureFrame(ExposureIdentifier identifier,
             return this;
         }
 
-        public CustomData getAdditionalData() {
+        public CompoundTag getAdditionalDataTag() {
             return additionalData;
         }
 
-        public Mutable setAdditionalData(CustomData additionalData) {
+        public Mutable setAdditionalDataTag(CompoundTag additionalData) {
             this.additionalData = additionalData;
             return this;
+        }
+
+        public Mutable updateAdditionalData(Consumer<CompoundTag> updater) {
+            updater.accept(additionalData);
+            return this;
+        }
+
+        public Mutable setChromatic(boolean chromatic) {
+            return updateAdditionalData(tag -> tag.putBoolean(ExposureFrameTag.CHROMATIC, chromatic));
         }
 
         public ExposureFrame toImmutable() {
             return new ExposureFrame(
                     this.identifier,
                     this.type,
-                    this.fromFile,
-                    this.chromatic,
                     this.photographer,
                     this.entitiesInFrame,
-                    this.additionalData);
+                    CustomData.of(this.additionalData));
         }
     }
 }

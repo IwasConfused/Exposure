@@ -7,14 +7,15 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public enum ColorChannel implements StringRepresentable {
+public enum ChromaticChannel implements StringRepresentable {
     RED(0xFFD8523E),
     GREEN(0xFF7BC64B),
     BLUE(0xFF4E73CE);
 
+    // Used in UI to color text, etc.
     private final int color;
 
-    ColorChannel(int color) {
+    ChromaticChannel(int color) {
         this.color = color;
     }
 
@@ -22,7 +23,7 @@ public enum ColorChannel implements StringRepresentable {
         return color;
     }
 
-    public static Optional<ColorChannel> fromStack(ItemStack stack) {
+    public static Optional<ChromaticChannel> fromStack(ItemStack stack) {
         if (stack.is(Exposure.Tags.Items.RED_FILTERS))
             return Optional.of(RED);
         else if (stack.is(Exposure.Tags.Items.GREEN_FILTERS))
@@ -33,16 +34,16 @@ public enum ColorChannel implements StringRepresentable {
             return Optional.empty();
     }
 
-    public static ColorChannel fromStringOrDefault(String serializedName, ColorChannel defaultValue) {
-        for (ColorChannel value : values()) {
+    public static ChromaticChannel fromStringOrDefault(String serializedName, ChromaticChannel defaultValue) {
+        for (ChromaticChannel value : values()) {
             if (value.getSerializedName().equals(serializedName))
                 return value;
         }
         return defaultValue;
     }
 
-    public static Optional<ColorChannel> fromString(String serializedName) {
-        for (ColorChannel value : values()) {
+    public static Optional<ChromaticChannel> fromString(String serializedName) {
+        for (ChromaticChannel value : values()) {
             if (value.getSerializedName().equals(serializedName))
                 return Optional.of(value);
         }

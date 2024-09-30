@@ -73,7 +73,7 @@ public class ExposureClient {
         ItemProperties.register(Exposure.Items.ALBUM.get(), Exposure.resource("photos"),
                 (stack, clientLevel, livingEntity, seed) ->
                         stack.getItem() instanceof AlbumItem albumItem ? albumItem.getPhotographsCount(stack) / 100f : 0f);
-        ItemProperties.register(Exposure.Items.INTERPLANAR_PROJECTOR.get(), Exposure.resource("active"),
+        ItemProperties.register(Exposure.Items.INTERPLANAR_PROJECTOR.get(), Exposure.resource("projector_active"),
                 (stack, clientLevel, livingEntity, seed) -> stack.has(DataComponents.CUSTOM_NAME) ? 1f : 0f);
     }
 

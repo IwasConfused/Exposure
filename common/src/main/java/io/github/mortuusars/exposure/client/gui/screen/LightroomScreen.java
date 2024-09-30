@@ -9,7 +9,6 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
-import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.print.PrintingMode;
@@ -18,7 +17,6 @@ import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
 import io.github.mortuusars.exposure.client.render.image.RenderedImageProvider;
 import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
-import io.github.mortuusars.exposure.util.ColorChannel;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -288,7 +286,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     private void addFrameInfoTooltipLines(List<Component> tooltipLines, int frameIndex, boolean isAdvancedTooltips) {
         @Nullable ExposureFrame frame = getMenu().getFrameIdByIndex(frameIndex);
         if (frame != null) {
-            ColorChannel.fromString(frame.additionalData().getUnsafe().getString(FrameProperties.CHROMATIC_CHANNEL)).ifPresent(c ->
+            frame.getChromaticChannel().ifPresent(c ->
                     tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
                         .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
 

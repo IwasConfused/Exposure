@@ -215,7 +215,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
     public boolean isSelectedFrameChromatic() {
         @Nullable ExposureFrame frame = getSelectedFrame();
-        return frame != null && frame.isChromatic();
+        return frame != null && frame.wasTakenWithChromaticFilter();
     }
 
     public boolean canPrintChromatic() {
@@ -378,6 +378,12 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
         PrintingProcess process = getPrintingProcess(frame);
         printFrame(frame, process, false);
+
+        // Band-aid fix to not leave sheet in input slot.
+        if (getItem(Lightroom.PAPER_SLOT).getItem() instanceof ChromaticSheetItem) {
+            getItem(Lightroom.PAPER_SLOT).shrink(1);
+            setChanged();
+        }
     }
 
     protected ItemStack createPrintResult(ExposureFrame frame, PrintingProcess process) {
@@ -434,6 +440,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     protected void consumePrintIngredients(ExposureFrame frame, PrintingProcess process) {
         getItem(Lightroom.PAPER_SLOT).shrink(1);
         process.getRequiredDyes().forEach(dye -> getItem(DYE_SLOTS.get(dye)).shrink(1));
+        setChanged();
     }
 
     protected void awardExperienceForPrint(ExposureFrame frame, PrintingProcess process, ItemStack result) {

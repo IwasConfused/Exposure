@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.item;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.TrichromeExposureDataCreator;
@@ -13,7 +14,7 @@ import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.client.WaitForExposureChangeS2CP;
-import io.github.mortuusars.exposure.util.ColorChannel;
+import io.github.mortuusars.exposure.util.ChromaticChannel;
 import io.github.mortuusars.exposure.warehouse.ImageData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
@@ -67,18 +68,18 @@ public class ChromaticSheetItem extends Item {
 
         if (!layers.isEmpty()) {
             MutableComponent component = Component.translatable("gui.exposure.channel.red")
-                    .withStyle(Style.EMPTY.withColor(ColorChannel.RED.getRepresentationColor()));
+                    .withStyle(Style.EMPTY.withColor(ChromaticChannel.RED.getRepresentationColor()));
 
             if (layers.size() >= 2) {
                 component.append(Component.translatable("gui.exposure.channel.separator").withStyle(ChatFormatting.GRAY));
                 component.append(Component.translatable("gui.exposure.channel.green")
-                        .withStyle(Style.EMPTY.withColor(ColorChannel.GREEN.getRepresentationColor())));
+                        .withStyle(Style.EMPTY.withColor(ChromaticChannel.GREEN.getRepresentationColor())));
             }
 
             if (layers.size() >= 3) {
                 component.append(Component.translatable("gui.exposure.channel.separator").withStyle(ChatFormatting.GRAY));
                 component.append(Component.translatable("gui.exposure.channel.blue")
-                        .withStyle(Style.EMPTY.withColor(ColorChannel.BLUE.getRepresentationColor())));
+                        .withStyle(Style.EMPTY.withColor(ChromaticChannel.BLUE.getRepresentationColor())));
             }
 
             tooltipComponents.add(component);
@@ -157,6 +158,7 @@ public class ChromaticSheetItem extends Item {
         ExposureFrame frameData = ExposureFrame.intersect(new ExposureIdentifier(exposureId), layers);
         frameData = frameData.toMutable()
                 .setType(ExposureType.COLOR)
+                .updateAdditionalData(tag -> tag.putBoolean(ExposureFrameTag.CHROMATIC, true))
                 .setChromatic(true)
                 .toImmutable();
 

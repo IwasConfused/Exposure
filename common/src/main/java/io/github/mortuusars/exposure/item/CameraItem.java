@@ -30,7 +30,7 @@ import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.CameraInHand;
-import io.github.mortuusars.exposure.util.ColorChannel;
+import io.github.mortuusars.exposure.util.ChromaticChannel;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
@@ -497,6 +497,7 @@ public class CameraItem extends Item {
     }
 
     public ExposureFrameDataFromClient getClientSideFrameData(Player player, ItemStack cameraStack) {
+        //TODO: figure out how to know when image was loaded
         boolean projectingFile = hasInterplanarProjectorFilter(cameraStack) && ExposureClient.isShaderActive();
 
         List<UUID> entitiesInFrame;
@@ -517,7 +518,6 @@ public class CameraItem extends Item {
     }
 
     public void exposeFrameClientside(Player player, NewCamera camera, String exposureId, boolean flashHasFired) {
-
 //        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
 
 //        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevelBeforeShot, flashHasFired))
@@ -623,7 +623,7 @@ public class CameraItem extends Item {
         }
         if (filmItem.getType() == ExposureType.BLACK_AND_WHITE) {
             StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
-            ColorChannel.fromStack(filterStack.getForReading()).ifPresentOrElse(
+            ChromaticChannel.fromStack(filterStack.getForReading()).ifPresentOrElse(
                     channel -> capture.addComponent(new SelectiveChannelBlackAndWhiteComponent(channel)),
                     () -> capture.addComponent(new BlackAndWhiteComponent()));
         }
@@ -681,10 +681,12 @@ public class CameraItem extends Item {
             tag.putInt(ExposureFrameTag.LIGHT_LEVEL, lightLevel);
         }
 
+        // Chromatic channel
+        ChromaticChannel.fromStack(getAttachment(cameraStack, AttachmentType.FILTER).getForReading())
+                .ifPresent(channel -> tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
+
         // Do not forget to add data from client:
         tag.merge(dataFromClient.extraData());
-
-
 
 
 
@@ -761,8 +763,8 @@ public class CameraItem extends Item {
         //TODO: modifyEntityInFrameData event
 
 
-        return new ExposureFrame(new ExposureIdentifier(id), type, dataFromClient.loadingFromFile(),
-                false, new Photographer(player), entitiesInFrame, CustomData.of(tag));
+
+        return new ExposureFrame(new ExposureIdentifier(id), type, new Photographer(player), entitiesInFrame, CustomData.of(tag));
     }
 
     public void addFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrame exposureFrame) {
