@@ -1,13 +1,9 @@
 package io.github.mortuusars.exposure.camera.viewfinder;
 
 import io.github.mortuusars.exposure.PlatformHelper;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.core.camera.AttachmentType;
-import io.github.mortuusars.exposure.data.filter.Filter;
 import io.github.mortuusars.exposure.data.filter.Filters;
-import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;

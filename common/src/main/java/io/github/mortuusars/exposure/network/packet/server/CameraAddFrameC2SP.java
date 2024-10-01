@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureFrameDataFromClient;
-import io.github.mortuusars.exposure.core.NewCamera;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,8 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Optional;
 
 public record CameraAddFrameC2SP(CameraAccessor cameraAccessor,
                                  ExposureFrameDataFromClient frameDataFromClient) implements IPacket {

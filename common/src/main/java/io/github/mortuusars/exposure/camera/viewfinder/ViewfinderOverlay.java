@@ -6,7 +6,7 @@ import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.NewCamera;
+import io.github.mortuusars.exposure.core.Camera;
 import io.github.mortuusars.exposure.core.camera.AttachmentType;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.item.CameraItem;
@@ -68,12 +68,12 @@ public class ViewfinderOverlay {
         if (minecraft.options.hideGui)
             return;
 
-        Optional<NewCamera> activeCamera = CameraClient.getActiveCamera();
-        if (activeCamera.isEmpty()) {
+        Optional<Camera> activeCamera = CameraClient.getActiveCamera();
+        if (activeCamera.isEmpty() || !activeCamera.get().isActive()) {
             return;
         }
 
-        NewCamera camera = activeCamera.get();
+        Camera camera = activeCamera.get();
         CameraItem cameraItem = camera.getItem();
         ItemStack cameraStack = camera.getItemStack();
 

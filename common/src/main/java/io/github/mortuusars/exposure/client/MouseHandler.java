@@ -3,13 +3,11 @@ package io.github.mortuusars.exposure.client;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.Camera;
+import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
-
-import java.util.Optional;
 
 public class MouseHandler {
     private static final boolean[] heldMouseButtons = new boolean[12];
@@ -23,8 +21,7 @@ public class MouseHandler {
             return false;
         }
 
-        Optional<Camera<?>> cameraOpt = Camera.getCamera(player);
-        if (cameraOpt.isEmpty()) {
+        if (CameraClient.getActiveCamera().isEmpty()) {
             return false;
         }
 

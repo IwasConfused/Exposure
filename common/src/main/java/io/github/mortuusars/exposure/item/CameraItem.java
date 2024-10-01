@@ -7,7 +7,6 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.capture.Capture;
 import io.github.mortuusars.exposure.camera.capture.CaptureManager;
 import io.github.mortuusars.exposure.camera.capture.FileCapture;
@@ -29,7 +28,6 @@ import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
-import io.github.mortuusars.exposure.util.CameraInHand;
 import io.github.mortuusars.exposure.util.ChromaticChannel;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -372,6 +370,10 @@ public class CameraItem extends Item {
 
         if (!inHand) {
             deactivate(player, stack);
+
+            if (level.isClientSide() && Viewfinder.isOpen()) {
+                Viewfinder.close();
+            }
         }
     }
 
@@ -381,11 +383,12 @@ public class CameraItem extends Item {
         if (player != null) {
             InteractionHand hand = context.getHand();
 
-            if (hand == InteractionHand.MAIN_HAND && Camera.getCamera(player)
-                    .filter(c -> c instanceof CameraInHand<?>)
-                    .map(c -> ((CameraInHand<?>) c).getHand() == InteractionHand.OFF_HAND).orElse(false)) {
-                return InteractionResult.PASS;
-            }
+            //TODO: both hands
+//            if (hand == InteractionHand.MAIN_HAND && Camera.getCamera(player)
+//                    .filter(c -> c instanceof CameraInHand<?>)
+//                    .map(c -> ((CameraInHand<?>) c).getHand() == InteractionHand.OFF_HAND).orElse(false)) {
+//                return InteractionResult.PASS;
+//            }
 
             return useCamera(player, hand);
         }
@@ -432,10 +435,10 @@ public class CameraItem extends Item {
 
         if (!active) {
             activate(player, cameraStack);
-            CameraClient.activateCamera(CameraAccessors.ofHand(hand));
             player.getCooldowns().addCooldown(this, 4);
 
             if (player.level().isClientSide) {
+                CameraClient.setActiveCameraAccessor(CameraAccessors.ofHand(hand));
                 // Release use key after activating. Otherwise, if right click is still held - camera will take a shot
                 CameraItemClientExtensions.releaseUseButton();
             }
@@ -517,7 +520,7 @@ public class CameraItem extends Item {
         return new ExposureFrameDataFromClient(projectingFile, entitiesInFrame, extraData);
     }
 
-    public void exposeFrameClientside(Player player, NewCamera camera, String exposureId, boolean flashHasFired) {
+    public void exposeFrameClientside(Player player, Camera camera, String exposureId, boolean flashHasFired) {
 //        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
 
 //        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevelBeforeShot, flashHasFired))

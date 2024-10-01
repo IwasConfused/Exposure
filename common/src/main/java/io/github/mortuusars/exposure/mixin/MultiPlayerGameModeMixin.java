@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.mixin;
 
-import io.github.mortuusars.exposure.camera.Camera;
-import io.github.mortuusars.exposure.util.CameraInHand;
+import io.github.mortuusars.exposure.camera.CameraClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
@@ -16,8 +15,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Optional;
 
 @Mixin(MultiPlayerGameMode.class)
 public abstract class MultiPlayerGameModeMixin {
@@ -46,17 +43,10 @@ public abstract class MultiPlayerGameModeMixin {
             return false;
         }
 
-        Optional<Camera<?>> cameraOpt = Camera.getCamera(player);
-        if (cameraOpt.isEmpty()) {
-            return false;
-        }
-
-        Camera<?> camera = cameraOpt.get();
-        if (camera instanceof CameraInHand<?> cameraInHand) {
-            gameMode.useItem(player, cameraInHand.getHand());
-            return true;
-        }
-
-        return false;
+        return CameraClient.getActiveCamera().map(camera ->
+                camera.getHand().map(hand -> {
+                    gameMode.useItem(player, hand);
+                    return true;
+                }).orElse(false)).orElse(false);
     }
 }

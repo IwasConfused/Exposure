@@ -9,9 +9,9 @@ import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
+import io.github.mortuusars.exposure.core.Camera;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.CameraAccessors;
-import io.github.mortuusars.exposure.core.NewCamera;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderOverlay;
@@ -67,7 +67,7 @@ public class CameraControlsScreen extends Screen {
     private final Player player;
     private final ClientLevel level;
     private final long openedAtTimestamp;
-    private final NewCamera camera;
+    private final Camera camera;
     private int leftPos;
     private int topPos;
 

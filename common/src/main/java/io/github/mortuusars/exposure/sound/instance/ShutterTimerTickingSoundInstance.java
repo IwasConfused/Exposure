@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.sound.instance;
 
+import io.github.mortuusars.exposure.core.Camera;
 import io.github.mortuusars.exposure.core.CameraAccessor;
-import io.github.mortuusars.exposure.core.NewCamera;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.component.camera.ShutterState;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
@@ -41,7 +41,7 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
             return;
         }
 
-        Optional<NewCamera> cameraOpt = cameraAccessor.getCamera(entity);
+        Optional<Camera> cameraOpt = cameraAccessor.getCamera(entity);
         if (cameraOpt.isEmpty()) {
             if (!(entity instanceof Player player)) {
                 stop();
@@ -64,7 +64,7 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
         }
         else {
             volume = fullVolume;
-            NewCamera camera = cameraOpt.get();
+            Camera camera = cameraOpt.get();
             ShutterState shutterState = camera.getItem().getShutterState(camera.getItemStack());
             if (!shutterState.isOpen() || !shutterState.shutterSpeed().shouldCauseTickingSound()) {
                 stop();

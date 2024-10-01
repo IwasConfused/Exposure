@@ -3,13 +3,11 @@ package io.github.mortuusars.exposure;
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
 import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.block.LightroomBlock;
 import io.github.mortuusars.exposure.block.entity.FlashBlockEntity;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.FlashMode;
 import io.github.mortuusars.exposure.command.argument.ExposureLookArgument;
@@ -30,7 +28,6 @@ import io.github.mortuusars.exposure.menu.*;
 import io.github.mortuusars.exposure.recipe.FilmDevelopingRecipe;
 import io.github.mortuusars.exposure.recipe.PhotographAgingRecipe;
 import io.github.mortuusars.exposure.recipe.PhotographCopyingRecipe;
-import io.github.mortuusars.exposure.util.CameraInHand;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
@@ -53,7 +50,6 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -87,7 +83,7 @@ public class Exposure {
         SoundEvents.init();
         ArgumentTypes.init();
 
-        Camera.registerCameraGetter(Exposure.resource("camera_in_hand"), player -> CameraInHand.ofPlayer(player, CameraItem.class));
+//        Camera.registerCameraGetter(Exposure.resource("camera_in_hand"), player -> CameraInHand.ofPlayer(player, CameraItem.class));
     }
 
     public static void initServer(MinecraftServer server) {

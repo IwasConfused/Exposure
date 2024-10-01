@@ -17,13 +17,13 @@ public final class CameraAccessor {
             CameraAccessors::byId
     );
 
-    private final Function<Entity, Optional<NewCamera>> accessFunction;
+    private final Function<Entity, Optional<Camera>> accessFunction;
 
-    public CameraAccessor(Function<Entity, Optional<NewCamera>> accessFunction) {
+    public CameraAccessor(Function<Entity, Optional<Camera>> accessFunction) {
         this.accessFunction = accessFunction;
     }
 
-    public Optional<NewCamera> getCamera(Entity entity) {
+    public Optional<Camera> getCamera(Entity entity) {
         return accessFunction.apply(entity);
     }
 }

@@ -4,20 +4,19 @@ package io.github.mortuusars.exposure.camera.viewfinder;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.core.Camera;
 import io.github.mortuusars.exposure.core.camera.FocalRange;
 import io.github.mortuusars.exposure.core.camera.ZoomDirection;
-import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.Fov;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.util.Mth;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Viewfinder {
     public static final float ZOOM_STEP = 8f;
@@ -46,12 +45,15 @@ public class Viewfinder {
         if (isOpen())
             return;
 
-        Camera<?> camera = Camera.getCamera(player).orElseThrow();
-        CameraItem cameraItem = camera.get().getItem();
-        ItemStack cameraStack = camera.get().getItemStack();
+        Optional<Camera> activeCamera = CameraClient.getActiveCamera();
+        if (activeCamera.isEmpty()) {
+            return;
+        }
 
-        focalRange = cameraItem.getFocalRange(cameraStack);
-        targetFov = Fov.focalLengthToFov(Mth.clamp(cameraItem.getZoom(cameraStack), focalRange.min(), focalRange.max()));
+        Camera camera = activeCamera.get();
+
+        focalRange = camera.getItem().getFocalRange(camera.getItemStack());
+        targetFov = Fov.focalLengthToFov(Mth.clamp(camera.getItem().getZoom(camera.getItemStack()), focalRange.min(), focalRange.max()));
 
         isOpen = true;
 

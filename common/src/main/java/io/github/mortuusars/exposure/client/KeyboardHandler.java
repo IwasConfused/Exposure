@@ -48,7 +48,7 @@ public class KeyboardHandler {
                 if (minecraft.screen instanceof CameraControlsScreen viewfinderControlsScreen) {
                     viewfinderControlsScreen.onClose();
                 } else {
-                    CameraClient.deactivateCamera();
+                    CameraClient.deactivateCameraAndSendToServer();
                 }
             }
             return true;

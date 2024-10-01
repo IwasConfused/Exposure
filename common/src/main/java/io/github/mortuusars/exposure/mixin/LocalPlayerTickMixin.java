@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin;
 
 import com.mojang.authlib.GameProfile;
-import io.github.mortuusars.exposure.camera.Camera;
+import io.github.mortuusars.exposure.camera.CameraClient;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -22,7 +22,7 @@ public abstract class LocalPlayerTickMixin extends Player {
     private void onPlayerTickEnd(CallbackInfo ci) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (((LocalPlayer)(Object)this).equals(player)) {
-            Camera.onLocalPlayerTick(player);
+            CameraClient.onLocalPlayerTick(player);
         }
     }
 }

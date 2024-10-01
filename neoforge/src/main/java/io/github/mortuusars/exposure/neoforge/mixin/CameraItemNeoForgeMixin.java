@@ -1,9 +1,7 @@
 package io.github.mortuusars.exposure.neoforge.mixin;
 
-import io.github.mortuusars.exposure.camera.Camera;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.neoforge.item.CameraItemForgeClientExtensions;
-import io.github.mortuusars.exposure.util.CameraInHand;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -33,11 +31,12 @@ public abstract class CameraItemNeoForgeMixin extends Item implements IItemExten
         if (player != null) {
             InteractionHand hand = context.getHand();
 
-            if (hand == InteractionHand.MAIN_HAND && Camera.getCamera(player)
-                    .filter(c -> c instanceof CameraInHand<?>)
-                    .map(c -> ((CameraInHand<?>) c).getHand() == InteractionHand.OFF_HAND).orElse(false)) {
-                return InteractionResult.PASS;
-            }
+            //TODO: both hands
+//            if (hand == InteractionHand.MAIN_HAND && Camera.getCamera(player)
+//                    .filter(c -> c instanceof CameraInHand<?>)
+//                    .map(c -> ((CameraInHand<?>) c).getHand() == InteractionHand.OFF_HAND).orElse(false)) {
+//                return InteractionResult.PASS;
+//            }
 
             return useCamera(player, hand);
         }

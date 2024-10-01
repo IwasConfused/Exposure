@@ -15,7 +15,7 @@ public abstract class MinecraftMixin {
     @Inject(method = "setScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/Screen;added()V"))
     void onSetScreen(Screen screen, CallbackInfo ci) {
         if (Viewfinder.isOpen() && !(screen instanceof CameraControlsScreen)) {
-            CameraClient.deactivateCamera();
+            CameraClient.deactivateCameraAndSendToServer();
         }
     }
 }

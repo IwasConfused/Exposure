@@ -19,7 +19,8 @@ public class CameraAccessors {
             new CameraAccessor(entity -> {
                 if (entity instanceof LivingEntity livingEntity) {
                     ItemStack itemInHand = livingEntity.getItemInHand(InteractionHand.MAIN_HAND);
-                    return itemInHand.getItem() instanceof CameraItem ? Optional.of(new NewCamera(itemInHand)) : Optional.empty();
+                    return itemInHand.getItem() instanceof CameraItem
+                            ? Optional.of(new Camera(itemInHand, InteractionHand.MAIN_HAND)) : Optional.empty();
                 }
                 return Optional.empty();
             }));
@@ -28,7 +29,8 @@ public class CameraAccessors {
             new CameraAccessor(entity -> {
                 if (entity instanceof LivingEntity livingEntity) {
                     ItemStack itemInHand = livingEntity.getItemInHand(InteractionHand.OFF_HAND);
-                    return itemInHand.getItem() instanceof CameraItem ? Optional.of(new NewCamera(itemInHand)) : Optional.empty();
+                    return itemInHand.getItem() instanceof CameraItem
+                            ? Optional.of(new Camera(itemInHand, InteractionHand.OFF_HAND)) : Optional.empty();
                 }
                 return Optional.empty();
             }));
