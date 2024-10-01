@@ -2,6 +2,7 @@
 
 ## UNRELEASED 1.21
 - Added `/exposure debug develop_film_in_hand` command.
+- Film Roll renaming screen now has a sound when item is renamed and Enter key can be used to quickly apply changes.
 
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.

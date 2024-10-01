@@ -6,6 +6,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
@@ -108,7 +110,10 @@ public class ItemRenameMenu extends AbstractContainerMenu {
     @Override
     public boolean clickMenuButton(Player player, int id) {
         if (id == APPLY_BUTTON_ID) {
-            playerInventory.setItem(slot, getSlot(0).getItem());
+            if (!getSlot(0).getItem().getHoverName().getString().equals(playerInventory.getItem(slot).getHoverName().getString())) {
+                playerInventory.setItem(slot, getSlot(0).getItem());
+                player.level().playSound(player, player, Exposure.SoundEvents.WRITE.get(), SoundSource.PLAYERS, 0.8f, 1f);
+            }
         }
         return super.clickMenuButton(player, id);
     }

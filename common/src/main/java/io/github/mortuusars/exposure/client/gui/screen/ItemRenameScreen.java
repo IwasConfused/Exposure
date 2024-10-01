@@ -11,10 +11,12 @@ import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +26,7 @@ import java.util.Objects;
 public class ItemRenameScreen extends AbstractContainerScreen<ItemRenameMenu> {
     public static final ResourceLocation TEXTURE = Exposure.resource("textures/gui/item_rename.png");
 
-    private EditBox name;
+    protected EditBox name;
 
     public ItemRenameScreen(ItemRenameMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -62,13 +64,13 @@ public class ItemRenameScreen extends AbstractContainerScreen<ItemRenameMenu> {
         addRenderableWidget(cancelButton);
     }
 
-    private void confirm() {
+    protected void confirm() {
         getMenu().clickMenuButton(Minecraft.getInstance().player, ItemRenameMenu.APPLY_BUTTON_ID);
         Objects.requireNonNull(Minecraft.getInstance().gameMode).handleInventoryButtonClick(getMenu().containerId, ItemRenameMenu.APPLY_BUTTON_ID);
         onClose();
     }
 
-    private void cancel() {
+    protected void cancel() {
         onClose();
     }
 
@@ -102,7 +104,7 @@ public class ItemRenameScreen extends AbstractContainerScreen<ItemRenameMenu> {
         guiGraphics.blit(TEXTURE, leftPos, topPos, 0, 0, imageWidth, imageHeight);
     }
 
-    private void onNameChanged(String name) {
+    protected void onNameChanged(String name) {
         ItemStack itemStack = getMenu().getSlot(0).getItem();
         if (!itemStack.has(DataComponents.CUSTOM_NAME) && name.equals(itemStack.getHoverName().getString())) {
             name = "";
@@ -117,6 +119,12 @@ public class ItemRenameScreen extends AbstractContainerScreen<ItemRenameMenu> {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == 256) {
             onClose();
+        }
+
+        if (keyCode == InputConstants.KEY_RETURN) {
+            confirm();
+            Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK.value(), 1f));
+            return true;
         }
 
         if (keyCode != InputConstants.KEY_TAB && (name.keyPressed(keyCode, scanCode, modifiers) || name.canConsumeInput())) {
