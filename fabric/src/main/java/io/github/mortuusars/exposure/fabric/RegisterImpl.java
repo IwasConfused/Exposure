@@ -119,7 +119,7 @@ public class RegisterImpl {
         var builder = DataComponentType.<T>builder();
         builderConsumer.accept(builder);
         var componentType = builder.build();
-        return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Exposure.ID + name, componentType);
+        return Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Exposure.resource(name), componentType);
     }
 
     public static <T extends ParticleType<? extends ParticleOptions>> Supplier<T> particleType(String name, Supplier<T> supplier) {

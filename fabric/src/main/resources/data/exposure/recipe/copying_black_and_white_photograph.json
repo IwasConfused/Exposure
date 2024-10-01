@@ -6,9 +6,7 @@
       "item": "minecraft:potion"
     },
     "components": {
-      "exposure:photograph_frame": {
-        "type": "color"
-      }
+      "exposure:photograph_type": "black_and_white"
     }
   },
   "ingredients": [
