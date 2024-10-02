@@ -154,6 +154,7 @@ public class Config {
         public static final ModConfigSpec.BooleanValue PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR;
         public static final ModConfigSpec.BooleanValue SIGNED_ALBUM_GLINT;
         public static final ModConfigSpec.BooleanValue ALBUM_SHOW_PHOTOS_COUNT;
+        public static final ModConfigSpec.BooleanValue DIFFERENT_DEVELOPING_POTION_COLORS;
 
         // CAPTURE
         public static final ModConfigSpec.IntValue CAPTURE_DELAY_FRAMES;
@@ -221,6 +222,9 @@ public class Config {
                         .comment("Signed Album item will have an enchantment glint.")
                         .define("SignedAlbumGlint", true);
 
+                DIFFERENT_DEVELOPING_POTION_COLORS = builder
+                        .comment("Mundane, Awkward and Thick potions will have their color changed slightly, so it's easier to tell them apart. Default: true")
+                        .define("DifferentDevelopingPotionsColors", true);
 
                 {
                     builder.push("Viewfinder");

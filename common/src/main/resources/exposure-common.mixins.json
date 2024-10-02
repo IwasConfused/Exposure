@@ -24,6 +24,7 @@
     "LecternBlockEntityMixin",
     "LecternMixin",
     "PlayerMixin",
+    "PotionContentsMixin",
     "ServerGamePacketListenerMixin"
   ],
   "injectors": {
