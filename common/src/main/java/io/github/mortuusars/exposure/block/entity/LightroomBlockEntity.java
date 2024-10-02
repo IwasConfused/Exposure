@@ -305,7 +305,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     protected PrintingProcess getPrintingProcess(@NotNull ExposureFrame frame) {
         PrintingMode printingMode = getPrintingMode();
 
-        if (printingMode == PrintingMode.REGULAR) {
+        if (printingMode == PrintingMode.REGULAR || !canPrintChromatic()) {
             return PrintingProcess.fromExposureType(frame.type());
         }
 
