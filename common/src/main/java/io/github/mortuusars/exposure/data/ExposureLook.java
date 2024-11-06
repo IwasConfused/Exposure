@@ -1,21 +1,20 @@
 package io.github.mortuusars.exposure.data;
 
-import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
-import io.github.mortuusars.exposure.core.pixel_modifiers.IPixelModifier;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum ExposureLook implements StringRepresentable {
-    REGULAR("regular", ExposurePixelModifiers.EMPTY),
-    AGED("aged", ExposurePixelModifiers.AGED),
-    NEGATIVE("negative", ExposurePixelModifiers.NEGATIVE),
-    NEGATIVE_FILM("negative_film", ExposurePixelModifiers.NEGATIVE_FILM);
+    REGULAR("regular", PixelModifier.EMPTY),
+    AGED("aged", PixelModifier.AGED),
+    NEGATIVE("negative", PixelModifier.NEGATIVE),
+    NEGATIVE_FILM("negative_film", PixelModifier.NEGATIVE_FILM);
 
     private final String name;
-    private final IPixelModifier modifier;
+    private final PixelModifier modifier;
 
-    ExposureLook(String name, IPixelModifier modifier) {
+    ExposureLook(String name, PixelModifier modifier) {
         this.name = name;
         this.modifier = modifier;
     }
@@ -34,7 +33,7 @@ public enum ExposureLook implements StringRepresentable {
         return name;
     }
 
-    public IPixelModifier getModifier() {
+    public PixelModifier getModifier() {
         return modifier;
     }
 

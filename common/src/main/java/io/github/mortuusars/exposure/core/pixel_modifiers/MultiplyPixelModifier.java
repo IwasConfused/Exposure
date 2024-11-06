@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.core.pixel_modifiers;
 
 import net.minecraft.util.FastColor;
 
-public class MultiplyPixelModifier implements IPixelModifier {
+public class MultiplyPixelModifier implements PixelModifier {
     public final int multiplyColor;
 
     public MultiplyPixelModifier(int multiplyColor) {

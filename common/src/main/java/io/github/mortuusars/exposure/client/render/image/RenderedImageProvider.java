@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.core.image.EmptyImage;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
-import io.github.mortuusars.exposure.core.image.IImage;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
@@ -13,11 +13,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class RenderedImageProvider {
     public static final RenderedImageProvider EMPTY = new RenderedImageProvider(new EmptyImage());
-    public static final RenderedImageProvider HIDDEN = new RenderedImageProvider(TextureImage.getTexture(Exposure.resource("textures/exposure/pack.png")));
+    public static final RenderedImageProvider HIDDEN = new RenderedImageProvider(ResourceImage.getOrCreate(
+            Exposure.resource("textures/exposure/pack.png")));
 
-    protected final IImage image;
+    protected final Image image;
 
-    public RenderedImageProvider(IImage image) {
+    public RenderedImageProvider(Image image) {
         this.image = image;
     }
 
@@ -31,11 +32,11 @@ public class RenderedImageProvider {
             return HIDDEN;
         }
 
-        @Nullable IImage image = frame.identifier().map(
+        @Nullable Image image = frame.identifier().map(
                 id -> ExposureClient.exposureCache().getOrQuery(id)
                         .map(data -> new ExposureDataImage(id, data))
                         .orElse(null),
-                TextureImage::getTexture);
+                ResourceImage::getOrCreate);
 
         if (image != null) {
             return new RenderedImageProvider(image);
@@ -66,11 +67,11 @@ public class RenderedImageProvider {
         return false;
     }
 
-    public IImage get() {
+    public Image get() {
         return image;
     }
 
     public String getInstanceId() {
-        return get().getImageId();
+        return get().id();
     }
 }

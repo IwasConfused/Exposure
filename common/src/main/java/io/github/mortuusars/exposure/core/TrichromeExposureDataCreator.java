@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.core;
 
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.capture.converter.DitheringColorConverter;
-import io.github.mortuusars.exposure.core.image.IImage;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.warehouse.ImageData;
 import net.minecraft.util.FastColor;
 import org.slf4j.Logger;
@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 public class TrichromeExposureDataCreator {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static ImageData create(IImage red, IImage green, IImage blue, String creator) {
+    public static ImageData create(Image red, Image green, Image blue, String creator) {
         int width = Math.min(red.getWidth(), Math.min(green.getWidth(), blue.getWidth()));
         int height = Math.min(red.getHeight(), Math.min(green.getHeight(), blue.getHeight()));
         if (width <= 0 ||height <= 0) {

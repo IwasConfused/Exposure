@@ -3,8 +3,8 @@ package io.github.mortuusars.exposure.warehouse.client;
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.pixel_modifiers.IPixelModifier;
 import io.github.mortuusars.exposure.data.export.ExposureExporter;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import net.minecraft.world.level.material.MapColor;
@@ -56,7 +56,7 @@ public class ClientsideExposureExporter extends ExposureExporter<ClientsideExpos
         int width = savedData.getWidth();
         int height = savedData.getHeight();
         NativeImage image = new NativeImage(width, height, false);
-        IPixelModifier modifier = getModifier();
+        PixelModifier modifier = getModifier();
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {

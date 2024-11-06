@@ -4,7 +4,7 @@ import io.github.mortuusars.exposure.core.FilmColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class TintedNegativeFilmPixelModifier implements IPixelModifier {
+public class TintedNegativeFilmPixelModifier implements PixelModifier {
     private final FilmColor filmColor;
 
     public TintedNegativeFilmPixelModifier(FilmColor tintColor) {

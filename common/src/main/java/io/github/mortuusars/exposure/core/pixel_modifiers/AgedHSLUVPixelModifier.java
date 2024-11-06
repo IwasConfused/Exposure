@@ -5,7 +5,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.StringUtils;
 
-public class AgedHSLUVPixelModifier implements IPixelModifier {
+public class AgedHSLUVPixelModifier implements PixelModifier {
     public final int tintColor;
     public final double[] tintColorHsluv;
     public final float tintOpacity;

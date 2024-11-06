@@ -2,13 +2,18 @@ package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mortuusars.exposure.client.Censor;
+import io.github.mortuusars.exposure.client.render.image.ResourceImage;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.image.ExposureDataImage;
+import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureCache;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureReceiver;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.client.render.ExposureRenderer;
-import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -48,6 +53,23 @@ public class ExposureClient {
 
     public static ExposureData getOrQuery(String exposureId) {
         return exposureCache().getOrQueryAndEmpty(exposureId);
+    }
+
+    public static Image createExposureImage(ExposureFrame frame) {
+        if (!Censor.isAllowedToRender(frame)) {
+            //TODO: move to belonging class
+            return Censor.HIDDEN_IMAGE;
+        }
+
+        return createExposureImage(frame.identifier());
+    }
+
+    private static Image createExposureImage(ExposureIdentifier identifier) {
+        return identifier.map(
+                id -> ExposureClient.exposureCache().getOrQuery(id)
+                        .map(data -> (Image)new ExposureDataImage(id, data))
+                        .orElse(Image.EMPTY),
+                ResourceImage::getOrCreate);
     }
 
     public static ExposureRenderer exposureRenderer() {

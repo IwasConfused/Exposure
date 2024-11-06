@@ -1,9 +1,8 @@
 package io.github.mortuusars.exposure.client.render;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.pixel_modifiers.IPixelModifier;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -20,7 +19,7 @@ public class PhotographRenderProperties {
             EMPTY_TEXTURE,
             Exposure.resource("textures/photograph/photograph_album.png"),
             EMPTY_TEXTURE,
-            ExposurePixelModifiers.EMPTY);
+            PixelModifier.EMPTY);
 
     public static final PhotographRenderProperties AGED = new PhotographRenderProperties("aged",
             stack -> stack.is(Exposure.Items.AGED_PHOTOGRAPH.get()),
@@ -28,7 +27,7 @@ public class PhotographRenderProperties {
             Exposure.resource("textures/photograph/aged_photograph_overlay.png"),
             Exposure.resource("textures/photograph/aged_photograph_album.png"),
             Exposure.resource("textures/photograph/aged_photograph_album_overlay.png"),
-            ExposurePixelModifiers.AGED);
+            PixelModifier.AGED);
 
     private static final List<PhotographRenderProperties> registeredProperties = new ArrayList<>();
 
@@ -38,7 +37,7 @@ public class PhotographRenderProperties {
     private final ResourceLocation overlayTexture;
     private final ResourceLocation albumPaperTexture;
     private final ResourceLocation albumPaperOverlayTexture;
-    private final IPixelModifier modifier;
+    private final PixelModifier modifier;
 
     static {
         register(PhotographRenderProperties.AGED);
@@ -46,7 +45,7 @@ public class PhotographRenderProperties {
 
     public PhotographRenderProperties(String id, Predicate<ItemStack> stackPredicate, ResourceLocation paperTexture,
                                       ResourceLocation overlayTexture, ResourceLocation albumPaperTexture,
-                                      ResourceLocation albumPaperOverlayTexture, IPixelModifier modifier) {
+                                      ResourceLocation albumPaperOverlayTexture, PixelModifier modifier) {
         this.id = id;
         this.stackPredicate = stackPredicate;
         this.paperTexture = paperTexture;
@@ -80,7 +79,7 @@ public class PhotographRenderProperties {
         return albumPaperOverlayTexture;
     }
 
-    public IPixelModifier getModifier() {
+    public PixelModifier getModifier() {
         return modifier;
     }
 

@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.data.export;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.pixel_modifiers.IPixelModifier;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.util.Color;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import net.minecraft.world.level.material.MapColor;
@@ -62,7 +62,7 @@ public class ServersideExposureExporter extends ExposureExporter<ServersideExpos
         int width = savedData.getWidth();
         int height = savedData.getHeight();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-        IPixelModifier modifier = getModifier();
+        PixelModifier modifier = getModifier();
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {

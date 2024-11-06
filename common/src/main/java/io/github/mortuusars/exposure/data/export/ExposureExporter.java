@@ -1,8 +1,7 @@
 package io.github.mortuusars.exposure.data.export;
 
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
-import io.github.mortuusars.exposure.core.pixel_modifiers.IPixelModifier;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +18,7 @@ public abstract class ExposureExporter<T extends ExposureExporter<?>> {
     private String folder = "exposures";
     @Nullable
     private String worldName = null;
-    private IPixelModifier modifier = ExposurePixelModifiers.EMPTY;
+    private PixelModifier modifier = PixelModifier.EMPTY;
     private ExposureSize size = ExposureSize.X1;
 
     public ExposureExporter(String name) {
@@ -29,7 +28,7 @@ public abstract class ExposureExporter<T extends ExposureExporter<?>> {
     public String getName() { return name; }
     public String getFolder() { return folder; }
     public @Nullable String getWorldSubfolder() { return worldName; }
-    public IPixelModifier getModifier() { return modifier; }
+    public PixelModifier getModifier() { return modifier; }
     public ExposureSize getSize() { return size; }
 
     @SuppressWarnings("unchecked")
@@ -57,7 +56,7 @@ public abstract class ExposureExporter<T extends ExposureExporter<?>> {
     }
 
     @SuppressWarnings("unchecked")
-    public T withModifier(IPixelModifier modifier) {
+    public T withModifier(PixelModifier modifier) {
         this.modifier = modifier;
         return (T)this;
     }

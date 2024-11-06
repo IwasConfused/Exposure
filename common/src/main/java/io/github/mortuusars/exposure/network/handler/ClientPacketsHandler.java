@@ -15,6 +15,7 @@ import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.ExposureSize;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
@@ -23,7 +24,6 @@ import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.network.packet.client.*;
-import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
 import io.github.mortuusars.exposure.util.ClientsideWorldNameGetter;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.ChatFormatting;
@@ -71,7 +71,7 @@ public class ClientPacketsHandler {
                             new ClientsideExposureExporter(filename)
                                     .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(),
                                             ClientsideWorldNameGetter::getWorldName)
-                                    .withModifier(ExposurePixelModifiers.EMPTY)
+                                    .withModifier(PixelModifier.EMPTY)
                                     .withSize(ExposureSize.X1),
                             new ICaptureComponent() {
                                 @Override

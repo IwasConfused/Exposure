@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.core.pixel_modifiers;
 
 import net.minecraft.util.FastColor;
 
-public class NegativePixelModifier implements IPixelModifier {
+public class NegativePixelModifier implements PixelModifier {
     @Override
     public String getIdSuffix() {
         return "_negative";

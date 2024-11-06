@@ -10,10 +10,10 @@ import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.client.render.image.RenderedImageProvider;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
-import io.github.mortuusars.exposure.core.image.IImage;
-import io.github.mortuusars.exposure.client.render.image.TextureImage;
+import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.client.render.image.ResourceImage;
+import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
-import io.github.mortuusars.exposure.core.pixel_modifiers.ExposurePixelModifiers;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
@@ -100,10 +100,10 @@ public class NegativeExposureScreen extends ZoomableScreen {
         if (type == null)
             type = ExposureType.BLACK_AND_WHITE;
 
-        @Nullable IImage image = exposureIdentifier.map(
+        @Nullable Image image = exposureIdentifier.map(
                 id -> ExposureClient.exposureCache().getOrQuery(id)
                         .map(data -> new ExposureDataImage(id, data)).orElse(null),
-                TextureImage::getTexture
+                ResourceImage::getOrCreate
         );
 
         if (image == null)
@@ -139,7 +139,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
         }
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        ExposureClient.exposureRenderer().render(new RenderedImageProvider(image), ExposurePixelModifiers.NEGATIVE_FILM,
+        ExposureClient.exposureRenderer().render(new RenderedImageProvider(image), PixelModifier.NEGATIVE_FILM,
                 guiGraphics.pose(), bufferSource, 0, 0, width, height, 0, 0, 1, 1,
                 LightTexture.FULL_BRIGHT, type.getImageColor().getRed(), type.getImageColor().getGreen(), type.getImageColor().getBlue(), 255);
         bufferSource.endBatch();

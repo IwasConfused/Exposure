@@ -3,10 +3,63 @@ package io.github.mortuusars.exposure.util;
 import java.beans.ConstructorProperties;
 
 public class Color {
+    public static final Color WHITE = new Color(255, 255, 255, 255);
+
     int value;
     private float[] frgbvalue = null;
     private float[] fvalue = null;
     private float falpha = 0.0f;
+
+
+    public Color(int r, int g, int b) {
+        this(r, g, b, 255);
+    }
+
+    @ConstructorProperties({"red", "green", "blue", "alpha"})
+    public Color(int r, int g, int b, int a) {
+        value = ((a & 0xFF) << 24) |
+                ((r & 0xFF) << 16) |
+                ((g & 0xFF) << 8)  |
+                ((b & 0xFF));
+        testColorValueRange(r,g,b,a);
+    }
+
+    public Color(int rgb) {
+        value = 0xff000000 | rgb;
+    }
+
+    public Color(int rgba, boolean hasalpha) {
+        if (hasalpha) {
+            value = rgba;
+        } else {
+            value = 0xff000000 | rgba;
+        }
+    }
+
+    public Color(float r, float g, float b) {
+        this( (int) (r*255+0.5), (int) (g*255+0.5), (int) (b*255+0.5));
+        testColorValueRange(r,g,b,1.0f);
+        frgbvalue = new float[3];
+        frgbvalue[0] = r;
+        frgbvalue[1] = g;
+        frgbvalue[2] = b;
+        falpha = 1.0f;
+        fvalue = frgbvalue;
+    }
+
+    public Color(float r, float g, float b, float a) {
+        this((int)(r*255+0.5), (int)(g*255+0.5), (int)(b*255+0.5), (int)(a*255+0.5));
+        frgbvalue = new float[3];
+        frgbvalue[0] = r;
+        frgbvalue[1] = g;
+        frgbvalue[2] = b;
+        falpha = a;
+        fvalue = frgbvalue;
+    }
+
+    public Color withAlpha(int alpha) {
+        return new Color((alpha & 0xFF) << 24 | value & 0xFFFFFF, true);
+    }
 
     private static void testColorValueRange(int r, int g, int b, int a) {
         boolean rangeError = false;
@@ -57,52 +110,6 @@ public class Color {
             throw new IllegalArgumentException("Color parameter outside of expected range:"
                     + badComponentString);
         }
-    }
-
-    public Color(int r, int g, int b) {
-        this(r, g, b, 255);
-    }
-
-    @ConstructorProperties({"red", "green", "blue", "alpha"})
-    public Color(int r, int g, int b, int a) {
-        value = ((a & 0xFF) << 24) |
-                ((r & 0xFF) << 16) |
-                ((g & 0xFF) << 8)  |
-                ((b & 0xFF));
-        testColorValueRange(r,g,b,a);
-    }
-
-    public Color(int rgb) {
-        value = 0xff000000 | rgb;
-    }
-
-    public Color(int rgba, boolean hasalpha) {
-        if (hasalpha) {
-            value = rgba;
-        } else {
-            value = 0xff000000 | rgba;
-        }
-    }
-
-    public Color(float r, float g, float b) {
-        this( (int) (r*255+0.5), (int) (g*255+0.5), (int) (b*255+0.5));
-        testColorValueRange(r,g,b,1.0f);
-        frgbvalue = new float[3];
-        frgbvalue[0] = r;
-        frgbvalue[1] = g;
-        frgbvalue[2] = b;
-        falpha = 1.0f;
-        fvalue = frgbvalue;
-    }
-
-    public Color(float r, float g, float b, float a) {
-        this((int)(r*255+0.5), (int)(g*255+0.5), (int)(b*255+0.5), (int)(a*255+0.5));
-        frgbvalue = new float[3];
-        frgbvalue[0] = r;
-        frgbvalue[1] = g;
-        frgbvalue[2] = b;
-        falpha = a;
-        fvalue = frgbvalue;
     }
 
     public int getRed() {
@@ -233,7 +240,7 @@ public class Color {
         return a << 24 | r << 16 | g << 8 | b;
     }
 
-    public static int getRGBFromHex(String hexColor) {
+    public static int RGBFromHex(String hexColor) {
         return new Color((int) Long.parseLong(hexColor.replace("#", ""), 16), true).getRGB();
     }
 }

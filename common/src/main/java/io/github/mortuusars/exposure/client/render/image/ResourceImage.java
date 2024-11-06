@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.render.image;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.image.IImage;
+import io.github.mortuusars.exposure.core.image.Image;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.resources.ResourceLocation;
@@ -13,18 +13,18 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-public class TextureImage extends SimpleTexture implements IImage {
-    private final String name;
+public class ResourceImage extends SimpleTexture implements Image {
+    protected final String name;
     @Nullable
-    private NativeImage image;
+    protected NativeImage image;
 
-    public TextureImage(ResourceLocation location) {
+    public ResourceImage(ResourceLocation location) {
         super(location);
         name = location.toString();
     }
 
     @Override
-    public String getImageId() {
+    public String id() {
         return name;
     }
 
@@ -46,22 +46,22 @@ public class TextureImage extends SimpleTexture implements IImage {
         return image != null ? image.getPixelRGBA(x, y) : 0x00000000;
     }
 
-    public static @Nullable io.github.mortuusars.exposure.client.render.image.TextureImage getTexture(ResourceLocation location) {
+    public static @NotNull Image getOrCreate(ResourceLocation location) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
         @Nullable AbstractTexture existingTexture = textureManager.byPath.get(location);
         if (existingTexture != null) {
-            return existingTexture instanceof io.github.mortuusars.exposure.client.render.image.TextureImage exposureTexture ? exposureTexture : null;
+            return existingTexture instanceof ResourceImage exposureTexture ? exposureTexture : Image.MISSING;
         }
 
         try {
-            io.github.mortuusars.exposure.client.render.image.TextureImage texture = new io.github.mortuusars.exposure.client.render.image.TextureImage(location);
+            ResourceImage texture = new ResourceImage(location);
             textureManager.register(location, texture);
             return texture;
         }
         catch (Exception e) {
             Exposure.LOGGER.error("Cannot load texture [{}]. {}", location, e);
-            return null;
+            return Image.MISSING;
         }
     }
 

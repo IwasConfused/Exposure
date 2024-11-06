@@ -3,11 +3,11 @@ package io.github.mortuusars.exposure.client;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.capture.component.ExposureUploaderComponent;
+import io.github.mortuusars.exposure.client.render.image.ResourceImage;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.TrichromeExposureDataCreator;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
-import io.github.mortuusars.exposure.core.image.IImage;
-import io.github.mortuusars.exposure.client.render.image.TextureImage;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.warehouse.ImageData;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +32,7 @@ public class ClientTrichromeFinalizer {
 
         item.tick();
 
-        IImage[] images = item.getImages();
+        Image[] images = item.getImages();
         if (images.length >= 3) {
             ImageData trichromeData = TrichromeExposureDataCreator.create(images[0], images[1], images[2], "");
             ExposureUploaderComponent uploaderComponent = new ExposureUploaderComponent(item.exposureId);
@@ -41,7 +41,7 @@ public class ClientTrichromeFinalizer {
             processingQueue.remove();
         } else if (item.attemptsRemaining < 0) {
             TrichromeExposureImagesGetter removedItem = processingQueue.remove();
-            for (@Nullable IImage image : removedItem.images) {
+            for (@Nullable Image image : removedItem.images) {
                 if (image != null) {
                     image.close();
                 }
@@ -54,7 +54,7 @@ public class ClientTrichromeFinalizer {
     private static class TrichromeExposureImagesGetter {
         private final ExposureIdentifier red, green, blue;
         private final String exposureId;
-        private final IImage[] images = new IImage[3];
+        private final Image[] images = new Image[3];
         private int attemptsRemaining;
 
         public TrichromeExposureImagesGetter(ExposureIdentifier red, ExposureIdentifier green,
@@ -82,15 +82,15 @@ public class ClientTrichromeFinalizer {
             attemptsRemaining--;
         }
 
-        private @Nullable IImage tryGetImage(ExposureIdentifier identifier) {
+        private @Nullable Image tryGetImage(ExposureIdentifier identifier) {
             return identifier.map(id ->
                             ExposureClient.exposureCache().getOrQuery(id)
                                     .map(data -> new ExposureDataImage(id, data))
                                     .orElse(null),
-                    TextureImage::new);
+                    ResourceImage::new);
         }
 
-        public IImage[] getImages() {
+        public Image[] getImages() {
             return images;
         }
     }

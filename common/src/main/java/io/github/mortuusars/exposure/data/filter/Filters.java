@@ -93,7 +93,7 @@ public class Filters {
                 int tintColor = Filter.DEFAULT_TINT_COLOR;
                 if (jsonObject.has("tint_color")) {
                     String hexString = jsonObject.get("tint_color").getAsString();
-                    tintColor = Color.getRGBFromHex(hexString);
+                    tintColor = Color.RGBFromHex(hexString);
                 }
 
                 return Optional.of(new Filter(ingredient, shader, attachmentTexture, tintColor));

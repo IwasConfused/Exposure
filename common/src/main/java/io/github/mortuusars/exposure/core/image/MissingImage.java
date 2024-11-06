@@ -1,23 +1,23 @@
 package io.github.mortuusars.exposure.core.image;
 
-public class EmptyImage implements Image {
+public class MissingImage implements Image {
     @Override
     public String id() {
-        return "empty_image";
+        return "missing_image";
     }
 
     @Override
     public int getWidth() {
-        return 1;
+        return 2;
     }
 
     @Override
     public int getHeight() {
-        return 1;
+        return 2;
     }
 
     @Override
     public int getPixelABGR(int x, int y) {
-        return 0x00000000;
+        return (x + y % 2) % 2 == 0 ? 0xFF000000 : 0xFFFF01ED; // black/pink checkerboard
     }
 }

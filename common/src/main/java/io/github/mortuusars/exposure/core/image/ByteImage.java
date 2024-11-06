@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.core.image;
 
-public class ByteImage implements IImage {
+public class ByteImage implements Image {
     private final String id;
     private final int width;
     private final int height;
@@ -21,7 +21,7 @@ public class ByteImage implements IImage {
     }
 
     @Override
-    public String getImageId() {
+    public String id() {
         return id;
     }
 
