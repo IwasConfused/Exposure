@@ -1,8 +1,7 @@
 package io.github.mortuusars.exposure.client.gui.tooltip;
 
-import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.render.photograph.NewPhotographRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.client.render.PhotographRenderer;
 import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
@@ -11,13 +10,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.world.inventory.tooltip.TooltipComponent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class PhotographClientTooltip implements ClientTooltipComponent {
     public static final int SIZE = 72;
+
     protected final PhotographTooltip tooltip;
     protected final List<ItemAndStack<PhotographItem>> photographs;
 
@@ -43,14 +42,14 @@ public class PhotographClientTooltip implements ClientTooltipComponent {
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(mouseX, mouseY, 5);
-        float scale = SIZE / (float) ExposureClient.exposureRenderer().getSize();
-        float nextPhotographOffset = PhotographRenderer.getStackedPhotographOffset() / ExposureClient.exposureRenderer().getSize();
+        float scale = SIZE;
+        float nextPhotographOffset = NewPhotographRenderer.getStackedPhotographOffset();
         scale *= 1f - (additionalPhotographs * nextPhotographOffset);
         guiGraphics.pose().scale(scale, scale, 1f);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
-        PhotographRenderer.renderStackedPhotographs(photographs, guiGraphics.pose(), bufferSource,
+        NewPhotographRenderer.renderStackedPhotographs(photographs, guiGraphics.pose(), bufferSource,
                 LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
 
         bufferSource.endBatch();
@@ -64,8 +63,8 @@ public class PhotographClientTooltip implements ClientTooltipComponent {
             int fontWidth = Minecraft.getInstance().font.width(count);
             float fontScale = 1.6f;
             guiGraphics.pose().translate(
-                    mouseX + ExposureClient.exposureRenderer().getSize() * scale - 2 - fontWidth * fontScale,
-                    mouseY + ExposureClient.exposureRenderer().getSize() * scale - 2 - 8 * fontScale,
+                    mouseX * scale - 2 - fontWidth * fontScale,
+                    mouseY * scale - 2 - 8 * fontScale,
                     10);
             guiGraphics.pose().scale(fontScale, fontScale, fontScale);
             guiGraphics.drawString(font, count, 0, 0, 0xFFFFFFFF);

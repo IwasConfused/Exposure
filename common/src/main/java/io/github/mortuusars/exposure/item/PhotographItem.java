@@ -5,6 +5,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
+import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
@@ -30,6 +31,10 @@ import java.util.Optional;
 public class PhotographItem extends Item {
     public PhotographItem(Properties properties) {
         super(properties);
+    }
+
+    public PhotographType getType(ItemStack stack) {
+        return PhotographType.REGULAR;
     }
 
     public ExposureFrame getFrame(ItemStack stack) {

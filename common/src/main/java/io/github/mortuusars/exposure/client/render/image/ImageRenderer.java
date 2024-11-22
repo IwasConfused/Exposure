@@ -15,28 +15,34 @@ public class ImageRenderer implements AutoCloseable {
     private final Map<String, RenderedImageInstance> cache = new HashMap<>();
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image) {
-        this.render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, Color.WHITE, LightTexture.FULL_BRIGHT);
+        this.render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, LightTexture.FULL_BRIGHT, Color.WHITE);
     }
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image, int packedLight) {
-        this.render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, Color.WHITE, packedLight);
+        this.render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, packedLight, Color.WHITE);
     }
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image, RenderCoordinates coords, Color color) {
-        this.render(poseStack, bufferSource, image,
-                coords.minX(), coords.minY(), coords.maxX(), coords.maxY(), coords.minU(), coords.minV(), coords.maxU(), coords.maxV(),
-                color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha(), LightTexture.FULL_BRIGHT);
+        this.render(poseStack, bufferSource, image, coords, LightTexture.FULL_BRIGHT, color);
     }
 
-    public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image, RenderCoordinates coords, Color color, int packedLight) {
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image, RenderCoordinates coords,
+                       int packedLight, Color color) {
         this.render(poseStack, bufferSource, image,
                 coords.minX(), coords.minY(), coords.maxX(), coords.maxY(), coords.minU(), coords.minV(), coords.maxU(), coords.maxV(),
-                color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha(), packedLight);
+                packedLight, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+    }
+
+    public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image, RenderCoordinates coords,
+                       int packedLight, int r, int g, int b, int a) {
+        this.render(poseStack, bufferSource, image,
+                coords.minX(), coords.minY(), coords.maxX(), coords.maxY(), coords.minU(), coords.minV(), coords.maxU(), coords.maxV(),
+                packedLight, r, g, b, a);
     }
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image,
                        float minX, float minY, float maxX, float maxY,
-                       float minU, float minV, float maxU, float maxV, int r, int g, int b, int a, int packedLight) {
+                       float minU, float minV, float maxU, float maxV, int packedLight, int r, int g, int b, int a) {
             getOrCreateInstance(image)
                     .draw(poseStack, bufferSource, minX, minY, maxX, maxY, minU, minV, maxU, maxV, packedLight, r, g, b, a);
     }

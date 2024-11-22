@@ -160,7 +160,7 @@ public class Exposure {
                         .stacksTo(1)));
 
         public static final Supplier<PhotographItem> AGED_PHOTOGRAPH = Register.item("aged_photograph",
-                () -> new PhotographItem(new Item.Properties()
+                () -> new AgedPhotographItem(new Item.Properties()
                         .stacksTo(1)));
 
         public static final Supplier<InterplanarProjectorItem> INTERPLANAR_PROJECTOR = Register.item("interplanar_projector",

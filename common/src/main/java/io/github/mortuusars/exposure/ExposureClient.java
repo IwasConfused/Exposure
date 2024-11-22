@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure;
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.client.Censor;
+import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.image.ResourceImage;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public class ExposureClient {
+    private static final ImageRenderer imageRenderer = new ImageRenderer();
     private static final ExposureRenderer exposureRenderer = new ExposureRenderer();
 
     private static ClientsideExposureCache exposureCache = new ClientsideExposureCache();
@@ -70,6 +72,10 @@ public class ExposureClient {
                         .map(data -> (Image)new ExposureDataImage(id, data))
                         .orElse(Image.EMPTY),
                 ResourceImage::getOrCreate);
+    }
+
+    public static ImageRenderer imageRenderer() {
+        return imageRenderer;
     }
 
     public static ExposureRenderer exposureRenderer() {

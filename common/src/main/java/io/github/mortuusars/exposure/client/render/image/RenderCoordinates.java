@@ -6,5 +6,9 @@ public record RenderCoordinates(float minX, float minY, float maxX, float maxY,
         this(x, y, x + width, y + height, 0, 0, 1, 1);
     }
 
+    public RenderCoordinates(float width, float height) {
+        this(0, 0, width, height);
+    }
+
     public static final RenderCoordinates DEFAULT = new RenderCoordinates(0, 0, 1, 1, 0, 0, 1, 1);
 }
