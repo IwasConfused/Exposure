@@ -4,13 +4,11 @@ import com.google.common.base.Preconditions;
 import com.mojang.serialization.MapCodec;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.neoforge.integration.create.CreateFilmDeveloping;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.neoforge.loot.PreventableAddTableLootModifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.config.ModConfigEvent;
@@ -30,6 +28,7 @@ public class ExposureNeoForge {
             RegisterImpl.CUSTOM_STATS.register(location.getPath(), () -> location);
         });
 
+        container.registerConfig(ModConfig.Type.SERVER, Config.Server.SPEC);
         container.registerConfig(ModConfig.Type.COMMON, Config.Common.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, Config.Client.SPEC);
 

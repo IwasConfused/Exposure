@@ -35,6 +35,7 @@ public class Lenses {
     }
 
     public static void onDatapackSync(@Nullable ServerPlayer joiningPlayer) {
+        //TODO: Encoding failed
         IPacket packet = getSyncToClientPacket();
 
         if (joiningPlayer != null)

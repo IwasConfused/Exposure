@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.item;
 
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.InterplanarProjectorMode;
 import net.minecraft.client.gui.screens.Screen;
@@ -31,11 +32,19 @@ public class InterplanarProjectorItem extends Item {
     }
 
     public boolean isConsumable(ItemStack stack) {
-        return true;
+        return isAllowed();
+    }
+
+    protected boolean isAllowed() {
+        return Config.Server.CAN_PROJECT_FROM_FILE.get();
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag tooltipFlag) {
+        if (!isAllowed()) {
+            components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.restricted"));
+        }
+
         components.add(getMode(stack).translate());
 
         if (Screen.hasShiftDown()) {
@@ -44,15 +53,14 @@ public class InterplanarProjectorItem extends Item {
             }
             components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.info"));
             components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.switch_info"));
-        }
-        else {
+        } else {
             components.add(Component.translatable("tooltip.exposure.hold_for_details"));
         }
     }
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
-        if (other.isEmpty() && action == ClickAction.SECONDARY) {
+        if (isAllowed() && other.isEmpty() && action == ClickAction.SECONDARY) {
             setMode(stack, getMode(stack).cycle());
             slot.setChanged();
             if (player.level().isClientSide) {

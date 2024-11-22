@@ -19,10 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public final class FocalRange implements StringRepresentable {
-//    public static final Codec<FocalRange> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-//            Codec.INT.fieldOf()
-//    ))
-
     public static final StreamCodec<ByteBuf, FocalRange> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, FocalRange::min,
             ByteBufCodecs.VAR_INT, FocalRange::max,

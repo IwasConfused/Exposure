@@ -115,10 +115,6 @@ public class ExposureClient {
         return openCameraControlsKey.isUnbound() ? Minecraft.getInstance().options.keyShift : openCameraControlsKey;
     }
 
-    public static boolean isShaderActive() {
-        return Minecraft.getInstance().gameRenderer.currentEffect() != null && Minecraft.getInstance().gameRenderer.effectActive;
-    }
-
     public static class Models {
         public static final ModelResourceLocation CAMERA_GUI =
                 new ModelResourceLocation(Exposure.resource("camera_gui"), "standalone");

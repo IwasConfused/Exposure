@@ -24,6 +24,10 @@ public class ViewfinderShader {
 
     public static void apply(ResourceLocation shaderLocation) {
         if (shader != null) {
+            if (shader.getName().equals(shaderLocation.toString())) {
+                return;
+            }
+
             shader.close();
         }
 

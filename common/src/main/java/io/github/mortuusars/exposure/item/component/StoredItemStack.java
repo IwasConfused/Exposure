@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * ItemStacks cannot be used in DataComponentType because when the stack is changed
- * - it may change in more than one place and cause unwanted side effects.
+ * - it can change in more than one place and cause unwanted side effects.
  * So this is an "immutable" wrapper around the ItemStack.
  * But because it's still possible to mutate the ItemStack stored in this class - care should be taken in how we use it.
  * {@link StoredItemStack#getForReading()} should be used when ItemStack is needed for read-only tasks such as checking item type, count, etc.

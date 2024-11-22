@@ -503,7 +503,7 @@ public class CameraItem extends Item {
 
     public ExposureFrameDataFromClient getClientSideFrameData(Player player, ItemStack cameraStack) {
         //TODO: figure out how to know when image was loaded
-        boolean projectingFile = hasInterplanarProjectorFilter(cameraStack) && ExposureClient.isShaderActive();
+        boolean projectingFile = hasInterplanarProjectorFilter(cameraStack);
 
         List<UUID> entitiesInFrame;
 
@@ -563,9 +563,11 @@ public class CameraItem extends Item {
     protected void startCapture(Player player, ItemStack cameraStack, String exposureId, boolean flashHasFired) {
         Capture capture;
 
+        //TODO: Get film properties here and pass them to createXXXCapture
+
         StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
 
-        if (filterStack.getItem() instanceof InterplanarProjectorItem projector && ExposureClient.isShaderActive()) {
+        if (filterStack.getItem() instanceof InterplanarProjectorItem projector && projector.isAllowed()) {
             String filepath = projector.getFilepath(filterStack.getForReading()).orElse("");
             boolean dither = projector.getMode(filterStack.getForReading()) == InterplanarProjectorMode.DITHERED;
 

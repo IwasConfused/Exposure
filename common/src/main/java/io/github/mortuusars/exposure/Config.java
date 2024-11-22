@@ -11,6 +11,26 @@ import net.neoforged.neoforge.common.ModConfigSpec;
  * Using ForgeConfigApiPort on fabric allows using forge config in both environments and without extra dependencies on forge.
  */
 public class Config {
+    public static class Server {
+        public static final ModConfigSpec SPEC;
+
+        public static final ModConfigSpec.BooleanValue CAN_PROJECT_FROM_FILE;
+
+        static {
+            ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+            builder.push("Capture");
+            {
+                CAN_PROJECT_FROM_FILE = builder
+                        .comment("Interplanar Projector can load images from a file on client's PC. Default: true")
+                        .define("CanProjectFromFile", true);
+            }
+            builder.pop();
+
+            SPEC = builder.build();
+        }
+    }
+
     public static class Common {
         public static final ModConfigSpec SPEC;
 
