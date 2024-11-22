@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.camera.capture;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.NativeImage;
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
 import io.github.mortuusars.exposure.camera.capture.converter.IImageToMapColorsConverter;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 @SuppressWarnings("unused")
 public abstract class Capture {
     protected ExposureType type = ExposureType.COLOR;
-    protected int size = 320;
+    protected int size = Config.Server.EXPOSURE_RESOLUTION.get();
     protected float cropFactor = Exposure.CROP_FACTOR;
     protected float brightnessStops = 0f;
     protected boolean asyncCapturing = false;

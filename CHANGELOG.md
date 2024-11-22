@@ -6,6 +6,9 @@
 - Mundane, Awkward and Thick potions now have different colors to tell them apart easier.
 - Photographs are no longer rendered as images in Item Frames by default. Can be turned back on in the config.
 
+- Added config option to change default exposure size.
+- Added config option to disable loading images from file with Interplanar Projector.
+
 - Camera filter shaders are now processed separately. Vanilla shaders (that sometimes used by other mods) will not be rendered when camera captures an image.     
 
 ## 1.7.6 - 2024-08-17

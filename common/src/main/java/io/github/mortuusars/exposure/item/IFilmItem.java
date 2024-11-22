@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.item;
 
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
@@ -16,7 +17,7 @@ public interface IFilmItem {
     }
 
     default int getDefaultFrameSize(ItemStack stack) {
-        return 320;
+        return Config.Server.EXPOSURE_RESOLUTION.get();
     }
 
     default int getMaxFrameCount(ItemStack stack) {

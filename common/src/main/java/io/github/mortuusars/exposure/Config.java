@@ -14,6 +14,7 @@ public class Config {
     public static class Server {
         public static final ModConfigSpec SPEC;
 
+        public static final ModConfigSpec.IntValue EXPOSURE_RESOLUTION;
         public static final ModConfigSpec.BooleanValue CAN_PROJECT_FROM_FILE;
 
         static {
@@ -21,6 +22,9 @@ public class Config {
 
             builder.push("Capture");
             {
+                EXPOSURE_RESOLUTION = builder
+                        .comment("Default size of an exposure image. High values take more disk space and can cause lag. Default: 320")
+                        .defineInRange("ExposureResolution", 320, 1, 2048);
                 CAN_PROJECT_FROM_FILE = builder
                         .comment("Interplanar Projector can load images from a file on client's PC. Default: true")
                         .define("CanProjectFromFile", true);
