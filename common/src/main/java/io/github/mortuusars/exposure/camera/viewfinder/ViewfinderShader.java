@@ -1,6 +1,8 @@
 package io.github.mortuusars.exposure.camera.viewfinder;
 
-import io.github.mortuusars.exposure.PlatformHelper;
+import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.core.camera.AttachmentType;
 import io.github.mortuusars.exposure.data.filter.Filters;
@@ -9,63 +11,63 @@ import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
-import java.util.Optional;
+import java.io.IOException;
 
 public class ViewfinderShader {
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final Minecraft minecraft = Minecraft.getInstance();
     @Nullable
-    private static ResourceLocation previousShader;
+    private static PostChain shader;
+    private static boolean active;
 
-    public static Optional<ResourceLocation> getCurrent() {
-        PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
-        if (effect != null) {
-            return Optional.of(ResourceLocation.parse(effect.getName()));
+    public static void apply(ResourceLocation shaderLocation) {
+        if (shader != null) {
+            shader.close();
         }
 
-        return Optional.empty();
-    }
-
-    public static void setPrevious(@Nullable ResourceLocation shader) {
-        previousShader = shader;
-    }
-
-    public static void restorePrevious() {
-        if (previousShader != null && shouldRestorePreviousShaderEffect()) {
-            applyShader(previousShader);
-            previousShader = null;
+        try {
+            shader = new PostChain(minecraft.getTextureManager(), minecraft.getResourceManager(),
+                    minecraft.getMainRenderTarget(), shaderLocation);
+            shader.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+            active = true;
+        } catch (IOException e) {
+            LOGGER.warn("Failed to load shader: {}", shaderLocation, e);
+            active = false;
+        } catch (JsonSyntaxException e) {
+            LOGGER.warn("Failed to parse shader: {}", shaderLocation, e);
+            active = false;
         }
     }
 
-    public static void applyShader(ResourceLocation shader) {
-        @Nullable PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
-        if (effect != null && effect.getName().equals(shader.toString())) {
-            return;
+    public static void resize(int width, int height) {
+        if (shader != null) {
+            shader.resize(width, height);
         }
-
-        Minecraft.getInstance().gameRenderer.loadEffect(shader);
     }
 
-    public static void removeShader() {
-        Minecraft.getInstance().gameRenderer.shutdownEffect();
+    public static void process() {
+        if (shader != null && active) {
+            RenderSystem.disableBlend();
+            RenderSystem.disableDepthTest();
+            RenderSystem.resetTextureMatrix();
+            shader.process(minecraft.getTimer().getGameTimeDeltaTicks());
+        }
+    }
+
+    public static void remove() {
+        if (shader != null) {
+            shader.close();
+        }
+
+        shader = null;
     }
 
     public static void update() {
         CameraClient.getActiveCamera().ifPresentOrElse(camera -> {
             ItemStack filterStack = camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILTER).getForReading();
-            Filters.getShaderOf(filterStack).ifPresentOrElse(ViewfinderShader::applyShader, ViewfinderShader::removeShader);
-        }, ViewfinderShader::removeShader);
-    }
-
-    public static boolean shouldRestorePreviousShaderEffect() {
-        /*
-            Cold Sweat applies a shader effect when having high temperature.
-            If we restore effect after exiting viewfinder it will apply blur even if temp is normal.
-            Not restoring shader is fine, Cold Sweat will reapply it if needed.
-         */
-        if (PlatformHelper.isModLoaded("cold_sweat") && previousShader != null
-                && previousShader.toString().equals("minecraft:shaders/post/blobs2.json"))
-            return false;
-        else
-            return previousShader != null;
+            Filters.getShaderOf(filterStack).ifPresentOrElse(ViewfinderShader::apply, ViewfinderShader::remove);
+        }, ViewfinderShader::remove);
     }
 }

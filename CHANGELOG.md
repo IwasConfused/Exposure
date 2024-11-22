@@ -6,6 +6,8 @@
 - Mundane, Awkward and Thick potions now have different colors to tell them apart easier.
 - Photographs are no longer rendered as images in Item Frames by default. Can be turned back on in the config.
 
+- Camera filter shaders are now processed separately. Vanilla shaders (that sometimes used by other mods) will not be rendered when camera captures an image.     
+
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.
 - Added es_es lang.

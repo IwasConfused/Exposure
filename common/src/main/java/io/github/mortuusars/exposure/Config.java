@@ -159,6 +159,7 @@ public class Config {
         // CAPTURE
         public static final ModConfigSpec.IntValue CAPTURE_DELAY_FRAMES;
         public static final ModConfigSpec.IntValue FLASH_CAPTURE_DELAY_TICKS;
+        public static final ModConfigSpec.BooleanValue DISABLE_POST_EFFECT;
 
         // VIEWFINDER
         public static final ModConfigSpec.DoubleValue VIEWFINDER_ZOOM_SENSITIVITY_MODIFIER;
@@ -257,6 +258,12 @@ public class Config {
                         .comment("Delay in ticks before capturing an image when shooting with flash." +
                                 "\nIf you experience flash synchronization issues (Flash having no effect on the image) - try increasing the value.")
                         .defineInRange("FlashCaptureDelayTicks", 4, 1, 7);
+                DISABLE_POST_EFFECT = builder
+                        .comment("Post Effect (vanilla shader) will be disabled when image is captured.",
+                                "It is sometimes used by mods to change how player sees the world. (Cold Sweat's overheating blur, Supplementaries mob heads, for example).",
+                                "In vanilla it's only used when spectating a creeper/enderman/etc.",
+                                "Default: true")
+                        .define("DisablePostEffect", true);
                 builder.pop();
             }
 

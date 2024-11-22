@@ -57,7 +57,6 @@ public class Viewfinder {
 
         isOpen = true;
 
-        ViewfinderShader.setPrevious(ViewfinderShader.getCurrent().orElse(null));
         ViewfinderShader.update();
         ViewfinderOverlay.setup();
     }
@@ -83,8 +82,7 @@ public class Viewfinder {
         isOpen = false;
         targetFov = Minecraft.getInstance().options.fov().get();
 
-        ViewfinderShader.removeShader();
-        ViewfinderShader.restorePrevious();
+        ViewfinderShader.remove();
     }
 
     public static FocalRange getFocalRange() {
