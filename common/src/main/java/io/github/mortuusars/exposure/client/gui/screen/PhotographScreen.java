@@ -7,13 +7,13 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.client.render.PhotographRenderProperties;
-import io.github.mortuusars.exposure.client.render.PhotographRenderer;
 import io.github.mortuusars.exposure.util.ClientsideWorldNameGetter;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
@@ -77,7 +77,7 @@ public class PhotographScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        zoomFactor = (float) height / ExposureClient.exposureRenderer().getSize();
+        zoomFactor = (float) height;
 
         ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
                 Widgets.PREVIOUS_BUTTON_SPRITES,
@@ -98,7 +98,7 @@ public class PhotographScreen extends Screen {
 
         zoomFactor = 0.8f;
         zoom.update();
-        scale = zoom.get() * zoomFactor;
+        scale = zoom.get() * zoomFactor * 256;
 
 
         RenderSystem.enableBlend();
@@ -110,7 +110,7 @@ public class PhotographScreen extends Screen {
         guiGraphics.pose().popPose();
 
         guiGraphics.pose().pushPose();
-        // Places widgets about photograph, because they will be covered when photo is zoomed in
+        // Places widgets above photograph, because they will be covered when photo is zoomed in
         guiGraphics.pose().translate(0, 0, 500);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         guiGraphics.pose().popPose();
@@ -120,13 +120,13 @@ public class PhotographScreen extends Screen {
         guiGraphics.pose().translate(x, y, 0);
         guiGraphics.pose().translate(width / 2f, height / 2f, 0);
         guiGraphics.pose().scale(scale, scale, scale);
-        guiGraphics.pose().translate(ExposureClient.exposureRenderer().getSize() / -2f, ExposureClient.exposureRenderer().getSize() / -2f, 100);
+        guiGraphics.pose().translate(-0.5, -0.5, 10);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
         ArrayList<ItemAndStack<PhotographItem>> photos = new ArrayList<>(photographs);
         Collections.rotate(photos, -pager.getCurrentPage());
-        PhotographRenderer.renderStackedPhotographs(photos, guiGraphics.pose(), bufferSource, LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
+        ExposureClient.photographRenderer().renderStackedPhotographs(photos, guiGraphics.pose(), bufferSource, LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
 
         bufferSource.endBatch();
 
@@ -252,8 +252,9 @@ public class PhotographScreen extends Screen {
                 return;
             }
 
-            PhotographRenderProperties properties = PhotographRenderProperties.get(photograph.getItemStack());
-            String filename = properties != PhotographRenderProperties.DEFAULT ? id + "_" + properties.getId() : id;
+            PhotographFeatures photographFeatures = PhotographFeatures.get(photograph.getItem().getType(photograph.getItemStack()));
+
+            String filename = photographFeatures != PhotographFeatures.REGULAR ? id + "_" + photographFeatures.getName() : id;
 
             if (savedExposures.contains(filename))
                 return;
@@ -264,7 +265,7 @@ public class PhotographScreen extends Screen {
                 new Thread(() -> new ClientsideExposureExporter(filename)
                         .withDefaultFolder()
                         .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), ClientsideWorldNameGetter::getWorldName)
-                        .withModifier(properties.getModifier())
+                        .withModifier(photographFeatures.getPixelModifier())
                         .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
                         .export(exposure), "ExposureSaving").start();
             });

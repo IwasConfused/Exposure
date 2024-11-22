@@ -4,9 +4,9 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.client.render.PhotographRenderProperties;
-import io.github.mortuusars.exposure.client.render.PhotographRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
@@ -54,32 +54,31 @@ public class PhotographSlotButton extends ImageButton {
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         ItemStack photograph = getPhotograph();
 
-        if (photograph.getItem() instanceof PhotographItem) {
+        if (photograph.getItem() instanceof PhotographItem photographItem) {
             hasPhotograph = true;
 
-            PhotographRenderProperties renderProperties = PhotographRenderProperties.get(photograph);
+            PhotographFeatures photographFeatures = PhotographFeatures.get(photographItem.getType(photograph));
 
             // Paper
-            guiGraphics.blit(renderProperties.getAlbumPaperTexture(),
+            guiGraphics.blit(photographFeatures.getAlbumPaperTexture(),
                     getX(), getY(), 0, 0, 0, width, height, width, height);
 
             // Exposure
-            //TODO: Change exposure renderer
             guiGraphics.pose().pushPose();
-            float scale = exposureArea.getWidth() / (float) ExposureClient.exposureRenderer().getSize();
+            float scale = exposureArea.getWidth();
             guiGraphics.pose().translate(exposureArea.getX(), exposureArea.getY(), 1);
             guiGraphics.pose().scale(scale, scale, scale);
             MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-            PhotographRenderer.render(photograph, false, false, guiGraphics.pose(),
+            ExposureClient.photographRenderer().render(photograph, false, false, guiGraphics.pose(),
                     bufferSource, LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
             bufferSource.endBatch();
             guiGraphics.pose().popPose();
 
             // Paper overlay
-            if (renderProperties.hasAlbumPaperOverlayTexture()) {
+            if (photographFeatures.hasAlbumOverlayTexture()) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 2);
-                guiGraphics.blit(renderProperties.getAlbumPaperOverlayTexture(),
+                guiGraphics.blit(photographFeatures.getAlbumOverlayTexture(),
                         getX(), getY(), 0, 0, 0, width, height, width, height);
                 guiGraphics.pose().popPose();
             }

@@ -171,6 +171,7 @@ public class Config {
         public static final ModConfigSpec.BooleanValue HIDE_LOADED_PHOTOGRAPHS_MADE_BY_OTHERS;
         public static final ModConfigSpec.BooleanValue HIDE_ALL_PHOTOGRAPHS_MADE_BY_OTHERS;
         public static final ModConfigSpec.IntValue PHOTOGRAPH_FRAME_CULLING_DISTANCE;
+        public static final ModConfigSpec.BooleanValue PHOTOGRAPH_RENDERS_IN_ITEM_FRAME;
 
         // INTEGRATION
         public static final ModConfigSpec.BooleanValue SHOW_JEI_INFORMATION;
@@ -274,6 +275,10 @@ public class Config {
                         .comment("Distance from the player beyond which Photograph Frame would not be rendered. Default: 64",
                                 "Note: this number may not relate to distance in blocks exactly. It's influenced by onRender distance and entity distance settings.")
                         .defineInRange("PhotographFrameCullingDistance", 64, 8, 128);
+
+                PHOTOGRAPH_RENDERS_IN_ITEM_FRAME = builder
+                        .comment("Photographs in Item Frame will be rendered as an image instead of an item icon. Default: false")
+                        .define("PhotographRendersInItemFrame", false);
 
                 builder.pop();
             }

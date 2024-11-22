@@ -175,7 +175,7 @@ public class ClientPacketsHandler {
     }
 
     public static void clearRenderingCache() {
-        executeOnMainThread(() -> ExposureClient.exposureRenderer().clearData());
+        executeOnMainThread(() -> ExposureClient.imageRenderer().clearData());
     }
 
     public static void syncLensesData(SyncLensesDataS2CP packet) {
@@ -189,7 +189,7 @@ public class ClientPacketsHandler {
     public static void onExposureChanged(ExposureChangedS2CP packet) {
         executeOnMainThread(() -> {
             ExposureClient.exposureCache().remove(packet.exposureId());
-            ExposureClient.exposureRenderer().clearDataSingle(packet.exposureId(), true);
+            ExposureClient.imageRenderer().clearDataSingle(packet.exposureId(), true);
         });
     }
 

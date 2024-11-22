@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.core.CameraAccessors;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderOverlay;
-import io.github.mortuusars.exposure.client.MouseHandler;
+import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;

@@ -4,14 +4,13 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.render.image.ModifiedImage;
+import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
-import io.github.mortuusars.exposure.client.render.image.RenderedImageProvider;
-import io.github.mortuusars.exposure.core.image.ExposureDataImage;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.client.render.image.ResourceImage;
 import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.util.GuiUtil;
@@ -20,7 +19,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.WidgetSprites;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -100,14 +98,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
         if (type == null)
             type = ExposureType.BLACK_AND_WHITE;
 
-        @Nullable Image image = exposureIdentifier.map(
-                id -> ExposureClient.exposureCache().getOrQuery(id)
-                        .map(data -> new ExposureDataImage(id, data)).orElse(null),
-                ResourceImage::getOrCreate
-        );
-
-        if (image == null)
-            return;
+        Image image = new ModifiedImage(ExposureClient.createExposureImage(exposureIdentifier), PixelModifier.NEGATIVE_FILM);
 
         int width = image.getWidth();
         int height = image.getHeight();
@@ -139,9 +130,9 @@ public class NegativeExposureScreen extends ZoomableScreen {
         }
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        ExposureClient.exposureRenderer().render(new RenderedImageProvider(image), PixelModifier.NEGATIVE_FILM,
-                guiGraphics.pose(), bufferSource, 0, 0, width, height, 0, 0, 1, 1,
-                LightTexture.FULL_BRIGHT, type.getImageColor().getRed(), type.getImageColor().getGreen(), type.getImageColor().getBlue(), 255);
+
+        ExposureClient.imageRenderer().render(guiGraphics.pose(), bufferSource, image, new RenderCoordinates(width, height), type.getImageColor());
+
         bufferSource.endBatch();
 
         guiGraphics.pose().popPose();

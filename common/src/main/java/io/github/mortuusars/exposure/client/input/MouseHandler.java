@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client;
+package io.github.mortuusars.exposure.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;

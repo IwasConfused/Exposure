@@ -18,13 +18,13 @@ import net.minecraft.world.item.ItemStack;
 
 import java.util.List;
 
-public class NewPhotographRenderer {
-    public static void render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
+public class PhotographRenderer {
+    public void render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
                               MultiBufferSource bufferSource, int packedLight) {
         render(itemStack, renderPaper, renderBackside, poseStack, bufferSource, packedLight, 255, 255, 255, 255);
     }
 
-    public static void render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
+    public void render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
                               MultiBufferSource bufferSource, int packedLight, int r, int g, int b, int a) {
         if (itemStack.getItem() instanceof PhotographItem photographItem)
             renderPhotograph(poseStack, bufferSource, photographItem, itemStack, renderPaper, renderBackside, packedLight, r, g, b, a);
@@ -32,7 +32,7 @@ public class NewPhotographRenderer {
             renderStackedPhotographs(stackedPhotographsItem, itemStack, poseStack, bufferSource, packedLight, r, g, b, a);
     }
 
-    public static void renderPhotograph(PoseStack poseStack, MultiBufferSource bufferSource,
+    public void renderPhotograph(PoseStack poseStack, MultiBufferSource bufferSource,
                                         PhotographItem photographItem, ItemStack photographStack,
                                         boolean renderPaper, boolean renderBackside, int packedLight, int r, int g, int b, int a) {
 
@@ -48,7 +48,7 @@ public class NewPhotographRenderer {
 
         int paperRotation = frame.identifier().hashCode() % 4 * 90;
 
-        if (renderPaper && photographFeatures.getPaperTexture() != PhotographTextures.EMPTY) {
+        if (renderPaper && photographFeatures.getPaperTexture() != ExposureClient.Textures.EMPTY) {
             poseStack.pushPose();
             poseStack.translate(0.5f, 0.5f, 0);
             poseStack.mulPose(Axis.ZP.rotationDegrees(paperRotation));
@@ -85,7 +85,7 @@ public class NewPhotographRenderer {
             ExposureClient.imageRenderer().render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
         }
 
-        if (renderPaper && photographFeatures.getOverlayTexture() != PhotographTextures.EMPTY) {
+        if (renderPaper && photographFeatures.getOverlayTexture() != ExposureClient.Textures.EMPTY) {
             poseStack.pushPose();
 
             poseStack.translate(0.5f, 0.5f, 0);
@@ -98,14 +98,14 @@ public class NewPhotographRenderer {
         }
     }
 
-    public static void renderStackedPhotographs(StackedPhotographsItem stackedPhotographsItem, ItemStack stack,
+    public void renderStackedPhotographs(StackedPhotographsItem stackedPhotographsItem, ItemStack stack,
                                                 PoseStack poseStack, MultiBufferSource bufferSource,
                                                 int packedLight, int r, int g, int b, int a) {
         List<ItemAndStack<PhotographItem>> photographs = stackedPhotographsItem.getPhotographs(stack);
         renderStackedPhotographs(photographs, poseStack, bufferSource, packedLight, r, g, b, a);
     }
 
-    public static void renderStackedPhotographs(List<ItemAndStack<PhotographItem>> photographs,
+    public void renderStackedPhotographs(List<ItemAndStack<PhotographItem>> photographs,
                                                 PoseStack poseStack, MultiBufferSource bufferSource,
                                                 int packedLight, int r, int g, int b, int a) {
         if (photographs.isEmpty())
@@ -152,11 +152,11 @@ public class NewPhotographRenderer {
         }
     }
 
-    public static float getStackedBrightnessStep() {
+    public float getStackedBrightnessStep() {
         return 0.15f;
     }
 
-    public static float getStackedPhotographOffset() {
+    public float getStackedPhotographOffset() {
         // 2 px / Texture size (64px) = 0.03125
         return 0.03125f;
     }

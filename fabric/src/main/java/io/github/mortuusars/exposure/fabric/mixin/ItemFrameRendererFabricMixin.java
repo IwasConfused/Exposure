@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.render.ItemFramePhotographRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -24,7 +25,8 @@ public abstract class ItemFrameRendererFabricMixin<T extends ItemFrame>
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/entity/ItemRenderer;renderStatic(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemDisplayContext;IILcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;Lnet/minecraft/world/level/Level;I)V"))
     void onItemFrameRender(T entity, float entityYaw, float partialTicks, PoseStack poseStack, MultiBufferSource buffer, int packedLight, CallbackInfo ci) {
         poseStack.scale(2F, 2F, 2F);
-        boolean rendered = ItemFramePhotographRenderer.render(entity, poseStack, buffer, packedLight);
+        boolean rendered = Config.Client.PHOTOGRAPH_RENDERS_IN_ITEM_FRAME.get() &&
+                ItemFramePhotographRenderer.render(entity, poseStack, buffer, packedLight);
 
         if (rendered) {
             poseStack.popPose();

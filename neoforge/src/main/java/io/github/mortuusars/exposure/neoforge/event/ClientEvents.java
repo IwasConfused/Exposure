@@ -1,13 +1,13 @@
 package io.github.mortuusars.exposure.neoforge.event;
 
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.capture.CaptureManager;
-import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
-import io.github.mortuusars.exposure.client.MouseHandler;
+import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
 import io.github.mortuusars.exposure.client.gui.screen.ItemRenameScreen;
@@ -83,7 +83,7 @@ public class ClientEvents {
     public static class GameBus {
         @SubscribeEvent
         public static void onLevelClear(LevelEvent.Unload event) {
-            ExposureClient.exposureRenderer().clearData();
+            ExposureClient.imageRenderer().clearData();
         }
 
         @SubscribeEvent
@@ -124,8 +124,12 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void renderItemFrameItem(RenderItemInFrameEvent event) {
-            if (ItemFramePhotographRenderer.render(event.getItemFrameEntity(), event.getPoseStack(), event.getMultiBufferSource(), event.getPackedLight()))
+            boolean rendered = Config.Client.PHOTOGRAPH_RENDERS_IN_ITEM_FRAME.get()
+                    && ItemFramePhotographRenderer.render(event.getItemFrameEntity(), event.getPoseStack(),
+                        event.getMultiBufferSource(), event.getPackedLight());
+            if (rendered) {
                 event.setCanceled(true);
+            }
         }
 
         @SubscribeEvent

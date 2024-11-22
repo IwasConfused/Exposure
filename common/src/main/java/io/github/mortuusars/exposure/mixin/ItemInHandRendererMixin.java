@@ -3,8 +3,9 @@ package io.github.mortuusars.exposure.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
-import io.github.mortuusars.exposure.client.render.PhotographInHandRenderer;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -20,7 +21,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ItemInHandRenderer.class)
 public abstract class ItemInHandRendererMixin {
@@ -60,13 +60,13 @@ public abstract class ItemInHandRendererMixin {
     }
 
     @Unique
-    private void exposure$renderOneHandedPhotograph(AbstractClientPlayer player, PoseStack poseStack, MultiBufferSource buffer, int combinedLight, float pEquippedProgress, HumanoidArm pHand, float pSwingProgress, ItemStack stack) {
+    private void exposure$renderOneHandedPhotograph(AbstractClientPlayer player, PoseStack poseStack, MultiBufferSource buffer, int packedLight, float pEquippedProgress, HumanoidArm pHand, float pSwingProgress, ItemStack stack) {
         float f = pHand == HumanoidArm.RIGHT ? 1.0F : -1.0F;
         poseStack.translate(f * 0.125F, -0.125D, 0.0D);
         if (!player.isInvisible()) {
             poseStack.pushPose();
             poseStack.mulPose(Axis.ZP.rotationDegrees(f * 10.0F));
-            this.renderPlayerArm(poseStack, buffer, combinedLight, pEquippedProgress, pSwingProgress, pHand);
+            this.renderPlayerArm(poseStack, buffer, packedLight, pEquippedProgress, pSwingProgress, pHand);
             poseStack.popPose();
         }
 
@@ -80,30 +80,45 @@ public abstract class ItemInHandRendererMixin {
         poseStack.translate(f * f3, f4 - 0.3F * f2, f5);
         poseStack.mulPose(Axis.XP.rotationDegrees(f2 * -45.0F));
         poseStack.mulPose(Axis.YP.rotationDegrees(f * f2 * -30.0F));
-        PhotographInHandRenderer.renderPhotograph(poseStack, buffer, combinedLight, stack);
+
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+        poseStack.scale(0.38f, 0.38f, 0.38f);
+        poseStack.translate(-0.5, -0.5, 0);
+        poseStack.scale(1f, 1f, -1f);
+
+        ExposureClient.photographRenderer().render(stack, true, false, poseStack, buffer, packedLight);
+
         poseStack.popPose();
     }
 
     @Unique
-    private void exposure$renderTwoHandedPhotograph(AbstractClientPlayer player, PoseStack pMatrixStack, MultiBufferSource pBuffer, int pCombinedLight, float pPitch, float pEquippedProgress, float pSwingProgress) {
-        float f = Mth.sqrt(pSwingProgress);
-        float f1 = -0.2F * Mth.sin(pSwingProgress * (float)Math.PI);
+    private void exposure$renderTwoHandedPhotograph(AbstractClientPlayer player, PoseStack poseStack, MultiBufferSource buffer, int packedLight, float pitch, float equippedProgress, float swingProgress) {
+        float f = Mth.sqrt(swingProgress);
+        float f1 = -0.2F * Mth.sin(swingProgress * (float)Math.PI);
         float f2 = -0.4F * Mth.sin(f * (float)Math.PI);
-        pMatrixStack.translate(0.0D, -f1 / 2.0F, f2);
-        float f3 = this.calculateMapTilt(pPitch);
-        pMatrixStack.translate(0.0D, 0.04F + pEquippedProgress * -1.2F + f3 * -0.5F, -0.72F);
-        pMatrixStack.mulPose(Axis.XP.rotationDegrees(f3 * -85.0F));
+        poseStack.translate(0.0D, -f1 / 2.0F, f2);
+        float f3 = this.calculateMapTilt(pitch);
+        poseStack.translate(0.0D, 0.04F + equippedProgress * -1.2F + f3 * -0.5F, -0.72F);
+        poseStack.mulPose(Axis.XP.rotationDegrees(f3 * -85.0F));
         if (!player.isInvisible()) {
-            pMatrixStack.pushPose();
-            pMatrixStack.mulPose(Axis.YP.rotationDegrees(90.0F));
-            this.renderMapHand(pMatrixStack, pBuffer, pCombinedLight, HumanoidArm.RIGHT);
-            this.renderMapHand(pMatrixStack, pBuffer, pCombinedLight, HumanoidArm.LEFT);
-            pMatrixStack.popPose();
+            poseStack.pushPose();
+            poseStack.mulPose(Axis.YP.rotationDegrees(90.0F));
+            this.renderMapHand(poseStack, buffer, packedLight, HumanoidArm.RIGHT);
+            this.renderMapHand(poseStack, buffer, packedLight, HumanoidArm.LEFT);
+            poseStack.popPose();
         }
 
         float f4 = Mth.sin(f * (float)Math.PI);
-        pMatrixStack.mulPose(Axis.XP.rotationDegrees(f4 * 20.0F));
-        pMatrixStack.scale(2.0F, 2.0F, 2.0F);
-        PhotographInHandRenderer.renderPhotograph(pMatrixStack, pBuffer, pCombinedLight, this.mainHandItem);
+        poseStack.mulPose(Axis.XP.rotationDegrees(f4 * 20.0F));
+        poseStack.scale(2.0F, 2.0F, 2.0F);
+
+        poseStack.mulPose(Axis.YP.rotationDegrees(180.0F));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
+        poseStack.scale(0.38f, 0.38f, 0.38f);
+        poseStack.translate(-0.5, -0.5, 0);
+        poseStack.scale(1f, 1f, -1f);
+
+        ExposureClient.photographRenderer().render(this.mainHandItem, true, false, poseStack, buffer, packedLight);
     }
 }

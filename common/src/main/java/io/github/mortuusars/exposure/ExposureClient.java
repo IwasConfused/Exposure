@@ -5,6 +5,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.image.ResourceImage;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
 import io.github.mortuusars.exposure.core.image.Image;
@@ -14,19 +15,19 @@ import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureCache;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureReceiver;
 import io.github.mortuusars.exposure.item.*;
-import io.github.mortuusars.exposure.client.render.ExposureRenderer;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
 public class ExposureClient {
     private static final ImageRenderer imageRenderer = new ImageRenderer();
-    private static final ExposureRenderer exposureRenderer = new ExposureRenderer();
+    private static final PhotographRenderer photographRenderer = new PhotographRenderer();
 
     private static ClientsideExposureCache exposureCache = new ClientsideExposureCache();
     private static ClientsideExposureUploader exposureSender;
@@ -43,12 +44,22 @@ public class ExposureClient {
         registerItemModelProperties();
     }
 
+    public static ImageRenderer imageRenderer() {
+        return imageRenderer;
+    }
+
+    public static PhotographRenderer photographRenderer() {
+        return photographRenderer;
+    }
+
     public static ClientsideExposureCache exposureCache() {
         return exposureCache;
     }
+
     public static ClientsideExposureUploader exposureUploader() {
         return exposureSender;
     }
+
     public static ClientsideExposureReceiver exposureReceiver() {
         return exposureReceiver;
     }
@@ -66,20 +77,12 @@ public class ExposureClient {
         return createExposureImage(frame.identifier());
     }
 
-    private static Image createExposureImage(ExposureIdentifier identifier) {
+    public static Image createExposureImage(ExposureIdentifier identifier) {
         return identifier.map(
                 id -> ExposureClient.exposureCache().getOrQuery(id)
-                        .map(data -> (Image)new ExposureDataImage(id, data))
+                        .map(data -> (Image) new ExposureDataImage(id, data))
                         .orElse(Image.EMPTY),
                 ResourceImage::getOrCreate);
-    }
-
-    public static ImageRenderer imageRenderer() {
-        return imageRenderer;
-    }
-
-    public static ExposureRenderer exposureRenderer() {
-        return exposureRenderer;
     }
 
     public static void registerKeymappings(Function<KeyMapping, KeyMapping> registerFunction) {
@@ -131,7 +134,19 @@ public class ExposureClient {
                 new ModelResourceLocation(Exposure.resource("photograph_frame_large"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_LARGE_STRIPPED =
                 new ModelResourceLocation(Exposure.resource("photograph_frame_large_stripped"), "standalone");
+    }
 
+    public static class Textures {
+        public static final ResourceLocation EMPTY = Exposure.resource("textures/empty.png");
 
+        public static class Photograph {
+            public static final ResourceLocation REGULAR_PAPER = Exposure.resource("textures/photograph/photograph.png");
+            public static final ResourceLocation REGULAR_ALBUM_PAPER = Exposure.resource("textures/photograph/photograph_album.png");
+
+            public static final ResourceLocation AGED_PAPER = Exposure.resource("textures/photograph/aged_photograph.png");
+            public static final ResourceLocation AGED_OVERLAY = Exposure.resource("textures/photograph/aged_photograph_overlay.png");
+            public static final ResourceLocation AGED_ALBUM_PAPER = Exposure.resource("textures/photograph/aged_photograph_album.png");
+            public static final ResourceLocation AGED_ALBUM_OVERLAY = Exposure.resource("textures/photograph/aged_photograph_album_overlay.png");
+        }
     }
 }

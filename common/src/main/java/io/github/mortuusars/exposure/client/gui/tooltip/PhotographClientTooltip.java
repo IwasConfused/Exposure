@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.client.gui.tooltip;
 
-import io.github.mortuusars.exposure.client.render.photograph.NewPhotographRenderer;
+import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
@@ -43,13 +44,13 @@ public class PhotographClientTooltip implements ClientTooltipComponent {
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(mouseX, mouseY, 5);
         float scale = SIZE;
-        float nextPhotographOffset = NewPhotographRenderer.getStackedPhotographOffset();
+        float nextPhotographOffset = ExposureClient.photographRenderer().getStackedPhotographOffset();
         scale *= 1f - (additionalPhotographs * nextPhotographOffset);
         guiGraphics.pose().scale(scale, scale, 1f);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
-        NewPhotographRenderer.renderStackedPhotographs(photographs, guiGraphics.pose(), bufferSource,
+        ExposureClient.photographRenderer().renderStackedPhotographs(photographs, guiGraphics.pose(), bufferSource,
                 LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
 
         bufferSource.endBatch();

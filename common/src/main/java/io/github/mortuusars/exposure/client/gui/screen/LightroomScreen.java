@@ -20,7 +20,6 @@ import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
-import io.github.mortuusars.exposure.client.render.image.RenderedImageProvider;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -32,7 +31,6 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.CommonComponents;
@@ -40,7 +38,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -324,36 +321,16 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         return selectedFrame + 1 >= 0 && selectedFrame + 1 < frames.size() && isHovering(116, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
-    public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
-                            float x, float y, float size, float alpha, ExposureType exposureType) {
-        poseStack.pushPose();
-        poseStack.translate(x, y, 0);
-
-        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        ExposureClient.exposureRenderer().render(RenderedImageProvider.fromFrame(frame),
-                PixelModifier.NEGATIVE_FILM, poseStack, bufferSource, 0, 0, size, size, LightTexture.FULL_BRIGHT,
-                exposureType.getImageColor().getRed(), exposureType.getImageColor().getGreen(), exposureType.getImageColor().getBlue(),
-                Mth.clamp((int) Math.ceil(alpha * 255), 0, 255));
-        bufferSource.endBatch();
-
-        poseStack.popPose();
-    }
-
     public static final ImageRenderer imageRenderer = new ImageRenderer();
 
-    public void renderFrame1(@NotNull ExposureFrame frame, PoseStack poseStack,
+    public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
                             float x, float y, float size, float alpha, ExposureType exposureType) {
-//        poseStack.pushPose();
-//        poseStack.translate(x, y, 0);
-
         Image image = new ModifiedImage(ExposureClient.createExposureImage(frame), PixelModifier.NEGATIVE_FILM);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         imageRenderer.render(poseStack, bufferSource, image, new RenderCoordinates(x, y, size, size),
                 exposureType.getImageColor().withAlpha((int) (alpha * 255)));
         bufferSource.endBatch();
-
-//        poseStack.popPose();
     }
 
     @Override

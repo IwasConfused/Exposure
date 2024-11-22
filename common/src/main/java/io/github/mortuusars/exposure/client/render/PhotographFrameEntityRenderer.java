@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.PlatformHelperClient;
-import io.github.mortuusars.exposure.client.render.photograph.NewPhotographRenderer;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -124,7 +124,7 @@ public class PhotographFrameEntityRenderer<T extends PhotographFrameEntity> exte
 
         int brightness = isGlowing ? 255 : getPhotographBrightness(entity);
 
-        NewPhotographRenderer.render(item, false, false, poseStack, bufferSource, packedLight,
+        ExposureClient.photographRenderer().render(item, false, false, poseStack, bufferSource, packedLight,
                 brightness, brightness, brightness, 255);
 
         poseStack.popPose();
