@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.camera.capture.component.*;
 import io.github.mortuusars.exposure.camera.capture.converter.DitheringColorConverter;
 import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
-import io.github.mortuusars.exposure.client.EntitiesInFrame;
+import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
@@ -29,6 +29,7 @@ import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.ChromaticChannel;
+import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
@@ -509,7 +510,7 @@ public class CameraItem extends Item {
         if (projectingFile) {
             entitiesInFrame = Collections.emptyList();
         } else {
-            entitiesInFrame = EntitiesInFrame.get(player, Viewfinder.getCurrentFov(), 12, isInSelfieMode(cameraStack))
+            entitiesInFrame = EntitiesInFrame.get(player, Viewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(cameraStack))
                     .stream()
                     .map(Entity::getUUID)
                     .toList();
@@ -733,10 +734,10 @@ public class CameraItem extends Item {
 //
 //        addStructuresInfo(player, frame);
 //
-//        if (!entitiesInFrameIds.isEmpty()) {
+//        if (!capturedEntities.isEmpty()) {
 //            ListTag entities = new ListTag();
 //
-//            for (Entity entity : entitiesInFrameIds) {
+//            for (Entity entity : capturedEntities) {
 //                if (entity instanceof EnderMan enderMan && player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player)) {
 //                    // I wanted to implement this in a predicate,
 //                    // but it's tricky because EntitySubPredicates do not get the player in their 'match' method.
@@ -761,7 +762,10 @@ public class CameraItem extends Item {
 //        }
 
         //TODO: add entities separately
-//        List<Entity> entitiesInFrameIds = dataFromClient.getEntitiesInFrame(player.serverLevel());
+
+        List<Entity> capturedEntitiesOnClient = dataFromClient.getCapturedEntities(player.serverLevel());
+        List<Entity> capturedEntities = crossCheckCapturedEntities(player, cameraStack, capturedEntitiesOnClient);
+
         List<EntityInFrame> entitiesInFrame = new ArrayList<>();
 
         //TODO: modifyFrameData event
@@ -770,6 +774,25 @@ public class CameraItem extends Item {
 
 
         return new ExposureFrame(new ExposureIdentifier(id), type, new Photographer(player), entitiesInFrame, CustomData.of(tag));
+    }
+
+    /**
+     * Returns an intersection of entities on both sides, i.e. if entity is captured on client but not on server - discard it.
+     */
+    public List<Entity> crossCheckCapturedEntities(ServerPlayer player, ItemStack cameraStack, List<Entity> entitiesOnClient) {
+        if (entitiesOnClient.isEmpty()) {
+            return entitiesOnClient;
+        }
+
+        FocalRange focalRange = getFocalRange(cameraStack);
+        double zoom = getZoom(cameraStack);
+        double fov = Mth.map(zoom, 0, 1, Fov.focalLengthToFov(focalRange.min()), Fov.focalLengthToFov(focalRange.max()));
+
+        List<Entity> entitiesOnServer = EntitiesInFrame.get(player, fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(cameraStack));
+
+        ArrayList<Entity> entities = new ArrayList<>(entitiesOnClient);
+        entities.retainAll(entitiesOnServer);
+        return entities;
     }
 
     public void addFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrame exposureFrame) {

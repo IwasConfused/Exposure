@@ -1,9 +1,7 @@
-package io.github.mortuusars.exposure.client;
+package io.github.mortuusars.exposure.core;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.util.Fov;
-import net.minecraft.client.Camera;
-import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
@@ -16,7 +14,9 @@ public class EntitiesInFrame {
     public static List<Entity> get(LivingEntity photographer, double fov, int limit, boolean inSelfieMode) {
         double currentFov = fov / Exposure.CROP_FACTOR;
         double currentFocalLength = Fov.fovToFocalLength(currentFov);
-        Vec3 cameraPos = Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+
+        Vec3 cameraPos = photographer.position().add(0, photographer.getEyeHeight(), 0);
+        Vec3 cameraLookAngle = Vec3.directionFromRotation(photographer.getXRot(), photographer.getYRot());
 
         List<Entity> entities = photographer.level().getEntities(photographer, new AABB(photographer.blockPosition()).inflate(128),
                 entity -> entity instanceof LivingEntity);
@@ -35,7 +35,7 @@ public class EntitiesInFrame {
             if (entitiesInFrame.size() >= limit)
                 break;
 
-            if (!isInFOV(currentFov, entity))
+            if (!isInFOV(cameraPos, cameraLookAngle, currentFov, entity))
                 continue; // Not in frame
 
             if (getWeightedDistance(cameraPos, entity) > currentFocalLength)
@@ -68,10 +68,7 @@ public class EntitiesInFrame {
         return (distanceInBlocks / sizeModifier) / Exposure.CROP_FACTOR;
     }
 
-    public static boolean isInFOV(double fov, Entity target) {
-        Camera camera = Minecraft.getInstance().gameRenderer.getMainCamera();
-        Vec3 cameraPos = camera.getPosition();
-        Vec3 cameraLookAngle = new Vec3(camera.getLookVector());
+    public static boolean isInFOV(Vec3 cameraPos, Vec3 cameraLookAngle, double fov, Entity target) {
         Vec3 targetEyePos = target.position().add(0, target.getEyeHeight(), 0);
 
         // Valid angles form a circle instead of square.
