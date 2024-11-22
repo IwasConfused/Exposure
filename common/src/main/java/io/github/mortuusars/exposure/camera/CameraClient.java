@@ -102,7 +102,6 @@ public class CameraClient {
         Viewfinder.close();
     }
 
-
     public static void setZoom(double zoom) {
         if (getActiveCameraAccessor() == null) {
             return;

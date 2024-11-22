@@ -2,7 +2,9 @@ package io.github.mortuusars.exposure.client.render.image;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.image.Image;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -10,24 +12,27 @@ import net.minecraft.client.renderer.texture.DynamicTexture;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
-class RenderedImageInstance implements AutoCloseable {
-    private Image image;
-    private DynamicTexture texture;
-    private final RenderType renderType;
-    private boolean requiresUpload = true;
+public class RenderedImageInstance implements AutoCloseable {
+    protected Image image;
+    protected DynamicTexture texture;
+    protected final ResourceLocation textureLocation;
+    protected final RenderType renderType;
+    protected boolean requiresUpload = true;
 
     RenderedImageInstance(Image image) {
         this.image = image;
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
-        ResourceLocation resourcelocation = Minecraft.getInstance().getTextureManager().register(image.id(), this.texture);
-        this.renderType = RenderType.text(resourcelocation);
+        // Filter id because ResourceLocation will crash if non-valid chars are present:
+        String id = Exposure.ID + "/" + Util.sanitizeName(image.id(), ResourceLocation::validPathChar);
+        this.textureLocation = Minecraft.getInstance().getTextureManager().register(id, this.texture);
+        this.renderType = RenderType.text(textureLocation);
     }
 
-    public void replaceData(Image exposure) {
-        boolean hasChanged = !this.image.id().equals(exposure.id());
-        this.image = exposure;
+    public void replaceData(Image image) {
+        boolean hasChanged = !this.image.id().equals(image.id());
+        this.image = image;
         if (hasChanged) {
-            this.texture = new DynamicTexture(exposure.getWidth(), exposure.getHeight(), true);
+            this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
             forceUpload();
         }
     }
@@ -66,6 +71,7 @@ class RenderedImageInstance implements AutoCloseable {
     }
 
     public void close() {
+        Minecraft.getInstance().getTextureManager().release(textureLocation);
         this.texture.close();
     }
 }

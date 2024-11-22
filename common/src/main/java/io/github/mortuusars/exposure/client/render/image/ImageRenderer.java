@@ -67,8 +67,6 @@ public class ImageRenderer implements AutoCloseable {
     }
 
     public void clearDataSingle(@NotNull String id, boolean allVariants) {
-        //TODO: id here would not be formatted. need to extract formatting to common place, not only in ExposureDataImage
-
         // Using cache.entrySet().removeIf(...) would be simpler, but it wouldn't let us .close() the instance
         for(Iterator<Map.Entry<String, RenderedImageInstance>> it = cache.entrySet().iterator(); it.hasNext(); ) {
             Map.Entry<String, RenderedImageInstance> entry = it.next();

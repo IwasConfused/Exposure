@@ -32,6 +32,7 @@ import io.github.mortuusars.exposure.util.ChromaticChannel;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -695,7 +696,6 @@ public class CameraItem extends Item {
         tag.merge(dataFromClient.extraData());
 
 
-
         //TODO: ... other properties
         Level level = player.level();
 //
@@ -767,7 +767,6 @@ public class CameraItem extends Item {
         //TODO: modifyFrameData event
 //        PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frame, entities);
         //TODO: modifyEntityInFrameData event
-
 
 
         return new ExposureFrame(new ExposureIdentifier(id), type, new Photographer(player), entitiesInFrame, CustomData.of(tag));
@@ -954,10 +953,14 @@ public class CameraItem extends Item {
         return -1;
     }
 
+    /**
+     * This method is called only server-side and then gets sent to client in a packet
+     * because gameTime is different between client/server, and IDs won't match.
+     */
     protected String createExposureId(Player player) {
-        // This method is called only server-side and then gets sent to client in a packet
-        // because gameTime is different between client/server, and IDs won't match.
-        return player.getName().getString() + "_" + player.level().getGameTime();
+        // Filtering just to avoid potential issues with IDs. Although it may not be necessary anymore
+        String playerName = Util.sanitizeName(player.getName().getString(), ResourceLocation::validPathChar);
+        return playerName + "_" + player.level().getGameTime();
     }
 
     public FocalRange getFocalRange(ItemStack cameraStack) {

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.PlatformHelperClient;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LightTexture;
@@ -111,12 +110,11 @@ public class PhotographFrameEntityRenderer<T extends PhotographFrameEntity> exte
         float frameBorderOffset = frameInvisible || isStripped ? 0f : 0.125f; // (2px / 16px = 0.125)
         float offsetFromCenter = frameInvisible ? 0.497f : 0.48f;
         float desiredSize = size + 1 - frameBorderOffset * 2;
-        float scale = desiredSize;
 
         poseStack.mulPose(Axis.ZP.rotationDegrees((entity.getItemRotation() * 360.0F / 4.0F)));
         poseStack.mulPose(Axis.ZP.rotationDegrees(180.0F));
         poseStack.translate(-0.5 * (size + 1) + frameBorderOffset, -0.5 * (size + 1) + frameBorderOffset, offsetFromCenter);
-        poseStack.scale(scale, scale, 1);
+        poseStack.scale(desiredSize, desiredSize, 1);
 
         boolean isGlowing = entity.isGlowing();
         if (isGlowing)
