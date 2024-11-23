@@ -13,15 +13,14 @@ public class CaptureManager {
         captureQueue.add(capture);
     }
 
-    public static void onRenderTickEnd() {
+    public static void onRenderTickStart() {
         if (currentCapture == null) {
             currentCapture = captureQueue.poll();
-            if (currentCapture != null) {
-                currentCapture.initialize();
-            }
-            else {
+            if (currentCapture == null) {
                 return;
             }
+
+            currentCapture.initialize();
         }
 
         if (currentCapture.isDone()) {

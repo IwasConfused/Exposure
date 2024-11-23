@@ -5,12 +5,9 @@ import com.google.common.collect.ImmutableList;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
-import io.github.mortuusars.exposure.camera.capture.Capture;
-import io.github.mortuusars.exposure.camera.capture.CaptureManager;
-import io.github.mortuusars.exposure.camera.capture.FileCapture;
-import io.github.mortuusars.exposure.camera.capture.ScreenshotCapture;
 import io.github.mortuusars.exposure.camera.capture.component.*;
 import io.github.mortuusars.exposure.camera.capture.converter.DitheringColorConverter;
 import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
@@ -613,7 +610,7 @@ public class CameraItem extends Item {
         int frameSize = filmItem.getFrameSize(filmStack.getForReading());
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
 
-        Capture capture = new ScreenshotCapture()
+        Capture capture = new BackgroundScreenshotCapture()
                 .setFilmType(filmItem.getType())
                 .setSize(frameSize)
                 .setBrightnessStops(brightnessStops)

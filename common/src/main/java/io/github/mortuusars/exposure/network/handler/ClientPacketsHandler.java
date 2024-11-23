@@ -63,7 +63,7 @@ public class ClientPacketsHandler {
             String filename = Util.getFilenameFormattedDateTime();
             CompoundTag frameData = new CompoundTag();
             frameData.putString(FrameProperties.ID, filename);
-            Capture capture = new ScreenshotCapture()
+            Capture capture = new DirectScreenshotCapture()
                     .setSize(finalSize)
                     .cropFactor(1f)
                     .setComponents(

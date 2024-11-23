@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.camera.viewfinder;
 
 import com.google.gson.JsonSyntaxException;
+import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.CameraClient;
@@ -57,6 +58,27 @@ public class ViewfinderShader {
             RenderSystem.disableDepthTest();
             RenderSystem.resetTextureMatrix();
             shader.process(minecraft.getTimer().getGameTimeDeltaTicks());
+        }
+    }
+
+    public static void process(RenderTarget renderTarget) {
+        if (shader != null && active) {
+            ResourceLocation shaderLocation = ResourceLocation.parse(shader.getName());
+
+            try {
+                PostChain tempShader = new PostChain(minecraft.getTextureManager(), minecraft.getResourceManager(),
+                        renderTarget, shaderLocation);
+                tempShader.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
+
+                RenderSystem.disableBlend();
+                RenderSystem.disableDepthTest();
+                RenderSystem.resetTextureMatrix();
+                tempShader.process(minecraft.getTimer().getGameTimeDeltaTicks());
+            } catch (IOException e) {
+                LOGGER.warn("Failed to load shader: {}", shaderLocation, e);
+            } catch (JsonSyntaxException e) {
+                LOGGER.warn("Failed to parse shader: {}", shaderLocation, e);
+            }
         }
     }
 

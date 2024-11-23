@@ -25,26 +25,44 @@ public class BaseComponent implements ICaptureComponent {
 
     @Override
     public int getFramesDelay(Capture capture) {
-        return 1 + Config.Client.CAPTURE_DELAY_FRAMES.get();
+        return Config.Client.CAPTURE_DELAY_FRAMES.get();
     }
 
+//    @Override
+//    public void onDelayFrame(Capture capture, int delayFramesLeft) {
+//        if (delayFramesLeft == Math.max(0, getFramesDelay(capture) - 1)) { // Right before capturing
+//            Minecraft mc = Minecraft.getInstance();
+//            hideGuiBeforeCapture = mc.options.hideGui;
+//            cameraTypeBeforeCapture = mc.options.getCameraType();
+//            postEffectActiveBeforeCapture = Minecraft.getInstance().gameRenderer.effectActive;
+//
+//            mc.options.hideGui = hideGuiOnCapture;
+//            CameraType cameraType = Minecraft.getInstance().options.getCameraType()
+//                    == CameraType.THIRD_PERSON_FRONT ? CameraType.THIRD_PERSON_FRONT : CameraType.FIRST_PERSON;
+//            mc.options.setCameraType(cameraType);
+//
+//
+//            if (Config.Client.DISABLE_POST_EFFECT.get()) {
+//                Minecraft.getInstance().gameRenderer.effectActive = false;
+//            }
+//        }
+//    }
+
     @Override
-    public void onDelayFrame(Capture capture, int delayFramesLeft) {
-        if (delayFramesLeft == Math.max(0, getFramesDelay(capture) - 1)) { // Right before capturing
-            Minecraft mc = Minecraft.getInstance();
-            hideGuiBeforeCapture = mc.options.hideGui;
-            cameraTypeBeforeCapture = mc.options.getCameraType();
-            postEffectActiveBeforeCapture = Minecraft.getInstance().gameRenderer.effectActive;
+    public void beforeCapture(Capture capture) {
+        Minecraft mc = Minecraft.getInstance();
+        hideGuiBeforeCapture = mc.options.hideGui;
+        cameraTypeBeforeCapture = mc.options.getCameraType();
+        postEffectActiveBeforeCapture = Minecraft.getInstance().gameRenderer.effectActive;
 
-            mc.options.hideGui = hideGuiOnCapture;
-            CameraType cameraType = Minecraft.getInstance().options.getCameraType()
-                    == CameraType.THIRD_PERSON_FRONT ? CameraType.THIRD_PERSON_FRONT : CameraType.FIRST_PERSON;
-            mc.options.setCameraType(cameraType);
+        mc.options.hideGui = hideGuiOnCapture;
+        CameraType cameraType = Minecraft.getInstance().options.getCameraType()
+                == CameraType.THIRD_PERSON_FRONT ? CameraType.THIRD_PERSON_FRONT : CameraType.FIRST_PERSON;
+        mc.options.setCameraType(cameraType);
 
 
-            if (Config.Client.DISABLE_POST_EFFECT.get()) {
-                Minecraft.getInstance().gameRenderer.effectActive = false;
-            }
+        if (Config.Client.DISABLE_POST_EFFECT.get()) {
+            Minecraft.getInstance().gameRenderer.effectActive = false;
         }
     }
 

@@ -132,10 +132,10 @@ public class ClientEvents {
             }
         }
 
-        @SubscribeEvent
-        public static void onRenderTick(RenderFrameEvent.Post event) {
-            CaptureManager.onRenderTickEnd();
-        }
+//        @SubscribeEvent
+//        public static void onRenderTick(RenderFrameEvent.Pre event) {
+//            CaptureManager.onRenderTickStart();
+//        }
 
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post event) {

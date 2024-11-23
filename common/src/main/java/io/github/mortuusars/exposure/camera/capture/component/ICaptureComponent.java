@@ -44,6 +44,11 @@ public interface ICaptureComponent {
     default void onDelayFrame(Capture capture, int delayFramesLeft) { }
 
     /**
+     * Called right before capturing a screenshot.
+     */
+    default void beforeCapture(Capture capture) { }
+
+    /**
      * Called after screenshot has been taken and before any processing of the image.
      */
     default void imageTaken(Capture capture, NativeImage screenshot) { }

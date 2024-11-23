@@ -161,6 +161,8 @@ public abstract class Capture {
 
         isCapturing = true;
 
+        beforeCapture();
+
         if (asyncCapturing) {
             new Thread(() -> {
                 @Nullable NativeImage image = captureImage();
@@ -170,6 +172,12 @@ public abstract class Capture {
         else {
             @Nullable NativeImage image = captureImage();
             onImageCaptured(image);
+        }
+    }
+
+    protected void beforeCapture() {
+        for (ICaptureComponent modifier : components) {
+            modifier.beforeCapture(this);
         }
     }
 
