@@ -310,7 +310,7 @@ public class CameraItem extends Item {
     public void closeShutter(ServerPlayer player, ItemStack stack) {
         ShutterState shutterState = getShutterState(stack);
         long closeTick = shutterState.getCloseTick();
-        boolean flashHasFired = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains(FLASH_HAS_FIRED_ON_LAST_SHOT);
+        boolean flashHasFired = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe().getBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT);
 
         setShutterState(stack, ShutterState.closed());
 
