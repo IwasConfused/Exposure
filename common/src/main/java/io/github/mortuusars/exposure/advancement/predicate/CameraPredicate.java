@@ -36,7 +36,7 @@ public record CameraPredicate(Optional<ItemPredicate> camera,
 
         return (camera.isEmpty() || camera.get().test(stack))
                 && (shutterSpeedMS.isEmpty() || shutterSpeedMS.get().matches(item.getShutterSpeed(stack).getDurationMilliseconds()))
-                && (focalLength.isEmpty() || focalLength.get().matches(Mth.ceil(item.getZoom(stack))))
+                && (focalLength.isEmpty() || focalLength.get().matches(Mth.ceil(item.getZoomPercentage(stack))))
                 && (film.isEmpty() || film.get().test(item.getAttachment(stack, AttachmentType.FILM).getForReading()))
                 && (flash.isEmpty() || flash.get().test(item.getAttachment(stack, AttachmentType.FLASH).getForReading()))
                 && (lens.isEmpty() || lens.get().test(item.getAttachment(stack, AttachmentType.LENS).getForReading()))

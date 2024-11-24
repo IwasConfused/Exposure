@@ -784,7 +784,7 @@ public class CameraItem extends Item {
         }
 
         FocalRange focalRange = getFocalRange(cameraStack);
-        double zoom = getZoom(cameraStack);
+        double zoom = getZoomPercentage(cameraStack);
         double fov = Mth.map(zoom, 0, 1, Fov.focalLengthToFov(focalRange.min()), Fov.focalLengthToFov(focalRange.max()));
 
         List<Entity> entitiesOnServer = EntitiesInFrame.get(player, fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(cameraStack));
@@ -1069,11 +1069,11 @@ public class CameraItem extends Item {
         stack.set(Exposure.DataComponents.SHUTTER_SPEED, shutterSpeed);
     }
 
-    public double getZoom(ItemStack stack) {
+    public double getZoomPercentage(ItemStack stack) {
         return stack.getOrDefault(Exposure.DataComponents.ZOOM, 0.0);
     }
 
-    public void setZoom(ItemStack stack, double zoom) {
+    public void setZoomPercentage(ItemStack stack, double zoom) {
         stack.set(Exposure.DataComponents.ZOOM, Mth.clamp(zoom, 0.0, 1.0));
     }
 

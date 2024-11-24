@@ -32,7 +32,7 @@ public record CameraSetZoomC2SP(@NotNull CameraAccessor accessor, double zoom) i
     public boolean handle(PacketFlow direction, Player player) {
         Preconditions.checkState(player != null, "Cannot handle packet {}: Player was null", ID);
         accessor.getCamera(player)
-                .ifPresent(camera -> camera.getItem().setZoom(camera.getItemStack(), zoom));
+                .ifPresent(camera -> camera.getItem().setZoomPercentage(camera.getItemStack(), zoom));
         return true;
     }
 }

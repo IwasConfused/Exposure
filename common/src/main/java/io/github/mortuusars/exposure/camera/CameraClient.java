@@ -108,7 +108,7 @@ public class CameraClient {
         }
 
         getActiveCamera().ifPresent(camera -> {
-            camera.getItem().setZoom(camera.getItemStack(), zoom);
+            camera.getItem().setZoomPercentage(camera.getItemStack(), zoom);
             Packets.sendToServer(new CameraSetZoomC2SP(getActiveCameraAccessor(), zoom));
         });
     }

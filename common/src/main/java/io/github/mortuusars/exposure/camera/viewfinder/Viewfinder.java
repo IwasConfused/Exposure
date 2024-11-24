@@ -52,8 +52,10 @@ public class Viewfinder {
 
         Camera camera = activeCamera.get();
 
+        double zoomPercentage = camera.getItem().getZoomPercentage(camera.getItemStack());
         focalRange = camera.getItem().getFocalRange(camera.getItemStack());
-        targetFov = Fov.focalLengthToFov(Mth.clamp(camera.getItem().getZoom(camera.getItemStack()), focalRange.min(), focalRange.max()));
+        double focalLength = Mth.map(zoomPercentage, 0.0, 1.0, focalRange.min(), focalRange.max());
+        targetFov = Fov.focalLengthToFov(focalLength);
 
         isOpen = true;
 

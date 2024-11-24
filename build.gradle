@@ -51,10 +51,17 @@ subprojects {
             name = "Jared's maven"
             url = "https://maven.blamejared.com/"
         }
+//        maven {
+//            name = "ModMaven"
+//            url = "https://modmaven.dev"
+//        }
+
         maven {
-            name = "ModMaven"
-            url = "https://modmaven.dev"
+            name = "FabricMC"
+            url = "https://maven.fabricmc.net/"
         }
+
+
 
         // saps.dev Maven (KubeJS and Rhino)
         maven {
