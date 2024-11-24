@@ -26,10 +26,9 @@ public class OnePerEntitySoundsClient {
 
         Map<ResourceLocation, SoundInstance> instances = sounds.computeIfAbsent(sourceEntity, e -> new HashMap<>());
 
-        @Nullable SoundInstance previousInstance = instances.get(soundEvent.getLocation());
+        @Nullable SoundInstance previousInstance = instances.remove(soundEvent.getLocation());
         if (previousInstance != null) {
-            Minecraft.getInstance().getSoundManager().stop(soundInstance);
-            instances.remove(soundEvent.getLocation());
+            Minecraft.getInstance().getSoundManager().stop(previousInstance);
         }
 
         instances.put(soundEvent.getLocation(), soundInstance);
