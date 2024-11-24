@@ -32,43 +32,8 @@ public record ShutterState(boolean isOpen, long openedAtTick, ShutterSpeed shutt
     }
 
     public long getCloseTick() {
-        return isOpen ? openedAtTick + shutterSpeed.getDurationTicks() : -1;
+        // Shutter speed duration should be at least 2 ticks so that it has enough time to be visible in a viewfinder overlay.
+        // It probably would've been better to implement this prolongation client-side, but this is
+        return isOpen ? openedAtTick + Math.max(shutterSpeed.getDurationTicks(), 2) : -1;
     }
-
-//    public static class Mutable {
-//        private boolean isOpen;
-//        private long openedAtTick;
-//        private int openDurationTicks;
-//
-//        public boolean isOpen() {
-//            return isOpen;
-//        }
-//
-//        public Mutable setOpen(boolean open) {
-//            isOpen = open;
-//            return this;
-//        }
-//
-//        public long getOpenedAtTick() {
-//            return openedAtTick;
-//        }
-//
-//        public Mutable setOpenedAtTick(long openedAtTick) {
-//            this.openedAtTick = openedAtTick;
-//            return this;
-//        }
-//
-//        public int getOpenDurationTicks() {
-//            return openDurationTicks;
-//        }
-//
-//        public Mutable setOpenDurationTicks(int openDurationTicks) {
-//            this.openDurationTicks = openDurationTicks;
-//            return this;
-//        }
-//
-//        public ShutterState toImmutable() {
-//            return new ShutterState(isOpen, openedAtTick, openDurationTicks);
-//        }
-//    }
 }
