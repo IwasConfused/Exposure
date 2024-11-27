@@ -6,11 +6,10 @@ import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
+import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.capture.component.*;
-import io.github.mortuusars.exposure.camera.capture.converter.DitheringColorConverter;
-import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
@@ -554,6 +553,9 @@ public class CameraItem extends Item {
 //            }
 //        }
 
+
+//        ExposureClient.captureManager().enqueue();
+
         startCapture(player, camera.getItemStack(), exposureId, flashHasFired);
     }
 
@@ -580,7 +582,7 @@ public class CameraItem extends Item {
                                 }
                             });
                         });
-                        CaptureManager.enqueue(regularCapture);
+                        ExposureClient.captureManager().enqueue(regularCapture);
                     })
                     .onImageCaptured(() -> {
                         Minecraft.getInstance().execute(() -> {
@@ -598,7 +600,7 @@ public class CameraItem extends Item {
             }
         }
 
-        CaptureManager.enqueue(capture);
+        ExposureClient.captureManager().enqueue(capture);
     }
 
     protected Capture createRegularCapture(Player player, ItemStack cameraStack, String exposureId, boolean flash) {
@@ -611,10 +613,11 @@ public class CameraItem extends Item {
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
 
         Capture capture = new BackgroundScreenshotCapture()
+                .setAsyncProcessing(false)
                 .setFilmType(filmItem.getType())
                 .setSize(frameSize)
                 .setBrightnessStops(brightnessStops)
-                .setConverter(new DitheringColorConverter());
+                .setConverter(ImageConverter.DITHERED_MAP_COLORS);
 
         capture.addComponent(new BaseComponent());
         capture.addComponent(new ExposureUploaderComponent(exposureId));
@@ -650,7 +653,7 @@ public class CameraItem extends Item {
                 .setFilmType(exposureType)
                 .setSize(frameSize)
                 .addComponent(new ExposureUploaderComponent(exposureId))
-                .setConverter(dither ? new DitheringColorConverter() : new SimpleColorConverter())
+                .setConverter(dither ? ImageConverter.DITHERED_MAP_COLORS : ImageConverter.NEAREST_MAP_COLORS)
                 .cropFactor(1)
                 .setAsyncCapturing(true);
 

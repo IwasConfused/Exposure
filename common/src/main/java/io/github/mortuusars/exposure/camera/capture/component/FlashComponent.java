@@ -21,7 +21,7 @@ public class FlashComponent implements ICaptureComponent {
         }
         if (framesDelay > 20) {
             Exposure.LOGGER.warn("Capture framesDelay of '{}' can be too long for use with a flash. " +
-                    "The flash might disappear in that time.", ticksDelay);
+                    "The flash might disappear in that time.", framesDelay);
         }
     }
 }

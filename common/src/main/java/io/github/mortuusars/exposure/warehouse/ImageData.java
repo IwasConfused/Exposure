@@ -11,7 +11,7 @@ public record ImageData(int width, int height, byte[] pixels) { //TODO: palette
         Preconditions.checkArgument(height >= 0, "Height cannot be negative.");
         if (pixels.length != width * height) {
             Exposure.LOGGER.warn("Pixel count '{}' is not correct for image dimensions of '{}x{}'. " +
-                    "Should be '{}pixels'", pixels.length, width, height, width * height);
+                    "Count should be '{}'.", pixels.length, width, height, width * height);
         }
     }
 }

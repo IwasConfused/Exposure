@@ -40,9 +40,8 @@ public class ShaderCommand {
     }
 
     private static int removeShader(CommandContext<CommandSourceStack> context) {
-        ResourceLocation shaderLocation = ResourceLocation.withDefaultNamespace("none");
         for (ServerPlayer targetPlayer : getTargetPlayers(context)) {
-            Packets.sendToClient(new ApplyShaderS2CP(shaderLocation), targetPlayer);
+            Packets.sendToClient(ApplyShaderS2CP.REMOVE, targetPlayer);
             context.getSource().sendSuccess(() -> Component.translatable("command.exposure.shader.removed"), false);
         }
         return 0;

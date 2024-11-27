@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.mixin;
 
-import io.github.mortuusars.exposure.camera.capture.CaptureManager;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
 import net.minecraft.client.Camera;
@@ -16,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class GameRendererMixin {
     @Inject(method = "renderLevel", at = @At(value = "HEAD"))
     void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
-        CaptureManager.onRenderTickStart();
+        ExposureClient.captureManager().onRenderTickStart();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.AFTER))

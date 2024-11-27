@@ -5,8 +5,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
-import io.github.mortuusars.exposure.camera.capture.converter.IImageToMapColorsConverter;
-import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
+import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.core.ExposureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -25,7 +24,7 @@ public abstract class Capture {
     protected boolean asyncCapturing = false;
     protected boolean asyncProcessing = true;
     protected ArrayList<ICaptureComponent> components = new ArrayList<>();
-    protected IImageToMapColorsConverter converter = new SimpleColorConverter();
+    protected ImageConverter converter = ImageConverter.DITHERED_MAP_COLORS;
     protected Runnable onImageCaptured = () -> {};
     protected Runnable onCapturingFailed = () -> {};
 
@@ -118,7 +117,7 @@ public abstract class Capture {
         return this;
     }
 
-    public Capture setConverter(IImageToMapColorsConverter converter) {
+    public Capture setConverter(ImageConverter converter) {
         this.converter = converter;
         return this;
     }
@@ -261,7 +260,7 @@ public abstract class Capture {
                 modifiedImage = component.modifyImage(this, modifiedImage);
             }
 
-            byte[] pixels = converter.convert(this, modifiedImage);
+            byte[] pixels = converter.convert(modifiedImage);
 
             for (ICaptureComponent component : components) {
                 component.teardown(this);
@@ -332,7 +331,7 @@ public abstract class Capture {
                 float ratioY = y / (float)resultHeight;
                 int sourcePosY = (int)(sourceY + (sourceHeight * ratioY));
 
-                // NativeImage#getPixelAGBA returns big-endian value - 0xAABBGGRR
+                // NativeImage#getPixelRGBA returns big-endian value - 0xAABBGGRR
                 // So for us it's ABGR
                 int colorABGR = source.getPixelRGBA(sourcePosX, sourcePosY);
 

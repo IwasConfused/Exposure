@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.core.pixel_modifiers;
 
-import io.github.mortuusars.exposure.util.Color;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.util.HUSLColorConverter;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;

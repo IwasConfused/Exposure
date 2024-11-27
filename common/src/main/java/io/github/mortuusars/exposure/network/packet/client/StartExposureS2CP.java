@@ -13,8 +13,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record StartExposureS2CP(String exposureId, CameraAccessor cameraAccessor,
-                                boolean flashHasFired, int lightLevelBeforeShot) implements IPacket {
+public record StartExposureS2CP(String exposureId,
+                                CameraAccessor cameraAccessor,
+                                boolean flashHasFired,
+                                int lightLevelBeforeShot) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("start_exposure");
     public static final CustomPacketPayload.Type<StartExposureS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 

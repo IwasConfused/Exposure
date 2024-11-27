@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mortuusars.exposure.client.capture.CaptureManager;
 import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.image.ResourceImage;
@@ -26,22 +27,24 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public class ExposureClient {
+    private static final CaptureManager captureManager = new CaptureManager();
+
     private static final ImageRenderer imageRenderer = new ImageRenderer();
     private static final PhotographRenderer photographRenderer = new PhotographRenderer();
 
-    private static ClientsideExposureCache exposureCache = new ClientsideExposureCache();
-    private static ClientsideExposureUploader exposureSender;
-    private static ClientsideExposureReceiver exposureReceiver;
+    private static final ClientsideExposureCache exposureCache = new ClientsideExposureCache();
+    private static final ClientsideExposureUploader exposureUploader = new ClientsideExposureUploader();
+    private static final ClientsideExposureReceiver exposureReceiver = new ClientsideExposureReceiver(exposureCache);
 
     @Nullable
     private static KeyMapping openCameraControlsKey = null;
 
     public static void init() {
-        exposureCache = new ClientsideExposureCache();
-        exposureSender = new ClientsideExposureUploader();
-        exposureReceiver = new ClientsideExposureReceiver(exposureCache);
-
         registerItemModelProperties();
+    }
+
+    public static CaptureManager captureManager() {
+        return captureManager;
     }
 
     public static ImageRenderer imageRenderer() {
@@ -57,7 +60,7 @@ public class ExposureClient {
     }
 
     public static ClientsideExposureUploader exposureUploader() {
-        return exposureSender;
+        return exposureUploader;
     }
 
     public static ClientsideExposureReceiver exposureReceiver() {

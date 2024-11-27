@@ -9,8 +9,7 @@ import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.camera.capture.component.BaseComponent;
 import io.github.mortuusars.exposure.camera.capture.component.ExposureUploaderComponent;
 import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
-import io.github.mortuusars.exposure.camera.capture.converter.DitheringColorConverter;
-import io.github.mortuusars.exposure.camera.capture.converter.SimpleColorConverter;
+import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
@@ -44,7 +43,7 @@ import java.util.Objects;
 public class ClientPacketsHandler {
     public static void applyShader(ApplyShaderS2CP packet) {
         executeOnMainThread(() -> {
-            if (packet.shaderLocation().getPath().equals("none")) {
+            if (packet.shouldRemove()) {
                 Minecraft.getInstance().gameRenderer.shutdownEffect();
             } else {
                 Minecraft.getInstance().gameRenderer.loadEffect(packet.shaderLocation());
@@ -79,8 +78,8 @@ public class ClientPacketsHandler {
                                     Exposure.LOGGER.info("Saved exposure screenshot: {}", filename);
                                 }
                             })
-                    .setConverter(new DitheringColorConverter());
-            CaptureManager.enqueue(capture);
+                    .setConverter(ImageConverter.DITHERED_MAP_COLORS);
+            ExposureClient.captureManager().enqueue(capture);
         });
     }
 
@@ -99,8 +98,8 @@ public class ClientPacketsHandler {
                     .setSize(size)
                     .cropFactor(1f)
                     .setComponents(new ExposureUploaderComponent(finalExposureId))
-                    .setConverter(dither ? new DitheringColorConverter() : new SimpleColorConverter());
-            CaptureManager.enqueue(capture);
+                    .setConverter(dither ? ImageConverter.DITHERED_MAP_COLORS : ImageConverter.NEAREST_MAP_COLORS);
+            ExposureClient.captureManager().enqueue(capture);
 
             ExposureFrame frame = ExposureFrame.EMPTY.toMutable().setIdentifier(new ExposureIdentifier(finalExposureId)).toImmutable();
             CapturedFramesHistory.add(frame);

@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.core;
 
 import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.util.Color;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

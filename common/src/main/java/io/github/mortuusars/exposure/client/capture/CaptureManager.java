@@ -1,19 +1,20 @@
-package io.github.mortuusars.exposure.camera.capture;
+package io.github.mortuusars.exposure.client.capture;
 
+import io.github.mortuusars.exposure.camera.capture.Capture;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
 public class CaptureManager {
-    private static final Queue<Capture> captureQueue = new LinkedList<>();
+    private final Queue<Capture> captureQueue = new LinkedList<>();
     @Nullable
-    private static Capture currentCapture;
+    private Capture currentCapture;
 
-    public static void enqueue(Capture capture) {
+    public void enqueue(Capture capture) {
         captureQueue.add(capture);
     }
 
-    public static void onRenderTickStart() {
+    public void onRenderTickStart() {
         if (currentCapture == null) {
             currentCapture = captureQueue.poll();
             if (currentCapture == null) {

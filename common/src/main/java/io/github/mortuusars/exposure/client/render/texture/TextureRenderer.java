@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.render.texture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.mortuusars.exposure.util.Color;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -13,7 +13,7 @@ import org.joml.Matrix4f;
 public class TextureRenderer {
     public static void render(PoseStack poseStack, MultiBufferSource bufferSource, ResourceLocation texture,
                               int packedLight, Color color) {
-        render(poseStack, bufferSource, texture, packedLight, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+        render(poseStack, bufferSource, texture, packedLight, color.getR(), color.getG(), color.getB(), color.getA());
     }
 
     public static void render(PoseStack poseStack, MultiBufferSource bufferSource, ResourceLocation texture,

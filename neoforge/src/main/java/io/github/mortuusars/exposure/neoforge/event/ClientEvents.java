@@ -3,7 +3,6 @@ package io.github.mortuusars.exposure.neoforge.event;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.capture.CaptureManager;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
@@ -131,11 +130,6 @@ public class ClientEvents {
                 event.setCanceled(true);
             }
         }
-
-//        @SubscribeEvent
-//        public static void onRenderTick(RenderFrameEvent.Pre event) {
-//            CaptureManager.onRenderTickStart();
-//        }
 
         @SubscribeEvent
         public static void onClientTick(ClientTickEvent.Post event) {

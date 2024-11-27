@@ -1,83 +1,67 @@
-package io.github.mortuusars.exposure.util;
+package io.github.mortuusars.exposure.core.image.color;
 
-import java.beans.ConstructorProperties;
+import net.minecraft.util.Mth;
 
 public class Color {
     public static final Color WHITE = new Color(255, 255, 255, 255);
 
-    int value;
-    private float[] frgbvalue = null;
-    private float[] fvalue = null;
-    private float falpha = 0.0f;
-
+    protected final int r, g, b, a;
+    protected final int value;
 
     public Color(int r, int g, int b) {
         this(r, g, b, 255);
     }
 
-    @ConstructorProperties({"red", "green", "blue", "alpha"})
     public Color(int r, int g, int b, int a) {
-        value = ((a & 0xFF) << 24) |
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
+        this.value = ((a & 0xFF) << 24) |
                 ((r & 0xFF) << 16) |
-                ((g & 0xFF) << 8)  |
+                ((g & 0xFF) << 8) |
                 ((b & 0xFF));
-        testColorValueRange(r,g,b,a);
+//        testColorValueRange(r, g, b, a);
     }
 
     public Color(int rgb) {
-        value = 0xff000000 | rgb;
+        this(rgb, false);
     }
 
-    public Color(int rgba, boolean hasalpha) {
-        if (hasalpha) {
-            value = rgba;
+    public Color(int rgba, boolean hasAlpha) {
+        if (hasAlpha) {
+            this.value = rgba;
         } else {
-            value = 0xff000000 | rgba;
+            this.value = 0xff000000 | rgba;
         }
-    }
 
-    public Color(float r, float g, float b) {
-        this( (int) (r*255+0.5), (int) (g*255+0.5), (int) (b*255+0.5));
-        testColorValueRange(r,g,b,1.0f);
-        frgbvalue = new float[3];
-        frgbvalue[0] = r;
-        frgbvalue[1] = g;
-        frgbvalue[2] = b;
-        falpha = 1.0f;
-        fvalue = frgbvalue;
-    }
-
-    public Color(float r, float g, float b, float a) {
-        this((int)(r*255+0.5), (int)(g*255+0.5), (int)(b*255+0.5), (int)(a*255+0.5));
-        frgbvalue = new float[3];
-        frgbvalue[0] = r;
-        frgbvalue[1] = g;
-        frgbvalue[2] = b;
-        falpha = a;
-        fvalue = frgbvalue;
+        this.a = hasAlpha ? (rgba >> 24) & 0xFF : 255;
+        this.r = (rgba >> 16) & 0xFF;
+        this.g = (rgba >> 8) & 0xFF;
+        this.b = rgba & 0xFF;
     }
 
     public Color withAlpha(int alpha) {
-        return new Color((alpha & 0xFF) << 24 | value & 0xFFFFFF, true);
+        return new Color(this.r, this.g, this.b, alpha);
     }
 
     private static void testColorValueRange(int r, int g, int b, int a) {
         boolean rangeError = false;
         String badComponentString = "";
 
-        if ( a < 0 || a > 255) {
+        if (a < 0 || a > 255) {
             rangeError = true;
             badComponentString = badComponentString + " Alpha";
         }
-        if ( r < 0 || r > 255) {
+        if (r < 0 || r > 255) {
             rangeError = true;
             badComponentString = badComponentString + " Red";
         }
-        if ( g < 0 || g > 255) {
+        if (g < 0 || g > 255) {
             rangeError = true;
             badComponentString = badComponentString + " Green";
         }
-        if ( b < 0 || b > 255) {
+        if (b < 0 || b > 255) {
             rangeError = true;
             badComponentString = badComponentString + " Blue";
         }
@@ -87,49 +71,47 @@ public class Color {
         }
     }
 
-    private static void testColorValueRange(float r, float g, float b, float a) {
-        boolean rangeError = false;
-        String badComponentString = "";
-        if ( a < 0.0 || a > 1.0) {
-            rangeError = true;
-            badComponentString = badComponentString + " Alpha";
-        }
-        if ( r < 0.0 || r > 1.0) {
-            rangeError = true;
-            badComponentString = badComponentString + " Red";
-        }
-        if ( g < 0.0 || g > 1.0) {
-            rangeError = true;
-            badComponentString = badComponentString + " Green";
-        }
-        if ( b < 0.0 || b > 1.0) {
-            rangeError = true;
-            badComponentString = badComponentString + " Blue";
-        }
-        if (rangeError) {
-            throw new IllegalArgumentException("Color parameter outside of expected range:"
-                    + badComponentString);
-        }
+    public int getR() {
+        return r;
     }
 
-    public int getRed() {
-        return (getRGB() >> 16) & 0xFF;
+    public int getG() {
+        return g;
     }
 
-    public int getGreen() {
-        return (getRGB() >> 8) & 0xFF;
+    public int getB() {
+        return b;
     }
 
-    public int getBlue() {
-        return (getRGB()) & 0xFF;
-    }
-
-    public int getAlpha() {
-        return (getRGB() >> 24) & 0xff;
+    public int getA() {
+        return a;
     }
 
     public int getRGB() {
         return value;
+    }
+
+    public Color subtract(Color other) {
+        return new Color(this.r - other.r, this.g - other.g, this.b - other.b);
+    }
+
+    public Color add(Color other) {
+        return new Color(this.r + other.r, this.g + other.g, this.b + other.b);
+    }
+
+    public int squaredDifferenceTo(Color color) {
+        int rDiff = color.r - r;
+        int gDiff = color.g - g;
+        int bDiff = color.b - b;
+        return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff;
+    }
+
+    public Color scalarMultiply(double scalar) {
+        return new Color((int) (this.r * scalar), (int) (this.g * scalar), (int) (this.b * scalar));
+    }
+
+    public Color clamp(int minimum, int maximum) {
+        return new Color(Mth.clamp(this.r, minimum, maximum), Mth.clamp(this.g, minimum, maximum), Mth.clamp(this.b, minimum, maximum));
     }
 
     public int hashCode() {
@@ -137,11 +119,11 @@ public class Color {
     }
 
     public boolean equals(Object obj) {
-        return obj instanceof Color && ((Color)obj).getRGB() == this.getRGB();
+        return obj instanceof Color && ((Color) obj).getRGB() == this.getRGB();
     }
 
     public String toString() {
-        return getClass().getName() + "[r=" + getRed() + ",g=" + getGreen() + ",b=" + getBlue() + "]";
+        return getClass().getName() + "[r=" + getR() + ",g=" + getG() + ",b=" + getB() + "]";
     }
 
     public static int HSBtoRGB(float hue, float saturation, float brightness) {
@@ -149,8 +131,8 @@ public class Color {
         if (saturation == 0) {
             r = g = b = (int) (brightness * 255.0f + 0.5f);
         } else {
-            float h = (hue - (float)Math.floor(hue)) * 6.0f;
-            float f = h - (float)java.lang.Math.floor(h);
+            float h = (hue - (float) Math.floor(hue)) * 6.0f;
+            float f = h - (float) java.lang.Math.floor(h);
             float p = brightness * (1.0f - saturation);
             float q = brightness * (1.0f - saturation * f);
             float t = brightness * (1.0f - (saturation * (1.0f - f)));
@@ -195,9 +177,9 @@ public class Color {
         if (hsbvals == null) {
             hsbvals = new float[3];
         }
-        int cmax = (r > g) ? r : g;
+        int cmax = Math.max(r, g);
         if (b > cmax) cmax = b;
-        int cmin = (r < g) ? r : g;
+        int cmin = Math.min(r, g);
         if (b < cmin) cmin = b;
 
         brightness = ((float) cmax) / 255.0f;
@@ -225,10 +207,6 @@ public class Color {
         hsbvals[1] = saturation;
         hsbvals[2] = brightness;
         return hsbvals;
-    }
-
-    public static Color getHSBColor(float h, float s, float b) {
-        return new Color(HSBtoRGB(h, s, b));
     }
 
     public static int BGRtoRGB(int bgr) {

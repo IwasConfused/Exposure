@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.render.image;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.util.Color;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import org.jetbrains.annotations.NotNull;
@@ -30,7 +30,7 @@ public class ImageRenderer implements AutoCloseable {
                        int packedLight, Color color) {
         this.render(poseStack, bufferSource, image,
                 coords.minX(), coords.minY(), coords.maxX(), coords.maxY(), coords.minU(), coords.minV(), coords.maxU(), coords.maxV(),
-                packedLight, color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha());
+                packedLight, color.getR(), color.getG(), color.getB(), color.getA());
     }
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, Image image, RenderCoordinates coords,

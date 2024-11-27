@@ -20,9 +20,15 @@ public record ApplyShaderS2CP(ResourceLocation shaderLocation) implements IPacke
             ApplyShaderS2CP::new
     );
 
+    public static final ApplyShaderS2CP REMOVE = new ApplyShaderS2CP(ResourceLocation.parse("remove:remove"));
+
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
+    }
+
+    public boolean shouldRemove() {
+        return shaderLocation.toString().equals("remove:remove");
     }
 
     @Override
