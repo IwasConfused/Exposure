@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public record ExposureFrameDataFromClient(boolean loadingFromFile,
-                                          List<UUID> capturedEntities,
-                                          CompoundTag extraData) {
+public record ExposureFrameClientData(boolean loadingFromFile,
+                                      List<UUID> capturedEntities,
+                                      CompoundTag extraData) {
 
-    public static final StreamCodec<ByteBuf, ExposureFrameDataFromClient> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL, ExposureFrameDataFromClient::loadingFromFile,
-            UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list(16)), ExposureFrameDataFromClient::capturedEntities,
-            ByteBufCodecs.COMPOUND_TAG, ExposureFrameDataFromClient::extraData,
-            ExposureFrameDataFromClient::new
+    public static final StreamCodec<ByteBuf, ExposureFrameClientData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.BOOL, ExposureFrameClientData::loadingFromFile,
+            UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list(16)), ExposureFrameClientData::capturedEntities,
+            ByteBufCodecs.COMPOUND_TAG, ExposureFrameClientData::extraData,
+            ExposureFrameClientData::new
     );
 
     public List<Entity> getCapturedEntities(ServerLevel level) {

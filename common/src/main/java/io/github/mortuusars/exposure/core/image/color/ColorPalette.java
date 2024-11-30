@@ -2,9 +2,37 @@ package io.github.mortuusars.exposure.core.image.color;
 
 
 import com.google.common.base.Preconditions;
+import io.github.mortuusars.exposure.Exposure;
+import net.minecraft.resources.ResourceLocation;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ColorPalette {
-    public static final ColorPalette MAP_COLORS = new ColorPalette(new int[]{
+    private static final Map<ResourceLocation, ColorPalette> PALETTES = new HashMap<>();
+
+    public static ColorPalette register(ResourceLocation id, ColorPalette palette) {
+        Preconditions.checkState(!PALETTES.containsKey(id), "Palette with id '%S' is already registered.", id);
+        PALETTES.put(id, palette);
+        return palette;
+    }
+
+    public static @Nullable ColorPalette byId(ResourceLocation id) {
+        return PALETTES.get(id);
+    }
+
+    public static ResourceLocation idOf(ColorPalette palette) {
+        for (Map.Entry<ResourceLocation, ColorPalette> entry : PALETTES.entrySet()) {
+            if (entry.getValue() == palette) {
+                return entry.getKey();
+            }
+        }
+        throw new IllegalStateException("Color palette is not registered.");
+    }
+
+    public static final ColorPalette MAP_COLORS = register(Exposure.resource("map_colors"), new ColorPalette(new int[]{
             0x000000, 0x000000, 0x000000, 0x000000,
             0x277D59, 0x30996D, 0x38B27F, 0x1D5E43,
             0x73A4AE, 0x8CC9D5, 0xA3E9F7, 0x567B82,
@@ -69,23 +97,17 @@ public class ColorPalette {
             0x697559, 0x81906D, 0x96A77F, 0x4F5843,
             0x000000, 0x000000, 0x000000, 0x000000,
             0x000000, 0x000000, 0x000000, 0x000000
-    });
+    }));
 
     private final Color[] colors;
 
     public ColorPalette(Color[] colors) {
+        Preconditions.checkState(colors.length <= 256, "Palette size can be up to or exactly 256 colors.");
         this.colors = colors;
     }
 
     public ColorPalette(int[] colors) {
-        Color[] cols = new Color[colors.length];
-
-        for (int i = 0; i < colors.length; i++) {
-            cols[i] = new Color(colors[i]);
-        }
-
-        this.colors = cols;
-        Preconditions.checkState(this.colors.length <= 256, "Palette size can be up to or exactly 256 colors.");
+        this(Arrays.stream(colors).mapToObj(Color::new).toArray(Color[]::new));
     }
 
     public Color[] getColors() {
@@ -94,10 +116,6 @@ public class ColorPalette {
 
     public Color byIndex(int index) {
         return colors[index & 0xFF];
-    }
-
-    public int closestColorIndexTo(int rgb) {
-        return closestColorIndexTo(new Color(rgb));
     }
 
     public int closestColorIndexTo(Color color) {

@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.client.render.image;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -13,13 +14,13 @@ import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
 
 public class RenderedImageInstance implements AutoCloseable {
-    protected Image image;
+    protected IdentifiableImage image;
     protected DynamicTexture texture;
     protected final ResourceLocation textureLocation;
     protected final RenderType renderType;
     protected boolean requiresUpload = true;
 
-    RenderedImageInstance(Image image) {
+    RenderedImageInstance(IdentifiableImage image) {
         this.image = image;
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
         // Filter id because ResourceLocation will crash if non-valid chars are present:
@@ -28,7 +29,7 @@ public class RenderedImageInstance implements AutoCloseable {
         this.renderType = RenderType.text(textureLocation);
     }
 
-    public void replaceData(Image image) {
+    public void replaceData(IdentifiableImage image) {
         boolean hasChanged = !this.image.id().equals(image.id());
         this.image = image;
         if (hasChanged) {
@@ -47,7 +48,7 @@ public class RenderedImageInstance implements AutoCloseable {
 
         for (int y = 0; y < this.image.getHeight(); y++) {
             for (int x = 0; x < this.image.getWidth(); x++) {
-                int ABGR = this.image.getPixelABGR(x, y);
+                int ABGR = this.image.getPixelARGB(x, y);
                 this.texture.getPixels().setPixelRGBA(x, y, ABGR); // Texture is in BGR format
             }
         }

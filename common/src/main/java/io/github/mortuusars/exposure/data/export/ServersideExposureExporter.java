@@ -58,15 +58,15 @@ public class ServersideExposureExporter extends ExposureExporter<ServersideExpos
     }
 
     @NotNull
-    protected BufferedImage convertToBufferedImage(ExposureData savedData) {
-        int width = savedData.getWidth();
-        int height = savedData.getHeight();
+    protected BufferedImage convertToBufferedImage(ExposureData exposureData) {
+        int width = exposureData.getWidth();
+        int height = exposureData.getHeight();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
         PixelModifier modifier = getModifier();
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                int ABGR = MapColor.getColorFromPackedId(savedData.getPixel(x, y)); // Mojang returns BGR color
+                int ABGR = MapColor.getColorFromPackedId(exposureData.getPixel(x, y)); // Mojang returns BGR color
                 ABGR = modifier.modifyPixel(ABGR);
                 image.setRGB(x, y, Color.BGRtoRGB(ABGR));
             }

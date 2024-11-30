@@ -1,8 +1,10 @@
 package io.github.mortuusars.exposure.core.image.processing;
 
 import com.mojang.blaze3d.platform.NativeImage;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.warehouse.PalettedImage;
 
 /**
  * Floyd-Steinberg dithering algorithm.
@@ -13,7 +15,7 @@ public class Dithering {
     /**
      * @return New instance of NativeImage. Original image is not modified.
      */
-    public static NativeImage dither(NativeImage image, ColorPalette palette) {
+    public static NativeImage dither(Image image, ColorPalette palette) {
         Color[] paletteColors = palette.getColors();
 
         int width = image.getWidth();
@@ -53,11 +55,11 @@ public class Dithering {
         return resultImage;
     }
 
-    public static byte[] ditherIndexed(NativeImage image, ColorPalette palette) {
+    public static PalettedImage ditherIndexed(Image image, ColorPalette palette) {
         return ditherIndexed(getPixels(image), palette);
     }
 
-    public static byte[] ditherIndexed(Color[][] pixels, ColorPalette palette) {
+    public static PalettedImage ditherIndexed(Color[][] pixels, ColorPalette palette) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -92,10 +94,10 @@ public class Dithering {
             }
         }
 
-        return indexedPixels;
+        return new PalettedImage(width, height, indexedPixels, palette);
     }
 
-    public static Color[][] getPixels(NativeImage image) {
+    public static Color[][] getPixels(Image image) {
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -103,7 +105,7 @@ public class Dithering {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                pixels[y][x] = new Color(image.getPixelRGBA(x, y));
+                pixels[y][x] = new Color(image.getPixelARGB(x, y));
             }
         }
 

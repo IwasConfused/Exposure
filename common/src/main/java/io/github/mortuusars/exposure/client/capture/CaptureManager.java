@@ -14,7 +14,7 @@ public class CaptureManager {
         captureQueue.add(capture);
     }
 
-    public void onRenderTickStart() {
+    public void tick() {
         if (currentCapture == null) {
             currentCapture = captureQueue.poll();
             if (currentCapture == null) {

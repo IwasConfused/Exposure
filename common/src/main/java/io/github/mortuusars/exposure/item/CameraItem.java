@@ -7,6 +7,14 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
+import io.github.mortuusars.exposure.client.snapshot.Captor;
+import io.github.mortuusars.exposure.client.snapshot.SnapShot;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.BackgroundScreenshotCaptureMethod;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.InvertedFallbackCaptureMethod;
+import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
+import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
+import io.github.mortuusars.exposure.client.snapshot.saving.FileSaver;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.capture.component.*;
@@ -76,6 +84,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.util.*;
 
 public class CameraItem extends Item {
@@ -407,6 +416,50 @@ public class CameraItem extends Item {
     }
 
     public InteractionResult useCamera(Player player, InteractionHand hand) {
+
+        if (player.level().isClientSide) {
+
+            SnapShot snapshot = SnapShot.create()
+                    .captureWith(Captor.builder()
+                            .method(new InvertedFallbackCaptureMethod(
+                                    new FileCaptureMethod("D:\\resizeda.png"),
+                                    new BackgroundScreenshotCaptureMethod(),
+                                    err -> player.displayClientMessage(Component.translatable(err.casualTranslationKey()), true)))
+                            .create())
+                    .then(image -> image
+                            .apply(Converter.DITHERED_MAP_COLORS::convert)
+                            .thenConsume(palettedImage -> new FileSaver(
+                                    new File("D:\\snapshot_test\\" + player.level().getGameTime() + ".png"))
+                                    .save(palettedImage)))
+                    .build();
+
+            ExposureClient.snapshot().enqueue(snapshot);
+
+
+//            SnapShot.builder()
+//                    .captor(Captor.builder()
+//                            .method(CaptureMethods.screenshot())
+//                            .addComponents(
+//                                    CaptureComponents.HIDE_GUI,
+//                                    CaptureComponents.FORCE_FIRST_PERSON,
+//                                    CaptureComponents.DISABLE_POST_EFFECT,
+//                                    CaptureComponents.optional(brightnessStops != 0, () -> CaptureComponents.gammaModification(brightnessStops)))
+//                            .process(Processor.builder()
+//                                    .addSteps(
+//                                            ProcessingSteps.crop(Crop.SQUARE, getCropFactor()),
+//                                            ProcessingSteps.optional(film.getType() == FilmType.BLACK_AND_WHITE, () -> ProcessingSteps.blackAndWhite()),
+//                                            ))
+//                            .convert(Converter.DITHERED_MAP_COLORS)
+//                            .save(new FileSaver("D:/image.png"));
+        }
+
+        if (true) {
+            return InteractionResult.SUCCESS;
+        }
+
+        //  aaaaaaaaaaaa
+
+
         if (player.getCooldowns().isOnCooldown(this))
             return InteractionResult.FAIL;
 
@@ -497,7 +550,7 @@ public class CameraItem extends Item {
         return InteractionResult.CONSUME; // Consume to not play swing animation
     }
 
-    public ExposureFrameDataFromClient getClientSideFrameData(Player player, ItemStack cameraStack) {
+    public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack cameraStack) {
         //TODO: figure out how to know when image was loaded
         boolean projectingFile = hasInterplanarProjectorFilter(cameraStack);
 
@@ -515,7 +568,7 @@ public class CameraItem extends Item {
         CompoundTag extraData = new CompoundTag();
         //TODO: get additional data event
 
-        return new ExposureFrameDataFromClient(projectingFile, entitiesInFrame, extraData);
+        return new ExposureFrameClientData(projectingFile, entitiesInFrame, extraData);
     }
 
     public void exposeFrameClientside(Player player, Camera camera, String exposureId, boolean flashHasFired) {
@@ -664,7 +717,7 @@ public class CameraItem extends Item {
         return capture;
     }
 
-    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrameDataFromClient dataFromClient) {
+    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrameClientData dataFromClient) {
         CompoundTag cameraCustomData = cameraStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 
         String id = cameraCustomData.getString(ID_OF_LAST_SHOT);

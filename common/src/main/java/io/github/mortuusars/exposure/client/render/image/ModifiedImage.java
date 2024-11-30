@@ -1,14 +1,15 @@
 package io.github.mortuusars.exposure.client.render.image;
 
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 
-public class ModifiedImage implements Image {
+public class ModifiedImage implements IdentifiableImage {
     protected final Image image;
     protected final PixelModifier modifier;
     protected String id;
 
-    public ModifiedImage(Image image, PixelModifier modifier) {
+    public ModifiedImage(IdentifiableImage image, PixelModifier modifier) {
         this.image = image;
         this.modifier = modifier;
         this.id = image.id() + modifier.getIdSuffix();
@@ -30,8 +31,8 @@ public class ModifiedImage implements Image {
     }
 
     @Override
-    public int getPixelABGR(int x, int y) {
-        return modifier.modifyPixel(image.getPixelABGR(x, y));
+    public int getPixelARGB(int x, int y) {
+        return modifier.modifyPixel(image.getPixelARGB(x, y));
     }
 
     @Override

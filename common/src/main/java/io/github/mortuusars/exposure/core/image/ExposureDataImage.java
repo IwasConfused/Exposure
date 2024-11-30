@@ -4,7 +4,7 @@ import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import org.jetbrains.annotations.NotNull;
 
-public record ExposureDataImage(String id, ExposureData exposureData) implements Image {
+public record ExposureDataImage(String id, ExposureData exposureData) implements IdentifiableImage {
     public ExposureDataImage(String id, @NotNull ExposureData exposureData) {
         this.id = id;
         this.exposureData = exposureData;
@@ -18,7 +18,7 @@ public record ExposureDataImage(String id, ExposureData exposureData) implements
         return exposureData.getHeight();
     }
 
-    public int getPixelABGR(int x, int y) {
+    public int getPixelARGB(int x, int y) {
         //TODO: custom palette
         return ColorPalette.MAP_COLORS.byIndex(exposureData.getPixel(x, y)).getRGB();
     }

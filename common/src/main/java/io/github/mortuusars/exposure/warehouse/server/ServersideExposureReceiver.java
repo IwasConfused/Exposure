@@ -78,6 +78,8 @@ public class ServersideExposureReceiver {
 //    }
 
     public void receive(String exposureId, ExposureClientData exposureClientData) {
+        cleanupTimedOutExposures();
+
         @Nullable PendingExposure pendingExposure = pendingExposures.get(exposureId);
         if (pendingExposure == null) {
             LOGGER.warn("Received unexpected exposure with exposureId '{}'. Discarding.", exposureId);

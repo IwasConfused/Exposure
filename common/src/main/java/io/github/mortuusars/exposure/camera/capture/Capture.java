@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
+import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.core.ExposureType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -260,7 +261,7 @@ public abstract class Capture {
                 modifiedImage = component.modifyImage(this, modifiedImage);
             }
 
-            byte[] pixels = converter.convert(modifiedImage);
+            byte[] pixels = converter.convert(new WrappedNativeImage(modifiedImage)).pixels();
 
             for (ICaptureComponent component : components) {
                 component.teardown(this);

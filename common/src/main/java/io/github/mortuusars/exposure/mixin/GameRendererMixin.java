@@ -16,7 +16,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class GameRendererMixin {
     @Inject(method = "renderLevel", at = @At(value = "HEAD"))
     void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
-        ExposureClient.captureManager().onRenderTickStart();
+        ExposureClient.captureManager().tick();
+        ExposureClient.snapshot().tick();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.AFTER))

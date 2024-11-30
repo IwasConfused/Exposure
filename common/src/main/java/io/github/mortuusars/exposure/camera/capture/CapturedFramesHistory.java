@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CapturedFramesHistory {
+    //TODO: make fully serverside, per player, save to disk so they are always available.
     
     private static final ArrayList<ExposureFrame> lastExposures = new ArrayList<>();
     private static int limit = 32;

@@ -5,10 +5,10 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.capture.component.ExposureUploaderComponent;
 import io.github.mortuusars.exposure.client.render.image.ResourceImage;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.TrichromeExposureDataCreator;
+import io.github.mortuusars.exposure.core.TrichromeCombiner;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.warehouse.ImageData;
+import io.github.mortuusars.exposure.warehouse.PalettedImage;
 import net.minecraft.nbt.CompoundTag;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +34,7 @@ public class ClientTrichromeFinalizer {
 
         Image[] images = item.getImages();
         if (images.length >= 3) {
-            ImageData trichromeData = TrichromeExposureDataCreator.create(images[0], images[1], images[2], "");
+            PalettedImage trichromeData = TrichromeCombiner.create(images[0], images[1], images[2]);
             ExposureUploaderComponent uploaderComponent = new ExposureUploaderComponent(item.exposureId);
             uploaderComponent.save(trichromeData.width(), trichromeData.height(), trichromeData.pixels(), new CompoundTag());
 

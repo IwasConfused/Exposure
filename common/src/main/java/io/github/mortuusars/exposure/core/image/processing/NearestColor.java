@@ -1,11 +1,12 @@
 package io.github.mortuusars.exposure.core.image.processing;
 
-import com.mojang.blaze3d.platform.NativeImage;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.warehouse.PalettedImage;
 
 public class NearestColor {
-    public static byte[] convert(NativeImage image, ColorPalette palette) {
+    public static PalettedImage convert(Image image, ColorPalette palette) {
         int width = image.getWidth();
         int height = image.getHeight();
 
@@ -13,12 +14,12 @@ public class NearestColor {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                int color = image.getPixelRGBA(x, y);
+                int color = image.getPixelARGB(x, y);
                 int colorIndex = palette.closestColorIndexTo(new Color(color));
                 indexedPixels[x + y * width] = (byte)colorIndex;
             }
         }
 
-        return indexedPixels;
+        return new PalettedImage(width, height, indexedPixels, palette);
     }
 }

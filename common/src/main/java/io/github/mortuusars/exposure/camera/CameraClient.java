@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.Camera;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.CameraAccessors;
-import io.github.mortuusars.exposure.core.ExposureFrameDataFromClient;
+import io.github.mortuusars.exposure.core.ExposureFrameClientData;
 import io.github.mortuusars.exposure.core.camera.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.FlashMode;
 import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
@@ -28,7 +28,7 @@ public class CameraClient {
     public static void handleExposureStart(Player player, CameraAccessor cameraAccessor, String exposureId, boolean flashHasFired) {
         cameraAccessor.getCamera(player).ifPresentOrElse(camera -> {
                     camera.getItem().exposeFrameClientside(player, camera, exposureId, flashHasFired);
-                    ExposureFrameDataFromClient clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
+                    ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
                     Packets.sendToServer(new CameraAddFrameC2SP(cameraAccessor, clientSideFrameData));
                 },
                 () -> LOGGER.error("Cannot start exposure '{}': failed to get a camera.", exposureId));

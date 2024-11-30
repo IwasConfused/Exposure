@@ -7,8 +7,10 @@ import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.image.ResourceImage;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
+import io.github.mortuusars.exposure.client.snapshot.SnapshotManager;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
@@ -28,6 +30,7 @@ import java.util.function.Function;
 
 public class ExposureClient {
     private static final CaptureManager captureManager = new CaptureManager();
+    private static final SnapshotManager snapshotManager = new SnapshotManager();
 
     private static final ImageRenderer imageRenderer = new ImageRenderer();
     private static final PhotographRenderer photographRenderer = new PhotographRenderer();
@@ -45,6 +48,10 @@ public class ExposureClient {
 
     public static CaptureManager captureManager() {
         return captureManager;
+    }
+
+    public static SnapshotManager snapshot() {
+        return snapshotManager;
     }
 
     public static ImageRenderer imageRenderer() {
@@ -71,7 +78,7 @@ public class ExposureClient {
         return exposureCache().getOrQueryAndEmpty(exposureId);
     }
 
-    public static Image createExposureImage(ExposureFrame frame) {
+    public static IdentifiableImage createExposureImage(ExposureFrame frame) {
         if (!Censor.isAllowedToRender(frame)) {
             //TODO: move to belonging class
             return Censor.HIDDEN_IMAGE;
@@ -80,10 +87,10 @@ public class ExposureClient {
         return createExposureImage(frame.identifier());
     }
 
-    public static Image createExposureImage(ExposureIdentifier identifier) {
+    public static IdentifiableImage createExposureImage(ExposureIdentifier identifier) {
         return identifier.map(
                 id -> ExposureClient.exposureCache().getOrQuery(id)
-                        .map(data -> (Image) new ExposureDataImage(id, data))
+                        .map(data -> (IdentifiableImage) new ExposureDataImage(id, data))
                         .orElse(Image.EMPTY),
                 ResourceImage::getOrCreate);
     }

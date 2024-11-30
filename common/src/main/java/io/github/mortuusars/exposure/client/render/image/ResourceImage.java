@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.client.render.image;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.*;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-public class ResourceImage extends SimpleTexture implements Image {
+public class ResourceImage extends SimpleTexture implements IdentifiableImage {
     protected final String name;
     @Nullable
     protected NativeImage image;
@@ -41,12 +42,12 @@ public class ResourceImage extends SimpleTexture implements Image {
     }
 
     @Override
-    public int getPixelABGR(int x, int y) {
+    public int getPixelARGB(int x, int y) {
         @Nullable NativeImage image = getImage();
         return image != null ? image.getPixelRGBA(x, y) : 0x00000000;
     }
 
-    public static @NotNull Image getOrCreate(ResourceLocation location) {
+    public static @NotNull IdentifiableImage getOrCreate(ResourceLocation location) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
         @Nullable AbstractTexture existingTexture = textureManager.byPath.get(location);

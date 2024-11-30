@@ -14,6 +14,7 @@ import io.github.mortuusars.exposure.client.render.image.ModifiedImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.core.print.PrintingMode;
@@ -325,7 +326,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
 
     public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
                             float x, float y, float size, float alpha, ExposureType exposureType) {
-        Image image = new ModifiedImage(ExposureClient.createExposureImage(frame), PixelModifier.NEGATIVE_FILM);
+        IdentifiableImage image = new ModifiedImage(ExposureClient.createExposureImage(frame), PixelModifier.NEGATIVE_FILM);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         imageRenderer.render(poseStack, bufferSource, image, new RenderCoordinates(x, y, size, size),

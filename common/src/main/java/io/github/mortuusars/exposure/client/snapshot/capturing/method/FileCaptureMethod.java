@@ -1,10 +1,11 @@
 
-package io.github.mortuusars.exposure.client.capture.method;
+package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.google.common.io.Files;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Either;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
 public class FileCaptureMethod implements CaptureMethod {
     public static final ErrorMessage ERROR_PATH_EMPTY = ErrorMessage.create("gui.exposure.capture.file.error.path_empty");
@@ -34,28 +36,30 @@ public class FileCaptureMethod implements CaptureMethod {
     }
 
     @Override
-    public @NotNull Either<NativeImage, ErrorMessage> capture() {
-        Either<File, ErrorMessage> file = findFileWithExtension(filepath);
+    public @NotNull CompletableFuture<CaptureResult> capture() {
+        return CompletableFuture.supplyAsync(() -> {
+            Either<File, ErrorMessage> file = findFileWithExtension(filepath);
 
-        if (file.right().isPresent()) {
-            return Either.right(file.right().get());
-        }
+            if (file.right().isPresent()) {
+                return CaptureResult.error(file.right().get());
+            }
 
-        file = validateFilepath(file.left().orElseThrow());
+            file = validateFilepath(file.left().orElseThrow());
 
-        if (file.right().isPresent()) {
-            return Either.right(file.right().get());
-        }
+            if (file.right().isPresent()) {
+                return CaptureResult.error(file.right().get());
+            }
 
-        try (FileInputStream inputStream = new FileInputStream(file.left().orElseThrow())) {
-            return Either.left(NativeImage.read(NativeImage.Format.RGBA, inputStream));
-        } catch (IOException e) {
-            Exposure.LOGGER.error("Loading image failed: {}", e.toString());
-            return Either.right(ERROR_CANNOT_READ);
-        }
+            try (FileInputStream inputStream = new FileInputStream(file.left().orElseThrow())) {
+                return CaptureResult.success(NativeImage.read(NativeImage.Format.RGBA, inputStream));
+            } catch (IOException e) {
+                Exposure.LOGGER.error("Loading image failed: {}", e.toString());
+                return CaptureResult.error(ERROR_CANNOT_READ);
+            }
+        });
     }
 
-    public static Either<File, ErrorMessage> validateFilepath(File file) {
+    private static Either<File, ErrorMessage> validateFilepath(File file) {
         String filepath = file.getPath();
 
         if (StringUtil.isNullOrEmpty(filepath)) {
@@ -88,9 +92,10 @@ public class FileCaptureMethod implements CaptureMethod {
     /**
      * If provided filepath is missing an extension - searches for first file
      * in parent directory that matches the name of given file.
+     *
      * @return File with extension or error.
      */
-    public static Either<File, ErrorMessage> findFileWithExtension(String filepath) {
+    private static Either<File, ErrorMessage> findFileWithExtension(String filepath) {
         File file = new File(filepath);
 
         String extension = Files.getFileExtension(filepath);

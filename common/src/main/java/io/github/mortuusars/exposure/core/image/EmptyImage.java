@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.core.image;
 
-public class EmptyImage implements Image {
+public class EmptyImage implements IdentifiableImage {
     @Override
     public String id() {
         return "empty_image";
@@ -17,7 +17,7 @@ public class EmptyImage implements Image {
     }
 
     @Override
-    public int getPixelABGR(int x, int y) {
+    public int getPixelARGB(int x, int y) {
         return 0x00000000;
     }
 }

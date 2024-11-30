@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
@@ -98,7 +99,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
         if (type == null)
             type = ExposureType.BLACK_AND_WHITE;
 
-        Image image = new ModifiedImage(ExposureClient.createExposureImage(exposureIdentifier), PixelModifier.NEGATIVE_FILM);
+        IdentifiableImage image = new ModifiedImage(ExposureClient.createExposureImage(exposureIdentifier), PixelModifier.NEGATIVE_FILM);
 
         int width = image.getWidth();
         int height = image.getHeight();

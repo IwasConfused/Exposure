@@ -20,10 +20,10 @@ public class ByteImage implements Image {
         this.pixels = new byte[width * height];
     }
 
-    @Override
-    public String id() {
-        return id;
-    }
+//    @Override
+//    public String id() {
+//        return id;
+//    }
 
     @Override
     public int getWidth() {
@@ -36,7 +36,7 @@ public class ByteImage implements Image {
     }
 
     @Override
-    public int getPixelABGR(int x, int y) {
+    public int getPixelARGB(int x, int y) {
         return pixels[y * width + x];
     }
 }

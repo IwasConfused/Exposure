@@ -1,10 +1,10 @@
-package io.github.mortuusars.exposure.client.capture.method;
+package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.datafixers.util.Either;
+import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
 /**
@@ -22,16 +22,15 @@ public class InvertedFallbackCaptureMethod implements CaptureMethod {
     }
 
     @Override
-    public @NotNull Either<NativeImage, ErrorMessage> capture() {
-        Either<NativeImage, ErrorMessage> fallback = fallbackMethod.capture();
+    public @NotNull CompletableFuture<CaptureResult> capture() {
+        CompletableFuture<CaptureResult> fallback = fallbackMethod.capture();
 
-        Either<NativeImage, ErrorMessage> capture = originalMethod.capture();
-
-        if (capture.right().isPresent()) {
-            onOriginalMethodFailed.accept(capture.right().get());
-            return fallback;
-        }
-
-        return capture;
+        return originalMethod.capture().thenApply(result -> {
+            if (result.isError()) {
+                onOriginalMethodFailed.accept(result.getErrorMessage());
+                return fallback.getNow(CaptureResult.error(CaptureMethod.ERROR_FAILED_GENERIC));
+            }
+            return result;
+        });
     }
 }

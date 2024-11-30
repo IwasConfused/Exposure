@@ -1,22 +1,23 @@
-package io.github.mortuusars.exposure.client.capture.method;
+package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
-import com.mojang.blaze3d.platform.NativeImage;
-import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
+import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
+import java.util.concurrent.CompletableFuture;
+
 public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
-    public @NotNull Either<NativeImage, ErrorMessage> capture() {
+    public @NotNull CompletableFuture<CaptureResult> capture() {
         Minecraft minecraft = Minecraft.getInstance();
 
         RenderTarget renderTarget = new TextureTarget(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(), true, Minecraft.ON_OSX);
@@ -35,10 +36,10 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
 
             ViewfinderShader.process(renderTarget);
 
-            return Either.left(Screenshot.takeScreenshot(renderTarget));
+            return CompletableFuture.completedFuture(CaptureResult.success(Screenshot.takeScreenshot(renderTarget)));
         } catch (Exception e) {
             LOGGER.error("Couldn't capture image", e);
-            return Either.right(ErrorMessage.EMPTY);
+            return CompletableFuture.completedFuture(CaptureResult.error(ErrorMessage.EMPTY));
         } finally {
             minecraft.gameRenderer.setPanoramicMode(false);
             minecraft.gameRenderer.setRenderBlockOutline(true);

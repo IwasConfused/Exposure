@@ -21,7 +21,6 @@ public class Color {
                 ((r & 0xFF) << 16) |
                 ((g & 0xFF) << 8) |
                 ((b & 0xFF));
-//        testColorValueRange(r, g, b, a);
     }
 
     public Color(int rgb) {
@@ -45,7 +44,7 @@ public class Color {
         return new Color(this.r, this.g, this.b, alpha);
     }
 
-    private static void testColorValueRange(int r, int g, int b, int a) {
+    public void validate(int r, int g, int b, int a) {
         boolean rangeError = false;
         String badComponentString = "";
 

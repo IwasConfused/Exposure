@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.TrichromeExposureDataCreator;
+import io.github.mortuusars.exposure.core.TrichromeCombiner;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.client.WaitForExposureChangeS2CP;
 import io.github.mortuusars.exposure.util.ChromaticChannel;
-import io.github.mortuusars.exposure.warehouse.ImageData;
+import io.github.mortuusars.exposure.warehouse.PalettedImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
@@ -198,7 +198,7 @@ public class ChromaticSheetItem extends Item {
     protected void createAndSaveTrichrome(String chromaticExposureId, String creator,
                                           ExposureDataImage red, ExposureDataImage green, ExposureDataImage blue) {
         try {
-            ImageData trichromeImageData = TrichromeExposureDataCreator.create(red, green, blue, creator);
+            PalettedImage trichromeImageData = TrichromeCombiner.create(red, green, blue);
 
             ExposureData exposureData = new ExposureData(trichromeImageData.width(), trichromeImageData.height(), trichromeImageData.pixels(),
                     ExposureType.COLOR, creator, UnixTimestamp.Seconds.now(), false, new CompoundTag(), false);

@@ -1,10 +1,10 @@
-package io.github.mortuusars.exposure.util;
+package io.github.mortuusars.exposure.core.image.color.converter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * https://github.com/hsluv/hsluv-java
+ * From: <a href="https://github.com/hsluv/hsluv-java">Github Project Page</a>
  */
 public class HUSLColorConverter {
     private static double[][] m = new double[][]

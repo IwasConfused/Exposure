@@ -7,6 +7,7 @@ import io.github.mortuusars.exposure.client.render.image.ModifiedImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.client.render.texture.TextureRenderer;
 import io.github.mortuusars.exposure.core.PhotographType;
+import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.item.PhotographItem;
@@ -41,7 +42,7 @@ public class PhotographRenderer {
 
         ExposureFrame frame = photographItem.getFrame(photographStack);
 
-        Image image = ExposureClient.createExposureImage(frame);
+        IdentifiableImage image = ExposureClient.createExposureImage(frame);
         if (photographFeatures.getPixelModifier() != PixelModifier.EMPTY) {
             image = new ModifiedImage(image, photographFeatures.getPixelModifier());
         }
