@@ -42,7 +42,7 @@ public class CaptureTimer {
         lastTick = startedTick;
         onStart.run();
 
-        update();
+        frameTick();
 
         return this;
     }
@@ -59,7 +59,7 @@ public class CaptureTimer {
         return !isRunning() && startedTick >= 0 && ticks <= 0;
     }
 
-    public void update() {
+    public void frameTick() {
         if (isRunning()) {
             long currentTick = getCurrentTick();
             if (lastTick != currentTick) {

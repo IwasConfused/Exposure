@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import org.jetbrains.annotations.NotNull;
@@ -23,14 +24,27 @@ public class InvertedFallbackCaptureMethod implements CaptureMethod {
 
     @Override
     public @NotNull CompletableFuture<CaptureResult> capture() {
-        CompletableFuture<CaptureResult> fallback = fallbackMethod.capture();
+        return fallbackMethod.capture()
+                .thenCompose(fallbackResult -> originalMethod.capture()
+                        .handle((originalResult, ex) -> {
+                            if (ex != null || (originalResult != null && originalResult.isError())) {
+                                if (ex != null) {
+                                    Exposure.LOGGER.error("Original capture method failed: {}", ex.getMessage());
+                                    onOriginalMethodFailed.accept(CaptureMethod.ERROR_FAILED_GENERIC);
+                                } else {
+                                    onOriginalMethodFailed.accept(originalResult.getErrorMessage());
+                                }
 
-        return originalMethod.capture().thenApply(result -> {
-            if (result.isError()) {
-                onOriginalMethodFailed.accept(result.getErrorMessage());
-                return fallback.getNow(CaptureResult.error(CaptureMethod.ERROR_FAILED_GENERIC));
-            }
-            return result;
-        });
+                                return fallbackResult;
+                            }
+
+                            return originalResult;
+                        }));
+    }
+
+    @Override
+    public void frameTick() {
+        fallbackMethod.frameTick();
+        originalMethod.frameTick();
     }
 }

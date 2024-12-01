@@ -10,4 +10,5 @@ public interface CaptureMethod {
     ErrorMessage ERROR_FAILED_GENERIC = ErrorMessage.create("gui.exposure.capture.error.failed");
 
     @NotNull CompletableFuture<CaptureResult> capture();
+    default void frameTick() {}
 }

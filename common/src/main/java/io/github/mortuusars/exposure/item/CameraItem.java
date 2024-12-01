@@ -9,9 +9,11 @@ import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.Captor;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
+import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.BackgroundScreenshotCaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.InvertedFallbackCaptureMethod;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.ScreenshotCaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.saving.FileSaver;
@@ -422,9 +424,12 @@ public class CameraItem extends Item {
             SnapShot snapshot = SnapShot.create()
                     .captureWith(Captor.builder()
                             .method(new InvertedFallbackCaptureMethod(
-                                    new FileCaptureMethod("D:\\resizeda.png"),
-                                    new BackgroundScreenshotCaptureMethod(),
+                                    new FileCaptureMethod("D:\\test.png"),
+                                    new ScreenshotCaptureMethod(),
                                     err -> player.displayClientMessage(Component.translatable(err.casualTranslationKey()), true)))
+                            .addComponents(
+                                    CaptureComponents.hideGui(),
+                                    CaptureComponents.forceFirstPerson())
                             .create())
                     .then(image -> image
                             .apply(Converter.DITHERED_MAP_COLORS::convert)

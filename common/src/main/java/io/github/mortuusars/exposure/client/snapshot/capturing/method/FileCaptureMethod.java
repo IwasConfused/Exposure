@@ -53,7 +53,7 @@ public class FileCaptureMethod implements CaptureMethod {
             try (FileInputStream inputStream = new FileInputStream(file.left().orElseThrow())) {
                 return CaptureResult.success(NativeImage.read(NativeImage.Format.RGBA, inputStream));
             } catch (IOException e) {
-                Exposure.LOGGER.error("Loading image failed: {}", e.toString());
+                Exposure.LOGGER.error("Loading image from file path '{}' failed: {}", filepath, e.toString());
                 return CaptureResult.error(ERROR_CANNOT_READ);
             }
         });

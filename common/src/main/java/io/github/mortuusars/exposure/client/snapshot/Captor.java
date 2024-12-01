@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureTimer;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
-import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
+import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponentsList;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.client.Minecraft;
@@ -18,13 +18,13 @@ public class Captor {
     public static final ErrorMessage ERROR_TIMED_OUT = ErrorMessage.create("gui.exposure.capture.error.timed_out");
 
     protected final CaptureMethod method;
-    protected final CaptureComponents components;
+    protected final CaptureComponentsList components;
     protected final long timeoutMs;
 
     protected final CaptureTimer timer;
     protected final CompletableFuture<CaptureResult> completableFuture;
 
-    public Captor(CaptureMethod captureMethod, CaptureComponents components, long timeoutMs) {
+    public Captor(CaptureMethod captureMethod, CaptureComponentsList components, long timeoutMs) {
         this.method = captureMethod;
         this.components = components;
         this.timeoutMs = timeoutMs;
@@ -47,10 +47,9 @@ public class Captor {
         return completableFuture;
     }
 
-    public void tick() {
-        if (timer.isRunning()) {
-            timer.update();
-        }
+    public void frameTick() {
+        method.frameTick();
+        timer.frameTick();
     }
 
     private void captureImage() {
@@ -76,7 +75,7 @@ public class Captor {
 
     public static class Builder {
         private CaptureMethod captureMethod;
-        private final CaptureComponents components = new CaptureComponents();
+        private final CaptureComponentsList components = new CaptureComponentsList();
         private long timeoutMs = 10_000; // 10 seconds
 
         public Builder method(CaptureMethod captureMethod) {

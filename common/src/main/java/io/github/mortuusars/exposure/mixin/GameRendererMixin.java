@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
-    @Inject(method = "renderLevel", at = @At(value = "HEAD"))
+    @Inject(method = "renderLevel", at = @At(value = "RETURN"))
     void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
         ExposureClient.captureManager().tick();
         ExposureClient.snapshot().tick();
