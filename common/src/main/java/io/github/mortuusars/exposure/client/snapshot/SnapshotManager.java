@@ -26,12 +26,14 @@ public class SnapshotManager {
             if (currentSnapshot == null) {
                 return;
             }
+
+            currentSnapshot.start();
         }
 
         if (currentSnapshot.isDone()) {
             currentSnapshot = null;
         }
-        else {
+        else if (currentSnapshot.isStarted()) {
             currentSnapshot.tick();
         }
     }

@@ -424,7 +424,7 @@ public class CameraItem extends Item {
             SnapShot snapshot = SnapShot.create()
                     .captureWith(Captor.builder()
                             .method(new InvertedFallbackCaptureMethod(
-                                    new FileCaptureMethod("D:\\test.png"),
+                                    new FileCaptureMethod("D:\\test1"),
                                     new ScreenshotCaptureMethod(),
                                     err -> player.displayClientMessage(Component.translatable(err.casualTranslationKey()), true)))
                             .addComponents(

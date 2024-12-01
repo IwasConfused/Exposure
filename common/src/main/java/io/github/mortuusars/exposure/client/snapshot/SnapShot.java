@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.client.snapshot;
 
 import com.google.common.base.Preconditions;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.Chain;
 import io.github.mortuusars.exposure.util.ErrorMessage;
@@ -23,26 +24,28 @@ public class SnapShot {
         this.captureErrorConsumers = captureErrorConsumers;
     }
 
+    public void start() {
+        started = true;
+        captor.capture()
+                .thenAccept(result -> {
+                    done = true;
+
+                    Exposure.LOGGER.info("Thread: {}", Thread.currentThread().getName());
+
+                    if (result.isSuccessful()) {
+                        Image image = result.getImage();
+                        captureConsumers.forEach(consumer -> consumer.accept(image));
+                        image.close();
+                    }
+                    if (result.isError()) {
+                        captureErrorConsumers.forEach(consumer -> consumer.accept(result.getErrorMessage()));
+                    }
+                });
+    }
+
     public void tick() {
         if (done) {
             return;
-        }
-
-        if (!started) {
-            started = true;
-            captor.capture()
-                    .thenAccept(result -> {
-                        done = true;
-
-                        if (result.isSuccessful()) {
-                            Image image = result.getImage();
-                            captureConsumers.forEach(consumer -> consumer.accept(image));
-                            image.close();
-                        }
-                        if (result.isError()) {
-                            captureErrorConsumers.forEach(consumer -> consumer.accept(result.getErrorMessage()));
-                        }
-                    });
         }
 
         captor.frameTick();

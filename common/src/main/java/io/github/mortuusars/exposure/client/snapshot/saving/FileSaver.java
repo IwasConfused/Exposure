@@ -22,6 +22,7 @@ public class FileSaver implements Saver {
         try (NativeImage image = Converter.convertBack(palettedImage)) {
             boolean ignored = file.getParentFile().mkdirs();
             image.writeToFile(file);
+            LOGGER.info("Saved image: {}", file);
         }
         catch (Exception e) {
             LOGGER.error("Failed to save image to file: {}", e.toString());

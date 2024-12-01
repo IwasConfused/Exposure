@@ -53,6 +53,7 @@ public class Captor {
     }
 
     private void captureImage() {
+        Exposure.LOGGER.info("CaptureImage Thread: {}", Thread.currentThread().getName());
         method.capture()
                 .completeOnTimeout(CaptureResult.error(ERROR_TIMED_OUT), timeoutMs, TimeUnit.MILLISECONDS)
                 .handle((result, throwable) -> {
@@ -63,6 +64,7 @@ public class Captor {
                     return result != null ? result : CaptureResult.error(CaptureMethod.ERROR_FAILED_GENERIC);
                 })
                 .thenApply(result -> {
+                    Exposure.LOGGER.info("Before execute Thread: {}", Thread.currentThread().getName());
                     Minecraft.getInstance().execute(components::afterCapture);
                     return result;
                 })

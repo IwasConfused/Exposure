@@ -2,18 +2,15 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.google.common.io.Files;
-import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.datafixers.util.Either;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.concurrent.CompletableFuture;
 
 public class FileCaptureMethod implements CaptureMethod {
@@ -50,12 +47,8 @@ public class FileCaptureMethod implements CaptureMethod {
                 return CaptureResult.error(file.right().get());
             }
 
-            try (FileInputStream inputStream = new FileInputStream(file.left().orElseThrow())) {
-                return CaptureResult.success(NativeImage.read(NativeImage.Format.RGBA, inputStream));
-            } catch (IOException e) {
-                Exposure.LOGGER.error("Loading image from file path '{}' failed: {}", filepath, e.toString());
-                return CaptureResult.error(ERROR_CANNOT_READ);
-            }
+            File f = file.left().orElseThrow();
+            return ImageFileLoader.chooseFitting(f).load(f);
         });
     }
 
