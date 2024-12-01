@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.client.snapshot;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.Chain;
 import io.github.mortuusars.exposure.util.ErrorMessage;
@@ -29,8 +28,6 @@ public class SnapShot {
         captor.capture()
                 .thenAccept(result -> {
                     done = true;
-
-                    Exposure.LOGGER.info("Thread: {}", Thread.currentThread().getName());
 
                     if (result.isSuccessful()) {
                         Image image = result.getImage();
