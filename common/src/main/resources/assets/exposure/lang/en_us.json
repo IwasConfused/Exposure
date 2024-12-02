@@ -46,6 +46,9 @@
   "entity.exposure.photograph": "Photograph",
   "entity.exposure.photograph_frame": "Photograph Frame",
 
+  "gui.exposure.error_message.generic.technical": "Some error occurred. See logs for details.",
+  "gui.exposure.error_message.generic.casual": "Something is not right...",
+
   "gui.exposure.capture.error.failed.technical": "Capturing failed. See logs for details.",
   "gui.exposure.capture.error.failed.casual": "Camera made a strange noise. It looks like exposure didn't work.",
   "gui.exposure.capture.error.timed_out.technical": "Capture is cancelled because it's took too long.",

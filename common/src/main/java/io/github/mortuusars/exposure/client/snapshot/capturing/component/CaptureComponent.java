@@ -9,7 +9,6 @@ public interface CaptureComponent {
     }
 
     default void delayTick(int delayTicksLeft) {
-
     }
 
     default void beforeCapture() {

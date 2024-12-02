@@ -4,6 +4,7 @@ import net.minecraft.network.chat.Component;
 
 public record ErrorMessage(String technicalTranslationKey, String casualTranslationKey) {
     public static final ErrorMessage EMPTY = new ErrorMessage("", "");
+    public static final ErrorMessage GENERIC = create("gui.exposure.error_message.generic");
 
     public static ErrorMessage create(String translationKey) {
         return new ErrorMessage(translationKey + ".technical", translationKey + ".casual");

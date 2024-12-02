@@ -7,16 +7,11 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
-import io.github.mortuusars.exposure.client.snapshot.Captor;
-import io.github.mortuusars.exposure.client.snapshot.SnapShot;
+import io.github.mortuusars.exposure.client.snapshot.*;
+import io.github.mortuusars.exposure.client.snapshot.capturing.Captor1;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.BackgroundScreenshotCaptureMethod;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.InvertedFallbackCaptureMethod;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.ScreenshotCaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
-import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
-import io.github.mortuusars.exposure.client.snapshot.saving.FileSaver;
+import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.capture.component.*;
@@ -86,7 +81,6 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.*;
 
 public class CameraItem extends Item {
@@ -330,7 +324,7 @@ public class CameraItem extends Item {
         }
 
         player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-        player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2);
+        player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2); // TODO: long cooldown if projector used
         playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
 
         StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
@@ -420,42 +414,25 @@ public class CameraItem extends Item {
     public InteractionResult useCamera(Player player, InteractionHand hand) {
 
         if (player.level().isClientSide) {
+            String filePath = "D:/test1asd";
 
-            SnapShot snapshot = SnapShot.create()
-                    .captureWith(Captor.builder()
-                            .method(new InvertedFallbackCaptureMethod(
-                                    new FileCaptureMethod("D:\\test1"),
-                                    new ScreenshotCaptureMethod(),
-                                    err -> player.displayClientMessage(Component.translatable(err.casualTranslationKey()), true)))
-                            .addComponents(
-                                    CaptureComponents.hideGui(),
-                                    CaptureComponents.forceFirstPerson())
+            String exposureId = createExposureId(player);
+
+            SnapShot.createTask(Captor1.screenshot()
+//                      .addOptionalComponent(brightnessStops != 0, () -> CaptureComponents.modifyGamma(brightnessStops))
+                            .addComponents(CaptureComponents.hideGui(), CaptureComponents.forceFirstPerson())
+                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
+                            .overridenBy(Captor1.file(filePath)
+                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
+                                    .create())
                             .create())
-                    .then(image -> image
-                            .apply(Converter.DITHERED_MAP_COLORS::convert)
-                            .thenConsume(palettedImage -> new FileSaver(
-                                    new File("D:\\snapshot_test\\" + player.level().getGameTime() + ".png"))
-                                    .save(palettedImage)))
-                    .build();
-
-            ExposureClient.snapshot().enqueue(snapshot);
-
-
-//            SnapShot.builder()
-//                    .captor(Captor.builder()
-//                            .method(CaptureMethods.screenshot())
-//                            .addComponents(
-//                                    CaptureComponents.HIDE_GUI,
-//                                    CaptureComponents.FORCE_FIRST_PERSON,
-//                                    CaptureComponents.DISABLE_POST_EFFECT,
-//                                    CaptureComponents.optional(brightnessStops != 0, () -> CaptureComponents.gammaModification(brightnessStops)))
-//                            .process(Processor.builder()
-//                                    .addSteps(
-//                                            ProcessingSteps.crop(Crop.SQUARE, getCropFactor()),
-//                                            ProcessingSteps.optional(film.getType() == FilmType.BLACK_AND_WHITE, () -> ProcessingSteps.blackAndWhite()),
-//                                            ))
-//                            .convert(Converter.DITHERED_MAP_COLORS)
-//                            .save(new FileSaver("D:/image.png"));
+                    .consume(result -> result
+                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
+                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
+                    .consume(result -> result
+                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
+                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
+                    .enqueue();
         }
 
         if (true) {

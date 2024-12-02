@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedList;
 import java.util.Queue;
 
-public class SnapShot {
+public class SnapShot1 {
     // Capture Types:
         // Screenshot (background | direct)
         // File
@@ -60,38 +60,38 @@ public class SnapShot {
 
      */
 
-    private static final Queue<SnapShotTask1> snapshotQueue = new LinkedList<>();
+    private final Queue<SnapShotTask<TaskResult<?>>> snapshotQueue = new LinkedList<>();
     @Nullable
-    private static SnapShotTask1 currentTask;
+    private SnapShotTask<TaskResult<?>> currentSnapshot;
 
-    public static void enqueue(SnapShotTask1 snapshot) {
+    public void enqueue(SnapShotTask<TaskResult<?>> snapshot) {
         Preconditions.checkState(!isQueued(snapshot), "This snapshot is already in queue.");
         snapshotQueue.add(snapshot);
     }
 
-    public static boolean isQueued(SnapShotTask1 snapshot) {
-        return currentTask == snapshot || snapshotQueue.contains(snapshot);
+    public boolean isQueued(SnapShotTask<TaskResult<?>> snapshot) {
+        return currentSnapshot == snapshot || snapshotQueue.contains(snapshot);
     }
 
-    public static void tick() {
-        if (currentTask == null) {
-            currentTask = snapshotQueue.poll();
-            if (currentTask == null) {
+    public void tick() {
+        if (currentSnapshot == null) {
+            currentSnapshot = snapshotQueue.poll();
+            if (currentSnapshot == null) {
                 return;
             }
 
-            currentTask.start();
+            currentSnapshot.start();
         }
 
-        if (currentTask.isDone()) {
-            currentTask = null;
+        if (currentSnapshot.isDone()) {
+            currentSnapshot = null;
         }
-        else if (currentTask.isStarted()) {
-            currentTask.tick();
+        else if (currentSnapshot.isStarted()) {
+            currentSnapshot.tick();
         }
     }
 
-    public static SnapShotTask1 createTask(CaptureTask captureTask) {
-        return new SnapShotTask1(captureTask);
-    }
+//    public static <T> SnapShotTask<T> invertedFallback(SnapShotTask<T> main, SnapShotTask<T> fallback) {
+//        return new SnapShotCompositeTask<>(main, fallback, SnapShotCompositeTask.ExecutionStrategy.INVERTED_FALLBACK);
+//    }
 }

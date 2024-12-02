@@ -4,7 +4,9 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
+import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
+import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
@@ -17,7 +19,7 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
-    public @NotNull CompletableFuture<CaptureResult> capture() {
+    public @NotNull CompletableFuture<TaskResult<Image>> capture() {
         Minecraft minecraft = Minecraft.getInstance();
 
         RenderTarget renderTarget = new TextureTarget(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(), true, Minecraft.ON_OSX);
@@ -36,10 +38,14 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
 
             ViewfinderShader.process(renderTarget);
 
-            return CompletableFuture.completedFuture(CaptureResult.success(Screenshot.takeScreenshot(renderTarget)));
+            WrappedNativeImage image = new WrappedNativeImage(Screenshot.takeScreenshot(renderTarget));
+
+            return CompletableFuture.supplyAsync(() -> {
+                return TaskResult.success(image);
+            });
         } catch (Exception e) {
             LOGGER.error("Couldn't capture image", e);
-            return CompletableFuture.completedFuture(CaptureResult.error(ErrorMessage.EMPTY));
+            return CompletableFuture.completedFuture(TaskResult.error(ErrorMessage.EMPTY));
         } finally {
             minecraft.gameRenderer.setPanoramicMode(false);
             minecraft.gameRenderer.setRenderBlockOutline(true);

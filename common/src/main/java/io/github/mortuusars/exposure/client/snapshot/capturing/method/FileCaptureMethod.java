@@ -3,8 +3,9 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.google.common.io.Files;
 import com.mojang.datafixers.util.Either;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
+import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
@@ -33,18 +34,18 @@ public class FileCaptureMethod implements CaptureMethod {
     }
 
     @Override
-    public @NotNull CompletableFuture<CaptureResult> capture() {
+    public @NotNull CompletableFuture<TaskResult<Image>> capture() {
         return CompletableFuture.supplyAsync(() -> {
             Either<File, ErrorMessage> file = findFileWithExtension(filepath);
 
             if (file.right().isPresent()) {
-                return CaptureResult.error(file.right().get());
+                return TaskResult.error(file.right().get());
             }
 
             file = validateFilepath(file.left().orElseThrow());
 
             if (file.right().isPresent()) {
-                return CaptureResult.error(file.right().get());
+                return TaskResult.error(file.right().get());
             }
 
             File f = file.left().orElseThrow();

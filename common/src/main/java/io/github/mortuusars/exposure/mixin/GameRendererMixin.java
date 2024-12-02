@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.mixin;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
+import io.github.mortuusars.exposure.client.snapshot.SnapShot;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
@@ -18,6 +19,7 @@ public abstract class GameRendererMixin {
     void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
         ExposureClient.captureManager().tick();
         ExposureClient.snapshot().tick();
+        SnapShot.tick();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.AFTER))

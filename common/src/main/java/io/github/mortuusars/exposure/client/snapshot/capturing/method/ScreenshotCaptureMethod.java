@@ -1,7 +1,10 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
+import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
+import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
+import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.core.image.Image;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +18,10 @@ public class ScreenshotCaptureMethod implements CaptureMethod {
     // BackgroundScreenshotMethod does not have this problem because it renders the level again for himself.
     protected int delay = Math.max(1, Config.Client.CAPTURE_DELAY_FRAMES.get());
     @Nullable
-    protected CompletableFuture<CaptureResult> future;
+    protected CompletableFuture<TaskResult<Image>> future;
 
     @Override
-    public @NotNull CompletableFuture<CaptureResult> capture() {
+    public @NotNull CompletableFuture<TaskResult<Image>> capture() {
         future = new CompletableFuture<>();
         return future;
     }
@@ -30,7 +33,8 @@ public class ScreenshotCaptureMethod implements CaptureMethod {
         }
 
         if (delay <= 0) {
-            future.complete(CaptureResult.success(Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget())));
+            NativeImage nativeImage = Screenshot.takeScreenshot(Minecraft.getInstance().getMainRenderTarget());
+            future.complete(TaskResult.success(new WrappedNativeImage(nativeImage)));
         }
 
         delay--;

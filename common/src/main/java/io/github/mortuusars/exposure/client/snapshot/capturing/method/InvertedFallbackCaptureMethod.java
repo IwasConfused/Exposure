@@ -1,7 +1,8 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
+import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,7 +24,7 @@ public class InvertedFallbackCaptureMethod implements CaptureMethod {
     }
 
     @Override
-    public @NotNull CompletableFuture<CaptureResult> capture() {
+    public @NotNull CompletableFuture<TaskResult<Image>> capture() {
         return fallbackMethod.capture()
                 .thenCompose(fallbackResult -> originalMethod.capture()
                         .handle((originalResult, ex) -> {

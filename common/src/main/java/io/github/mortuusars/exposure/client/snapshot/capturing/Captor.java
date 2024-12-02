@@ -1,12 +1,12 @@
-package io.github.mortuusars.exposure.client.snapshot;
+package io.github.mortuusars.exposure.client.snapshot.capturing;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureResult;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureTimer;
+import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponentsList;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.client.Minecraft;
 
@@ -22,7 +22,7 @@ public class Captor {
     protected final long timeoutMs;
 
     protected final CaptureTimer timer;
-    protected final CompletableFuture<CaptureResult> completableFuture;
+    protected final CompletableFuture<TaskResult<Image>> completableFuture;
 
     public Captor(CaptureMethod captureMethod, CaptureComponentsList components, long timeoutMs) {
         this.method = captureMethod;
@@ -39,7 +39,7 @@ public class Captor {
         this.completableFuture = new CompletableFuture<>();
     }
 
-    public CompletableFuture<CaptureResult> capture() {
+    public CompletableFuture<TaskResult<Image>> capture() {
         if (!timer.isRunning()) {
             timer.start();
         }
@@ -54,13 +54,13 @@ public class Captor {
 
     private void captureImage() {
         method.capture()
-                .completeOnTimeout(CaptureResult.error(ERROR_TIMED_OUT), timeoutMs, TimeUnit.MILLISECONDS)
+                .completeOnTimeout(TaskResult.error(ERROR_TIMED_OUT), timeoutMs, TimeUnit.MILLISECONDS)
                 .handle((result, throwable) -> {
                     if (throwable != null) {
                         Exposure.LOGGER.error("Capturing failed: {}", throwable.toString());
-                        return CaptureResult.error(CaptureMethod.ERROR_FAILED_GENERIC);
+                        return TaskResult.<Image>error(CaptureMethod.ERROR_FAILED_GENERIC);
                     }
-                    return result != null ? result : CaptureResult.error(CaptureMethod.ERROR_FAILED_GENERIC);
+                    return result != null ? result : TaskResult.<Image>error(CaptureMethod.ERROR_FAILED_GENERIC);
                 })
                 .thenApply(result -> {
                     Minecraft.getInstance().execute(components::afterCapture);
