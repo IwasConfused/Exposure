@@ -25,7 +25,7 @@ public class BaseComponent implements ICaptureComponent {
 
     @Override
     public int getFramesDelay(Capture capture) {
-        return Config.Client.CAPTURE_DELAY_FRAMES.get();
+        return Config.Client.DIRECT_CAPTURE_DELAY_FRAMES.get();
     }
 
 //    @Override

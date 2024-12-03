@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
-import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponentsList;
+import io.github.mortuusars.exposure.client.snapshot.capturing.component.CompositeCaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.BackgroundScreenshotCaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
@@ -13,34 +13,32 @@ import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 public class Capture extends CaptureTask {
     public static final ErrorMessage ERROR_TIMED_OUT = ErrorMessage.create("gui.exposure.capture.error.timed_out");
 
     protected final CaptureMethod method;
-    protected final CaptureComponentsList components;
+    protected final CaptureComponent component;
     protected final long timeoutMs;
     protected final Consumer<ErrorMessage> onError;
 
     protected final CaptureTimer timer;
     protected final CompletableFuture<TaskResult<Image>> completableFuture;
 
-    public Capture(CaptureMethod captureMethod, CaptureComponentsList components, long timeoutMs, Consumer<ErrorMessage> onError) {
+    public Capture(CaptureMethod captureMethod, CaptureComponent component, long timeoutMs, Consumer<ErrorMessage> onError) {
         this.method = captureMethod;
-        this.components = components;
+        this.component = component;
         this.timeoutMs = timeoutMs;
         this.onError = onError;
 
-        this.timer = new CaptureTimer(components.requiredDelayTicks())
-                .whenStarted(this.components::initialize)
-                .onTick(this.components::delayTick)
+        this.timer = new CaptureTimer(component.requiredDelayTicks())
+                .whenStarted(this.component::initialize)
+                .onTick(this.component::delayTick)
                 .whenEnded(() -> {
-                    this.components.beforeCapture();
+                    this.component.beforeCapture();
                     captureImage();
                 });
         this.completableFuture = new CompletableFuture<>();
@@ -72,8 +70,10 @@ public class Capture extends CaptureTask {
                 })
                 .thenApply(result -> {
                     setDone();
+                    // Execution of components and stuff should be on the RenderThread
+                    // because it may need to access something in the game that may throw if executed from other threads.
                     Minecraft.getInstance().execute(() -> {
-                        components.afterCapture();
+                        component.afterCapture();
                         if (result.isError()) {
                             onError.accept(result.getErrorMessage());
                         }
@@ -95,17 +95,13 @@ public class Capture extends CaptureTask {
         return new Builder();
     }
 
-    public static Builder screenshot() {
-        return new Builder().method(new BackgroundScreenshotCaptureMethod());
-    }
-
     public static Builder file(String filePath) {
         return new Builder().method(new FileCaptureMethod(filePath));
     }
 
     public static class Builder {
         private CaptureMethod captureMethod;
-        private final CaptureComponentsList components = new CaptureComponentsList();
+        private CaptureComponent component = CaptureComponent.EMPTY;
         private Consumer<ErrorMessage> onError;
         private long timeoutMs = 10_000; // 10 seconds
 
@@ -120,20 +116,12 @@ public class Capture extends CaptureTask {
         }
 
         public Builder addComponent(CaptureComponent component) {
-            this.components.add(component);
+            this.component = this.component.combine(component);
             return this;
         }
 
         public Builder addComponents(CaptureComponent... components) {
-            Arrays.stream(components).forEach(this.components::add);
-            return this;
-        }
-
-        public Builder addOptionalComponent(boolean shouldAdd, Supplier<CaptureComponent> componentSupplier) {
-            if (shouldAdd) {
-                this.components.add(componentSupplier.get());
-            }
-            return this;
+            return addComponent(new CompositeCaptureComponent(components));
         }
 
         public Builder onError(Consumer<ErrorMessage> errorMessageConsumer) {
@@ -161,7 +149,7 @@ public class Capture extends CaptureTask {
         public CaptureTask create() {
             Preconditions.checkState(captureMethod != null,
                     "Capture Method wasn't specified. Use 'method' to specify.");
-            Capture captor = new Capture(captureMethod, components, timeoutMs, onError);
+            Capture captor = new Capture(captureMethod, component, timeoutMs, onError);
 
             if (overrideTask != null) {
                 return captor.overridenBy(overrideTask);

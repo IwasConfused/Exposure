@@ -181,8 +181,9 @@ public class Config {
         public static final ModConfigSpec.BooleanValue DIFFERENT_DEVELOPING_POTION_COLORS;
 
         // CAPTURE
-        public static final ModConfigSpec.IntValue CAPTURE_DELAY_FRAMES;
         public static final ModConfigSpec.IntValue FLASH_CAPTURE_DELAY_TICKS;
+        public static final ModConfigSpec.BooleanValue FORCE_DIRECT_SCREENSHOT_CAPTURE;
+        public static final ModConfigSpec.IntValue DIRECT_CAPTURE_DELAY_FRAMES;
         public static final ModConfigSpec.BooleanValue DISABLE_POST_EFFECT;
 
         // VIEWFINDER
@@ -273,7 +274,12 @@ public class Config {
 
             {
                 builder.push("Capture");
-                CAPTURE_DELAY_FRAMES = builder
+                FORCE_DIRECT_SCREENSHOT_CAPTURE = builder
+                        .comment("Force legacy (pre 1.21) capturing method for taking images. Enable if you experiencing issues with resulting images.",
+                                "If Iris or Oculus is installed legacy method will be used regardless of this setting.",
+                                "Default: false")
+                        .define("ForceDirectScreenshotCapture", false);
+                DIRECT_CAPTURE_DELAY_FRAMES = builder
                         .comment("Delay in frames before capturing an image.",
                                 "Set to higher value when leftovers of GUI elements (such as nameplates) are visible on the images",
                                 "(some shaders have temporal effects that take several frames to disappear fully)")
@@ -285,7 +291,7 @@ public class Config {
                 DISABLE_POST_EFFECT = builder
                         .comment("Post Effect (vanilla shader) will be disabled when image is captured.",
                                 "It is sometimes used by mods to change how player sees the world. (Cold Sweat's overheating blur, Supplementaries mob heads, for example).",
-                                "In vanilla it's only used when spectating a creeper/enderman/etc.",
+                                "In vanilla, it's only used when spectating a creeper/enderman/etc.",
                                 "Default: true")
                         .define("DisablePostEffect", true);
                 builder.pop();

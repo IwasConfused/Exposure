@@ -12,11 +12,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ScreenshotCaptureMethod implements CaptureMethod {
+public class DirectScreenshotCaptureMethod implements CaptureMethod {
     // At least 1 frame of delay is needed because some immediate CaptureComponents may only apply on the next frame
     // and in this method we take a screenshot of what's already rendered.
     // BackgroundScreenshotMethod does not have this problem because it renders the level again for himself.
-    protected int delay = Math.max(1, Config.Client.CAPTURE_DELAY_FRAMES.get());
+    protected int delay = Math.max(1, Config.Client.DIRECT_CAPTURE_DELAY_FRAMES.get());
     @Nullable
     protected CompletableFuture<TaskResult<Image>> future;
 

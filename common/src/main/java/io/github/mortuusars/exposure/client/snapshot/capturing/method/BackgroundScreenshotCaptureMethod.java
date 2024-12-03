@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.client.snapshot.TaskResult;
@@ -10,11 +11,16 @@ import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
+import net.minecraft.client.renderer.PostChain;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
+/**
+ * Captures a screenshot without showing it on screen. Makes photographing a seamless experience™.
+ */
 public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -36,13 +42,17 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
             renderTarget.bindWrite(false);
             minecraft.gameRenderer.renderLevel(minecraft.getTimer());
 
-            ViewfinderShader.process(renderTarget);
+            applyShaderEffects(renderTarget);
+
+            if (ExposureClient.isIrisOrOculusInstalled()) {
+                LOGGER.warn("BackgroundScreenshotCaptureMethod is used while Iris or Oculus is installed. " +
+                        "Captured image most likely will not look as expected.");
+            }
 
             WrappedNativeImage image = new WrappedNativeImage(Screenshot.takeScreenshot(renderTarget));
 
-            return CompletableFuture.supplyAsync(() -> {
-                return TaskResult.success(image);
-            });
+            // Using supplyAsync to make subsequent calls be asynchronous. I'm not the best with async stuff.
+            return CompletableFuture.supplyAsync(() -> TaskResult.success(image));
         } catch (Exception e) {
             LOGGER.error("Couldn't capture image", e);
             return CompletableFuture.completedFuture(TaskResult.error(ErrorMessage.EMPTY));
@@ -53,5 +63,14 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
             minecraft.levelRenderer.graphicsChanged();
             minecraft.getMainRenderTarget().bindWrite(true);
         }
+    }
+
+    private static void applyShaderEffects(RenderTarget renderTarget) {
+        @Nullable PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
+        if (effect != null && Minecraft.getInstance().gameRenderer.effectActive) {
+            ViewfinderShader.processAs(effect, renderTarget);
+        }
+
+        ViewfinderShader.process(renderTarget);
     }
 }

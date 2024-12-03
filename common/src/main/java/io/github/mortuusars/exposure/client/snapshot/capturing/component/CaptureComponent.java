@@ -18,4 +18,10 @@ public interface CaptureComponent {
 
     default void afterCapture() {
     }
+
+    default CaptureComponent combine(CaptureComponent other) {
+        if (this.equals(EMPTY)) return other;
+        if (other.equals(EMPTY)) return this;
+        else return new CompositeCaptureComponent(this, other);
+    }
 }

@@ -39,9 +39,15 @@ public class ExposureClient {
 
     @Nullable
     private static KeyMapping openCameraControlsKey = null;
+    private static boolean isIrisOrOculusInstalled;
 
     public static void init() {
         registerItemModelProperties();
+        isIrisOrOculusInstalled = PlatformHelper.isModLoaded("iris") || PlatformHelper.isModLoaded("oculus");
+    }
+
+    public static boolean isIrisOrOculusInstalled() {
+        return isIrisOrOculusInstalled;
     }
 
     public static CaptureManager captureManager() {

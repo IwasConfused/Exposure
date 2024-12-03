@@ -4,7 +4,6 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 import com.google.common.io.Files;
 import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
 import io.github.mortuusars.exposure.core.image.Image;
@@ -28,20 +27,20 @@ public class FileCaptureMethod implements CaptureMethod {
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    protected final String filepath;
+    protected final String filePath;
 
-    public FileCaptureMethod(String filepath) {
-        this.filepath = filepath;
+    public FileCaptureMethod(String filePath) {
+        this.filePath = filePath;
     }
 
-    public String getFilepath() {
-        return filepath;
+    public String getFilePath() {
+        return filePath;
     }
 
     @Override
     public @NotNull CompletableFuture<TaskResult<Image>> capture() {
         return CompletableFuture.supplyAsync(() -> {
-            Either<File, ErrorMessage> file = findFileWithExtension(filepath);
+            Either<File, ErrorMessage> file = findFileWithExtension(filePath);
 
             if (file.right().isPresent()) {
                 return TaskResult.error(file.right().get());

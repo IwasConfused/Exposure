@@ -15,15 +15,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(GameRenderer.class)
 public abstract class GameRendererMixin {
-    @Inject(method = "renderLevel", at = @At(value = "RETURN"))
-    void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;", shift = At.Shift.AFTER))
+    void onRender(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
+        // Processing viewfinder shader should be done before capturing with SnapShot
+        // because Direct capture method will not be affected by it otherwise.
+        ViewfinderShader.process();
         ExposureClient.captureManager().tick();
         SnapShot.tick();
-    }
-
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/LevelRenderer;doEntityOutline()V", shift = At.Shift.AFTER))
-    void onRender(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-        ViewfinderShader.process();
     }
 
     @Inject(method = "resize", at = @At(value = "HEAD"))

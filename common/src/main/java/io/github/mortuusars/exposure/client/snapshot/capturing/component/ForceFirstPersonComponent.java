@@ -4,7 +4,7 @@ import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
-public class ForceFirstPersonCaptureComponent implements CaptureComponent {
+public class ForceFirstPersonComponent implements CaptureComponent {
     @Nullable
     private CameraType cameraTypeBeforeCapture;
 

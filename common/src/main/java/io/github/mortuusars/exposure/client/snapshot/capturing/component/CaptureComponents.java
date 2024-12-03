@@ -3,12 +3,16 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.component;
 import java.util.function.Supplier;
 
 public interface CaptureComponents {
-    static HideGuiCaptureComponent hideGui() {
-        return new HideGuiCaptureComponent();
+    static ForceFirstPersonComponent forceFirstPerson() {
+        return new ForceFirstPersonComponent();
     }
 
-    static ForceFirstPersonCaptureComponent forceFirstPerson() {
-        return new ForceFirstPersonCaptureComponent();
+    static HideGuiComponent hideGui() {
+        return new HideGuiComponent();
+    }
+
+    static DisablePostEffectComponent disablePostEffect() {
+        return new DisablePostEffectComponent();
     }
 
     static CaptureComponent optional(boolean predicate, Supplier<CaptureComponent> componentSupplier) {

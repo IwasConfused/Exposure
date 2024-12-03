@@ -11,6 +11,7 @@ import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
 import io.github.mortuusars.exposure.core.*;
@@ -413,38 +414,6 @@ public class CameraItem extends Item {
     }
 
     public InteractionResult useCamera(Player player, InteractionHand hand) {
-
-        if (player.level().isClientSide) {
-            String filePath = "D:/resized";
-
-            String exposureId = createExposureId(player);
-
-            SnapShot.createTask(Capture.screenshot()
-//                      .addOptionalComponent(brightnessStops != 0, () -> CaptureComponents.modifyGamma(brightnessStops))
-                            .addComponents(
-                                    CaptureComponents.hideGui(),
-                                    CaptureComponents.forceFirstPerson())
-                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
-                            .overridenBy(Capture.file(filePath)
-                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
-                                    .create())
-                            .create())
-                    .consume(result -> result
-                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
-                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
-                    .consume(result -> result
-                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
-                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
-                    .enqueue();
-        }
-
-        if (true) {
-            return InteractionResult.SUCCESS;
-        }
-
-        //  aaaaaaaaaaaa
-
-
         if (player.getCooldowns().isOnCooldown(this))
             return InteractionResult.FAIL;
 
@@ -480,6 +449,38 @@ public class CameraItem extends Item {
             }
 
             return InteractionResult.CONSUME; // Consume to not play animation
+        }
+
+
+        if (player.level().isClientSide) {
+            String filePath = "D:/resizedasd";
+
+            String exposureId = createExposureId(player);
+
+            SnapShot.createTask(Capture.builder()
+                            .method(CaptureMethod.screenshot())
+//                      .addOptionalComponent(brightnessStops != 0, () -> CaptureComponents.modifyGamma(brightnessStops))
+                            .addComponents(
+                                    CaptureComponents.forceFirstPerson(),
+                                    CaptureComponents.hideGui(),
+                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect))
+                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
+                            .overridenBy(Capture.builder()
+                                    .method(CaptureMethod.fromFile(filePath))
+                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
+                                    .create())
+                            .create())
+                    .consume(result -> result
+                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
+                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
+                    .consume(result -> result
+                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
+                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
+                    .enqueue();
+        }
+
+        if (true) {
+            return InteractionResult.SUCCESS;
         }
 
 
