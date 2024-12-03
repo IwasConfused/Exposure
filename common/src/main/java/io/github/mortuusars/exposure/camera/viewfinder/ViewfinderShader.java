@@ -73,7 +73,7 @@ public class ViewfinderShader {
      */
     public static void process(RenderTarget renderTarget) {
         if (shader != null && active) {
-            processAs(shader, renderTarget);
+            processWith(shader, renderTarget);
         }
     }
 
@@ -84,7 +84,7 @@ public class ViewfinderShader {
      * Main use for this is to apply a shader when capturing a photograph.
      */
     // This is probably wrong class for it, but it'll do for now.
-    public static void processAs(@NotNull PostChain shader, @NotNull RenderTarget renderTarget) {
+    public static void processWith(@NotNull PostChain shader, @NotNull RenderTarget renderTarget) {
         try {
             ResourceLocation shaderLocation = ResourceLocation.parse(shader.getName());
 

@@ -68,7 +68,7 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
     private static void applyShaderEffects(RenderTarget renderTarget) {
         @Nullable PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
         if (effect != null && Minecraft.getInstance().gameRenderer.effectActive) {
-            ViewfinderShader.processAs(effect, renderTarget);
+            ViewfinderShader.processWith(effect, renderTarget);
         }
 
         ViewfinderShader.process(renderTarget);

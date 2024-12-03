@@ -5,7 +5,6 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CompositeCaptureComponent;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.BackgroundScreenshotCaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
 import io.github.mortuusars.exposure.core.image.Image;
@@ -83,12 +82,12 @@ public class Capture extends CaptureTask {
                 .thenAccept(completableFuture::complete);
     }
 
-    public CaptureTask overridenBy(CaptureTask task) {
-        return FallbackCaptureTask.override(this, task);
+    public CaptureTask overridenBy(CaptureTask override) {
+        return new OverrideCaptureTask(this, override);
     }
 
-    public CaptureTask fallbackTo(CaptureTask task) {
-        return new FallbackCaptureTask(this, task, FallbackCaptureTask.ExecutionStrategy.FALLBACK);
+    public CaptureTask fallbackTo(CaptureTask fallback) {
+        return new FallbackCaptureTask(this, fallback);
     }
 
     public static Builder builder() {

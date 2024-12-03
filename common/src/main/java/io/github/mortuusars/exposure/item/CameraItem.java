@@ -451,40 +451,40 @@ public class CameraItem extends Item {
         }
 
 
-//        if (player.level().isClientSide) {
-//            String filePath = "D:/resizedasd";
-//
-//            String exposureId = createExposureId(player);
-//
-//            int brightnessStops = 0;
-//
-//            SnapShot.createTask(Capture.builder()
-//                            .method(CaptureMethod.screenshot())
-//                            .addComponents(
-//                                    CaptureComponents.forceRegularOrSelfieCamera(),
-//                                    CaptureComponents.hideGui(),
-//                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
-//                                    CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
-////                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
-//                            )
-//                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
-//                            .overridenBy(Capture.builder()
-//                                    .method(CaptureMethod.fromFile(filePath))
-//                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
-//                                    .create())
-//                            .create())
-//                    .consume(result -> result
-//                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
-//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
-//                    .consume(result -> result
-//                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
-//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
-//                    .enqueue();
-//        }
-//
-//        if (true) {
-//            return InteractionResult.SUCCESS;
-//        }
+        if (player.level().isClientSide) {
+            String filePath = "D:/resized";
+
+            String exposureId = createExposureId(player);
+
+            int brightnessStops = 0;
+
+            SnapShot.createTask(Capture.builder()
+                            .method(CaptureMethod.screenshot())
+                            .addComponents(
+                                    CaptureComponents.forceRegularOrSelfieCamera(),
+                                    CaptureComponents.hideGui(),
+                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
+                                    CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
+//                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
+                            )
+                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
+                            .overridenBy(Capture.builder()
+                                    .method(CaptureMethod.fromFile(filePath))
+                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
+                                    .create())
+                            .create())
+                    .consume(result -> result
+                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
+                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
+                    .consume(result -> result
+                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
+                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
+                    .enqueue();
+        }
+
+        if (true) {
+            return InteractionResult.SUCCESS;
+        }
 
 
         // All server-side below this point
