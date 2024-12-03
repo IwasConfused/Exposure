@@ -9,6 +9,7 @@ import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
+import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
@@ -420,7 +421,9 @@ public class CameraItem extends Item {
 
             SnapShot.createTask(Capture.screenshot()
 //                      .addOptionalComponent(brightnessStops != 0, () -> CaptureComponents.modifyGamma(brightnessStops))
-                            .addComponents(CaptureComponents.hideGui(), CaptureComponents.forceFirstPerson())
+                            .addComponents(
+                                    CaptureComponents.hideGui(),
+                                    CaptureComponents.forceFirstPerson())
                             .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
                             .overridenBy(Capture.file(filePath)
                                     .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
