@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.*;
-import io.github.mortuusars.exposure.client.snapshot.capturing.Captor1;
+import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
@@ -414,15 +414,15 @@ public class CameraItem extends Item {
     public InteractionResult useCamera(Player player, InteractionHand hand) {
 
         if (player.level().isClientSide) {
-            String filePath = "D:/test1asd";
+            String filePath = "D:/resized";
 
             String exposureId = createExposureId(player);
 
-            SnapShot.createTask(Captor1.screenshot()
+            SnapShot.createTask(Capture.screenshot()
 //                      .addOptionalComponent(brightnessStops != 0, () -> CaptureComponents.modifyGamma(brightnessStops))
                             .addComponents(CaptureComponents.hideGui(), CaptureComponents.forceFirstPerson())
                             .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
-                            .overridenBy(Captor1.file(filePath)
+                            .overridenBy(Capture.file(filePath)
                                     .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
                                     .create())
                             .create())
@@ -595,7 +595,7 @@ public class CameraItem extends Item {
     }
 
     protected void startCapture(Player player, ItemStack cameraStack, String exposureId, boolean flashHasFired) {
-        Capture capture;
+        io.github.mortuusars.exposure.camera.capture.Capture capture;
 
         //TODO: Get film properties here and pass them to createXXXCapture
 
@@ -607,7 +607,7 @@ public class CameraItem extends Item {
 
             capture = createFileCapture(player, cameraStack, exposureId, filepath, dither)
                     .onCapturingFailed(() -> {
-                        Capture regularCapture = createRegularCapture(player, cameraStack, exposureId, flashHasFired);
+                        io.github.mortuusars.exposure.camera.capture.Capture regularCapture = createRegularCapture(player, cameraStack, exposureId, flashHasFired);
                         regularCapture.onImageCaptured(() -> {
                             Minecraft.getInstance().execute(() -> {
                                 player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
@@ -638,7 +638,7 @@ public class CameraItem extends Item {
         ExposureClient.captureManager().enqueue(capture);
     }
 
-    protected Capture createRegularCapture(Player player, ItemStack cameraStack, String exposureId, boolean flash) {
+    protected io.github.mortuusars.exposure.camera.capture.Capture createRegularCapture(Player player, ItemStack cameraStack, String exposureId, boolean flash) {
         StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
             throw new IllegalStateException("Film attachment should be present at the time of capture.");
@@ -647,7 +647,7 @@ public class CameraItem extends Item {
         int frameSize = filmItem.getFrameSize(filmStack.getForReading());
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
 
-        Capture capture = new BackgroundScreenshotCapture()
+        io.github.mortuusars.exposure.camera.capture.Capture capture = new BackgroundScreenshotCapture()
                 .setAsyncProcessing(false)
                 .setFilmType(filmItem.getType())
                 .setSize(frameSize)
@@ -673,8 +673,8 @@ public class CameraItem extends Item {
         return capture;
     }
 
-    protected Capture createFileCapture(Player player, ItemStack cameraStack, String exposureId,
-                                        String filepath, boolean dither) {
+    protected io.github.mortuusars.exposure.camera.capture.Capture createFileCapture(Player player, ItemStack cameraStack, String exposureId,
+                                                                                     String filepath, boolean dither) {
         StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
             throw new IllegalStateException("Film attachment should be present at the time of capture.");
@@ -683,7 +683,7 @@ public class CameraItem extends Item {
         ExposureType exposureType = filmItem.getType();
         int frameSize = filmItem.getFrameSize(filmStack.getForReading());
 
-        Capture capture = new FileCapture(filepath,
+        io.github.mortuusars.exposure.camera.capture.Capture capture = new FileCapture(filepath,
                 error -> player.displayClientMessage(error.getCasualTranslation().withStyle(ChatFormatting.RED), false))
                 .setFilmType(exposureType)
                 .setSize(frameSize)

@@ -2,8 +2,6 @@ package io.github.mortuusars.exposure.client.snapshot.capturing;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.snapshot.CaptureTask;
-import io.github.mortuusars.exposure.client.snapshot.ExecutionStrategy;
 import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponentsList;
@@ -21,7 +19,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class Captor1 extends CaptureTask {
+public class Capture extends CaptureTask {
     public static final ErrorMessage ERROR_TIMED_OUT = ErrorMessage.create("gui.exposure.capture.error.timed_out");
 
     protected final CaptureMethod method;
@@ -32,7 +30,7 @@ public class Captor1 extends CaptureTask {
     protected final CaptureTimer timer;
     protected final CompletableFuture<TaskResult<Image>> completableFuture;
 
-    public Captor1(CaptureMethod captureMethod, CaptureComponentsList components, long timeoutMs, Consumer<ErrorMessage> onError) {
+    public Capture(CaptureMethod captureMethod, CaptureComponentsList components, long timeoutMs, Consumer<ErrorMessage> onError) {
         this.method = captureMethod;
         this.components = components;
         this.timeoutMs = timeoutMs;
@@ -86,11 +84,11 @@ public class Captor1 extends CaptureTask {
     }
 
     public CaptureTask overridenBy(CaptureTask task) {
-        return new CompositeCaptor(task, this, ExecutionStrategy.INVERTED_FALLBACK);
+        return FallbackCaptureTask.override(this, task);
     }
 
     public CaptureTask fallbackTo(CaptureTask task) {
-        return new CompositeCaptor(this, task, ExecutionStrategy.FALLBACK);
+        return new FallbackCaptureTask(this, task, FallbackCaptureTask.ExecutionStrategy.FALLBACK);
     }
 
     public static Builder builder() {
@@ -163,7 +161,7 @@ public class Captor1 extends CaptureTask {
         public CaptureTask create() {
             Preconditions.checkState(captureMethod != null,
                     "Capture Method wasn't specified. Use 'method' to specify.");
-            Captor1 captor = new Captor1(captureMethod, components, timeoutMs, onError);
+            Capture captor = new Capture(captureMethod, components, timeoutMs, onError);
 
             if (overrideTask != null) {
                 return captor.overridenBy(overrideTask);

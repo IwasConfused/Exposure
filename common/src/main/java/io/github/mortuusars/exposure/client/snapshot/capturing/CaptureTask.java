@@ -1,5 +1,6 @@
-package io.github.mortuusars.exposure.client.snapshot;
+package io.github.mortuusars.exposure.client.snapshot.capturing;
 
+import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.core.image.Image;
 
 import java.util.concurrent.CompletableFuture;

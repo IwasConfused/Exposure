@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.client.snapshot;
 
 import com.google.common.base.Preconditions;
+import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureTask;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
@@ -60,16 +61,16 @@ public class SnapShot {
 
      */
 
-    private static final Queue<SnapShotTask1> snapshotQueue = new LinkedList<>();
+    private static final Queue<SnapShotTask> snapshotQueue = new LinkedList<>();
     @Nullable
-    private static SnapShotTask1 currentTask;
+    private static SnapShotTask currentTask;
 
-    public static void enqueue(SnapShotTask1 snapshot) {
+    public static void enqueue(SnapShotTask snapshot) {
         Preconditions.checkState(!isQueued(snapshot), "This snapshot is already in queue.");
         snapshotQueue.add(snapshot);
     }
 
-    public static boolean isQueued(SnapShotTask1 snapshot) {
+    public static boolean isQueued(SnapShotTask snapshot) {
         return currentTask == snapshot || snapshotQueue.contains(snapshot);
     }
 
@@ -91,7 +92,7 @@ public class SnapShot {
         }
     }
 
-    public static SnapShotTask1 createTask(CaptureTask captureTask) {
-        return new SnapShotTask1(captureTask);
+    public static SnapShotTask createTask(CaptureTask captureTask) {
+        return new SnapShotTask(captureTask);
     }
 }

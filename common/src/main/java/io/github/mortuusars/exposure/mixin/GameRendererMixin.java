@@ -18,7 +18,6 @@ public abstract class GameRendererMixin {
     @Inject(method = "renderLevel", at = @At(value = "RETURN"))
     void onRenderLevel(DeltaTracker deltaTracker, CallbackInfo ci) {
         ExposureClient.captureManager().tick();
-        ExposureClient.snapshot().tick();
         SnapShot.tick();
     }
 

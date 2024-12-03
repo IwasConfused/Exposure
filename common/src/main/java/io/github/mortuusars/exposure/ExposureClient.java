@@ -7,7 +7,6 @@ import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.image.ResourceImage;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
-import io.github.mortuusars.exposure.client.snapshot.SnapShot1;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.image.ExposureDataImage;
 import io.github.mortuusars.exposure.core.image.IdentifiableImage;
@@ -30,7 +29,6 @@ import java.util.function.Function;
 
 public class ExposureClient {
     private static final CaptureManager captureManager = new CaptureManager();
-    private static final SnapShot1 snapshotManager = new SnapShot1();
 
     private static final ImageRenderer imageRenderer = new ImageRenderer();
     private static final PhotographRenderer photographRenderer = new PhotographRenderer();
@@ -48,10 +46,6 @@ public class ExposureClient {
 
     public static CaptureManager captureManager() {
         return captureManager;
-    }
-
-    public static SnapShot1 snapshot() {
-        return snapshotManager;
     }
 
     public static ImageRenderer imageRenderer() {

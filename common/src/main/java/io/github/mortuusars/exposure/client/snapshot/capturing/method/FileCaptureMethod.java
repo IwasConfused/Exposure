@@ -3,6 +3,8 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.google.common.io.Files;
 import com.mojang.datafixers.util.Either;
+import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.snapshot.TaskResult;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
 import io.github.mortuusars.exposure.core.image.Image;
@@ -10,6 +12,7 @@ import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.io.*;
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +25,8 @@ public class FileCaptureMethod implements CaptureMethod {
     public static final ErrorMessage ERROR_FILE_DOES_NOT_EXIST = ErrorMessage.create("gui.exposure.capture.file.error.file_does_not_exist");
     public static final ErrorMessage ERROR_CANNOT_READ = ErrorMessage.create("gui.exposure.capture.file.error.cannot_read");
     public static final ErrorMessage ERROR_NOT_SUPPORTED = ErrorMessage.create("gui.exposure.capture.file.error.not_supported");
+
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     protected final String filepath;
 
@@ -49,6 +54,9 @@ public class FileCaptureMethod implements CaptureMethod {
             }
 
             File f = file.left().orElseThrow();
+
+            LOGGER.info("Loading image from file: {}", f);
+
             return ImageFileLoader.chooseFitting(f).load(f);
         });
     }
