@@ -1,20 +1,14 @@
 package io.github.mortuusars.exposure.block;
 
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.block.entity.FlashBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.RenderShape;
-import net.minecraft.world.level.block.SimpleWaterloggedBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityTicker;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -25,11 +19,12 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-@SuppressWarnings("deprecation")
-public class FlashBlock extends Block implements EntityBlock, SimpleWaterloggedBlock {
+public class FlashBlock extends Block implements /*EntityBlock,*/ SimpleWaterloggedBlock {
+    public static final int LIFETIME_TICKS = 8;
+
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
+
     public FlashBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any().setValue(WATERLOGGED, false));
@@ -73,18 +68,17 @@ public class FlashBlock extends Block implements EntityBlock, SimpleWaterloggedB
         return pState.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(pState);
     }
 
-    @Nullable
     @Override
-    public BlockEntity newBlockEntity(@NotNull BlockPos pos, @NotNull BlockState blockState) {
-        return new FlashBlockEntity(pos, blockState);
+    protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
+        super.onPlace(state, level, pos, oldState, movedByPiston);
+        level.scheduleTick(pos, this, LIFETIME_TICKS);
     }
 
-    @Nullable
     @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, @NotNull BlockState state, @NotNull BlockEntityType<T> blockEntityType) {
-        if (!level.isClientSide && blockEntityType == Exposure.BlockEntityTypes.FLASH.get())
-            return FlashBlockEntity::serverTick;
-
-        return null;
+    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        BlockState newState = state.getValue(FlashBlock.WATERLOGGED)
+                ? Blocks.WATER.defaultBlockState()
+                : Blocks.AIR.defaultBlockState();
+        level.setBlock(pos, newState, Block.UPDATE_ALL);
     }
 }

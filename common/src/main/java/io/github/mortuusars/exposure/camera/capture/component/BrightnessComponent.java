@@ -34,8 +34,8 @@ public class BrightnessComponent implements ICaptureComponent {
 
     @Override
     public void onDelayFrame(Capture capture, int delayFramesLeft) {
-        if (delayFramesLeft <= 1 && GammaModifier.getAdditionalBrightness() == 0f) {
-            GammaModifier.setAdditionalBrightness(additionalGamma);
+        if (delayFramesLeft <= 1 && GammaModifier.getOffset() == 0f) {
+            GammaModifier.apply(additionalGamma);
             // Update light texture immediately:
             Minecraft.getInstance().gameRenderer.lightTexture().tick();
         }
@@ -82,7 +82,7 @@ public class BrightnessComponent implements ICaptureComponent {
 
     @Override
     public void imageTaken(Capture capture, NativeImage image) {
-        GammaModifier.setAdditionalBrightness(0f);
+        GammaModifier.apply(0f);
     }
 
     /**

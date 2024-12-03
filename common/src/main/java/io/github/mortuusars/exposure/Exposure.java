@@ -6,7 +6,6 @@ import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.block.LightroomBlock;
-import io.github.mortuusars.exposure.block.entity.FlashBlockEntity;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.core.camera.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.FlashMode;
@@ -122,9 +121,6 @@ public class Exposure {
     public static class BlockEntityTypes {
         public static final Supplier<BlockEntityType<LightroomBlockEntity>> LIGHTROOM =
                 Register.blockEntityType("lightroom", () -> Register.newBlockEntityType(LightroomBlockEntity::new, Blocks.LIGHTROOM.get()));
-
-        public static final Supplier<BlockEntityType<FlashBlockEntity>> FLASH =
-                Register.blockEntityType("flash", () -> Register.newBlockEntityType(FlashBlockEntity::new, Blocks.FLASH.get()));
 
         static void init() {
         }

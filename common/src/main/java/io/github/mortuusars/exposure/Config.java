@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure;
 
+import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.core.camera.FocalRange;
 import io.github.mortuusars.exposure.data.ExposureSize;
 import io.github.mortuusars.exposure.core.image.color.Color;
@@ -263,7 +264,7 @@ public class Config {
                     VIEWFINDER_FONT_SECONDARY_COLOR = builder.define("FontSecondaryColorHex", "FF7A736C");
                     VIEWFINDER_MIDDLE_CLICK_CONTROLS = builder
                             .comment("Clicking middle mouse button will open Viewfinder Controls. This is independent of Open Camera Controls keybind.",
-                                    "Allows opening camera controls without dismounting from a vehicle - and keeping controls on sneak as well.",
+                                    "Allows opening camera controls without dismounting from a vehicle - and keeping controls on sneak or other button as well.",
                                     "Default: true")
                             .define("MiddleClickOpensControls", true);
                     builder.pop();
@@ -287,7 +288,7 @@ public class Config {
                 FLASH_CAPTURE_DELAY_TICKS = builder
                         .comment("Delay in ticks before capturing an image when shooting with flash." +
                                 "\nIf you experience flash synchronization issues (Flash having no effect on the image) - try increasing the value.")
-                        .defineInRange("FlashCaptureDelayTicks", 4, 1, 7);
+                        .defineInRange("FlashCaptureDelayTicks", 4, 1, FlashBlock.LIFETIME_TICKS);
                 DISABLE_POST_EFFECT = builder
                         .comment("Post Effect (vanilla shader) will be disabled when image is captured.",
                                 "It is sometimes used by mods to change how player sees the world. (Cold Sweat's overheating blur, Supplementaries mob heads, for example).",

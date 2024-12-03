@@ -9,7 +9,6 @@ import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
-import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
@@ -452,36 +451,40 @@ public class CameraItem extends Item {
         }
 
 
-        if (player.level().isClientSide) {
-            String filePath = "D:/resizedasd";
-
-            String exposureId = createExposureId(player);
-
-            SnapShot.createTask(Capture.builder()
-                            .method(CaptureMethod.screenshot())
-//                      .addOptionalComponent(brightnessStops != 0, () -> CaptureComponents.modifyGamma(brightnessStops))
-                            .addComponents(
-                                    CaptureComponents.forceFirstPerson(),
-                                    CaptureComponents.hideGui(),
-                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect))
-                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
-                            .overridenBy(Capture.builder()
-                                    .method(CaptureMethod.fromFile(filePath))
-                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
-                                    .create())
-                            .create())
-                    .consume(result -> result
-                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
-                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
-                    .consume(result -> result
-                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
-                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
-                    .enqueue();
-        }
-
-        if (true) {
-            return InteractionResult.SUCCESS;
-        }
+//        if (player.level().isClientSide) {
+//            String filePath = "D:/resizedasd";
+//
+//            String exposureId = createExposureId(player);
+//
+//            int brightnessStops = 0;
+//
+//            SnapShot.createTask(Capture.builder()
+//                            .method(CaptureMethod.screenshot())
+//                            .addComponents(
+//                                    CaptureComponents.forceRegularOrSelfieCamera(),
+//                                    CaptureComponents.hideGui(),
+//                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
+//                                    CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
+////                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
+//                            )
+//                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
+//                            .overridenBy(Capture.builder()
+//                                    .method(CaptureMethod.fromFile(filePath))
+//                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
+//                                    .create())
+//                            .create())
+//                    .consume(result -> result
+//                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
+//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
+//                    .consume(result -> result
+//                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
+//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
+//                    .enqueue();
+//        }
+//
+//        if (true) {
+//            return InteractionResult.SUCCESS;
+//        }
 
 
         // All server-side below this point
@@ -635,7 +638,7 @@ public class CameraItem extends Item {
         } else {
             capture = createRegularCapture(player, cameraStack, exposureId, flashHasFired);
             if (flashHasFired) {
-                capture.onImageCaptured(() -> spawnClientsideFlashEffects(player, cameraStack));
+//                capture.onImageCaptured(() -> spawnClientsideFlashEffects(player, cameraStack));
             }
         }
 
@@ -1044,24 +1047,24 @@ public class CameraItem extends Item {
      * This method is called after we take a screenshot. Otherwise, due to the delays (flash, etc) - particles would be captured as well.
      */
     @SuppressWarnings("unused")
-    public void spawnClientsideFlashEffects(@NotNull Player player, ItemStack cameraStack) {
-        Preconditions.checkState(player.level().isClientSide, "This methods should only be called client-side.");
-        Level level = player.level();
-        Vec3 pos = player.position();
-        Vec3 lookAngle = player.getLookAngle();
-        pos = pos.add(0, 1, 0).add(lookAngle.multiply(0.8f, 0.8f, 0.8f));
-
-        RandomSource r = level.getRandom();
-        for (int i = 0; i < 3; i++) {
-            level.addParticle(ParticleTypes.END_ROD,
-                    pos.x + r.nextFloat() - 0.5f,
-                    pos.y + r.nextFloat() + 0.15f,
-                    pos.z + r.nextFloat() - 0.5f,
-                    lookAngle.x * 0.025f + r.nextFloat() * 0.025f,
-                    lookAngle.y * 0.025f + r.nextFloat() * 0.025f,
-                    lookAngle.z * 0.025f + r.nextFloat() * 0.025f);
-        }
-    }
+//    public void spawnClientsideFlashEffects(@NotNull Player player, ItemStack cameraStack) {
+//        Preconditions.checkState(player.level().isClientSide, "This methods should only be called client-side.");
+//        Level level = player.level();
+//        Vec3 pos = player.position();
+//        Vec3 lookAngle = player.getLookAngle();
+//        pos = pos.add(0, 1, 0).add(lookAngle.multiply(0.8f, 0.8f, 0.8f));
+//
+//        RandomSource r = level.getRandom();
+//        for (int i = 0; i < 3; i++) {
+//            level.addParticle(ParticleTypes.END_ROD,
+//                    pos.x + r.nextFloat() - 0.5f,
+//                    pos.y + r.nextFloat() + 0.15f,
+//                    pos.z + r.nextFloat() - 0.5f,
+//                    lookAngle.x * 0.025f + r.nextFloat() * 0.025f,
+//                    lookAngle.y * 0.025f + r.nextFloat() * 0.025f,
+//                    lookAngle.z * 0.025f + r.nextFloat() * 0.025f);
+//        }
+//    }
 
     // ---
 
