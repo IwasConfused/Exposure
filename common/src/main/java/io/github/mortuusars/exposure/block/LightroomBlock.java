@@ -50,17 +50,6 @@ public class LightroomBlock extends Block implements EntityBlock {
         return this.defaultBlockState().setValue(FACING, pContext.getHorizontalDirection().getOpposite());
     }
 
-    // TODO: Check custom name
-//    @Override
-//    public void setPlacedBy(@NotNull Level level, @NotNull BlockPos pos, @NotNull BlockState state, LivingEntity placer, ItemStack stack) {
-//        @Nullable Component customName = stack.get(DataComponents.CUSTOM_NAME);
-//        if (customName != null) {
-//            BlockEntity blockentity = level.getBlockEntity(pos);
-//            if (blockentity instanceof LightroomBlockEntity lightroomBlockEntity)
-//                lightroomBlockEntity.setCustomName(stack.getHoverName());
-//        }
-//    }
-
     @Override
     public void onRemove(BlockState state, @NotNull Level level, @NotNull BlockPos pos, BlockState newState, boolean isMoving) {
         if (!state.is(newState.getBlock())) {
