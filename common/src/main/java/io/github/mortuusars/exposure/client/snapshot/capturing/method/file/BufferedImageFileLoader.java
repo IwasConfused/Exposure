@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method.file;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.image.WrappedBufferedImage;
-import io.github.mortuusars.exposure.util.Result;
+import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
 import io.github.mortuusars.exposure.core.image.Image;
 

@@ -1,10 +1,7 @@
 package io.github.mortuusars.exposure.client.snapshot;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.snapshot.capturing.Task;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.DirectScreenshotCaptureTask;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.util.ErrorMessage;
+import io.github.mortuusars.exposure.util.task.Task;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;

@@ -2,13 +2,16 @@ package io.github.mortuusars.exposure.client.snapshot.capturing;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.util.Result;
+import io.github.mortuusars.exposure.util.task.FallbackTask;
+import io.github.mortuusars.exposure.util.task.OverrideTask;
+import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CompositeCaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
 import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.util.TranslatableError;
+import io.github.mortuusars.exposure.util.task.Task;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,11 +86,11 @@ public class Capture extends Task<Result<Image>> {
     }
 
     public Task<Result<Image>> overridenBy(Task<Result<Image>> override) {
-        return new OverrideCaptureTask<>(this, override);
+        return new OverrideTask<>(this, override);
     }
 
     public Task<Result<Image>> fallbackTo(Task<Result<Image>> fallback) {
-        return new FallbackCaptureTask<>(this, fallback);
+        return new FallbackTask<>(this, fallback);
     }
 
     public static Builder builder() {

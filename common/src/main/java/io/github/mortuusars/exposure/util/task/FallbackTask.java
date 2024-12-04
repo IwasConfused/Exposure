@@ -1,7 +1,6 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.util.task;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.util.Result;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import org.slf4j.Logger;
 
@@ -10,13 +9,13 @@ import java.util.concurrent.CompletableFuture;
 /**
  * If first task is failed, second task will be executed, and it's result returned.
  */
-public class FallbackCaptureTask<T> extends Task<Result<T>> {
+public class FallbackTask<T> extends Task<Result<T>> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final Task<Result<T>> main;
     private final Task<Result<T>> fallback;
 
-    public FallbackCaptureTask(Task<Result<T>> main, Task<Result<T>> fallback) {
+    public FallbackTask(Task<Result<T>> main, Task<Result<T>> fallback) {
         this.main = main;
         this.fallback = fallback;
     }
@@ -40,7 +39,7 @@ public class FallbackCaptureTask<T> extends Task<Result<T>> {
     private Result<T> captureFallback() {
         return fallback.execute().handle((fallbackResult, fallbackException) -> {
             if (fallbackException != null) {
-                LOGGER.error("Both Main and Fallback SnapShot tasks are failed!");
+                LOGGER.error("Both Main and Fallback tasks are failed!");
                 return Result.<T>error(new TranslatableError(TranslatableError.GENERIC, fallbackException));
             }
             return fallbackResult;

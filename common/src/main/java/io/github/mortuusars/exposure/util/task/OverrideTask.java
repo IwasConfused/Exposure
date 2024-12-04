@@ -1,7 +1,6 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.util.task;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.util.Result;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -9,13 +8,13 @@ import java.util.concurrent.CompletableFuture;
 /**
  * Tasks are executed in order. Second task will be returned if it is successful.
  */
-public class OverrideCaptureTask<T> extends Task<Result<T>> {
+public class OverrideTask<T> extends Task<Result<T>> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final Task<Result<T>> original;
     private final Task<Result<T>> override;
 
-    public OverrideCaptureTask(Task<Result<T>> original, Task<Result<T>> override) {
+    public OverrideTask(Task<Result<T>> original, Task<Result<T>> override) {
         this.original = original;
         this.override = override;
     }

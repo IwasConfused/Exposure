@@ -1,6 +1,5 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.util.task;
 
-import io.github.mortuusars.exposure.util.Result;
 import io.github.mortuusars.exposure.util.TranslatableError;
 
 import java.util.concurrent.CompletableFuture;

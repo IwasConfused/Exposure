@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.util.task;
 
 import io.github.mortuusars.exposure.util.TranslatableError;
 

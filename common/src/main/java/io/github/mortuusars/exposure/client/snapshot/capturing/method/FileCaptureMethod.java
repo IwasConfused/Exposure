@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.google.common.io.Files;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.util.Result;
+import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
 import io.github.mortuusars.exposure.core.image.Image;
 import net.minecraft.util.StringUtil;

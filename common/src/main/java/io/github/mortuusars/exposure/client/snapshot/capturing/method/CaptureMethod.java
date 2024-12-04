@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.util.Result;
+import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.core.image.Image;
 import org.jetbrains.annotations.NotNull;
 

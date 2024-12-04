@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.util.task;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;

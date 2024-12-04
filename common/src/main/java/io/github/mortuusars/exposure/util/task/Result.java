@@ -1,6 +1,7 @@
-package io.github.mortuusars.exposure.util;
+package io.github.mortuusars.exposure.util.task;
 
 import com.google.common.base.Preconditions;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
