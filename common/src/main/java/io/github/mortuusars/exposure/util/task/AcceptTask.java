@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.util.task;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class AcceptTask<T> extends NestedTask<T, Void> {
+public class AcceptTask<T> extends TransformedNestedTask<T, Void> {
     private final Consumer<T> acceptor;
     private final boolean async;
 

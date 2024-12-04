@@ -8,8 +8,8 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public abstract class Task<T> {
-    private boolean started;
-    private boolean done;
+    protected boolean started;
+    protected boolean done;
 
     public abstract CompletableFuture<T> execute();
 
@@ -38,6 +38,10 @@ public abstract class Task<T> {
 
     public Task<T> withTimeout(int timeout, TimeUnit timeUnit) {
         return new TimeoutTask<>(this, timeout, timeUnit);
+    }
+
+    public Task<T> withTimeout(T valueIfTimedOut, int timeout, TimeUnit timeUnit) {
+        return new TimeoutTask<>(this, timeout, timeUnit, valueIfTimedOut);
     }
 
     public <R> Task<R> then(Function<T, R> transformFunction) {

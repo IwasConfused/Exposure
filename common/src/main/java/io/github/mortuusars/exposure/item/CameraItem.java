@@ -9,8 +9,10 @@ import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
+import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.DirectScreenshotCaptureTask;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
 import io.github.mortuusars.exposure.core.*;
@@ -459,23 +461,30 @@ public class CameraItem extends Item {
 
             int brightnessStops = 0;
 
-            SnapShot.enqueue(Capture.builder()
-                    .method(CaptureMethod.screenshot())
-                    .addComponents(
-                            CaptureComponents.forceRegularOrSelfieCamera(),
-                            CaptureComponents.hideGui(),
-                            CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
-                            CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
-//                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
-                    )
-                    .onError(err -> Exposure.LOGGER.error(err.getLocalizedMessage()))
-//                    .overridenBy(Capture.file(filePath)
-//                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false))
-//                            .createTask())
-                    .createTask()
-                    .then(Result::unwrap)
+            SnapShot.enqueue(Capture.of(
+                            new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
+                                    .overridenBy(new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
+                                            .onError(err -> player.displayClientMessage(err.casual(), true))))
                     .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
                     .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save));
+
+//            SnapShot.enqueue(Capture.builder()
+//                    .method(CaptureMethod.screenshot())
+//                    .addComponents(
+//                            CaptureComponents.forceRegularOrSelfieCamera(),
+//                            CaptureComponents.hideGui(),
+//                            CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
+//                            CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
+////                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
+//                    )
+//                    .onError(err -> Exposure.LOGGER.error(err.getLocalizedMessage()))
+////                    .overridenBy(Capture.file(filePath)
+////                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false))
+////                            .createTask())
+//                    .createTask()
+//                    .then(Result::unwrap)
+//                    .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
+//                    .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save));
 
 //            SnapShot.createTask(Capture.builder()
 //                            .method(CaptureMethod.screenshot())

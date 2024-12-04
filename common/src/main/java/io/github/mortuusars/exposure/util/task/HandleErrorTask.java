@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.util.TranslatableError;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 
-public class HandleErrorTask<T> extends NestedTask<T, T> {
+public class HandleErrorTask<T> extends NestedTask<T> {
     private final Consumer<TranslatableError> errorConsumer;
 
     public HandleErrorTask(Task<T> task, Consumer<TranslatableError> errorConsumer) {

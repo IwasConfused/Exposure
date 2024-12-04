@@ -1,9 +1,9 @@
 package io.github.mortuusars.exposure.util.task;
 
-public abstract class NestedTask<T> extends Task<T> {
+public abstract class TransformedNestedTask<T, R> extends Task<R> {
     private final Task<T> task;
 
-    public NestedTask(Task<T> task) {
+    public TransformedNestedTask(Task<T> task) {
         this.task = task;
     }
 
