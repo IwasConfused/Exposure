@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.util.task;
 import io.github.mortuusars.exposure.util.TranslatableError;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -33,6 +34,10 @@ public abstract class Task<T> {
 
     public Task<T> onError(Consumer<TranslatableError> errorConsumer) {
         return new HandleErrorTask<>(this, errorConsumer);
+    }
+
+    public Task<T> withTimeout(int timeout, TimeUnit timeUnit) {
+        return new TimeoutTask<>(this, timeout, timeUnit);
     }
 
     public <R> Task<R> then(Function<T, R> transformFunction) {
