@@ -5,7 +5,7 @@ import com.mojang.serialization.MapCodec;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
-import io.github.mortuusars.exposure.neoforge.loot.PreventableAddTableLootModifier;
+import io.github.mortuusars.exposure.neoforge.loot.ConfigurableAddTableLootModifier;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
@@ -61,8 +61,8 @@ public class ExposureNeoForge {
         private static final DeferredRegister<MapCodec<? extends IGlobalLootModifier>> LOOT_MODIFIERS =
                 DeferredRegister.create(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, Exposure.ID);
 
-        public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<PreventableAddTableLootModifier>> ADD_TABLE =
-                LOOT_MODIFIERS.register("add_table", () -> PreventableAddTableLootModifier.CODEC);
+        public static final DeferredHolder<MapCodec<? extends IGlobalLootModifier>, MapCodec<ConfigurableAddTableLootModifier>> ADD_TABLE =
+                LOOT_MODIFIERS.register("add_table", () -> ConfigurableAddTableLootModifier.CODEC);
     }
 
     private void onConfigReloading(ModConfigEvent.Reloading event) {

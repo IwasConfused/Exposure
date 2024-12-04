@@ -18,13 +18,13 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Basically a copy of AddTableLootModifier just to allow disabling it through config.
  */
-public class PreventableAddTableLootModifier extends AddTableLootModifier {
-    public static final MapCodec<PreventableAddTableLootModifier> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+public class ConfigurableAddTableLootModifier extends AddTableLootModifier {
+    public static final MapCodec<ConfigurableAddTableLootModifier> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
                     IGlobalLootModifier.LOOT_CONDITIONS_CODEC.fieldOf("conditions").forGetter(glm -> glm.conditions),
-                    ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("table").forGetter(PreventableAddTableLootModifier::table))
-            .apply(instance, PreventableAddTableLootModifier::new));
+                    ResourceKey.codec(Registries.LOOT_TABLE).fieldOf("table").forGetter(ConfigurableAddTableLootModifier::table))
+            .apply(instance, ConfigurableAddTableLootModifier::new));
 
-    public PreventableAddTableLootModifier(LootItemCondition[] conditions, ResourceKey<LootTable> table) {
+    public ConfigurableAddTableLootModifier(LootItemCondition[] conditions, ResourceKey<LootTable> table) {
         super(conditions, table);
     }
 
