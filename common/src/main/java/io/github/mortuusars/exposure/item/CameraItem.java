@@ -13,6 +13,7 @@ import io.github.mortuusars.exposure.client.snapshot.capturing.component.Capture
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.DirectScreenshotCaptureTask;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureTask;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
 import io.github.mortuusars.exposure.core.*;
@@ -463,7 +464,7 @@ public class CameraItem extends Item {
 
             SnapShot.enqueue(Capture.of(
                             new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
-                                    .overridenBy(new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
+                                    .overridenBy(new Capture<>(new FileCaptureTask(filePath), CaptureComponent.EMPTY)
                                             .onError(err -> player.displayClientMessage(err.casual(), true))))
                     .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
                     .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save));
