@@ -1,7 +1,10 @@
 package io.github.mortuusars.exposure.client.snapshot;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.snapshot.capturing.CaptureTask;
+import io.github.mortuusars.exposure.client.snapshot.capturing.Task;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.DirectScreenshotCaptureTask;
+import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.util.ErrorMessage;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;
@@ -61,16 +64,16 @@ public class SnapShot {
 
      */
 
-    private static final Queue<SnapShotTask> snapshotQueue = new LinkedList<>();
+    private static final Queue<Task<?>> snapshotQueue = new LinkedList<>();
     @Nullable
-    private static SnapShotTask currentTask;
+    private static Task<?> currentTask;
 
-    public static void enqueue(SnapShotTask snapshot) {
+    public static void enqueue(Task<?> snapshot) {
         Preconditions.checkState(!isQueued(snapshot), "This snapshot is already in queue.");
         snapshotQueue.add(snapshot);
     }
 
-    public static boolean isQueued(SnapShotTask snapshot) {
+    public static boolean isQueued(Task<?> snapshot) {
         return currentTask == snapshot || snapshotQueue.contains(snapshot);
     }
 
@@ -81,7 +84,7 @@ public class SnapShot {
                 return;
             }
 
-            currentTask.start();
+            currentTask.execute();
         }
 
         if (currentTask.isDone()) {
@@ -90,9 +93,5 @@ public class SnapShot {
         else if (currentTask.isStarted()) {
             currentTask.tick();
         }
-    }
-
-    public static SnapShotTask createTask(CaptureTask captureTask) {
-        return new SnapShotTask(captureTask);
     }
 }

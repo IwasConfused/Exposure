@@ -12,6 +12,7 @@ import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
+import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
@@ -33,6 +34,7 @@ import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.ChromaticChannel;
 import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
+import io.github.mortuusars.exposure.util.Result;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -458,28 +460,46 @@ public class CameraItem extends Item {
 
             int brightnessStops = 0;
 
-            SnapShot.createTask(Capture.builder()
-                            .method(CaptureMethod.screenshot())
-                            .addComponents(
-                                    CaptureComponents.forceRegularOrSelfieCamera(),
-                                    CaptureComponents.hideGui(),
-                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
-                                    CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
+            SnapShot.enqueue(Capture.builder()
+                    .method(CaptureMethod.screenshot())
+                    .addComponents(
+                            CaptureComponents.forceRegularOrSelfieCamera(),
+                            CaptureComponents.hideGui(),
+                            CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
+                            CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
 //                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
-                            )
-                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
-                            .overridenBy(Capture.builder()
-                                    .method(CaptureMethod.fromFile(filePath))
-                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
-                                    .create())
-                            .create())
-                    .consume(result -> result
-                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
-                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
-                    .consume(result -> result
-                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
-                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
-                    .enqueue();
+                    )
+                    .onError(err -> Exposure.LOGGER.error(err.getLocalizedMessage()))
+//                    .overridenBy(Capture.file(filePath)
+//                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false))
+//                            .createTask())
+                    .createTask()
+                    .then(Result::unwrap)
+                    .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
+                    .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save));
+
+//            SnapShot.createTask(Capture.builder()
+//                            .method(CaptureMethod.screenshot())
+//                            .addComponents(
+//                                    CaptureComponents.forceRegularOrSelfieCamera(),
+//                                    CaptureComponents.hideGui(),
+//                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
+//                                    CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
+////                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
+//                            )
+//                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
+//                            .overridenBy(Capture.builder()
+//                                    .method(CaptureMethod.fromFile(filePath))
+//                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
+//                                    .createTask())
+//                            .createTask())
+//                    .consume(result -> result
+//                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
+//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
+//                    .consume(result -> result
+//                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
+//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
+//                    .enqueue();
         }
 
         if (true) {

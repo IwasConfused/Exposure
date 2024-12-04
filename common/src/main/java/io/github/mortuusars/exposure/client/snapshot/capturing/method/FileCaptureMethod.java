@@ -2,12 +2,10 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 
 import com.google.common.io.Files;
-import com.mojang.datafixers.util.Either;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.util.Result;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.util.ErrorMessage;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,13 +15,13 @@ import java.io.*;
 import java.util.concurrent.CompletableFuture;
 
 public class FileCaptureMethod implements CaptureMethod {
-    public static final ErrorMessage ERROR_PATH_EMPTY = ErrorMessage.create("gui.exposure.capture.file.error.path_empty");
-    public static final ErrorMessage ERROR_PATH_INVALID = ErrorMessage.create("gui.exposure.capture.file.error.path_invalid");
-    public static final ErrorMessage ERROR_NO_EXTENSION = ErrorMessage.create("gui.exposure.capture.file.error.no_extension");
-    public static final ErrorMessage ERROR_PATH_IS_DIRECTORY = ErrorMessage.create("gui.exposure.capture.file.error.path_is_directory");
-    public static final ErrorMessage ERROR_FILE_DOES_NOT_EXIST = ErrorMessage.create("gui.exposure.capture.file.error.file_does_not_exist");
-    public static final ErrorMessage ERROR_CANNOT_READ = ErrorMessage.create("gui.exposure.capture.file.error.cannot_read");
-    public static final ErrorMessage ERROR_NOT_SUPPORTED = ErrorMessage.create("gui.exposure.capture.file.error.not_supported");
+    public static final String ERROR_PATH_EMPTY = "gui.exposure.capture.file.error.path_empty";
+    public static final String ERROR_PATH_INVALID = "gui.exposure.capture.file.error.path_invalid";
+    public static final String ERROR_NO_EXTENSION = "gui.exposure.capture.file.error.no_extension";
+    public static final String ERROR_PATH_IS_DIRECTORY = "gui.exposure.capture.file.error.path_is_directory";
+    public static final String ERROR_FILE_DOES_NOT_EXIST = "gui.exposure.capture.file.error.file_does_not_exist";
+    public static final String ERROR_CANNOT_READ = "gui.exposure.capture.file.error.cannot_read";
+    public static final String ERROR_NOT_SUPPORTED = "gui.exposure.capture.file.error.not_supported";
 
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -38,42 +36,42 @@ public class FileCaptureMethod implements CaptureMethod {
     }
 
     @Override
-    public @NotNull CompletableFuture<TaskResult<Image>> capture() {
+    public @NotNull CompletableFuture<Result<Image>> capture() {
         return CompletableFuture.supplyAsync(() -> {
-            Either<File, ErrorMessage> file = findFileWithExtension(filePath);
+            Result<File> result = findFileWithExtension(filePath);
 
-            if (file.right().isPresent()) {
-                return TaskResult.error(file.right().get());
+            if (result.isError()) {
+                return result.remapError();
             }
 
-            file = validateFilepath(file.left().orElseThrow());
+            result = validateFilepath(result.getValue());
 
-            if (file.right().isPresent()) {
-                return TaskResult.error(file.right().get());
+            if (result.isError()) {
+                return result.remapError();
             }
 
-            File f = file.left().orElseThrow();
+            File file = result.getValue();
 
-            LOGGER.info("Loading image from file: {}", f);
+            LOGGER.info("Loading image from file: {}", file);
 
-            return ImageFileLoader.chooseFitting(f).load(f);
+            return ImageFileLoader.chooseFitting(file).load(file);
         });
     }
 
-    private static Either<File, ErrorMessage> validateFilepath(File file) {
+    private static Result<File> validateFilepath(File file) {
         String filepath = file.getPath();
 
         if (StringUtil.isNullOrEmpty(filepath)) {
-            return Either.right(ERROR_PATH_EMPTY);
+            return Result.error(ERROR_PATH_EMPTY);
         }
 
         if (file.isDirectory()) {
-            return Either.right(ERROR_PATH_IS_DIRECTORY);
+            return Result.error(ERROR_PATH_IS_DIRECTORY);
         }
 
         String extension = Files.getFileExtension(filepath);
         if (StringUtil.isNullOrEmpty(extension)) {
-            return Either.right(ERROR_NO_EXTENSION);
+            return Result.error(ERROR_NO_EXTENSION);
         }
 
         //TODO: supported formats
@@ -84,10 +82,10 @@ public class FileCaptureMethod implements CaptureMethod {
 //        }
 
         if (!file.exists()) {
-            return Either.right(ERROR_FILE_DOES_NOT_EXIST);
+            return Result.error(ERROR_FILE_DOES_NOT_EXIST);
         }
 
-        return Either.left(file);
+        return Result.success(file);
     }
 
     /**
@@ -96,22 +94,22 @@ public class FileCaptureMethod implements CaptureMethod {
      *
      * @return File with extension or error.
      */
-    private static Either<File, ErrorMessage> findFileWithExtension(String filepath) {
+    private static Result<File> findFileWithExtension(String filepath) {
         File file = new File(filepath);
 
         String extension = Files.getFileExtension(filepath);
         if (!StringUtil.isNullOrEmpty(extension)) {
-            return Either.left(file);
+            return Result.success(file);
         }
 
         @Nullable File parentFile = file.getParentFile();
         if (parentFile == null) {
-            return Either.right(ERROR_PATH_INVALID);
+            return Result.error(ERROR_PATH_INVALID);
         }
 
         File[] files = parentFile.listFiles();
         if (files == null) {
-            return Either.right(ERROR_CANNOT_READ);
+            return Result.error(ERROR_CANNOT_READ);
         }
 
         String name = file.getName();
@@ -122,10 +120,10 @@ public class FileCaptureMethod implements CaptureMethod {
 
             String fileName = Files.getNameWithoutExtension(fileInDirectory.getName());
             if (fileName.equals(name)) {
-                return Either.left(fileInDirectory);
+                return Result.success(fileInDirectory);
             }
         }
 
-        return Either.right(ERROR_FILE_DOES_NOT_EXIST);
+        return Result.error(ERROR_FILE_DOES_NOT_EXIST);
     }
 }

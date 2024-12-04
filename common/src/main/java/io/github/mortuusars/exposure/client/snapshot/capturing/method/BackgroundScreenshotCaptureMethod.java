@@ -6,9 +6,9 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
-import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.util.Result;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.util.ErrorMessage;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import net.minecraft.client.renderer.PostChain;
@@ -25,7 +25,7 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Override
-    public @NotNull CompletableFuture<TaskResult<Image>> capture() {
+    public @NotNull CompletableFuture<Result<Image>> capture() {
         Minecraft minecraft = Minecraft.getInstance();
 
         RenderTarget renderTarget = new TextureTarget(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(), true, Minecraft.ON_OSX);
@@ -52,10 +52,10 @@ public class BackgroundScreenshotCaptureMethod implements CaptureMethod {
             WrappedNativeImage image = new WrappedNativeImage(Screenshot.takeScreenshot(renderTarget));
 
             // Using supplyAsync to make subsequent calls be asynchronous. I'm not the best with async stuff.
-            return CompletableFuture.supplyAsync(() -> TaskResult.success(image));
+            return CompletableFuture.supplyAsync(() -> Result.success(image));
         } catch (Exception e) {
-            LOGGER.error("Couldn't capture image", e);
-            return CompletableFuture.completedFuture(TaskResult.error(ErrorMessage.EMPTY));
+            LOGGER.error("Couldn't capture image: ", e);
+            return CompletableFuture.completedFuture(Result.error(CaptureMethod.ERROR_FAILED_GENERIC));
         } finally {
             minecraft.gameRenderer.setPanoramicMode(false);
             minecraft.gameRenderer.setRenderBlockOutline(true);

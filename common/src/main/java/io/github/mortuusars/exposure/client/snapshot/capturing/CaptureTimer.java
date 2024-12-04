@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 public class CaptureTimer {
     private int ticks;
     private boolean isRunning;
-    private long startedTick = -1;
-    private long lastTick = -1;
+    private long startedAtGameTick = -1;
+    private long lastGameTick = -1;
 
     private Runnable onStart;
-    private Consumer<Integer> onTick;
+    private Consumer<Integer> onGameTick;
     private Runnable onEnd;
 
     public CaptureTimer(int ticks) {
@@ -26,8 +26,8 @@ public class CaptureTimer {
         return this;
     }
 
-    public CaptureTimer onTick(Consumer<Integer> onTick) {
-        this.onTick = onTick;
+    public CaptureTimer onGameTick(Consumer<Integer> onTick) {
+        this.onGameTick = onTick;
         return this;
     }
 
@@ -36,47 +36,52 @@ public class CaptureTimer {
         return this;
     }
 
-    public CaptureTimer start() {
-        isRunning = true;
-        startedTick = getCurrentTick();
-        lastTick = startedTick;
-        onStart.run();
-
-        frameTick();
-
-        return this;
-    }
-
-    public void stop() {
-        isRunning = false;
-    }
-
     public boolean isRunning() {
         return isRunning;
     }
 
     public boolean isDone() {
-        return !isRunning() && startedTick >= 0 && ticks <= 0;
+        return !isRunning && startedAtGameTick >= 0 && ticks <= 0;
     }
 
-    public void frameTick() {
-        if (isRunning()) {
-            long currentTick = getCurrentTick();
-            if (lastTick != currentTick) {
-                if (ticks <= 0) {
-                    stop();
-                    onEnd.run();
-                    return;
-                }
+    public CaptureTimer start() {
+        isRunning = true;
+        startedAtGameTick = getCurrentGameTick();
+        lastGameTick = startedAtGameTick;
+        onStart.run();
 
+        //TODO: test if ticking is needed here
+//        tick();
+
+        return this;
+    }
+
+    public void pause() {
+        isRunning = false;
+    }
+
+    public void tick() {
+        if (isRunning) {
+            long currentGameTick = getCurrentGameTick();
+            boolean isNewTick = lastGameTick != currentGameTick;
+            if (isNewTick) {
                 ticks--;
-                onTick.accept(ticks);
-                lastTick = currentTick;
+                onGameTick.accept(ticks);
+                lastGameTick = currentGameTick;
+            }
+
+            if (ticks <= 0) {
+                stopAndEnd();
             }
         }
     }
 
-    private long getCurrentTick() {
+    private void stopAndEnd() {
+        isRunning = false;
+        onEnd.run();
+    }
+
+    private long getCurrentGameTick() {
         return Objects.requireNonNull(Minecraft.getInstance().level,
                 "Snapshot system can only be used when level is loaded.").getGameTime();
     }

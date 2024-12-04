@@ -1,9 +1,8 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.client.snapshot.TaskResult;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.util.ErrorMessage;
+import io.github.mortuusars.exposure.util.Result;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
@@ -11,47 +10,47 @@ import java.util.concurrent.CompletableFuture;
 /**
  * If first task is failed, second task will be executed, and it's result returned.
  */
-public class FallbackCaptureTask extends CaptureTask {
+public class FallbackCaptureTask<T> extends Task<Result<T>> {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    private final CaptureTask main;
-    private final CaptureTask fallback;
+    private final Task<Result<T>> main;
+    private final Task<Result<T>> fallback;
 
-    public FallbackCaptureTask(CaptureTask main, CaptureTask fallback) {
+    public FallbackCaptureTask(Task<Result<T>> main, Task<Result<T>> fallback) {
         this.main = main;
         this.fallback = fallback;
     }
 
     @Override
-    public CompletableFuture<TaskResult<Image>> capture() {
-        return main.capture()
+    public CompletableFuture<Result<T>> execute() {
+        return main.execute()
                 .handle((mainResult, mainException) -> {
                     if (mainResult != null && mainResult.isSuccessful()) {
                         return mainResult;
                     } else if (mainException != null) {
                         LOGGER.error("Main CaptureTask is failed: ", mainException);
                     } else if (mainResult != null && mainResult.isError()) {
-                        LOGGER.error("Main CaptureTask is failed: {}", mainResult.getErrorMessage());
+                        LOGGER.error("Main CaptureTask is failed: {}", mainResult.getError().getLocalizedMessage());
                     }
 
                     return captureFallback();
                 });
     }
 
-    private TaskResult<Image> captureFallback() {
-        return fallback.capture().handle((fallbackResult, fallbackException) -> {
+    private Result<T> captureFallback() {
+        return fallback.execute().handle((fallbackResult, fallbackException) -> {
             if (fallbackException != null) {
                 LOGGER.error("Both Main and Fallback SnapShot tasks are failed!");
-                return TaskResult.<Image>error(ErrorMessage.GENERIC);
+                return Result.<T>error(new TranslatableError(TranslatableError.GENERIC, fallbackException));
             }
             return fallbackResult;
         }).join();
     }
 
     @Override
-    public void frameTick() {
-        main.frameTick();
-        fallback.frameTick();
+    public void tick() {
+        main.tick();
+        fallback.tick();
     }
 
     @Override

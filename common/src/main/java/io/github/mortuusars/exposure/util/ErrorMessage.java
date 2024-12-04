@@ -12,6 +12,7 @@ public record ErrorMessage(String technicalTranslationKey, String casualTranslat
 
     public boolean isEmpty() {
         return this.equals(EMPTY);
+
     }
 
     public Component getTechnicalTranslation() {

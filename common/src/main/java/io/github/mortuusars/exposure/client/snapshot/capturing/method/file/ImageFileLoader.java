@@ -1,13 +1,12 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method.file;
 
-import com.google.common.io.Files;
-import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.util.Result;
 import io.github.mortuusars.exposure.core.image.Image;
 
 import java.io.File;
 
 public interface ImageFileLoader {
-    TaskResult<Image> load(File file);
+    Result<Image> load(File file);
 
     static ImageFileLoader chooseFitting(File file) {
         return new BufferedImageFileLoader();
@@ -18,7 +17,7 @@ public interface ImageFileLoader {
 
     static ImageFileLoader fallback(ImageFileLoader main, ImageFileLoader fallback) {
         return file -> {
-            TaskResult<Image> mainResult = main.load(file);
+            Result<Image> mainResult = main.load(file);
             return mainResult.isSuccessful() ? mainResult : fallback.load(file);
         };
     }

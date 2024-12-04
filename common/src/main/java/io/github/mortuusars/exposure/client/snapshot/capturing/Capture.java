@@ -2,13 +2,13 @@ package io.github.mortuusars.exposure.client.snapshot.capturing;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.snapshot.TaskResult;
+import io.github.mortuusars.exposure.util.Result;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CompositeCaptureComponent;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.util.ErrorMessage;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,18 +16,18 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
-public class Capture extends CaptureTask {
-    public static final ErrorMessage ERROR_TIMED_OUT = ErrorMessage.create("gui.exposure.capture.error.timed_out");
+public class Capture extends Task<Result<Image>> {
+    public static final String ERROR_TIMED_OUT = "gui.exposure.capture.error.timed_out";
 
     protected final CaptureMethod method;
     protected final CaptureComponent component;
     protected final long timeoutMs;
-    protected final Consumer<ErrorMessage> onError;
+    protected final Consumer<TranslatableError> onError;
 
     protected final CaptureTimer timer;
-    protected final CompletableFuture<TaskResult<Image>> completableFuture;
+    protected final CompletableFuture<Result<Image>> completableFuture;
 
-    public Capture(CaptureMethod captureMethod, CaptureComponent component, long timeoutMs, Consumer<ErrorMessage> onError) {
+    public Capture(CaptureMethod captureMethod, CaptureComponent component, long timeoutMs, Consumer<TranslatableError> onError) {
         this.method = captureMethod;
         this.component = component;
         this.timeoutMs = timeoutMs;
@@ -35,7 +35,7 @@ public class Capture extends CaptureTask {
 
         this.timer = new CaptureTimer(component.requiredDelayTicks())
                 .whenStarted(this.component::initialize)
-                .onTick(this.component::delayTick)
+                .onGameTick(this.component::delayTick)
                 .whenEnded(() -> {
                     this.component.beforeCapture();
                     captureImage();
@@ -43,7 +43,7 @@ public class Capture extends CaptureTask {
         this.completableFuture = new CompletableFuture<>();
     }
 
-    public CompletableFuture<TaskResult<Image>> capture() {
+    public CompletableFuture<Result<Image>> execute() {
         if (!timer.isRunning()) {
             timer.start();
             setStarted();
@@ -52,20 +52,20 @@ public class Capture extends CaptureTask {
         return completableFuture;
     }
 
-    public void frameTick() {
-        method.frameTick();
-        timer.frameTick();
+    public void tick() {
+        method.tick();
+        timer.tick();
     }
 
     private void captureImage() {
         method.capture()
-                .completeOnTimeout(TaskResult.error(ERROR_TIMED_OUT), timeoutMs, TimeUnit.MILLISECONDS)
+                .completeOnTimeout(Result.error(ERROR_TIMED_OUT), timeoutMs, TimeUnit.MILLISECONDS)
                 .handle((result, throwable) -> {
                     if (throwable != null) {
                         Exposure.LOGGER.error("Capturing failed: {}", throwable.toString());
-                        return TaskResult.<Image>error(CaptureMethod.ERROR_FAILED_GENERIC);
+                        return Result.<Image>error(CaptureMethod.ERROR_FAILED_GENERIC);
                     }
-                    return result != null ? result : TaskResult.<Image>error(CaptureMethod.ERROR_FAILED_GENERIC);
+                    return result != null ? result : Result.<Image>error(CaptureMethod.ERROR_FAILED_GENERIC);
                 })
                 .thenApply(result -> {
                     setDone();
@@ -74,7 +74,7 @@ public class Capture extends CaptureTask {
                     Minecraft.getInstance().execute(() -> {
                         component.afterCapture();
                         if (result.isError()) {
-                            onError.accept(result.getErrorMessage());
+                            onError.accept(result.getError());
                         }
                     });
                     return result;
@@ -82,12 +82,12 @@ public class Capture extends CaptureTask {
                 .thenAccept(completableFuture::complete);
     }
 
-    public CaptureTask overridenBy(CaptureTask override) {
-        return new OverrideCaptureTask(this, override);
+    public Task<Result<Image>> overridenBy(Task<Result<Image>> override) {
+        return new OverrideCaptureTask<>(this, override);
     }
 
-    public CaptureTask fallbackTo(CaptureTask fallback) {
-        return new FallbackCaptureTask(this, fallback);
+    public Task<Result<Image>> fallbackTo(Task<Result<Image>> fallback) {
+        return new FallbackCaptureTask<>(this, fallback);
     }
 
     public static Builder builder() {
@@ -101,13 +101,13 @@ public class Capture extends CaptureTask {
     public static class Builder {
         private CaptureMethod captureMethod;
         private CaptureComponent component = CaptureComponent.EMPTY;
-        private Consumer<ErrorMessage> onError;
+        private Consumer<TranslatableError> onError;
         private long timeoutMs = 10_000; // 10 seconds
 
         @Nullable
-        private CaptureTask overrideTask;
+        private Task<Result<Image>> overrideTask;
         @Nullable
-        private CaptureTask fallbackTask;
+        private Task<Result<Image>> fallbackTask;
 
         public Builder method(CaptureMethod captureMethod) {
             this.captureMethod = captureMethod;
@@ -123,7 +123,7 @@ public class Capture extends CaptureTask {
             return addComponent(new CompositeCaptureComponent(components));
         }
 
-        public Builder onError(Consumer<ErrorMessage> errorMessageConsumer) {
+        public Builder onError(Consumer<TranslatableError> errorMessageConsumer) {
             this.onError = errorMessageConsumer;
             return this;
         }
@@ -133,19 +133,19 @@ public class Capture extends CaptureTask {
             return this;
         }
 
-        public Builder overridenBy(CaptureTask overrideTask) {
+        public Builder overridenBy(Task<Result<Image>> overrideTask) {
             Preconditions.checkState(fallbackTask == null, "Capture task cannot be 'overridenBy' and 'fallbackTo' at the same time.");
             this.overrideTask = overrideTask;
             return this;
         }
 
-        public Builder fallbackTo(CaptureTask fallbackTask) {
+        public Builder fallbackTo(Task<Result<Image>> fallbackTask) {
             Preconditions.checkState(overrideTask == null, "Capture task cannot be 'overridenBy' and 'fallbackTo' at the same time.");
             this.fallbackTask = fallbackTask;
             return this;
         }
 
-        public CaptureTask create() {
+        public Task<Result<Image>> createTask() {
             Preconditions.checkState(captureMethod != null,
                     "Capture Method wasn't specified. Use 'method' to specify.");
             Capture captor = new Capture(captureMethod, component, timeoutMs, onError);
