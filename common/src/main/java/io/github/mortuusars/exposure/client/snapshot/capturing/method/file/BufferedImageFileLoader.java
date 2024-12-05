@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method.file;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.image.WrappedBufferedImage;
+import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureTask;
 import io.github.mortuusars.exposure.util.task.Result;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureMethod;
 import io.github.mortuusars.exposure.core.image.Image;
 
 import javax.imageio.ImageIO;
@@ -20,7 +20,7 @@ public class BufferedImageFileLoader implements ImageFileLoader {
             return Result.success(new WrappedBufferedImage(image));
         } catch (IOException e) {
             Exposure.LOGGER.error("Loading image from file path '{}' failed:", file, e);
-            return Result.error(FileCaptureMethod.ERROR_CANNOT_READ);
+            return Result.error(FileCaptureTask.ERROR_CANNOT_READ);
         }
     }
 }

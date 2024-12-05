@@ -20,12 +20,13 @@ public class HandleErrorTask<T> extends NestedTask<T> {
                 .exceptionally(throwable -> {
                     errorConsumer.accept(new TranslatableError(TranslatableError.GENERIC, throwable));
                     Exposure.LOGGER.error("Task threw an exception: ", throwable);
-                    throw new RuntimeException("Subsequent execution is stopped.");
+                    throw new TaskStoppedException();
                 })
                 .thenApply(executionResult -> {
                     if (executionResult instanceof Result<?> result && result.isError()) {
-                        Exposure.LOGGER.error("Error: ", result.getError());
+                        Exposure.LOGGER.error(result.getError().getLocalizedMessage());
                         errorConsumer.accept(result.getError());
+                        throw new TaskStoppedException();
                     }
 
                     return executionResult;

@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.component;
+package io.github.mortuusars.exposure.client.snapshot.capturing.action;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
@@ -9,11 +9,11 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public class FlashComponent implements CaptureComponent {
+public class FlashAction implements CaptureAction {
     private final Entity photographer;
     private long initializedAt;
 
-    public FlashComponent(Entity photographer) {
+    public FlashAction(Entity photographer) {
         this.photographer = photographer;
     }
 

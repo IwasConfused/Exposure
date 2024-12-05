@@ -1,9 +1,9 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.component;
+package io.github.mortuusars.exposure.client.snapshot.capturing.action;
 
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 
-public class ForceRegularOrSelfieCameraTypeComponent implements CaptureComponent {
+public class ForceRegularOrSelfieCameraTypeAction implements CaptureAction {
     private CameraType cameraTypeBeforeCapture = CameraType.FIRST_PERSON;
 
     @Override

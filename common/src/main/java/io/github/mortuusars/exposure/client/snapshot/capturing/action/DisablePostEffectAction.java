@@ -1,8 +1,8 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.component;
+package io.github.mortuusars.exposure.client.snapshot.capturing.action;
 
 import net.minecraft.client.Minecraft;
 
-public class DisablePostEffectComponent implements CaptureComponent {
+public class DisablePostEffectAction implements CaptureAction {
     private boolean effectActive;
 
     @Override

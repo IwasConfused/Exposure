@@ -1,8 +1,8 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.component;
+package io.github.mortuusars.exposure.client.snapshot.capturing.action;
 
 import net.minecraft.client.Minecraft;
 
-public class HideGuiComponent implements CaptureComponent {
+public class HideGuiAction implements CaptureAction {
     private boolean hideGuiBeforeCapture;
 
     @Override

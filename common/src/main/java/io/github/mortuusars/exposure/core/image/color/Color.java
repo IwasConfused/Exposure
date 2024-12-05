@@ -208,13 +208,20 @@ public class Color {
         return hsbvals;
     }
 
-    public static int BGRtoRGB(int bgr) {
-        int a = (bgr >> 24) & 0xFF;
-        int b = (bgr >> 16) & 0xFF;
-        int g = (bgr >> 8) & 0xFF;
-        int r = bgr & 0xFF;
+    public static int BGRtoRGB(int ABGR) {
+        int a = (ABGR >> 24) & 0xFF;
+        int b = (ABGR >> 16) & 0xFF;
+        int g = (ABGR >> 8) & 0xFF;
+        int r = ABGR & 0xFF;
 
         return a << 24 | r << 16 | g << 8 | b;
+    }
+
+    /**
+     * It's equivalent to BGRtoRGB, but it's there to make code more readable.
+     */
+    public static int RGBtoBGR(int ARGB) {
+        return BGRtoRGB(ARGB);
     }
 
     public static int RGBFromHex(String hexColor) {

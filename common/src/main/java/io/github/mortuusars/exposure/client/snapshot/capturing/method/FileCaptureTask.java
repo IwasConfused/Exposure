@@ -39,6 +39,8 @@ public class FileCaptureTask extends Task<Result<Image>> {
     @Override
     public CompletableFuture<Result<Image>> execute() {
         return CompletableFuture.supplyAsync(() -> {
+            LOGGER.info("Attempting to load image from file: '{}'", filePath);
+
             Result<File> result = findFileWithExtension(filePath);
 
             if (result.isError()) {
@@ -53,7 +55,7 @@ public class FileCaptureTask extends Task<Result<Image>> {
 
             File file = result.getValue();
 
-            LOGGER.info("Loading image from file: {}", file);
+            LOGGER.info("Reading image from file: '{}'", file);
 
             return ImageFileLoader.chooseFitting(file).load(file);
         });

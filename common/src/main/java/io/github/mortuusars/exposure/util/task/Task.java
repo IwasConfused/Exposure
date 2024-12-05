@@ -59,4 +59,12 @@ public abstract class Task<T> {
     public Task<Void> acceptAsync(Consumer<T> acceptFunction) {
         return new AcceptTask<>(this, acceptFunction, true);
     }
+
+    public Task<T> overridenBy(Task<T> override) {
+        return new OverrideTask<>(this, override);
+    }
+
+//    public Task<T> fallbackTo(Task<T> fallback) {
+//        return new FallbackTask<>(this, fallback);
+//    }
 }

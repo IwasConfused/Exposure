@@ -1,8 +1,6 @@
 package io.github.mortuusars.exposure.core.image.processing;
 
-import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.core.image.PixelImage;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.warehouse.PalettedImage;

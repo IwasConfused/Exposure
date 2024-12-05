@@ -3,20 +3,21 @@ package io.github.mortuusars.exposure.client.snapshot.saving;
 import com.mojang.blaze3d.platform.NativeImage;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import org.slf4j.Logger;
 
 import java.io.File;
 
-public class ImageFileSaver implements Saver {
+public class NativeImageFileSaver implements Saver {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final File file;
 
-    public ImageFileSaver(File file) {
+    public NativeImageFileSaver(File file) {
         this.file = file;
     }
 
-    public ImageFileSaver(String filePath) {
+    public NativeImageFileSaver(String filePath) {
         this.file = new File(filePath);
     }
 
@@ -28,7 +29,7 @@ public class ImageFileSaver implements Saver {
             for (int y = 0; y < image.getHeight(); y++) {
                 for (int x = 0; x < image.getWidth(); x++) {
                     int pixelColor = image.getPixelARGB(x, y);
-                    nativeImage.setPixelRGBA(x, y, pixelColor);
+                    nativeImage.setPixelRGBA(x, y, Color.RGBtoBGR(pixelColor));
                 }
             }
 

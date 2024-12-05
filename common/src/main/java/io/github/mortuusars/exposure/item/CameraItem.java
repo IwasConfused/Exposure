@@ -7,17 +7,14 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
+import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.core.image.ResizedImage;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
-import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.DirectScreenshotCaptureTask;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureTask;
-import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
-import io.github.mortuusars.exposure.client.snapshot.saving.ImageFileSaver;
+import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
+import io.github.mortuusars.exposure.client.snapshot.converter.PalettedConverter;
+import io.github.mortuusars.exposure.client.snapshot.saving.NativeImageFileSaver;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.capture.component.*;
@@ -38,6 +35,7 @@ import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.ChromaChannel;
 import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -88,6 +86,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class CameraItem extends Item {
     private static final String ID_OF_LAST_SHOT = "id_of_last_shot";
@@ -462,20 +461,29 @@ public class CameraItem extends Item {
             String exposureId = createExposureId(player);
 
             int brightnessStops = 0;
+            boolean flashHasFired = false;
 
-            SnapShot.enqueue(Capture.of(
-                            new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
-                                    .overridenBy(new Capture<>(new FileCaptureTask(filePath), CaptureComponent.EMPTY)
-                                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false))))
+            SnapShot.enqueue(Capture.of(Capture.screenshot(),
+                            CaptureActions.hideGui(),
+                            CaptureActions.forceRegularOrSelfieCamera(),
+                            CaptureActions.disablePostEffect(),
+                            CaptureActions.modifyGamma(brightnessStops),
+                            CaptureAction.optional(flashHasFired, () -> CaptureActions.flash(player)))
+                    .handleErrorAndGetResult(printCasualErrorInChat(player))
                     .thenAsync(Process.with(
-                                Processor.Crop.SQUARE,
-                                Processor.Crop.factor(Exposure.CROP_FACTOR),
-                                Processor.Resize.to(320),
-                                Processor.brightness(brightnessStops),
-                                Processor.blackAndWhite()))
-                    .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
-                    .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save)
-                    .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false)));
+                            Processor.Crop.SQUARE,
+                            Processor.Crop.factor(Exposure.CROP_FACTOR)))
+                    .overridenBy(Capture.of(Capture.file(filePath))
+                            .handleErrorAndGetResult(printCasualErrorInChat(player))
+                            .thenAsync(Process.with(Processor.Crop.SQUARE)))
+                    .thenAsync(Process.with(
+                            Processor.Resize.to(320),
+                            Processor.brightness(brightnessStops)
+//                            Processor.blackAndWhite()
+                    ))
+                    .thenAsync(PalettedConverter.DITHERED_MAP_COLORS::convert)
+                    .acceptAsync(new NativeImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save)
+                    .onError(printCasualErrorInChat(player)));
 
 
 //            SnapShot.enqueue(Capture.builder()
@@ -575,6 +583,10 @@ public class CameraItem extends Item {
         Packets.sendToClient(new StartExposureS2CP(exposureId, cameraAccessor, flashHasFired, lightLevel), serverPlayer);
 
         return InteractionResult.CONSUME; // Consume to not play swing animation
+    }
+
+    private @NotNull Consumer<TranslatableError> printCasualErrorInChat(Player player) {
+        return err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false);
     }
 
     public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack cameraStack) {
