@@ -23,7 +23,7 @@ public interface PixelModifier {
      * Suffix is used to differentiate between cached rendered exposures.
      */
     String getIdSuffix();
-    default int modifyPixel(int ABGR) {
-        return ABGR;
+    default int modifyPixel(int ARGB) {
+        return ARGB;
     }
 }

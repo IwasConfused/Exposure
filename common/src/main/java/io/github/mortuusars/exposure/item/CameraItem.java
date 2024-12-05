@@ -8,13 +8,15 @@ import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
+import io.github.mortuusars.exposure.client.snapshot.processing.BlackAndWhiteProcessor;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
 import io.github.mortuusars.exposure.client.snapshot.converter.PalettedConverter;
-import io.github.mortuusars.exposure.client.snapshot.saving.NativeImageFileSaver;
+import io.github.mortuusars.exposure.client.snapshot.processing.SingleChannelBlackAndWhiteProcessor;
+import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.capture.component.*;
@@ -22,6 +24,7 @@ import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -36,6 +39,8 @@ import io.github.mortuusars.exposure.util.ChromaChannel;
 import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import io.github.mortuusars.exposure.util.TranslatableError;
+import io.github.mortuusars.exposure.util.task.Task;
+import io.github.mortuusars.exposure.warehouse.PalettedImage;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -454,85 +459,6 @@ public class CameraItem extends Item {
             return InteractionResult.CONSUME; // Consume to not play animation
         }
 
-
-        if (player.level().isClientSide) {
-            String filePath = "D:/resizedasd";
-
-            String exposureId = createExposureId(player);
-
-            int brightnessStops = 0;
-            boolean flashHasFired = false;
-
-            SnapShot.enqueue(Capture.of(Capture.screenshot(),
-                            CaptureActions.hideGui(),
-                            CaptureActions.forceRegularOrSelfieCamera(),
-                            CaptureActions.disablePostEffect(),
-                            CaptureActions.modifyGamma(brightnessStops),
-                            CaptureAction.optional(flashHasFired, () -> CaptureActions.flash(player)))
-                    .handleErrorAndGetResult(printCasualErrorInChat(player))
-                    .thenAsync(Process.with(
-                            Processor.Crop.SQUARE,
-                            Processor.Crop.factor(Exposure.CROP_FACTOR)))
-                    .overridenBy(Capture.of(Capture.file(filePath))
-                            .handleErrorAndGetResult(printCasualErrorInChat(player))
-                            .thenAsync(Process.with(Processor.Crop.SQUARE)))
-                    .thenAsync(Process.with(
-                            Processor.Resize.to(320),
-                            Processor.brightness(brightnessStops)
-//                            Processor.blackAndWhite()
-                    ))
-                    .thenAsync(PalettedConverter.DITHERED_MAP_COLORS::convert)
-                    .acceptAsync(new NativeImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save)
-                    .onError(printCasualErrorInChat(player)));
-
-
-//            SnapShot.enqueue(Capture.builder()
-//                    .method(CaptureMethod.screenshot())
-//                    .addComponents(
-//                            CaptureComponents.forceRegularOrSelfieCamera(),
-//                            CaptureComponents.hideGui(),
-//                            CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
-//                            CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
-////                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
-//                    )
-//                    .onError(err -> Exposure.LOGGER.error(err.getLocalizedMessage()))
-////                    .overridenBy(Capture.file(filePath)
-////                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false))
-////                            .createTask())
-//                    .createTask()
-//                    .then(Result::unwrap)
-//                    .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
-//                    .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save));
-
-//            SnapShot.createTask(Capture.builder()
-//                            .method(CaptureMethod.screenshot())
-//                            .addComponents(
-//                                    CaptureComponents.forceRegularOrSelfieCamera(),
-//                                    CaptureComponents.hideGui(),
-//                                    CaptureComponents.optional(Config.Client.DISABLE_POST_EFFECT.isTrue(), CaptureComponents::disablePostEffect),
-//                                    CaptureComponents.optional(brightnessStops != 0, CaptureComponents.modifyGamma(brightnessStops))
-////                                    CaptureComponents::optional(flashHasFired, CaptureComponents::flash)
-//                            )
-//                            .onError(err -> Exposure.LOGGER.error(err.casualTranslationKey()))
-//                            .overridenBy(Capture.builder()
-//                                    .method(CaptureMethod.fromFile(filePath))
-//                                    .onError(err -> player.displayClientMessage(err.getCasualTranslation(), false))
-//                                    .createTask())
-//                            .createTask())
-//                    .consume(result -> result
-//                            .thenApply(Converter.DITHERED_MAP_COLORS::convert)
-//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save))
-//                    .consume(result -> result
-//                            .thenApply(Converter.NEAREST_MAP_COLORS::convert)
-//                            .thenAccept(new ImageFileSaver("D:/snapshot_test/" + exposureId + "_nearest.png")::save))
-//                    .enqueue();
-        }
-
-        if (true) {
-            return InteractionResult.SUCCESS;
-        }
-
-
         // All server-side below this point
 
         if (!(player instanceof ServerPlayer serverPlayer))
@@ -652,108 +578,83 @@ public class CameraItem extends Item {
     }
 
     protected void startCapture(Player player, ItemStack cameraStack, String exposureId, boolean flashHasFired) {
-        io.github.mortuusars.exposure.camera.capture.Capture capture;
-
-        //TODO: Get film properties here and pass them to createXXXCapture
-
-        StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
-
-        if (filterStack.getItem() instanceof InterplanarProjectorItem projector && projector.isAllowed()) {
-            String filepath = projector.getFilepath(filterStack.getForReading()).orElse("");
-            boolean dither = projector.getMode(filterStack.getForReading()) == InterplanarProjectorMode.DITHERED;
-
-            capture = createFileCapture(player, cameraStack, exposureId, filepath, dither)
-                    .onCapturingFailed(() -> {
-                        io.github.mortuusars.exposure.camera.capture.Capture regularCapture = createRegularCapture(player, cameraStack, exposureId, flashHasFired);
-                        regularCapture.onImageCaptured(() -> {
-                            Minecraft.getInstance().execute(() -> {
-                                player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
-                                        SoundSource.PLAYERS, 0.8f, 0.6f);
-                                for (int i = 0; i < 32; ++i) {
-                                    player.level().addParticle(ParticleTypes.PORTAL, player.getX(), player.getY() + player.getRandom().nextDouble() * 2.0, player.getZ(), player.getRandom().nextGaussian(), 0.0, player.getRandom().nextGaussian());
-                                }
-                            });
-                        });
-                        ExposureClient.captureManager().enqueue(regularCapture);
-                    })
-                    .onImageCaptured(() -> {
-                        Minecraft.getInstance().execute(() -> {
-                            player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
-                                    SoundSource.PLAYERS, 0.8f, 1.1f);
-                            for (int i = 0; i < 32; ++i) {
-                                player.level().addParticle(ParticleTypes.PORTAL, player.getX(), player.getY() + player.getRandom().nextDouble() * 2.0, player.getZ(), player.getRandom().nextGaussian(), 0.0, player.getRandom().nextGaussian());
-                            }
-                        });
-                    });
-        } else {
-            capture = createRegularCapture(player, cameraStack, exposureId, flashHasFired);
-            if (flashHasFired) {
-//                capture.onImageCaptured(() -> spawnClientsideFlashEffects(player, cameraStack));
-            }
-        }
-
-        ExposureClient.captureManager().enqueue(capture);
-    }
-
-    protected io.github.mortuusars.exposure.camera.capture.Capture createRegularCapture(Player player, ItemStack cameraStack, String exposureId, boolean flash) {
         StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
             throw new IllegalStateException("Film attachment should be present at the time of capture.");
         }
+        StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
 
         int frameSize = filmItem.getFrameSize(filmStack.getForReading());
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
 
-        io.github.mortuusars.exposure.camera.capture.Capture capture = new BackgroundScreenshotCapture()
-                .setAsyncProcessing(false)
-                .setFilmType(filmItem.getType())
-                .setSize(frameSize)
-                .setBrightnessStops(brightnessStops)
-                .setConverter(ImageConverter.DITHERED_MAP_COLORS);
+        Task<PalettedImage> captureTask = Capture.of(Capture.screenshot(),
+                        CaptureActions.hideGui(),
+                        CaptureActions.forceRegularOrSelfieCamera(),
+                        CaptureActions.disablePostEffect(),
+                        CaptureActions.modifyGamma(brightnessStops),
+                        CaptureAction.optional(flashHasFired, () -> CaptureActions.flash(player)))
+                .handleErrorAndGetResult(printCasualErrorInChat(player))
+                .thenAsync(Process.with(
+                        Processor.Crop.SQUARE,
+                        Processor.Crop.factor(Exposure.CROP_FACTOR),
+                        Processor.Resize.to(frameSize),
+                        Processor.brightness(brightnessStops),
+                        chooseColorProcessor(cameraStack, filmStack, filterStack)))
+                .thenAsync(PalettedConverter.DITHERED_MAP_COLORS::convert);
 
-        capture.addComponent(new BaseComponent());
-        capture.addComponent(new ExposureUploaderComponent(exposureId));
 
-        if (flash) {
-            capture.addComponent(new FlashComponent());
-        }
-        if (brightnessStops != 0) {
-            capture.addComponent(new BrightnessComponent(brightnessStops));
-        }
-        if (filmItem.getType() == ExposureType.BLACK_AND_WHITE) {
-            StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
-            ChromaChannel.fromStack(filterStack.getForReading()).ifPresentOrElse(
-                    channel -> capture.addComponent(new SelectiveChannelBlackAndWhiteComponent(channel)),
-                    () -> capture.addComponent(new BlackAndWhiteComponent()));
+        if (filterStack.getItem() instanceof InterplanarProjectorItem projector && projector.isAllowed()) {
+            String filePath = projector.getFilepath(filterStack.getForReading()).orElse("");
+            boolean dither = projector.getMode(filterStack.getForReading()) == InterplanarProjectorMode.DITHERED;
+
+            captureTask = captureTask.overridenBy(Capture.of(Capture.file(filePath))
+                    .handleErrorAndGetResult(error -> {
+                        Minecraft.getInstance().execute(() -> onProjectingFail(player));
+                        printCasualErrorInChat(player).accept(error);
+                    })
+                    .then(image -> {
+                        Minecraft.getInstance().execute(() -> onProjectingSuccess(player));
+                        return image;
+                    })
+                    .thenAsync(Process.with(
+                            Processor.Crop.SQUARE,
+                            Processor.Resize.to(frameSize),
+                            Processor.brightness(brightnessStops),
+                            chooseColorProcessor(cameraStack, filmStack, filterStack)))
+                    .thenAsync((dither ? PalettedConverter.DITHERED_MAP_COLORS : PalettedConverter.NEAREST_MAP_COLORS)::convert));
         }
 
-        return capture;
+        SnapShot.enqueue(captureTask
+                .acceptAsync(new ImageUploader(exposureId)::upload)
+                .onError(printCasualErrorInChat(player)));
     }
 
-    protected io.github.mortuusars.exposure.camera.capture.Capture createFileCapture(Player player, ItemStack cameraStack, String exposureId,
-                                                                                     String filepath, boolean dither) {
-        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
-        if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
-            throw new IllegalStateException("Film attachment should be present at the time of capture.");
+    protected void onProjectingSuccess(Player player) {
+        player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
+                SoundSource.PLAYERS, 0.8f, 1.1f);
+        for (int i = 0; i < 32; ++i) {
+            player.level().addParticle(ParticleTypes.PORTAL, player.getX(), player.getY() + player.getRandom().nextDouble() * 2.0, player.getZ(), player.getRandom().nextGaussian(), 0.0, player.getRandom().nextGaussian());
+        }
+    }
+
+    protected void onProjectingFail(Player player) {
+        player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
+                SoundSource.PLAYERS, 0.8f, 0.6f);
+        for (int i = 0; i < 32; ++i) {
+            player.level().addParticle(ParticleTypes.PORTAL, player.getX(), player.getY() + player.getRandom().nextDouble() * 2.0, player.getZ(), player.getRandom().nextGaussian(), 0.0, player.getRandom().nextGaussian());
+        }
+    }
+
+    protected Processor chooseColorProcessor(ItemStack cameraStack, StoredItemStack filmStack, StoredItemStack filterStack) {
+        ExposureType type = filmStack.getItem() instanceof FilmRollItem film ? film.getType() : ExposureType.COLOR;
+
+        if (type == ExposureType.COLOR) {
+            return Processor.EMPTY;
         }
 
-        ExposureType exposureType = filmItem.getType();
-        int frameSize = filmItem.getFrameSize(filmStack.getForReading());
-
-        io.github.mortuusars.exposure.camera.capture.Capture capture = new FileCapture(filepath,
-                error -> player.displayClientMessage(error.getCasualTranslation().withStyle(ChatFormatting.RED), false))
-                .setFilmType(exposureType)
-                .setSize(frameSize)
-                .addComponent(new ExposureUploaderComponent(exposureId))
-                .setConverter(dither ? ImageConverter.DITHERED_MAP_COLORS : ImageConverter.NEAREST_MAP_COLORS)
-                .cropFactor(1)
-                .setAsyncCapturing(true);
-
-        if (exposureType == ExposureType.BLACK_AND_WHITE) {
-            capture.addComponent(new BlackAndWhiteComponent());
-        }
-
-        return capture;
+        return ChromaChannel.fromFilterStack(filterStack.getForReading())
+                .map(Processor::singleChannelBlackAndWhite)
+                .orElse(Processor.blackAndWhite());
     }
 
     public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack cameraStack, ExposureFrameClientData dataFromClient) {
@@ -781,7 +682,7 @@ public class CameraItem extends Item {
         }
 
         // Chromatic channel
-        ChromaChannel.fromStack(getAttachment(cameraStack, AttachmentType.FILTER).getForReading())
+        ChromaChannel.fromFilterStack(getAttachment(cameraStack, AttachmentType.FILTER).getForReading())
                 .ifPresent(channel -> tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
         // Do not forget to add data from client:

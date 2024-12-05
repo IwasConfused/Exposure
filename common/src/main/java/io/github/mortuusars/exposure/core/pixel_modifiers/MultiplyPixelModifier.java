@@ -10,19 +10,19 @@ public class MultiplyPixelModifier implements PixelModifier {
     }
 
     @Override
-    public int modifyPixel(int ABGR) {
+    public int modifyPixel(int ARGB) {
         if (multiplyColor == 0)
-            return ABGR;
+            return ARGB;
 
-        int alpha = FastColor.ABGR32.alpha(ABGR);
-        int blue = FastColor.ABGR32.blue(ABGR);
-        int green = FastColor.ABGR32.green(ABGR);
-        int red = FastColor.ABGR32.red(ABGR);
+        int alpha = FastColor.ABGR32.alpha(ARGB);
+        int blue = FastColor.ABGR32.blue(ARGB);
+        int green = FastColor.ABGR32.green(ARGB);
+        int red = FastColor.ABGR32.red(ARGB);
 
-        int tintAlpha = FastColor.ARGB32.alpha(ABGR);
-        int tintBlue = FastColor.ARGB32.blue(ABGR);
-        int tintGreen = FastColor.ARGB32.green(ABGR);
-        int tintRed = FastColor.ARGB32.red(ABGR);
+        int tintAlpha = FastColor.ARGB32.alpha(ARGB);
+        int tintBlue = FastColor.ARGB32.blue(ARGB);
+        int tintGreen = FastColor.ARGB32.green(ARGB);
+        int tintRed = FastColor.ARGB32.red(ARGB);
 
         alpha = Math.min(255, (alpha * tintAlpha) / 255);
         blue = Math.min(255, (blue * tintBlue) / 255);

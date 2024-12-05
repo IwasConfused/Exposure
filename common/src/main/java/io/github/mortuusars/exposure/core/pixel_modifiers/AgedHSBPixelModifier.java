@@ -34,16 +34,16 @@ public class AgedHSBPixelModifier implements PixelModifier {
     }
 
     @Override
-    public int modifyPixel(int ABGR) {
-        int alpha = FastColor.ABGR32.alpha(ABGR);
-        int blue = FastColor.ABGR32.blue(ABGR);
-        int green = FastColor.ABGR32.green(ABGR);
-        int red = FastColor.ABGR32.red(ABGR);
+    public int modifyPixel(int ARGB) {
+        int alpha = FastColor.ARGB32.alpha(ARGB);
+        int red = FastColor.ARGB32.red(ARGB);
+        int green = FastColor.ARGB32.green(ARGB);
+        int blue = FastColor.ARGB32.blue(ARGB);
 
         // Modify black and white points to make the image appear faded:
-        blue = (int) Mth.map(blue, 0, 255, blackPoint, whitePoint);
-        green = (int) Mth.map(green, 0, 255, blackPoint, whitePoint);
         red = (int) Mth.map(red, 0, 255, blackPoint, whitePoint);
+        green = (int) Mth.map(green, 0, 255, blackPoint, whitePoint);
+        blue = (int) Mth.map(blue, 0, 255, blackPoint, whitePoint);
 
         float[] baseHSB = new float[3];
         Color.RGBtoHSB(red, green, blue, baseHSB);
@@ -60,7 +60,7 @@ public class AgedHSBPixelModifier implements PixelModifier {
         int newGreen = Mth.clamp((int) Mth.lerp(tintOpacity, green, FastColor.ARGB32.green(tintedRGB)), 0, 255);
         int newRed = Mth.clamp((int) Mth.lerp(tintOpacity, red, FastColor.ARGB32.red(tintedRGB)), 0, 255);
 
-        return FastColor.ABGR32.color(alpha, newBlue, newGreen, newRed);
+        return FastColor.ARGB32.color(alpha, newRed, newGreen, newBlue);
     }
 
     @Override

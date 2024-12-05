@@ -20,7 +20,7 @@ public interface CaptureActions {
         return new DisablePostEffectAction();
     }
 
-    static CaptureAction modifyGamma(int brightnessStops) {
+    static CaptureAction modifyGamma(float brightnessStops) {
         return brightnessStops != 0 ? new ModifyGammaAction(brightnessStops) : CaptureAction.EMPTY;
     }
 

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.image.IdentifiableImage;
 import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -48,8 +49,8 @@ public class RenderedImageInstance implements AutoCloseable {
 
         for (int y = 0; y < this.image.getHeight(); y++) {
             for (int x = 0; x < this.image.getWidth(); x++) {
-                int ABGR = this.image.getPixelARGB(x, y);
-                this.texture.getPixels().setPixelRGBA(x, y, ABGR); // Texture is in BGR format
+                int ARGB = this.image.getPixelARGB(x, y);
+                this.texture.getPixels().setPixelRGBA(x, y, Color.RGBtoBGR(ARGB)); // Texture is in BGR format
             }
         }
 

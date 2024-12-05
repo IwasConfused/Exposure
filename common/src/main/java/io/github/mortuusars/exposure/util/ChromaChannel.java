@@ -23,7 +23,7 @@ public enum ChromaChannel implements StringRepresentable {
         return color;
     }
 
-    public static Optional<ChromaChannel> fromStack(ItemStack stack) {
+    public static Optional<ChromaChannel> fromFilterStack(ItemStack stack) {
         if (stack.is(Exposure.Tags.Items.RED_FILTERS))
             return Optional.of(RED);
         else if (stack.is(Exposure.Tags.Items.GREEN_FILTERS))

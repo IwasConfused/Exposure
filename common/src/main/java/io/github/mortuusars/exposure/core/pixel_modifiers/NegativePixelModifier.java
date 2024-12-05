@@ -9,11 +9,11 @@ public class NegativePixelModifier implements PixelModifier {
     }
 
     @Override
-    public int modifyPixel(int ABGR) {
-        int alpha = FastColor.ABGR32.alpha(ABGR);
-        int blue = FastColor.ABGR32.blue(ABGR);
-        int green = FastColor.ABGR32.green(ABGR);
-        int red = FastColor.ABGR32.red(ABGR);
+    public int modifyPixel(int ARGB) {
+        int alpha = FastColor.ABGR32.alpha(ARGB);
+        int blue = FastColor.ABGR32.blue(ARGB);
+        int green = FastColor.ABGR32.green(ARGB);
+        int red = FastColor.ABGR32.red(ARGB);
 
         // Invert
         blue = 255 - blue;

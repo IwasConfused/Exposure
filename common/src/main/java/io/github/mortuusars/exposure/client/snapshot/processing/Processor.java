@@ -12,7 +12,7 @@ import java.util.function.Supplier;
 public interface Processor extends Function<Image, Image> {
     Processor EMPTY = image -> image;
 
-    static Processor brightness(int stops) {
+    static Processor brightness(float stops) {
         return stops != 0 ? new BrightnessProcessor(stops) : EMPTY;
     }
 
