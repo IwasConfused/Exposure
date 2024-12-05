@@ -600,7 +600,11 @@ public class CameraItem extends Item {
                         Processor.Resize.to(frameSize),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(cameraStack, filmStack, filterStack)))
-                .thenAsync(PalettedConverter.DITHERED_MAP_COLORS::convert);
+                .thenAsync(image -> {
+                    PalettedImage palettedImage = PalettedConverter.DITHERED_MAP_COLORS.convert(image);
+                    image.close();
+                    return palettedImage;
+                });
 
 
         if (filterStack.getItem() instanceof InterplanarProjectorItem projector && projector.isAllowed()) {
@@ -621,7 +625,11 @@ public class CameraItem extends Item {
                             Processor.Resize.to(frameSize),
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(cameraStack, filmStack, filterStack)))
-                    .thenAsync((dither ? PalettedConverter.DITHERED_MAP_COLORS : PalettedConverter.NEAREST_MAP_COLORS)::convert));
+                    .thenAsync(image -> {
+                        PalettedImage palettedImage = (dither ? PalettedConverter.DITHERED_MAP_COLORS : PalettedConverter.NEAREST_MAP_COLORS).convert(image);
+                        image.close();
+                        return palettedImage;
+                    }));
         }
 
         SnapShot.enqueue(captureTask
