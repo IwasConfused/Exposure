@@ -7,6 +7,9 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
+import io.github.mortuusars.exposure.client.snapshot.processing.Process;
+import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
+import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.image.ResizedImage;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
@@ -22,7 +25,6 @@ import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.core.image.processing.Crop;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -33,7 +35,7 @@ import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
-import io.github.mortuusars.exposure.util.ChromaticChannel;
+import io.github.mortuusars.exposure.util.ChromaChannel;
 import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import it.unimi.dsi.fastutil.longs.LongSet;
@@ -464,9 +466,13 @@ public class CameraItem extends Item {
             SnapShot.enqueue(Capture.of(
                             new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
                                     .overridenBy(new Capture<>(new FileCaptureTask(filePath), CaptureComponent.EMPTY)
-                                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), true))))
-                    .then(Crop.factor(Exposure.CROP_FACTOR).then(Crop.SQUARE)::crop)
-                    .then(image -> new ResizedImage(image, 320, 320))
+                                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false))))
+                    .thenAsync(Process.with(
+                                Processor.Crop.SQUARE,
+                                Processor.Crop.factor(Exposure.CROP_FACTOR),
+                                Processor.Resize.to(320),
+                                Processor.brightness(brightnessStops),
+                                Processor.blackAndWhite()))
                     .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
                     .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save)
                     .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false)));
@@ -704,7 +710,7 @@ public class CameraItem extends Item {
         }
         if (filmItem.getType() == ExposureType.BLACK_AND_WHITE) {
             StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
-            ChromaticChannel.fromStack(filterStack.getForReading()).ifPresentOrElse(
+            ChromaChannel.fromStack(filterStack.getForReading()).ifPresentOrElse(
                     channel -> capture.addComponent(new SelectiveChannelBlackAndWhiteComponent(channel)),
                     () -> capture.addComponent(new BlackAndWhiteComponent()));
         }
@@ -763,7 +769,7 @@ public class CameraItem extends Item {
         }
 
         // Chromatic channel
-        ChromaticChannel.fromStack(getAttachment(cameraStack, AttachmentType.FILTER).getForReading())
+        ChromaChannel.fromStack(getAttachment(cameraStack, AttachmentType.FILTER).getForReading())
                 .ifPresent(channel -> tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
         // Do not forget to add data from client:

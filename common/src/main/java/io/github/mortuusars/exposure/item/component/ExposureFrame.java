@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.util.ChromaticChannel;
+import io.github.mortuusars.exposure.util.ChromaChannel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -123,8 +123,8 @@ public record ExposureFrame(ExposureIdentifier identifier,
         return getAdditionalDataTagForReading().getBoolean(ExposureFrameTag.CHROMATIC);
     }
 
-    public Optional<ChromaticChannel> getChromaticChannel() {
-        return ChromaticChannel.fromString(getAdditionalDataTagForReading().getString(ExposureFrameTag.CHROMATIC_CHANNEL));
+    public Optional<ChromaChannel> getChromaticChannel() {
+        return ChromaChannel.fromString(getAdditionalDataTagForReading().getString(ExposureFrameTag.CHROMATIC_CHANNEL));
     }
 
     public boolean wasTakenWithChromaticFilter() {

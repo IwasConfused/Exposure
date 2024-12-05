@@ -14,7 +14,7 @@ import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.client.WaitForExposureChangeS2CP;
-import io.github.mortuusars.exposure.util.ChromaticChannel;
+import io.github.mortuusars.exposure.util.ChromaChannel;
 import io.github.mortuusars.exposure.warehouse.PalettedImage;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponents;
@@ -68,18 +68,18 @@ public class ChromaticSheetItem extends Item {
 
         if (!layers.isEmpty()) {
             MutableComponent component = Component.translatable("gui.exposure.channel.red")
-                    .withStyle(Style.EMPTY.withColor(ChromaticChannel.RED.getRepresentationColor()));
+                    .withStyle(Style.EMPTY.withColor(ChromaChannel.RED.getRepresentationColor()));
 
             if (layers.size() >= 2) {
                 component.append(Component.translatable("gui.exposure.channel.separator").withStyle(ChatFormatting.GRAY));
                 component.append(Component.translatable("gui.exposure.channel.green")
-                        .withStyle(Style.EMPTY.withColor(ChromaticChannel.GREEN.getRepresentationColor())));
+                        .withStyle(Style.EMPTY.withColor(ChromaChannel.GREEN.getRepresentationColor())));
             }
 
             if (layers.size() >= 3) {
                 component.append(Component.translatable("gui.exposure.channel.separator").withStyle(ChatFormatting.GRAY));
                 component.append(Component.translatable("gui.exposure.channel.blue")
-                        .withStyle(Style.EMPTY.withColor(ChromaticChannel.BLUE.getRepresentationColor())));
+                        .withStyle(Style.EMPTY.withColor(ChromaChannel.BLUE.getRepresentationColor())));
             }
 
             tooltipComponents.add(component);
