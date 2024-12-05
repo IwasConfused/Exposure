@@ -8,4 +8,8 @@ public interface Image extends AutoCloseable {
     int getHeight();
     int getPixelARGB(int x, int y);
     default void close() {}
+
+    default Image copy() {
+        return PixelImage.copyFrom(this);
+    }
 }

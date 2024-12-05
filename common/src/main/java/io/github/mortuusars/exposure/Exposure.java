@@ -68,7 +68,7 @@ public class Exposure {
     public static final String ID = "exposure";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public static final float CROP_FACTOR = 1.142857f;
+    public static final float CROP_FACTOR = 0.875f;
     public static final int MAX_ENTITIES_IN_FRAME = 12;
 
     public static void init() {

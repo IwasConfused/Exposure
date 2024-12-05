@@ -7,11 +7,10 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
+import io.github.mortuusars.exposure.core.image.ResizedImage;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponent;
-import io.github.mortuusars.exposure.client.snapshot.capturing.component.CaptureComponents;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.CaptureMethod;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.DirectScreenshotCaptureTask;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureTask;
 import io.github.mortuusars.exposure.client.snapshot.converter.Converter;
@@ -23,6 +22,7 @@ import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.core.image.processing.Crop;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -36,7 +36,6 @@ import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.ChromaticChannel;
 import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
-import io.github.mortuusars.exposure.util.task.Result;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -456,7 +455,7 @@ public class CameraItem extends Item {
 
 
         if (player.level().isClientSide) {
-            String filePath = "D:/resized";
+            String filePath = "D:/resizedasd";
 
             String exposureId = createExposureId(player);
 
@@ -465,9 +464,13 @@ public class CameraItem extends Item {
             SnapShot.enqueue(Capture.of(
                             new Capture<>(new DirectScreenshotCaptureTask(), CaptureComponent.EMPTY)
                                     .overridenBy(new Capture<>(new FileCaptureTask(filePath), CaptureComponent.EMPTY)
-                                            .onError(err -> player.displayClientMessage(err.casual(), true))))
+                                            .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), true))))
+                    .then(Crop.factor(Exposure.CROP_FACTOR).then(Crop.SQUARE)::crop)
+                    .then(image -> new ResizedImage(image, 320, 320))
                     .thenAsync(Converter.DITHERED_MAP_COLORS::convert)
-                    .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save));
+                    .acceptAsync(new ImageFileSaver("D:/snapshot_test/" + exposureId + ".png")::save)
+                    .onError(err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false)));
+
 
 //            SnapShot.enqueue(Capture.builder()
 //                    .method(CaptureMethod.screenshot())
