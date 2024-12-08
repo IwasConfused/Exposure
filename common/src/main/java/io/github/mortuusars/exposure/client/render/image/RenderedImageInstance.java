@@ -1,36 +1,60 @@
 package io.github.mortuusars.exposure.client.render.image;
 
+import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.image.IdentifiableImage;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import org.joml.Matrix4f;
 
+import java.util.function.Function;
+
 public class RenderedImageInstance implements AutoCloseable {
-    protected IdentifiableImage image;
-    protected DynamicTexture texture;
+    private static final Function<ResourceLocation, RenderType> TEXT_MIPMAP = Util.memoize(texture -> RenderType.create("exposure_mipmap",
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+            VertexFormat.Mode.QUADS,
+            786432,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(RenderType.RENDERTYPE_TEXT_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(texture, false, true))
+                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                    .setLightmapState(RenderType.LIGHTMAP)
+                    .createCompositeState(false)));
+
     protected final ResourceLocation textureLocation;
+    protected RenderableImage image;
+    protected DynamicTexture texture;
     protected final RenderType renderType;
     protected boolean requiresUpload = true;
 
-    RenderedImageInstance(IdentifiableImage image) {
+    RenderedImageInstance(RenderableImage image) {
         this.image = image;
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
-        // Filter id because ResourceLocation will crash if non-valid chars are present:
-        String id = Exposure.ID + "/" + Util.sanitizeName(image.getId(), ResourceLocation::validPathChar);
-        this.textureLocation = Minecraft.getInstance().getTextureManager().register(id, this.texture);
-        this.renderType = RenderType.text(textureLocation);
+        this.textureLocation = image.getIdentifier().toResourceLocation();
+        Minecraft.getInstance().getTextureManager().register(textureLocation, this.texture);
+
+        int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
+        renderType = mipmapLevel > 0 ? TEXT_MIPMAP.apply(textureLocation) : RenderType.text(textureLocation);
+
+        forceUpload();
     }
 
-    public void replaceData(IdentifiableImage image) {
-        boolean hasChanged = !this.image.getId().equals(image.getId());
+    public void replaceData(RenderableImage image) {
+        boolean hasChanged = !image.getIdentifier().equals(this.image.getIdentifier());
         this.image = image;
         if (hasChanged) {
             this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
@@ -46,11 +70,23 @@ public class RenderedImageInstance implements AutoCloseable {
         if (texture.getPixels() == null)
             return;
 
-        for (int y = 0; y < this.image.getHeight(); y++) {
-            for (int x = 0; x < this.image.getWidth(); x++) {
+        int width = this.image.getWidth();
+        int height = this.image.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 int ARGB = this.image.getPixelARGB(x, y);
-                this.texture.getPixels().setPixelRGBA(x, y, Color.ARGBtoABGR(ARGB)); // Texture is in BGR format
+                this.texture.getPixels().setPixelRGBA(x, y, Color.ARGBtoABGR(ARGB)); // Texture is in ABGR format
             }
+        }
+
+        int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
+        if (mipmapLevel > 0) {
+            texture.setFilter(false,true);
+            TextureUtil.prepareImage(texture.getId(), mipmapLevel, width, height);
+            SpriteContents spriteContents = new SpriteContents(this.textureLocation, new FrameSize(width, height),  texture.getPixels(), ResourceMetadata.EMPTY);
+            spriteContents.increaseMipLevel(mipmapLevel);
+            spriteContents.uploadFirstFrame(0,0);
         }
 
         this.texture.upload();

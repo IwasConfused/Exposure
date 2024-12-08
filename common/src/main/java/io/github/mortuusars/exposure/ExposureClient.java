@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.image.*;
-import io.github.mortuusars.exposure.client.render.image.NewImageRenderer;
+import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
@@ -24,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public class ExposureClient {
-    private static final NewImageRenderer imageRenderer = new NewImageRenderer();
+    private static final ImageRenderer imageRenderer = new ImageRenderer();
     private static final PhotographRenderer photographRenderer = new PhotographRenderer();
 
     private static final ClientsideExposureCache exposureCache = new ClientsideExposureCache();
@@ -44,7 +44,7 @@ public class ExposureClient {
         return isIrisOrOculusInstalled;
     }
 
-    public static NewImageRenderer imageRenderer() {
+    public static ImageRenderer imageRenderer() {
         return imageRenderer;
     }
 
