@@ -5,7 +5,7 @@ import net.minecraft.util.Mth;
 public class Color {
     public static final Color WHITE = new Color(255, 255, 255, 255);
 
-    protected final int r, g, b, a;
+    protected final int a, r, g, b;
     protected final int value;
 
     public Color(int r, int g, int b) {
@@ -99,13 +99,13 @@ public class Color {
     }
 
     public int squaredDifferenceTo(Color color) {
-        int rDiff = color.r - r;
-        int gDiff = color.g - g;
-        int bDiff = color.b - b;
+        int rDiff = Math.abs(r - color.r);
+        int gDiff = Math.abs(g - color.g);
+        int bDiff = Math.abs(b - color.b);
         return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff;
     }
 
-    public Color scalarMultiply(double scalar) {
+    public Color multiply(double scalar) {
         return new Color((int) (this.r * scalar), (int) (this.g * scalar), (int) (this.b * scalar));
     }
 
@@ -208,7 +208,7 @@ public class Color {
         return hsbvals;
     }
 
-    public static int BGRtoRGB(int ABGR) {
+    public static int ABGRtoARGB(int ABGR) {
         int a = (ABGR >> 24) & 0xFF;
         int b = (ABGR >> 16) & 0xFF;
         int g = (ABGR >> 8) & 0xFF;
@@ -220,8 +220,8 @@ public class Color {
     /**
      * It's equivalent to BGRtoRGB, but it's there to make code more readable.
      */
-    public static int RGBtoBGR(int ARGB) {
-        return BGRtoRGB(ARGB);
+    public static int ARGBtoABGR(int ARGB) {
+        return ABGRtoARGB(ARGB);
     }
 
     public static int RGBFromHex(String hexColor) {

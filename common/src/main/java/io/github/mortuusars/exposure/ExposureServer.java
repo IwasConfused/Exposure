@@ -1,9 +1,10 @@
 package io.github.mortuusars.exposure;
 
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
-import io.github.mortuusars.exposure.warehouse.server.ServersideExposureSender;
 import io.github.mortuusars.exposure.warehouse.server.ServersideExposureStorage;
+import io.github.mortuusars.exposure.warehouse.server.ServersideExposureSender;
 import io.github.mortuusars.exposure.warehouse.server.ServersideExposureReceiver;
 import net.minecraft.server.MinecraftServer;
 
@@ -28,11 +29,12 @@ public class ExposureServer {
         return exposureReceiver;
     }
 
-    public static ExposureData getExposure(String exposureId) {
-        return exposureStorage().get(exposureId);
+    public static ExposureData getExposure(ExposureIdentifier identifier) {
+        //TODO: return missing image if not found
+        return exposureStorage().get(identifier);
     }
 
-    public static void awaitExposure(String exposureId, ExposureType type, String creator) {
-        exposureReceiver().waitForExposure(exposureId, type, creator);
+    public static void awaitExposure(ExposureIdentifier identifier, ExposureType type, String creator) {
+        exposureReceiver().waitForExposure(identifier, type, creator);
     }
 }

@@ -4,11 +4,10 @@ package io.github.mortuusars.exposure.client.snapshot.capturing.method;
 import com.google.common.io.Files;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
-import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.util.task.Task;
 import net.minecraft.util.StringUtil;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 

@@ -67,61 +67,64 @@ public class ExportCommand {
                                         ExposureLookArgument.getLook(context, "look")))));
     }
 
-    private static int exportAll(CommandSourceStack source, ExposureSize size, ExposureLook look) {
-        List<String> ids = ExposureServer.exposureStorage().getAllExposureIds();
-        return exportExposures(source, ids, size, look);
-    }
-
-    private static int exportExposures(CommandSourceStack stack, List<String> exposureIds, ExposureSize size, ExposureLook look) {
-        int savedCount = 0;
-
-        File folder = stack.getServer().getWorldPath(LevelResource.ROOT).resolve("exposures").toFile();
-        boolean ignored = folder.mkdirs();
-
-        for (String exposureId : exposureIds) {
-            ExposureData exposureData = ExposureServer.getExposure(exposureId);
-            if (exposureData == ExposureData.EMPTY) {
-                stack.sendFailure(Component.translatable("command.exposure.export.failure.not_found", exposureId));
-                continue;
-            }
-
-            String name = exposureId + look.getIdSuffix();
-
-            boolean saved = new ServersideExposureExporter(name)
-                    .withFolder(folder.getAbsolutePath().replace("\\.\\", "\\").replace("/./", "/"))
-                    .withModifier(look.getModifier())
-                    .withSize(size)
-                    .export(exposureData);
-
-            if (saved)
-                stack.sendSuccess(() ->
-                        Component.translatable("command.exposure.export.success.saved_exposure_id", exposureId), true);
-
-            savedCount++;
-        }
-
-        if (savedCount > 0) {
-            String folderPath = getFolderPath(folder);
-            Component folderComponent = Component.literal(folderPath)
-                    .withStyle(ChatFormatting.UNDERLINE)
-                    .withStyle(arg -> arg.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, folderPath)));
-            Component component = Component.translatable("command.exposure.export.success.result", savedCount, folderComponent);
-            stack.sendSuccess(() -> component, true);
-        } else
-            stack.sendFailure(Component.translatable("command.exposure.export.failure.none_saved"));
-
+    private static int exportAll(CommandSourceStack stack, ExposureSize size, ExposureLook look) {
+//        List<String> ids = ExposureServer.exposureStorage().getAllExposureIds();
+//        return exportExposures(stack, ids, size, look);
+        stack.sendFailure(Component.literal("Not implemented yet."));
         return 0;
     }
 
-    @NotNull
-    private static String getFolderPath(File folder) {
-        String folderPath;
-        try {
-            folderPath = folder.getCanonicalPath();
-        } catch (IOException e) {
-            Exposure.LOGGER.error(e.toString());
-            folderPath = folder.getAbsolutePath();
-        }
-        return folderPath;
+    private static int exportExposures(CommandSourceStack stack, List<String> exposureIds, ExposureSize size, ExposureLook look) {
+//        int savedCount = 0;
+//
+//        File folder = stack.getServer().getWorldPath(LevelResource.ROOT).resolve("exposures").toFile();
+//        boolean ignored = folder.mkdirs();
+//
+//        for (String exposureId : exposureIds) {
+//            ExposureData exposureData = ExposureServer.getExposure(exposureId);
+//            if (exposureData == ExposureData.EMPTY) {
+//                stack.sendFailure(Component.translatable("command.exposure.export.failure.not_found", exposureId));
+//                continue;
+//            }
+//
+//            String name = exposureId + look.getIdSuffix();
+//
+//            boolean saved = new ServersideExposureExporter(name)
+//                    .withFolder(folder.getAbsolutePath().replace("\\.\\", "\\").replace("/./", "/"))
+//                    .withModifier(look.getModifier())
+//                    .withSize(size)
+//                    .export(exposureData);
+//
+//            if (saved)
+//                stack.sendSuccess(() ->
+//                        Component.translatable("command.exposure.export.success.saved_exposure_id", exposureId), true);
+//
+//            savedCount++;
+//        }
+//
+//        if (savedCount > 0) {
+//            String folderPath = getFolderPath(folder);
+//            Component folderComponent = Component.literal(folderPath)
+//                    .withStyle(ChatFormatting.UNDERLINE)
+//                    .withStyle(arg -> arg.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, folderPath)));
+//            Component component = Component.translatable("command.exposure.export.success.result", savedCount, folderComponent);
+//            stack.sendSuccess(() -> component, true);
+//        } else
+//            stack.sendFailure(Component.translatable("command.exposure.export.failure.none_saved"));
+//
+        stack.sendFailure(Component.literal("Not implemented yet."));
+        return 0;
     }
+
+//    @NotNull
+//    private static String getFolderPath(File folder) {
+//        String folderPath;
+//        try {
+//            folderPath = folder.getCanonicalPath();
+//        } catch (IOException e) {
+//            Exposure.LOGGER.error(e.toString());
+//            folderPath = folder.getAbsolutePath();
+//        }
+//        return folderPath;
+//    }
 }

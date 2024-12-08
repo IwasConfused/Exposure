@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.mixin;
 
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
@@ -20,7 +19,6 @@ public abstract class GameRendererMixin {
         // Processing viewfinder shader should be done before capturing with SnapShot
         // because Direct capture method will not be affected by it otherwise.
         ViewfinderShader.process();
-        ExposureClient.captureManager().tick();
         SnapShot.tick();
     }
 

@@ -4,7 +4,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.image.IdentifiableImage;
-import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -25,13 +24,13 @@ public class RenderedImageInstance implements AutoCloseable {
         this.image = image;
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
         // Filter id because ResourceLocation will crash if non-valid chars are present:
-        String id = Exposure.ID + "/" + Util.sanitizeName(image.id(), ResourceLocation::validPathChar);
+        String id = Exposure.ID + "/" + Util.sanitizeName(image.getId(), ResourceLocation::validPathChar);
         this.textureLocation = Minecraft.getInstance().getTextureManager().register(id, this.texture);
         this.renderType = RenderType.text(textureLocation);
     }
 
     public void replaceData(IdentifiableImage image) {
-        boolean hasChanged = !this.image.id().equals(image.id());
+        boolean hasChanged = !this.image.getId().equals(image.getId());
         this.image = image;
         if (hasChanged) {
             this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
@@ -50,7 +49,7 @@ public class RenderedImageInstance implements AutoCloseable {
         for (int y = 0; y < this.image.getHeight(); y++) {
             for (int x = 0; x < this.image.getWidth(); x++) {
                 int ARGB = this.image.getPixelARGB(x, y);
-                this.texture.getPixels().setPixelRGBA(x, y, Color.RGBtoBGR(ARGB)); // Texture is in BGR format
+                this.texture.getPixels().setPixelRGBA(x, y, Color.ARGBtoABGR(ARGB)); // Texture is in BGR format
             }
         }
 

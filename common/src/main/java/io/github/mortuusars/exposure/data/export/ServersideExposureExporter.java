@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.data.export;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import net.minecraft.world.level.material.MapColor;
@@ -68,7 +68,7 @@ public class ServersideExposureExporter extends ExposureExporter<ServersideExpos
             for (int y = 0; y < height; y++) {
                 int ABGR = MapColor.getColorFromPackedId(exposureData.getPixel(x, y)); // Mojang returns BGR color
                 ABGR = modifier.modifyPixel(ABGR);
-                image.setRGB(x, y, Color.BGRtoRGB(ABGR));
+                image.setRGB(x, y, Color.ABGRtoARGB(ABGR));
             }
         }
 

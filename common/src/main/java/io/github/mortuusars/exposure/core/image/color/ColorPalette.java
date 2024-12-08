@@ -2,7 +2,12 @@ package io.github.mortuusars.exposure.core.image.color;
 
 
 import com.google.common.base.Preconditions;
+import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.CameraAccessor;
+import io.github.mortuusars.exposure.core.CameraAccessors;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,8 +18,15 @@ import java.util.Map;
 public class ColorPalette {
     private static final Map<ResourceLocation, ColorPalette> PALETTES = new HashMap<>();
 
+    public static final Codec<ColorPalette> CODEC = ResourceLocation.CODEC.xmap(ColorPalette::byId, ColorPalette::idOf);
+
+    public static final StreamCodec<ByteBuf, ColorPalette> STREAM_CODEC = StreamCodec.composite(
+            ResourceLocation.STREAM_CODEC, ColorPalette::idOf,
+            ColorPalette::byId
+    );
+
     public static ColorPalette register(ResourceLocation id, ColorPalette palette) {
-        Preconditions.checkState(!PALETTES.containsKey(id), "Palette with id '%S' is already registered.", id);
+        Preconditions.checkState(!PALETTES.containsKey(id), "Palette with id '%s' is already registered.", id);
         PALETTES.put(id, palette);
         return palette;
     }
@@ -96,7 +108,9 @@ public class ColorPalette {
             0x677B98, 0x7E96BA, 0x93AFD8, 0x4D5C72,
             0x697559, 0x81906D, 0x96A77F, 0x4F5843,
             0x000000, 0x000000, 0x000000, 0x000000,
-            0x000000, 0x000000, 0x000000, 0x000000
+            0x000000, 0x000000, 0x000000,
+//            0x000000
+            0x0C150B
     }));
 
     private final Color[] colors;
@@ -120,10 +134,13 @@ public class ColorPalette {
 
     public int closestColorIndexTo(Color color) {
         int closest = 0;
+        int closestDistance = Integer.MAX_VALUE;
 
         for (int i = 0; i < colors.length; i++) {
-            if (colors[i].squaredDifferenceTo(color) < colors[closest].squaredDifferenceTo(color)) {
+            int distance = colors[i].squaredDifferenceTo(color);
+            if (distance < closestDistance) {
                 closest = i;
+                closestDistance = distance;
             }
         }
 

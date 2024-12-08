@@ -8,9 +8,10 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
+import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class PhotographScreen extends Screen {
     protected final ZoomAnimationController zoom = new ZoomAnimationController();
@@ -65,7 +67,7 @@ public class PhotographScreen extends Screen {
     protected void queryAllPhotographs(List<ItemAndStack<PhotographItem>> photographs) {
         for (ItemAndStack<PhotographItem> photograph : photographs) {
             ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
-            frame.identifier().ifId(ExposureClient::getOrQuery);
+            frame.identifier().ifId(id -> ExposureClient.getOrQuery(frame.identifier()));
         }
     }
 
@@ -247,28 +249,34 @@ public class PhotographScreen extends Screen {
             return;
         }
 
-        frame.identifier().ifId(id -> {
-            if (StringUtil.isBlank(id)) {
-                return;
-            }
+        if (frame.identifier().isId()) {
+            PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
+            PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
 
-            PhotographFeatures photographFeatures = PhotographFeatures.get(photograph.getItem().getType(photograph.getItemStack()));
-
-            String filename = photographFeatures != PhotographFeatures.REGULAR ? id + "_" + photographFeatures.getName() : id;
+            String filename = getFilename(frame, photographType);
 
             if (savedExposures.contains(filename))
                 return;
 
-            ExposureClient.exposureCache().getOrQuery(id).ifPresent(exposure -> {
+            ExposureData exposureData = ExposureClient.getOrQuery(frame.identifier());
+            if (!exposureData.equals(ExposureData.EMPTY)) {
                 savedExposures.add(filename);
 
-                new Thread(() -> new ClientsideExposureExporter(filename)
+                CompletableFuture.runAsync(() -> new ClientsideExposureExporter(filename)
                         .withDefaultFolder()
                         .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), ClientsideWorldNameGetter::getWorldName)
-                        .withModifier(photographFeatures.getPixelModifier())
+                        .withModifier(photographFeatures.pixelModifier())
                         .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
-                        .export(exposure), "ExposureSaving").start();
-            });
-        });
+                        .export(exposureData));
+            }
+        }
+    }
+
+    private @NotNull String getFilename(ExposureFrame frame, PhotographType photographType) {
+        String filename = frame.identifier().id().orElse("");
+        String suffix = photographType.getFileSuffix();
+        if (!StringUtil.isNullOrEmpty(suffix))
+            filename += "_" + suffix;
+        return filename;
     }
 }

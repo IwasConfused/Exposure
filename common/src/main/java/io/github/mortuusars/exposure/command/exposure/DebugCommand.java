@@ -16,13 +16,14 @@ import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DebugCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> get() {
@@ -48,6 +49,8 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
+        //TODO: per player capture history, to not mix up exposures on server.
+
         List<ExposureFrame> frames = CapturedFramesHistory.get();
 
         if (frames.size() < 3) {
@@ -63,14 +66,21 @@ public class DebugCommand {
             item.addLayer(itemStack, frames.get(1)); // Green
             item.addLayer(itemStack, frames.get(0)); // Blue
 
-            ItemStack photographStack = item.finalize(player.serverLevel(), player, itemStack, player.getScoreboardName());
+            ItemStack photographStack = item.combineIntoPhotograph(player, itemStack);
+            @Nullable ExposureFrame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
+            Preconditions.checkState(frame != null, "Frame data cannot be empty after combining.");
 
-            @Nullable ExposureFrame frameData = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
-            Preconditions.checkState(frameData != null, "Frame Data cannot be empty after finalizing.");
+            Packets.sendToClient(new OnFrameAddedS2CP(frame), player); // Adds frame to client CapturedFramesHistory
 
-            Packets.sendToClient(new OnFrameAddedS2CP(frameData), player); // Adds frame to client CapturedFramesHistory
+            Supplier<Component> msg = () -> Component.literal("Created chromatic exposure: ")
+                    .append(Component.literal(frame.identifier().toString())
+                            .withStyle(Style.EMPTY
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                            "/exposure show id " + frame.identifier().toString()))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
+                                    .withUnderlined(true)));
 
-            stack.sendSuccess(() -> Component.literal("Created chromatic exposure: " + frameData.identifier().toString()), true);
+            stack.sendSuccess(msg, true);
         } catch (Exception e) {
             stack.sendFailure(Component.literal("Failed to create chromatic exposure: " + e));
             return 1;

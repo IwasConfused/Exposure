@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record ExposureChangedS2CP(String exposureId) implements IPacket {
+public record ExposureChangedS2CP(ExposureIdentifier identifier) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("exposure_changed");
     public static final CustomPacketPayload.Type<ExposureChangedS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, ExposureChangedS2CP> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, ExposureChangedS2CP::exposureId,
+            ExposureIdentifier.STREAM_CODEC, ExposureChangedS2CP::identifier,
             ExposureChangedS2CP::new
     );
 

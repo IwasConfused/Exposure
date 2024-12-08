@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.CameraAccessor;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -13,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record StartExposureS2CP(String exposureId,
+public record StartExposureS2CP(ExposureIdentifier identifier,
                                 CameraAccessor cameraAccessor,
                                 boolean flashHasFired,
                                 int lightLevelBeforeShot) implements IPacket {
@@ -21,7 +22,7 @@ public record StartExposureS2CP(String exposureId,
     public static final CustomPacketPayload.Type<StartExposureS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, StartExposureS2CP> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, StartExposureS2CP::exposureId,
+            ExposureIdentifier.STREAM_CODEC, StartExposureS2CP::identifier,
             CameraAccessor.STREAM_CODEC, StartExposureS2CP::cameraAccessor,
             ByteBufCodecs.BOOL, StartExposureS2CP::flashHasFired,
             ByteBufCodecs.VAR_INT, StartExposureS2CP::lightLevelBeforeShot,

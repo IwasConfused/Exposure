@@ -1,7 +1,5 @@
 package io.github.mortuusars.exposure.client.image;
 
-import io.github.mortuusars.exposure.core.image.Image;
-
 import java.awt.image.BufferedImage;
 
 public class WrappedBufferedImage implements Image {

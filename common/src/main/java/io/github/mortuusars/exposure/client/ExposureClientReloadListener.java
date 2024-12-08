@@ -21,7 +21,7 @@ public class ExposureClientReloadListener extends SimplePreparableReloadListener
             ExposureClient.exposureReceiver().clear();
         }
         if (ExposureClient.imageRenderer() != null) {
-            ExposureClient.imageRenderer().clearData();
+            ExposureClient.imageRenderer().clearCache();
         }
     }
 }

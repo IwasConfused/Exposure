@@ -3,13 +3,10 @@ package io.github.mortuusars.exposure.client.render.photograph;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.render.image.ModifiedImage;
+import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.client.render.texture.TextureRenderer;
 import io.github.mortuusars.exposure.core.PhotographType;
-import io.github.mortuusars.exposure.core.image.IdentifiableImage;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
@@ -42,20 +39,17 @@ public class PhotographRenderer {
 
         ExposureFrame frame = photographItem.getFrame(photographStack);
 
-        IdentifiableImage image = ExposureClient.createExposureImage(frame);
-        if (photographFeatures.getPixelModifier() != PixelModifier.EMPTY) {
-            image = new ModifiedImage(image, photographFeatures.getPixelModifier());
-        }
+        RenderableImage image = photographFeatures.process(ExposureClient.createExposureImage(frame));
 
         int paperRotation = frame.identifier().hashCode() % 4 * 90;
 
-        if (renderPaper && photographFeatures.getPaperTexture() != ExposureClient.Textures.EMPTY) {
+        if (renderPaper && photographFeatures.paperTexture() != ExposureClient.Textures.EMPTY) {
             poseStack.pushPose();
             poseStack.translate(0.5f, 0.5f, 0);
             poseStack.mulPose(Axis.ZP.rotationDegrees(paperRotation));
             poseStack.translate(-0.5f, -0.5f, 0);
 
-            TextureRenderer.render(poseStack, bufferSource, photographFeatures.getPaperTexture(), packedLight, r, g, b, a);
+            TextureRenderer.render(poseStack, bufferSource, photographFeatures.paperTexture(), packedLight, r, g, b, a);
 
             poseStack.popPose();
 
@@ -68,7 +62,7 @@ public class PhotographRenderer {
                 poseStack.mulPose(Axis.ZP.rotationDegrees(paperRotation));
                 poseStack.translate(-0.5f, -0.5f, 0);
 
-                TextureRenderer.render(poseStack, bufferSource, photographFeatures.getPaperTexture(),
+                TextureRenderer.render(poseStack, bufferSource, photographFeatures.paperTexture(),
                         packedLight, (int) (r * 0.85f), (int) (g * 0.85f), (int) (b * 0.85f), a);
 
                 poseStack.popPose();
@@ -86,7 +80,7 @@ public class PhotographRenderer {
             ExposureClient.imageRenderer().render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
         }
 
-        if (renderPaper && photographFeatures.getOverlayTexture() != ExposureClient.Textures.EMPTY) {
+        if (renderPaper && photographFeatures.hasOverlayTexture()) {
             poseStack.pushPose();
 
             poseStack.translate(0.5f, 0.5f, 0);
@@ -94,7 +88,7 @@ public class PhotographRenderer {
             poseStack.translate(-0.5f, -0.5f, 0);
 
             poseStack.translate(0, 0, 0.002);
-            TextureRenderer.render(poseStack, bufferSource, photographFeatures.getOverlayTexture(), packedLight, r, g, b, a);
+            TextureRenderer.render(poseStack, bufferSource, photographFeatures.overlayTexture(), packedLight, r, g, b, a);
             poseStack.popPose();
         }
     }
@@ -146,7 +140,7 @@ public class PhotographRenderer {
 
             float brightnessMul = 1f - (getStackedBrightnessStep() * i);
 
-            TextureRenderer.render(poseStack, bufferSource, photographFeatures.getPaperTexture(),
+            TextureRenderer.render(poseStack, bufferSource, photographFeatures.paperTexture(),
                     packedLight, (int)(r * brightnessMul), (int)(g * brightnessMul), (int)(b * brightnessMul), a);
 
             poseStack.popPose();

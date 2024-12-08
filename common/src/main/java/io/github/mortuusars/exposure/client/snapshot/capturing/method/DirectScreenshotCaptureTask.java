@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.util.task.Task;
-import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.client.image.Image;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Screenshot;
 import org.jetbrains.annotations.NotNull;

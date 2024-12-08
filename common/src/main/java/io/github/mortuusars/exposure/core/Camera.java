@@ -20,6 +20,7 @@ public class Camera extends ItemAndStack<CameraItem> {
         return getItem().isActive(getItemStack());
     }
 
+    //TODO: move to CameraInHand class
     public Optional<InteractionHand> getHand() {
         return hand;
     }

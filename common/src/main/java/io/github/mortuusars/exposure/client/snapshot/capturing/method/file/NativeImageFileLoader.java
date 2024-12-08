@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.client.snapshot.capturing.method.FileCaptureTask;
 import io.github.mortuusars.exposure.util.task.Result;
-import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.client.image.Image;
 
 import java.io.File;
 import java.io.FileInputStream;

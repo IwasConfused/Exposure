@@ -9,14 +9,11 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
-import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
-import io.github.mortuusars.exposure.client.render.image.ModifiedImage;
+import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.image.IdentifiableImage;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
+import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
@@ -322,14 +319,12 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         return selectedFrame + 1 >= 0 && selectedFrame + 1 < frames.size() && isHovering(116, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
-    public static final ImageRenderer imageRenderer = new ImageRenderer();
-
     public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
                             float x, float y, float size, float alpha, ExposureType exposureType) {
-        IdentifiableImage image = new ModifiedImage(ExposureClient.createExposureImage(frame), PixelModifier.NEGATIVE_FILM);
+        RenderableImage image = ExposureClient.createExposureImage(frame).processWith(PixelModifier.NEGATIVE_FILM);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        imageRenderer.render(poseStack, bufferSource, image, new RenderCoordinates(x, y, size, size),
+        ExposureClient.imageRenderer().render(poseStack, bufferSource, image, new RenderCoordinates(x, y, size, size),
                 exposureType.getImageColor().withAlpha((int) (alpha * 255)));
         bufferSource.endBatch();
     }

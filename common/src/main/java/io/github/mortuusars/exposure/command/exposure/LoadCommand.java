@@ -5,6 +5,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.LoadExposureFromFileCommandS2CP;
@@ -32,10 +33,13 @@ public class LoadCommand {
                                                 IntegerArgumentType.getInteger(context, "size"), false)))));
     }
 
+    //TODO: use default id if not specified
+
     private static int loadExposureFromFile(CommandSourceStack stack, String exposureId, String path, int size, boolean dither) throws CommandSyntaxException {
         ServerPlayer player = stack.getPlayerOrException();
-        ExposureServer.awaitExposure(exposureId, ExposureType.COLOR, player.getScoreboardName());
-        Packets.sendToClient(new LoadExposureFromFileCommandS2CP(exposureId, path, size, dither), player);
+        ExposureIdentifier identifier = ExposureIdentifier.id(exposureId);
+        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
+        Packets.sendToClient(new LoadExposureFromFileCommandS2CP(identifier, path, size, dither), player);
         return 0;
     }
 }

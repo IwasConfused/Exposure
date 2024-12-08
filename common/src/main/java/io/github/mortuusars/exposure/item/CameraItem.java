@@ -5,26 +5,21 @@ import com.google.common.collect.ImmutableList;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.camera.capture.*;
-import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
-import io.github.mortuusars.exposure.client.snapshot.processing.BlackAndWhiteProcessor;
+import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.*;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
-import io.github.mortuusars.exposure.client.snapshot.converter.PalettedConverter;
-import io.github.mortuusars.exposure.client.snapshot.processing.SingleChannelBlackAndWhiteProcessor;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
-import io.github.mortuusars.exposure.camera.capture.component.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -40,7 +35,7 @@ import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.task.Task;
-import io.github.mortuusars.exposure.warehouse.PalettedImage;
+import io.github.mortuusars.exposure.warehouse.PalettizedImage;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -495,24 +490,25 @@ public class CameraItem extends Item {
                     1f, 1f, shutterSpeed.getDurationTicks());
         }
 
-        String exposureId = createExposureId(player);
+        ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(player);
 
         CustomData.update(DataComponents.CUSTOM_DATA, cameraStack, tag -> {
-            tag.putString(ID_OF_LAST_SHOT, exposureId);
+            tag.putString(ID_OF_LAST_SHOT, exposureIdentifier.getId());
             tag.putBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT, flashHasFired);
             tag.putInt(LIGHT_LEVEL_ON_LAST_SHOT, lightLevel);
         });
 
-        ExposureServer.awaitExposure(exposureId, filmItem.getType(), player.getScoreboardName());
+        ExposureServer.awaitExposure(exposureIdentifier, filmItem.getType(), player.getScoreboardName());
 
         CameraAccessor cameraAccessor = CameraAccessors.ofHand(hand);
-        Packets.sendToClient(new StartExposureS2CP(exposureId, cameraAccessor, flashHasFired, lightLevel), serverPlayer);
+        Packets.sendToClient(new StartExposureS2CP(exposureIdentifier, cameraAccessor, flashHasFired, lightLevel), serverPlayer);
 
         return InteractionResult.CONSUME; // Consume to not play swing animation
     }
 
     private @NotNull Consumer<TranslatableError> printCasualErrorInChat(Player player) {
-        return err -> player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false);
+        return err -> Minecraft.getInstance().execute(() ->
+                player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false));
     }
 
     public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack cameraStack) {
@@ -536,7 +532,7 @@ public class CameraItem extends Item {
         return new ExposureFrameClientData(projectingFile, entitiesInFrame, extraData);
     }
 
-    public void exposeFrameClientside(Player player, Camera camera, String exposureId, boolean flashHasFired) {
+    public void exposeFrameClientside(Player player, Camera camera, ExposureIdentifier identifier, boolean flashHasFired) {
 //        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
 
 //        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevelBeforeShot, flashHasFired))
@@ -574,10 +570,10 @@ public class CameraItem extends Item {
 
 //        ExposureClient.captureManager().enqueue();
 
-        startCapture(player, camera.getItemStack(), exposureId, flashHasFired);
+        startCapture(player, camera.getItemStack(), identifier, flashHasFired);
     }
 
-    protected void startCapture(Player player, ItemStack cameraStack, String exposureId, boolean flashHasFired) {
+    protected void startCapture(Player player, ItemStack cameraStack, ExposureIdentifier identifier, boolean flashHasFired) {
         StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
             throw new IllegalStateException("Film attachment should be present at the time of capture.");
@@ -587,7 +583,7 @@ public class CameraItem extends Item {
         int frameSize = filmItem.getFrameSize(filmStack.getForReading());
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
 
-        Task<PalettedImage> captureTask = Capture.of(Capture.screenshot(),
+        Task<PalettizedImage> captureTask = Capture.of(Capture.screenshot(),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
                         CaptureActions.disablePostEffect(),
@@ -601,9 +597,9 @@ public class CameraItem extends Item {
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(cameraStack, filmStack, filterStack)))
                 .thenAsync(image -> {
-                    PalettedImage palettedImage = PalettedConverter.DITHERED_MAP_COLORS.convert(image);
+                    PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
                     image.close();
-                    return palettedImage;
+                    return palettizedImage;
                 });
 
 
@@ -613,7 +609,7 @@ public class CameraItem extends Item {
 
             captureTask = captureTask.overridenBy(Capture.of(Capture.file(filePath))
                     .handleErrorAndGetResult(error -> {
-                        Minecraft.getInstance().execute(() -> onProjectingFail(player));
+                        Minecraft.getInstance().execute(() -> onProjectingFailed(player));
                         printCasualErrorInChat(player).accept(error);
                     })
                     .then(image -> {
@@ -626,14 +622,16 @@ public class CameraItem extends Item {
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(cameraStack, filmStack, filterStack)))
                     .thenAsync(image -> {
-                        PalettedImage palettedImage = (dither ? PalettedConverter.DITHERED_MAP_COLORS : PalettedConverter.NEAREST_MAP_COLORS).convert(image);
+                        PalettizedImage palettizedImage = (dither
+                                ? ImagePalettizer.DITHERED_MAP_COLORS
+                                : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
                         image.close();
-                        return palettedImage;
+                        return palettizedImage;
                     }));
         }
 
         SnapShot.enqueue(captureTask
-                .acceptAsync(new ImageUploader(exposureId)::upload)
+                .acceptAsync(new ImageUploader(identifier)::upload)
                 .onError(printCasualErrorInChat(player)));
     }
 
@@ -645,7 +643,7 @@ public class CameraItem extends Item {
         }
     }
 
-    protected void onProjectingFail(Player player) {
+    protected void onProjectingFailed(Player player) {
         player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
                 SoundSource.PLAYERS, 0.8f, 0.6f);
         for (int i = 0; i < 32; ++i) {
@@ -776,7 +774,7 @@ public class CameraItem extends Item {
         //TODO: modifyEntityInFrameData event
 
 
-        return new ExposureFrame(new ExposureIdentifier(id), type, new Photographer(player), entitiesInFrame, CustomData.of(tag));
+        return new ExposureFrame(ExposureIdentifier.id(id), type, new Photographer(player), entitiesInFrame, CustomData.of(tag));
     }
 
     /**

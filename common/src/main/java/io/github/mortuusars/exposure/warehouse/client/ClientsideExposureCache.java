@@ -1,5 +1,7 @@
 package io.github.mortuusars.exposure.warehouse.client;
 
+import com.google.common.base.Preconditions;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.QueryExposureDataC2SP;
@@ -8,28 +10,30 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class ClientsideExposureCache {
-    protected final Map<String, ExposureData> cache = new HashMap<>();
-    protected final Set<String> queriedExposureIds = new HashSet<>();
-    protected final Set<String> waitingExposureIds = new HashSet<>();
+    protected final Map<ExposureIdentifier, ExposureData> cache = new HashMap<>();
+    protected final Set<ExposureIdentifier> queriedExposureIds = new HashSet<>();
+    protected final Set<ExposureIdentifier> waitingExposureIds = new HashSet<>();
 
-    public Optional<ExposureData> getOrQuery(String exposureId) {
-        ExposureData exposureData = cache.get(exposureId);
+    public Optional<ExposureData> getOrQuery(ExposureIdentifier identifier) {
+        ExposureData exposureData = cache.get(identifier);
 
-        if (exposureData == null && !waitingExposureIds.contains(exposureId) && !queriedExposureIds.contains(exposureId)) {
-            Packets.sendToServer(new QueryExposureDataC2SP(exposureId));
-            queriedExposureIds.add(exposureId);
+        if (exposureData == null && !waitingExposureIds.contains(identifier) && !queriedExposureIds.contains(identifier)) {
+            Packets.sendToServer(new QueryExposureDataC2SP(identifier));
+            queriedExposureIds.add(identifier);
         }
 
         return Optional.ofNullable(exposureData);
     }
 
-    public ExposureData getOrQueryAndEmpty(String exposureId) {
-        ExposureData exposureData = cache.get(exposureId);
+    public ExposureData getOrQueryAndEmpty(ExposureIdentifier identifier) {
+        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get or query an exposure data. Only ID is supported.");
+
+        ExposureData exposureData = cache.get(identifier);
 
         if (exposureData == null) {
-            if (!waitingExposureIds.contains(exposureId) && !queriedExposureIds.contains(exposureId)) {
-                Packets.sendToServer(new QueryExposureDataC2SP(exposureId));
-                queriedExposureIds.add(exposureId);
+            if (!waitingExposureIds.contains(identifier) && !queriedExposureIds.contains(identifier)) {
+                Packets.sendToServer(new QueryExposureDataC2SP(identifier));
+                queriedExposureIds.add(identifier);
             }
             return ExposureData.EMPTY;
         }
@@ -37,24 +41,24 @@ public class ClientsideExposureCache {
         return exposureData;
     }
 
-    public void put(String exposureId, @NotNull ExposureData data) {
-        cache.put(exposureId, data);
-        queriedExposureIds.remove(exposureId);
-        waitingExposureIds.remove(exposureId);
+    public void put(ExposureIdentifier identifier, @NotNull ExposureData data) {
+        cache.put(identifier, data);
+        queriedExposureIds.remove(identifier);
+        waitingExposureIds.remove(identifier);
     }
 
-    public void putOnWaitingList(String exposureId) {
-        waitingExposureIds.add(exposureId);
+    public void putOnWaitingList(ExposureIdentifier identifier) {
+        waitingExposureIds.add(identifier);
     }
 
-    public List<String> getAllIds() {
+    public List<ExposureIdentifier> getAllIds() {
         return cache.keySet().stream().toList();
     }
 
-    public void remove(String exposureId) {
-        cache.remove(exposureId);
-        queriedExposureIds.remove(exposureId);
-        waitingExposureIds.remove(exposureId);
+    public void remove(ExposureIdentifier identifier) {
+        cache.remove(identifier);
+        queriedExposureIds.remove(identifier);
+        waitingExposureIds.remove(identifier);
     }
 
     public void clear() {

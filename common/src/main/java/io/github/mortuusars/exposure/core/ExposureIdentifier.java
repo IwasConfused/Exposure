@@ -1,36 +1,33 @@
 package io.github.mortuusars.exposure.core;
 
-import com.mojang.datafixers.util.Either;
+import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.StringUtil;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ExposureIdentifier {
-    public static final ExposureIdentifier EMPTY = new ExposureIdentifier("");
-
-    public static final Codec<ExposureIdentifier> TEXTURE_CODEC = RecordCodecBuilder.create(instance ->
-            instance.group(ResourceLocation.CODEC.fieldOf("texture").forGetter(ExposureIdentifier::getTextureLocation))
-                    .apply(instance, ExposureIdentifier::new));
+    public static final ExposureIdentifier EMPTY = new ExposureIdentifier("", null);
 
     public static final Codec<ExposureIdentifier> CODEC = Codec.withAlternative(
-            Codec.STRING.xmap(ExposureIdentifier::new, ExposureIdentifier::getId), TEXTURE_CODEC);
+            Codec.STRING.xmap(ExposureIdentifier::id, ExposureIdentifier::getId),
+            ResourceLocation.CODEC.xmap(ExposureIdentifier::texture, ExposureIdentifier::getTexture));
 
     public static final StreamCodec<FriendlyByteBuf, ExposureIdentifier> STREAM_CODEC = new StreamCodec<>() {
         @Override
         public @NotNull ExposureIdentifier decode(FriendlyByteBuf buffer) {
             boolean isTexture = buffer.readBoolean();
             return isTexture
-                    ? new ExposureIdentifier(buffer.readResourceLocation())
-                    : new ExposureIdentifier(buffer.readUtf());
+                    ? ExposureIdentifier.texture(buffer.readResourceLocation())
+                    : ExposureIdentifier.id(buffer.readUtf());
         }
 
         @Override
@@ -38,8 +35,10 @@ public class ExposureIdentifier {
             boolean isTexture = instance.isTexture();
             buffer.writeBoolean(isTexture);
             if (isTexture) {
-                buffer.writeResourceLocation(instance.getTextureLocation());
+                assert instance.getTexture() != null;
+                buffer.writeResourceLocation(instance.getTexture());
             } else {
+                assert instance.getId() != null;
                 buffer.writeUtf(instance.getId());
             }
         }
@@ -48,75 +47,78 @@ public class ExposureIdentifier {
     @Nullable
     private final String id;
     @Nullable
-    private final ResourceLocation textureLocation;
+    private final ResourceLocation texture;
 
-    public ExposureIdentifier(@NotNull String id) {
+    private ExposureIdentifier(@Nullable String id, @Nullable ResourceLocation textureLocation) {
         this.id = id;
-        this.textureLocation = null;
+        this.texture = textureLocation;
     }
 
-    public ExposureIdentifier(@NotNull ResourceLocation textureLocation) {
-        this.id = null;
-        this.textureLocation = textureLocation;
+    public static ExposureIdentifier id(@NotNull String id) {
+        return new ExposureIdentifier(id, null);
+    }
+
+    public static ExposureIdentifier texture(@NotNull ResourceLocation texture) {
+        return new ExposureIdentifier(null, texture);
     }
 
     public boolean isEmpty() {
         return this == EMPTY || (id != null && id.isEmpty());
     }
 
-    public Either<String, ResourceLocation> get() {
-        return id != null ? Either.left(id) : Either.right(textureLocation);
-    }
-
     public @Nullable String getId() {
         return id;
     }
 
-    public Optional<String> getIdOpt() {
+    public Optional<String> id() {
         return Optional.ofNullable(id);
     }
 
-    public @Nullable ResourceLocation getTextureLocation() {
-        return textureLocation;
+    public @Nullable ResourceLocation getTexture() {
+        return texture;
     }
 
-    public Optional<ResourceLocation> getTextureOpt() {
-        return Optional.ofNullable(textureLocation);
+    public Optional<ResourceLocation> texture() {
+        return Optional.ofNullable(texture);
     }
 
     public boolean isId() {
-        return getId() != null;
+        return id != null;
     }
 
     public boolean isTexture() {
-        return !isId();
+        return texture != null;
     }
 
     public <T> T map(final Function<String, T> ifId, final Function<ResourceLocation, T> ifTexture) {
-        return isId() ? ifId.apply(getId()) : ifTexture.apply(getTextureLocation());
+        return isId() ? ifId.apply(id) : ifTexture.apply(getTexture());
     }
 
     public ExposureIdentifier ifId(Consumer<String> idConsumer) {
         if (isId()) {
-            idConsumer.accept(getId());
+            idConsumer.accept(id);
         }
         return this;
     }
 
     public <T> Optional<T> mapId(Function<String, T> mappingFunc) {
-        return isId() ? Optional.ofNullable(mappingFunc.apply(id)) : Optional.empty();
+        return isId() ? Optional.of(mappingFunc.apply(id)) : Optional.empty();
     }
 
     public ExposureIdentifier ifTexture(Consumer<ResourceLocation> textureConsumer) {
         if (isTexture()) {
-            textureConsumer.accept(getTextureLocation());
+            textureConsumer.accept(getTexture());
         }
         return this;
     }
 
+    public <T> Optional<T> mapTexture(Function<ResourceLocation, T> mappingFunc) {
+        return isTexture() ? Optional.of(mappingFunc.apply(texture)) : Optional.empty();
+    }
+
     @Override
     public String toString() {
-        return map(Function.identity(), ResourceLocation::toString);
+        return map(id -> "Id: " + id, texture -> "Texture: " + texture);
     }
 
     @Override
@@ -124,11 +126,31 @@ public class ExposureIdentifier {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ExposureIdentifier that = (ExposureIdentifier) o;
-        return Objects.equals(id, that.id) && Objects.equals(textureLocation, that.textureLocation);
+        return Objects.equals(id, that.id) && Objects.equals(texture, that.texture);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, textureLocation);
+        return Objects.hash(id, texture);
+    }
+
+    // --
+
+    public static ExposureIdentifier createId(@NotNull Player player, String... middleParts) {
+        List<String> parts = new ArrayList<>();
+        parts.add(player.getScoreboardName());
+        parts.addAll(Arrays.asList(middleParts));
+        parts.add(Long.toString(player.level().getGameTime()));
+        return composeId(parts.toArray(String[]::new));
+    }
+
+    private static ExposureIdentifier composeId(String... parts) {
+        Preconditions.checkArgument(parts.length > 0, "Cannot compose ID with 0 parts.");
+        List<String> sanitizedParts = Arrays.stream(parts)
+                .filter(s -> !StringUtil.isNullOrEmpty(s))
+                .map(s -> s.replace('_', '-'))
+                .toList();
+        String id = String.join("_", sanitizedParts);
+        return ExposureIdentifier.id(id);
     }
 }

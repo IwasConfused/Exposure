@@ -1,6 +1,8 @@
 package io.github.mortuusars.exposure.warehouse.server;
 
+import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ExposureChangedS2CP;
@@ -35,7 +37,7 @@ public class ServersideExposureStorage {
         createDirectoryIfNeeded();
     }
 
-    public List<String> getAllExposureIds() {
+    public List<ExposureIdentifier> getAllExposureIds() {
         // Save exposures that are in cache and waiting to be saved:
         levelStorageSupplier.get().save();
 
@@ -46,32 +48,36 @@ public class ServersideExposureStorage {
         if (listOfFiles == null)
             return Collections.emptyList();
 
-        List<String> ids = new ArrayList<>();
+        List<ExposureIdentifier> ids = new ArrayList<>();
 
         for (File file : listOfFiles) {
-            if (file != null && file.isFile())
-                ids.add(com.google.common.io.Files.getNameWithoutExtension(file.getName()));
+            if (file != null && file.isFile()) {
+                String filename = com.google.common.io.Files.getNameWithoutExtension(file.getName());
+                ids.add(ExposureIdentifier.id(filename));
+            }
         }
 
         return ids;
     }
 
-    public ExposureData get(String exposureId) {
+    public ExposureData get(ExposureIdentifier identifier) {
+        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get an exposure data. Only ID is supported.");
+
         DimensionDataStorage dataStorage = levelStorageSupplier.get();
-        @Nullable ExposureData exposureData = dataStorage.get(ExposureData.factory(), getSaveId(exposureId));
+        @Nullable ExposureData exposureData = dataStorage.get(ExposureData.factory(), getSaveId(identifier));
 
         if (exposureData == null) {
-            LOGGER.error("Exposure '{}' was not loaded. File does not exist or some error occurred.", exposureId);
+            LOGGER.error("Exposure '{}' was not loaded. File does not exist or some error occurred.", identifier);
             return ExposureData.EMPTY;
         }
 
         return exposureData;
     }
 
-    public void put(String exposureId, ExposureData data) {
+    public void put(ExposureIdentifier identifier, ExposureData data) {
         if (createDirectoryIfNeeded()) {
             DimensionDataStorage dataStorage = levelStorageSupplier.get();
-            dataStorage.set(getSaveId(exposureId), data);
+            dataStorage.set(getSaveId(identifier), data);
             data.setDirty();
 
             //TODO: Serverside frame history
@@ -89,12 +95,12 @@ public class ServersideExposureStorage {
      * When exposure on the server changes we need to notify client to re-query it.
      * Otherwise, due to caching, client wouldn't know about the change.
      */
-    public void sendExposureChanged(String exposureId) {
-        Packets.sendToAllClients(new ExposureChangedS2CP(exposureId));
+    public void sendExposureChanged(ExposureIdentifier identifier) {
+        Packets.sendToAllClients(new ExposureChangedS2CP(identifier));
     }
 
-    protected String getSaveId(String exposureId) {
-        return EXPOSURES_DIRECTORY_NAME + "/" + exposureId;
+    protected String getSaveId(ExposureIdentifier identifier) {
+        return EXPOSURES_DIRECTORY_NAME + "/" + identifier.id().orElse("");
     }
 
     protected boolean createDirectoryIfNeeded() {

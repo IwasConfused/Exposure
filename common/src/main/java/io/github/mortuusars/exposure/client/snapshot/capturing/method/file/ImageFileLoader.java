@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.snapshot.capturing.method.file;
 
 import io.github.mortuusars.exposure.util.task.Result;
-import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.client.image.Image;
 
 import java.io.File;
 

@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.data.export;
 
+import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import org.jetbrains.annotations.Nullable;
 

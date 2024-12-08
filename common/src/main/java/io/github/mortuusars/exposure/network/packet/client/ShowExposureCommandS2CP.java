@@ -35,12 +35,8 @@ public record ShowExposureCommandS2CP(ExposureIdentifier identifier,
         return new ShowExposureCommandS2CP(ExposureIdentifier.EMPTY, negative, true);
     }
 
-    public static ShowExposureCommandS2CP id(String exposureId, boolean negative) {
-        return new ShowExposureCommandS2CP(new ExposureIdentifier(exposureId), negative, false);
-    }
-
-    public static ShowExposureCommandS2CP texture(ResourceLocation path, boolean negative) {
-        return new ShowExposureCommandS2CP(new ExposureIdentifier(path), negative, false);
+    public static ShowExposureCommandS2CP identifier(ExposureIdentifier identifier, boolean negative) {
+        return new ShowExposureCommandS2CP(identifier, negative, false);
     }
 
     @Override

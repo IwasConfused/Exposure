@@ -5,7 +5,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -60,7 +59,7 @@ public class PhotographSlotButton extends ImageButton {
             PhotographFeatures photographFeatures = PhotographFeatures.get(photographItem.getType(photograph));
 
             // Paper
-            guiGraphics.blit(photographFeatures.getAlbumPaperTexture(),
+            guiGraphics.blit(photographFeatures.albumPaperTexture(),
                     getX(), getY(), 0, 0, 0, width, height, width, height);
 
             // Exposure
@@ -78,7 +77,7 @@ public class PhotographSlotButton extends ImageButton {
             if (photographFeatures.hasAlbumOverlayTexture()) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 2);
-                guiGraphics.blit(photographFeatures.getAlbumOverlayTexture(),
+                guiGraphics.blit(photographFeatures.albumOverlayTexture(),
                         getX(), getY(), 0, 0, 0, width, height, width, height);
                 guiGraphics.pose().popPose();
             }

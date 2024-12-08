@@ -82,7 +82,7 @@ public class ClientEvents {
     public static class GameBus {
         @SubscribeEvent
         public static void onLevelClear(LevelEvent.Unload event) {
-            ExposureClient.imageRenderer().clearData();
+            ExposureClient.imageRenderer().clearCache();
         }
 
         @SubscribeEvent

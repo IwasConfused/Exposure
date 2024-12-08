@@ -4,15 +4,13 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.render.image.ModifiedImage;
+import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
-import io.github.mortuusars.exposure.core.image.IdentifiableImage;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
+import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
@@ -92,14 +90,14 @@ public class NegativeExposureScreen extends ZoomableScreen {
         ExposureIdentifier exposureIdentifier = exposures.get(pager.getCurrentPage());
 
         @Nullable ExposureType type = exposureIdentifier.map(
-                id -> ExposureClient.exposureCache().getOrQuery(id).map(ExposureData::getType)
+                id -> ExposureClient.exposureCache().getOrQuery(exposureIdentifier).map(ExposureData::getType)
                         .orElse(ExposureType.BLACK_AND_WHITE),
                 texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath()
                         .endsWith("_bw")) ? ExposureType.COLOR : ExposureType.BLACK_AND_WHITE);
         if (type == null)
             type = ExposureType.BLACK_AND_WHITE;
 
-        IdentifiableImage image = new ModifiedImage(ExposureClient.createExposureImage(exposureIdentifier), PixelModifier.NEGATIVE_FILM);
+        RenderableImage image = ExposureClient.createExposureImage(exposureIdentifier).processWith(PixelModifier.NEGATIVE_FILM);
 
         int width = image.getWidth();
         int height = image.getHeight();

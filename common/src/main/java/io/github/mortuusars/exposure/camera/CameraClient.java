@@ -2,10 +2,7 @@ package io.github.mortuusars.exposure.camera;
 
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
-import io.github.mortuusars.exposure.core.Camera;
-import io.github.mortuusars.exposure.core.CameraAccessor;
-import io.github.mortuusars.exposure.core.CameraAccessors;
-import io.github.mortuusars.exposure.core.ExposureFrameClientData;
+import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.FlashMode;
 import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
@@ -25,13 +22,13 @@ import java.util.Optional;
 public class CameraClient {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void handleExposureStart(Player player, CameraAccessor cameraAccessor, String exposureId, boolean flashHasFired) {
+    public static void handleExposureStart(Player player, CameraAccessor cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
         cameraAccessor.getCamera(player).ifPresentOrElse(camera -> {
-                    camera.getItem().exposeFrameClientside(player, camera, exposureId, flashHasFired);
+                    camera.getItem().exposeFrameClientside(player, camera, identifier, flashHasFired);
                     ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
                     Packets.sendToServer(new CameraAddFrameC2SP(cameraAccessor, clientSideFrameData));
                 },
-                () -> LOGGER.error("Cannot start exposure '{}': failed to get a camera.", exposureId));
+                () -> LOGGER.error("Cannot start exposure '{}': cannot get a camera with accessor '{}'.", identifier, cameraAccessor));
     }
 
     @Nullable
@@ -63,9 +60,7 @@ public class CameraClient {
                     camera.getItem().deactivate(Minecraft.getInstance().player, camera.getItemStack());
                     Packets.sendToServer(new DeactivateCameraC2SP(activeCameraAccessor));
                 },
-                () -> {
-                    LOGGER.warn("Cannot access a camera to deactivate it.");
-                });
+                () -> LOGGER.warn("Cannot access a camera to deactivate it."));
 
         activeCameraAccessor = null;
     }

@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -12,12 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record LoadExposureFromFileCommandS2CP(String exposureId, String filePath, int size, boolean dither) implements IPacket {
+public record LoadExposureFromFileCommandS2CP(ExposureIdentifier identifier, String filePath, int size, boolean dither) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("load_exposure_from_file");
     public static final CustomPacketPayload.Type<LoadExposureFromFileCommandS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, LoadExposureFromFileCommandS2CP> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, LoadExposureFromFileCommandS2CP::exposureId,
+            ExposureIdentifier.STREAM_CODEC, LoadExposureFromFileCommandS2CP::identifier,
             ByteBufCodecs.STRING_UTF8, LoadExposureFromFileCommandS2CP::filePath,
             ByteBufCodecs.VAR_INT, LoadExposureFromFileCommandS2CP::size,
             ByteBufCodecs.BOOL, LoadExposureFromFileCommandS2CP::dither,
@@ -31,7 +32,7 @@ public record LoadExposureFromFileCommandS2CP(String exposureId, String filePath
 
     @Override
     public boolean handle(PacketFlow direction, Player player) {
-        ClientPacketsHandler.loadExposure(exposureId, filePath, size, dither);
+        ClientPacketsHandler.loadExposure(identifier, filePath, size, dither);
         return true;
     }
 }

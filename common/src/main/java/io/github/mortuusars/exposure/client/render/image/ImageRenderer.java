@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.client.render.image;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.mortuusars.exposure.core.image.IdentifiableImage;
-import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -49,7 +48,7 @@ public class ImageRenderer implements AutoCloseable {
     }
 
     private RenderedImageInstance getOrCreateInstance(IdentifiableImage image) {
-        return (this.cache).compute(image.id(), (id, expData) -> {
+        return (this.cache).compute(image.getId(), (id, expData) -> {
             if (expData == null) {
                 return new RenderedImageInstance(image);
             } else {

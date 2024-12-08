@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.data;
 
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
+import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

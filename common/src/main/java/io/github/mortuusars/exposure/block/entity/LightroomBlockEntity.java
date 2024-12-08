@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
 import io.github.mortuusars.exposure.util.ItemAndStack;
+import net.minecraft.Util;
 import net.minecraft.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -38,7 +39,9 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Comparator;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class LightroomBlockEntity extends BaseContainerBlockEntity implements WorldlyContainer {
@@ -80,7 +83,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     );
 
     protected NonNullList<ItemStack> items = NonNullList.withSize(Lightroom.SLOTS, ItemStack.EMPTY);
-    protected @Nullable String lastUserName = null;
+    protected UUID lastPlayerId = Util.NIL_UUID;
     protected int selectedFrameIndex;
     protected int progress;
     protected int printTime;
@@ -125,8 +128,8 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         stopPrintingProcess();
     }
 
-    public void setLastUser(Player player) {
-        lastUserName = player.getScoreboardName();
+    public void setLastPlayer(Player player) {
+        lastPlayerId = player.getUUID();
     }
 
     public float getProgressPercentage() {
@@ -387,10 +390,6 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     protected ItemStack createPrintResult(ExposureFrame frame, PrintingProcess process) {
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return ItemStack.EMPTY;
-        }
-
         if (process.isChromatic()) {
             ItemStack paperStack = getItem(Lightroom.PAPER_SLOT);
             ItemStack chromaticStack = paperStack.getItem() instanceof ChromaticSheetItem
@@ -400,13 +399,9 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
             chromaticItem.addLayer(chromaticStack, frame);
 
-            if (chromaticItem.canFinalize(chromaticStack)) {
-                if (lastUserName == null) {
-                    return chromaticItem.finalize(serverLevel, null, chromaticStack, "Exposure");
-                } else {
-                    @Nullable ServerPlayer player = serverLevel.getServer().getPlayerList().getPlayerByName(lastUserName);
-                    return chromaticItem.finalize(serverLevel, player, chromaticStack, lastUserName);
-                }
+            @Nullable ServerPlayer player = getPlayerToCombineChromatic();
+            if (chromaticItem.canCombine(chromaticStack) && player != null) {
+                return chromaticItem.combineIntoPhotograph(player, chromaticStack);
             }
 
             return chromaticStack;
@@ -416,6 +411,21 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
             photographStack.set(Exposure.DataComponents.PHOTOGRAPH_TYPE, frame.type());
             return photographStack;
         }
+    }
+
+    protected @Nullable ServerPlayer getPlayerToCombineChromatic() {
+        if (!(getLevel() instanceof ServerLevel serverLevel)) {
+            return null;
+        }
+
+        if (serverLevel.getPlayerByUUID(lastPlayerId) instanceof ServerPlayer lastPlayer) {
+            return lastPlayer;
+        }
+
+        BlockPos pos = getBlockPos();
+        return serverLevel.players().stream()
+                .min(Comparator.comparingDouble(pl -> pl.distanceToSqr(pos.getX(), pos.getY(), pos.getZ())))
+                .orElse(null);
     }
 
     protected void putPrintResultInOutputSlot(ItemStack printResult) {
@@ -455,11 +465,12 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
     protected void onFramePrinted(ExposureFrame frame, PrintingProcess process) {
         if (process.isRegular()) { // Chromatics create new exposure. Marking is not needed.
-            frame.identifier().getIdOpt().ifPresent(exposureId -> ExposureServer.getExposure(exposureId).markAsPrinted());
+            ExposureServer.getExposure(frame.identifier()).markAsPrinted();
         }
 
-        if (advanceFrame)
+        if (advanceFrame) {
             advanceFrame();
+        }
     }
 
     protected void advanceFrame() {
@@ -596,8 +607,8 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         this.storedExperience = tag.getInt("PrintedPhotographsCount");
         this.advanceFrame = tag.getBoolean("AdvanceFrame");
         this.printingMode = PrintingMode.fromStringOrDefault(tag.getString("PrintMode"), PrintingMode.REGULAR);
-        if (tag.contains("LastUserName", Tag.TAG_STRING)) {
-            this.lastUserName = tag.getString("LastUserName");
+        if (tag.contains("LastPlayerId", Tag.TAG_INT_ARRAY)) {
+            this.lastPlayerId = tag.getUUID("LastPlayerId");
         }
     }
 
@@ -617,8 +628,8 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
             tag.putBoolean("AdvanceFrame", true);
         if (printingMode != PrintingMode.REGULAR)
             tag.putString("PrintMode", printingMode.getSerializedName());
-        if (lastUserName != null)
-            tag.putString("LastUserName", lastUserName);
+        if (!lastPlayerId.equals(Util.NIL_UUID))
+            tag.putUUID("LastPlayerId", lastPlayerId);
     }
 
     protected @NotNull NonNullList<ItemStack> getItems() {

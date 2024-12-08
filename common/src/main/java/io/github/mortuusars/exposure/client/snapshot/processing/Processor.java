@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.client.snapshot.processing;
 
-import io.github.mortuusars.exposure.core.image.CroppedImage;
-import io.github.mortuusars.exposure.core.image.Image;
-import io.github.mortuusars.exposure.core.image.ResizedImage;
+import io.github.mortuusars.exposure.client.image.CroppedImage;
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.ResizedImage;
 import io.github.mortuusars.exposure.util.ChromaChannel;
 import io.github.mortuusars.exposure.util.Rect2i;
 
@@ -11,6 +11,19 @@ import java.util.function.Supplier;
 
 public interface Processor extends Function<Image, Image> {
     Processor EMPTY = image -> image;
+
+    default Processor then(Processor next) {
+        if (next.equals(EMPTY)) return this;
+        return this.equals(EMPTY) ? next : image -> next.apply(apply(image));
+    }
+
+    default Processor thenIf(boolean condition, Processor next) {
+        return condition ? then(next) : this;
+    }
+
+    default Processor thenIf(boolean condition, Supplier<Processor> next) {
+        return condition ? then(next.get()) : this;
+    }
 
     static Processor brightness(float stops) {
         return stops != 0 ? new BrightnessProcessor(stops) : EMPTY;
@@ -26,29 +39,6 @@ public interface Processor extends Function<Image, Image> {
 
     static Processor singleChannelBlackAndWhite(ChromaChannel chromaChannel) {
         return new SingleChannelBlackAndWhiteProcessor(chromaChannel);
-    }
-
-    // --
-
-    static Processor with(Processor processor) {
-        return processor;
-    }
-
-    static Processor of(boolean condition, Supplier<Processor> next) {
-        return condition ? EMPTY : next.get();
-    }
-
-    default Processor then(Processor next) {
-        if (next.equals(EMPTY)) return this;
-        return this.equals(EMPTY) ? next : image -> next.apply(apply(image));
-    }
-
-    default Processor thenIf(boolean condition, Supplier<Processor> next) {
-        return condition ? this : then(next.get());
-    }
-
-    default Processor thenIf(boolean condition, Processor next) {
-        return condition ? this : then(next);
     }
 
     interface Crop extends Processor {

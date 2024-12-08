@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
-import io.github.mortuusars.exposure.core.image.Image;
+import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.util.task.Task;
 import net.minecraft.client.Minecraft;

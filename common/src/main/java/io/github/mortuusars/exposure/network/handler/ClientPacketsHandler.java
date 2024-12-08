@@ -1,36 +1,33 @@
 package io.github.mortuusars.exposure.network.handler;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.camera.capture.*;
-import io.github.mortuusars.exposure.camera.capture.component.BaseComponent;
-import io.github.mortuusars.exposure.camera.capture.component.ExposureUploaderComponent;
-import io.github.mortuusars.exposure.camera.capture.component.ICaptureComponent;
-import io.github.mortuusars.exposure.client.capture.converter.ImageConverter;
+import io.github.mortuusars.exposure.client.snapshot.SnapShot;
+import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
+import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
+import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
+import io.github.mortuusars.exposure.client.snapshot.processing.Process;
+import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
+import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
-import io.github.mortuusars.exposure.core.pixel_modifiers.PixelModifier;
+import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
-import io.github.mortuusars.exposure.data.ExposureSize;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
+import io.github.mortuusars.exposure.warehouse.PalettizedImage;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.network.packet.client.*;
-import io.github.mortuusars.exposure.util.ClientsideWorldNameGetter;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.player.Player;
@@ -51,71 +48,59 @@ public class ClientPacketsHandler {
         });
     }
 
-    public static void exposeScreenshot(int size) {
-        Preconditions.checkState(size > 0, size + " size is invalid. Should be larger than 0.");
-        if (size == Integer.MAX_VALUE)
-            size = Math.min(Minecraft.getInstance().getWindow().getWidth(), Minecraft.getInstance().getWindow()
-                    .getHeight());
+    public static void exposeScreenshot(ExposureIdentifier identifier, int size, float brightnessStops) {
+        Preconditions.checkState(size > 0 && size <= 2048, size + " size is invalid. Should be larger than 0.");
 
-        int finalSize = size;
         executeOnMainThread(() -> {
-            String filename = Util.getFilenameFormattedDateTime();
-            CompoundTag frameData = new CompoundTag();
-            frameData.putString(FrameProperties.ID, filename);
-            Capture capture = new DirectScreenshotCapture()
-                    .setSize(finalSize)
-                    .cropFactor(1f)
-                    .setComponents(
-                            new BaseComponent(true),
-                            new ClientsideExposureExporter(filename)
-                                    .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(),
-                                            ClientsideWorldNameGetter::getWorldName)
-                                    .withModifier(PixelModifier.EMPTY)
-                                    .withSize(ExposureSize.X1),
-                            new ICaptureComponent() {
-                                @Override
-                                public void end(Capture capture) {
-                                    Exposure.LOGGER.info("Saved exposure screenshot: {}", filename);
-                                }
-                            })
-                    .setConverter(ImageConverter.DITHERED_MAP_COLORS);
-            ExposureClient.captureManager().enqueue(capture);
+            SnapShot.enqueue(Capture.of(Capture.screenshot(), CaptureActions.of(
+                            CaptureActions.hideGui(),
+                            CaptureActions.forceRegularOrSelfieCamera(),
+                            CaptureActions.disablePostEffect(),
+                            CaptureActions.modifyGamma(brightnessStops)))
+                    .handleErrorAndGetResult()
+                    .thenAsync(Process.with(
+                            Processor.Crop.SQUARE,
+                            Processor.Resize.to(size),
+                            Processor.brightness(brightnessStops)))
+                    .thenAsync(image -> {
+                        PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
+                        image.close();
+                        return palettizedImage;
+                    })
+                    .acceptAsync(new ImageUploader(identifier)::upload));
         });
     }
 
-    public static void loadExposure(String exposureId, String filePath, int size, boolean dither) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (StringUtil.isNullOrEmpty(exposureId)) {
-            if (player == null)
-                throw new IllegalStateException("Cannot load exposure: filePath is null or empty and player is null.");
-            exposureId = player.getName().getString() + player.level().getGameTime();
-        }
+    public static void loadExposure(ExposureIdentifier identifier, String filePath, int size, boolean dither) {
+        @Nullable LocalPlayer player = Minecraft.getInstance().player;
+        Preconditions.checkState(player != null, "Cannot load exposure: player is null.");
+        Preconditions.checkArgument(!StringUtil.isNullOrEmpty(filePath), "Cannot load exposure: filePath is null or empty.");
 
-        String finalExposureId = exposureId;
-        new Thread(() -> {
-            Capture capture = new FileCapture(filePath, error -> { if (player != null) player.displayClientMessage(
-                            error.getTechnicalTranslation().withStyle(ChatFormatting.RED), false); })
-                    .setSize(size)
-                    .cropFactor(1f)
-                    .setComponents(new ExposureUploaderComponent(finalExposureId))
-                    .setConverter(dither ? ImageConverter.DITHERED_MAP_COLORS : ImageConverter.NEAREST_MAP_COLORS);
-            ExposureClient.captureManager().enqueue(capture);
-
-            ExposureFrame frame = ExposureFrame.EMPTY.toMutable().setIdentifier(new ExposureIdentifier(finalExposureId)).toImmutable();
-            CapturedFramesHistory.add(frame);
-
-            Exposure.LOGGER.info("Loaded exposure from file '{}' with Id: '{}'.", filePath, finalExposureId);
-            Objects.requireNonNull(Minecraft.getInstance().player).displayClientMessage(
-                    Component.translatable("command.exposure.load_from_file.success", finalExposureId)
-                            .withStyle(ChatFormatting.GREEN), false);
-        }).start();
+        executeOnMainThread(() -> {
+            SnapShot.enqueue(Capture.of(Capture.file(filePath))
+                    .handleErrorAndGetResult()
+                    .thenAsync(Process.with(
+                            Processor.Crop.SQUARE,
+                            Processor.Resize.to(size)))
+                    .thenAsync(image -> {
+                        PalettizedImage palettizedImage = (dither
+                                ? ImagePalettizer.DITHERED_MAP_COLORS
+                                : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
+                        image.close();
+                        return palettizedImage;
+                    })
+                    .acceptAsync(new ImageUploader(identifier)::upload)
+                    .acceptAsync(v -> player.displayClientMessage(
+                            Component.translatable("command.exposure.load_from_file.success", identifier)
+                                    .withStyle(ChatFormatting.GREEN), false)));
+        });
     }
 
     public static void startExposure(StartExposureS2CP packet) {
         executeOnMainThread(() -> {
             LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
             CameraAccessor cameraAccessor = packet.cameraAccessor();
-            CameraClient.handleExposureStart(player, cameraAccessor, packet.exposureId(), packet.flashHasFired());
+            CameraClient.handleExposureStart(player, cameraAccessor, packet.identifier(), packet.flashHasFired());
         });
     }
 
@@ -174,7 +159,7 @@ public class ClientPacketsHandler {
     }
 
     public static void clearRenderingCache() {
-        executeOnMainThread(() -> ExposureClient.imageRenderer().clearData());
+        executeOnMainThread(() -> ExposureClient.imageRenderer().clearCache());
     }
 
     public static void syncLensesData(SyncLensesDataS2CP packet) {
@@ -182,13 +167,13 @@ public class ClientPacketsHandler {
     }
 
     public static void waitForExposureChange(WaitForExposureChangeS2CP packet) {
-        executeOnMainThread(() -> ExposureClient.exposureCache().putOnWaitingList(packet.exposureId()));
+        executeOnMainThread(() -> ExposureClient.exposureCache().putOnWaitingList(packet.identifier()));
     }
 
     public static void onExposureChanged(ExposureChangedS2CP packet) {
         executeOnMainThread(() -> {
-            ExposureClient.exposureCache().remove(packet.exposureId());
-            ExposureClient.imageRenderer().clearDataSingle(packet.exposureId(), true);
+            ExposureClient.exposureCache().remove(packet.identifier());
+            ExposureClient.imageRenderer().clearCacheOf(identifier -> identifier.matches(packet.identifier()));
         });
     }
 
@@ -197,7 +182,11 @@ public class ClientPacketsHandler {
     }
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
-        executeOnMainThread(() -> ClientTrichromeFinalizer.finalizeTrichrome(packet.red(), packet.green(), packet.blue(), packet.chromaticExposureId()));
+        Preconditions.checkState(!packet.identifier().isEmpty(),
+                "Cannot create chromatic exposure: identifier is empty.");
+        Preconditions.checkState(packet.layers().size() == 3,
+                "Cannot create chromatic exposure: 3 layers is required. %s is provided", packet.layers().size());
+        executeOnMainThread(() -> ClientTrichromeFinalizer.finalizeTrichrome(packet.identifier(), packet.layers()));
     }
 
     private static void executeOnMainThread(Runnable runnable) {

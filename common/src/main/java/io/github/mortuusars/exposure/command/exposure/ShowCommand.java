@@ -5,6 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.command.suggestion.ExposureIdSuggestionProvider;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ShowExposureCommandS2CP;
@@ -57,15 +58,17 @@ public class ShowCommand {
             return 1;
         }
 
-        ExposureData exposureData = ExposureServer.exposureStorage().get(id);
+        ExposureIdentifier identifier = ExposureIdentifier.id(id);
+
+        ExposureData exposureData = ExposureServer.exposureStorage().get(identifier);
         if (exposureData.equals(ExposureData.EMPTY)) {
             stack.sendFailure(Component.translatable("command.exposure.show.error.not_found", id));
             return 0;
         }
 
-        ExposureServer.exposureSender().sendTo(id, exposureData, player);
+        ExposureServer.exposureSender().sendTo(identifier, exposureData, player);
 
-        Packets.sendToClient(ShowExposureCommandS2CP.id(id, negative), player);
+        Packets.sendToClient(ShowExposureCommandS2CP.identifier(identifier, negative), player);
 
         return 0;
     }
@@ -77,7 +80,8 @@ public class ShowCommand {
             return 1;
         }
 
-        Packets.sendToClient(ShowExposureCommandS2CP.texture(path, negative), player);
+        ExposureIdentifier identifier = ExposureIdentifier.texture(path);
+        Packets.sendToClient(ShowExposureCommandS2CP.identifier(identifier, negative), player);
 
         return 0;
     }

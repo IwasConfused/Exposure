@@ -2,15 +2,13 @@ package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.client.capture.CaptureManager;
 import io.github.mortuusars.exposure.client.Censor;
+import io.github.mortuusars.exposure.client.image.*;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
-import io.github.mortuusars.exposure.client.render.image.ResourceImage;
+import io.github.mortuusars.exposure.client.render.image.NewImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.image.ExposureDataImage;
 import io.github.mortuusars.exposure.core.image.IdentifiableImage;
-import io.github.mortuusars.exposure.core.image.Image;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader;
@@ -28,9 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public class ExposureClient {
-    private static final CaptureManager captureManager = new CaptureManager();
-
-    private static final ImageRenderer imageRenderer = new ImageRenderer();
+    private static final NewImageRenderer imageRenderer = new NewImageRenderer();
     private static final PhotographRenderer photographRenderer = new PhotographRenderer();
 
     private static final ClientsideExposureCache exposureCache = new ClientsideExposureCache();
@@ -50,11 +46,7 @@ public class ExposureClient {
         return isIrisOrOculusInstalled;
     }
 
-    public static CaptureManager captureManager() {
-        return captureManager;
-    }
-
-    public static ImageRenderer imageRenderer() {
+    public static NewImageRenderer imageRenderer() {
         return imageRenderer;
     }
 
@@ -74,25 +66,25 @@ public class ExposureClient {
         return exposureReceiver;
     }
 
-    public static ExposureData getOrQuery(String exposureId) {
-        return exposureCache().getOrQueryAndEmpty(exposureId);
+    public static ExposureData getOrQuery(ExposureIdentifier identifier) {
+        return exposureCache().getOrQueryAndEmpty(identifier);
     }
 
-    public static IdentifiableImage createExposureImage(ExposureFrame frame) {
-        if (!Censor.isAllowedToRender(frame)) {
-            //TODO: move to belonging class
-            return Censor.HIDDEN_IMAGE;
+    public static RenderableImage createExposureImage(ExposureFrame frame) {
+        RenderableImage image = createExposureImage(frame.identifier());
+        return Censor.isAllowedToRender(frame) ? image : image.wrapIn(CensoredImage::new);
+    }
+
+    public static RenderableImage createExposureImage(ExposureIdentifier identifier) {
+        if (identifier.isTexture()) {
+            return new RenderableImage(ResourceImage.getOrCreate(identifier.getTexture()), ImageIdentifier.of(identifier));
         }
 
-        return createExposureImage(frame.identifier());
-    }
-
-    public static IdentifiableImage createExposureImage(ExposureIdentifier identifier) {
-        return identifier.map(
-                id -> ExposureClient.exposureCache().getOrQuery(id)
-                        .map(data -> (IdentifiableImage) new ExposureDataImage(id, data))
-                        .orElse(Image.EMPTY),
-                ResourceImage::getOrCreate);
+        ExposureData exposureData = getOrQuery(identifier);
+        ImageIdentifier imageIdentifier = exposureData.equals(ExposureData.EMPTY)
+                ? ImageIdentifier.EMPTY
+                : ImageIdentifier.of(identifier);
+        return new RenderableImage(new ExposureDataImage(exposureData), imageIdentifier);
     }
 
     public static void registerKeymappings(Function<KeyMapping, KeyMapping> registerFunction) {

@@ -9,6 +9,7 @@ import com.mojang.serialization.ListBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -39,6 +40,7 @@ public class ExposureData extends SavedData {
             Codec.INT.fieldOf("width").forGetter(ExposureData::getWidth),
             Codec.INT.fieldOf("height").forGetter(ExposureData::getHeight),
             BYTE_ARRAY_CODEC.fieldOf("pixels").forGetter(ExposureData::getPixels),
+            ColorPalette.CODEC.optionalFieldOf("palette", ColorPalette.MAP_COLORS).forGetter(ExposureData::getPalette),
             ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(ExposureData::getType),
             Codec.STRING.optionalFieldOf("creator", "").forGetter(ExposureData::getCreator),
             Codec.LONG.optionalFieldOf("timestamp", 1645494000L).forGetter(ExposureData::getTimestamp),
@@ -53,6 +55,7 @@ public class ExposureData extends SavedData {
                     ByteBufCodecs.VAR_INT.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer),
                     ByteBufCodecs.byteArray(2048 * 2048).decode(buffer),
+                    ColorPalette.STREAM_CODEC.decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.STRING_UTF8.decode(buffer),
                     ByteBufCodecs.VAR_LONG.decode(buffer),
@@ -65,6 +68,7 @@ public class ExposureData extends SavedData {
             ByteBufCodecs.VAR_INT.encode(buffer, data.getWidth());
             ByteBufCodecs.VAR_INT.encode(buffer, data.getWidth());
             ByteBufCodecs.byteArray(2048*2048).encode(buffer, data.getPixels());
+            ColorPalette.STREAM_CODEC.encode(buffer, data.getPalette());
             ExposureType.STREAM_CODEC.encode(buffer, data.getType());
             ByteBufCodecs.STRING_UTF8.encode(buffer, data.getCreator());
             ByteBufCodecs.VAR_LONG.encode(buffer, data.getTimestamp());
@@ -74,12 +78,13 @@ public class ExposureData extends SavedData {
         }
     };
 
-    public static final ExposureData EMPTY = new ExposureData(1, 1, new byte[]{0},
+    public static final ExposureData EMPTY = new ExposureData(1, 1, new byte[]{0}, ColorPalette.MAP_COLORS,
             ExposureType.COLOR, "", 0, false, new CompoundTag(), false);
 
     private final int width;
     private final int height;
     private final byte[] pixels;
+    private final ColorPalette palette;
     private final ExposureType type;
     private final String creator;
     private final long timestamp;
@@ -87,16 +92,17 @@ public class ExposureData extends SavedData {
     private final CompoundTag extraData;
     private boolean wasPrinted;
 
-    public ExposureData(int width, int height, byte[] pixels, ExposureType type,
+    public ExposureData(int width, int height, byte[] pixels, ColorPalette palette, ExposureType type,
                         String creator, long timestamp, boolean fromFile, CompoundTag extraData, boolean wasPrinted) {
-        Preconditions.checkArgument(width >= 0, "Width cannot be negative.");
-        Preconditions.checkArgument(height >= 0, "Height cannot be negative.");
-        if (pixels.length > width * height)
-            Exposure.LOGGER.warn("Pixel count '{}' is larger than image dimensions of '{}x{}' could fit.", pixels.length, width, height);
-
+        Preconditions.checkArgument(width >= 0, "Width cannot be negative. %s", this);
+        Preconditions.checkArgument(height >= 0, "Height cannot be negative. %s ", this);
+        Preconditions.checkArgument(pixels.length == width * height,
+                "Pixel count '%s' is not correct for image dimensions of '%sx%s'. " +
+                        "Count should be '%s'.", pixels.length, width, height, width * height);
         this.width = width;
         this.height = height;
         this.pixels = pixels;
+        this.palette = palette;
         this.type = type;
         this.creator = creator;
         this.timestamp = timestamp;
@@ -145,6 +151,10 @@ public class ExposureData extends SavedData {
 
     public byte getPixel(int x, int y) {
         return pixels[y * width + x];
+    }
+
+    public ColorPalette getPalette() {
+        return palette;
     }
 
     public ExposureType getType() {
