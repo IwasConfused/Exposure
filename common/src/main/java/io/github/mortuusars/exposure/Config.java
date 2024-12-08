@@ -355,19 +355,15 @@ public class Config {
 
         //TODO: store Color object
         public static int getBackgroundColor() {
-            return getColorFromHex(VIEWFINDER_BACKGROUND_COLOR.get());
+            return Color.fromHex(VIEWFINDER_BACKGROUND_COLOR.get()).getARGB();
         }
 
         public static int getMainFontColor() {
-            return getColorFromHex(VIEWFINDER_FONT_MAIN_COLOR.get());
+            return Color.fromHex(VIEWFINDER_FONT_MAIN_COLOR.get()).getARGB();
         }
 
         public static int getSecondaryFontColor() {
-            return getColorFromHex(VIEWFINDER_FONT_SECONDARY_COLOR.get());
-        }
-
-        private static int getColorFromHex(String hexColor) {
-            return new Color((int) Long.parseLong(hexColor.replace("#", ""), 16), true).getRGB();
+            return Color.fromHex(VIEWFINDER_FONT_SECONDARY_COLOR.get()).getARGB();
         }
     }
 }

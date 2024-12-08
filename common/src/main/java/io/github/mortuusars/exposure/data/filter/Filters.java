@@ -90,13 +90,13 @@ public class Filters {
                     attachmentTexture =  ResourceLocation.parse(jsonObject.get("attachment_texture").getAsString());
                 }
 
-                int tintColor = Filter.DEFAULT_TINT_COLOR;
+                Color UItintColor = Filter.DEFAULT_TINT_COLOR;
                 if (jsonObject.has("tint_color")) {
                     String hexString = jsonObject.get("tint_color").getAsString();
-                    tintColor = Color.RGBFromHex(hexString);
+                    UItintColor = Color.fromHex(hexString);
                 }
 
-                return Optional.of(new Filter(ingredient, shader, attachmentTexture, tintColor));
+                return Optional.of(new Filter(ingredient, shader, attachmentTexture, UItintColor));
             } catch (Exception e) {
                 Exposure.LOGGER.error("Filter '{}' was not loaded: {}", key, e);
                 return Optional.empty();

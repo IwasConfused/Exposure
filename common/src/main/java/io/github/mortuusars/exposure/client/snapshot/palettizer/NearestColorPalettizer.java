@@ -16,7 +16,7 @@ public class NearestColorPalettizer implements ImagePalettizer {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int color = image.getPixelARGB(x, y);
-                int colorIndex = palette.closestColorIndexTo(new Color(color));
+                int colorIndex = palette.closestColorIndexTo(Color.argb(color));
                 indexedPixels[x + y * width] = (byte)colorIndex;
             }
         }

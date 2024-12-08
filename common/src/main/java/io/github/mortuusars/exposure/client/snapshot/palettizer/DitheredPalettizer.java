@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.client.snapshot.palettizer;
 
 import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.core.image.color.NeatColor;
 import io.github.mortuusars.exposure.warehouse.PalettizedImage;
 
 /**
@@ -16,7 +16,7 @@ public class DitheredPalettizer implements ImagePalettizer {
         return palettize(getPixels(image), palette);
     }
 
-    public PalettizedImage palettize(NeatColor[][] pixels, ColorPalette palette) {
+    public PalettizedImage palettize(Color[][] pixels, ColorPalette palette) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -24,14 +24,14 @@ public class DitheredPalettizer implements ImagePalettizer {
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                NeatColor oldColor = pixels[y][x];
+                Color oldColor = pixels[y][x];
                 int colorIndex = palette.closestColorIndexTo(oldColor);
 
                 indexedPixels[y * width + x] = (byte)colorIndex;
 
-                NeatColor newColor = palette.byIndex(colorIndex).toNeatColor();
+                Color newColor = palette.byIndex(colorIndex);
 
-                NeatColor.Unbounded error = oldColor.subtractUnbounded(newColor);
+                Color.Unbounded error = oldColor.subtractUnbounded(newColor);
 
                 if (x + 1 < width) {
                     pixels[y][x + 1] = applyError(pixels[y][x + 1], error, 7. / 16);
@@ -54,19 +54,19 @@ public class DitheredPalettizer implements ImagePalettizer {
         return new PalettizedImage(width, height, indexedPixels, palette);
     }
 
-    private NeatColor applyError(NeatColor color, NeatColor.Unbounded error, double scalar) {
+    private Color applyError(Color color, Color.Unbounded error, double scalar) {
         return color.addUnbounded(error.multiply(scalar)).clamp();
     }
 
-    private NeatColor[][] getPixels(Image image) {
+    private Color[][] getPixels(Image image) {
         int width = image.getWidth();
         int height = image.getHeight();
 
-        NeatColor[][] pixels = new NeatColor[height][width];
+        Color[][] pixels = new Color[height][width];
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                pixels[y][x] = NeatColor.argb(image.getPixelARGB(x, y));
+                pixels[y][x] = Color.argb(image.getPixelARGB(x, y));
             }
         }
 

@@ -6,6 +6,8 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
 import io.github.mortuusars.exposure.core.camera.FocalRange;
+import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.data.filter.Filter;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
@@ -134,24 +136,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
         int filterY = hasLens ? 54 : 52;
         if (filterSlot.hasItem()) {
             Filters.of(filterSlot.getItem()).ifPresent(filter -> {
-                int tintRGB = filter.getTintColor();
-                float r = ((tintRGB >> 16) & 0xFF) / 255f;
-                float g = ((tintRGB >> 8) & 0xFF) / 255f;
-                float b = (tintRGB & 0xFF) / 255f;
-
-                if (isMouseOver(filterOnLens, mouseX, mouseY) || isMouseOver(this.filter, mouseX, mouseY)) {
-                    r *= 1.35f;
-                    g *= 1.35f;
-                    b *= 1.35f;
-                }
-
-                RenderSystem.setShaderColor(r, g, b, 1.0F);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-
-                ResourceLocation filterTexture = filter.getAttachmentTexture();
-                guiGraphics.blit(filterTexture, leftPos + filterX, topPos + filterY, 0, 0, 32, 32, 32, 32);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+                renderFilter(guiGraphics, mouseX, mouseY, filter, filterX, filterY);
             });
         } else if (isMouseOver(filterOnLens, mouseX, mouseY)) {
             RenderSystem.enableBlend();
@@ -166,6 +151,28 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
         if (isMouseOver(viewfinder, mouseX, mouseY) && !isMouseOver(flash, mouseX, mouseY)) {
             guiGraphics.blit(TEXTURE, leftPos + 65, topPos + 24, 42, 185, 49, 26);
         }
+    }
+
+    protected void renderFilter(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, Filter filter, int filterX, int filterY) {
+        Color tint = filter.getTintColor();
+        float a = tint.getAF();
+        float r = tint.getRF();
+        float g = tint.getGF();
+        float b = tint.getBF();
+
+        if (isMouseOver(filterOnLens, mouseX, mouseY) || isMouseOver(this.filter, mouseX, mouseY)) {
+            r *= 1.35f;
+            g *= 1.35f;
+            b *= 1.35f;
+        }
+
+        RenderSystem.setShaderColor(r, g, b, a);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+
+        ResourceLocation filterTexture = filter.getAttachmentTexture();
+        guiGraphics.blit(filterTexture, leftPos + filterX, topPos + filterY, 0, 0, 32, 32, 32, 32);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     protected boolean isMouseOver(HoveredElement element, int mouseX, int mouseY) {

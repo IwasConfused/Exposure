@@ -41,14 +41,14 @@ public class AgedHSBPixelModifier implements PixelModifier {
         blue = (int) Mth.map(blue, 0, 255, blackPoint, whitePoint);
 
         float[] baseHSB = new float[3];
-        Color.RGBtoHSB(red, green, blue, baseHSB);
+        Color.HSB.RGBtoHSB(red, green, blue, baseHSB);
 
         float[] tintHSB = new float[3];
-        Color.RGBtoHSB(FastColor.ARGB32.red(tintColor), FastColor.ARGB32.green(tintColor), FastColor.ARGB32.blue(tintColor), tintHSB);
+        Color.HSB.RGBtoHSB(FastColor.ARGB32.red(tintColor), FastColor.ARGB32.green(tintColor), FastColor.ARGB32.blue(tintColor), tintHSB);
 
         // Luma is not 100% correct. It's brighter than it would have been originally, but brighter looks better.
         int luma = Mth.clamp((int) (0.45 * red + 0.65 * green + 0.2 * blue), 0, 255);
-        int tintedRGB = Color.HSBtoRGB(tintHSB[0], tintHSB[1], luma / 255f);
+        int tintedRGB = Color.HSB.HSBtoRGB(tintHSB[0], tintHSB[1], luma / 255f);
 
         // Blend two colors together:
         int newBlue = Mth.clamp((int) Mth.lerp(tintOpacity, blue, FastColor.ARGB32.blue(tintedRGB)), 0, 255);

@@ -15,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public enum ExposureType implements StringRepresentable {
-    COLOR("color", new Color(180, 130, 110), new FilmColor(1.2F, 0.96F, 0.75F, 1.0F)),
-    BLACK_AND_WHITE("black_and_white", new Color(255, 255, 255), new FilmColor(1.0F, 1.0F, 1.0F, 1.0F));
+    COLOR("color", Color.rgb(180, 130, 110), new FilmColor(1.2F, 0.96F, 0.75F, 1.0F)),
+    BLACK_AND_WHITE("black_and_white", Color.WHITE, new FilmColor(1.0F, 1.0F, 1.0F, 1.0F));
 
     public static final Codec<ExposureType> CODEC = StringRepresentable.fromEnum(ExposureType::values);
     public static final StreamCodec<ByteBuf, ExposureType> STREAM_CODEC =
