@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceMetadata;
-import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
 import java.util.function.Function;
@@ -39,8 +38,7 @@ public class NewRenderedImageInstance implements AutoCloseable {
     protected final ResourceLocation textureLocation;
     protected RenderableImage image;
     protected DynamicTexture texture;
-    @Nullable
-    protected RenderType renderType;
+    protected final RenderType renderType;
     protected boolean requiresUpload = true;
 
     NewRenderedImageInstance(RenderableImage image) {
@@ -48,6 +46,10 @@ public class NewRenderedImageInstance implements AutoCloseable {
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
         this.textureLocation = image.getIdentifier().toResourceLocation();
         Minecraft.getInstance().getTextureManager().register(textureLocation, this.texture);
+
+        int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
+        renderType = mipmapLevel > 0 ? TEXT_MIPMAP.apply(textureLocation) : RenderType.text(textureLocation);
+
         forceUpload();
     }
 
@@ -85,10 +87,6 @@ public class NewRenderedImageInstance implements AutoCloseable {
             SpriteContents spriteContents = new SpriteContents(this.textureLocation, new FrameSize(width, height),  texture.getPixels(), ResourceMetadata.EMPTY);
             spriteContents.increaseMipLevel(mipmapLevel);
             spriteContents.uploadFirstFrame(0,0);
-            renderType = TEXT_MIPMAP.apply(spriteContents.name());
-        }
-        else {
-            renderType = RenderType.text(textureLocation);
         }
 
         this.texture.upload();
