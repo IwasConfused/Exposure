@@ -21,6 +21,10 @@ import org.joml.Matrix4f;
 
 import java.util.function.Function;
 
+/**
+ * Credits to <a href="https://github.com/Jalvaviel/MapMipMapMod">MapMipMapMod by Jalvaviel</a> for example of mipmap implementation for dynamic images.
+ * And to <a href="https://github.com/bravely-beep">bravely-beep</a> for pointing me to it.
+ */
 public class RenderedImageInstance implements AutoCloseable {
     private static final Function<ResourceLocation, RenderType> TEXT_MIPMAP = Util.memoize(texture -> RenderType.create("exposure_mipmap",
             DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
