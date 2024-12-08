@@ -1,21 +1,46 @@
 package io.github.mortuusars.exposure.client.render.image;
 
+import com.mojang.blaze3d.platform.TextureUtil;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.vertex.VertexFormat;
 import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.DynamicTexture;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceMetadata;
+import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 
+import java.util.function.Function;
+
 public class NewRenderedImageInstance implements AutoCloseable {
+    private static final Function<ResourceLocation, RenderType> TEXT_MIPMAP = Util.memoize(texture -> RenderType.create("exposure_mipmap",
+            DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
+            VertexFormat.Mode.QUADS,
+            786432,
+            false,
+            true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(RenderType.RENDERTYPE_TEXT_SHADER)
+                    .setTextureState(new RenderStateShard.TextureStateShard(texture, false, true))
+                    .setTransparencyState(RenderType.TRANSLUCENT_TRANSPARENCY)
+                    .setLightmapState(RenderType.LIGHTMAP)
+                    .createCompositeState(false)));
+
     protected final ResourceLocation textureLocation;
-    protected final RenderType renderType;
     protected RenderableImage image;
     protected DynamicTexture texture;
+    @Nullable
+    protected RenderType renderType;
     protected boolean requiresUpload = true;
 
     NewRenderedImageInstance(RenderableImage image) {
@@ -23,8 +48,7 @@ public class NewRenderedImageInstance implements AutoCloseable {
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
         this.textureLocation = image.getIdentifier().toResourceLocation();
         Minecraft.getInstance().getTextureManager().register(textureLocation, this.texture);
-        this.renderType = RenderType.text(textureLocation);
-        this.updateTexture();
+        forceUpload();
     }
 
     public void replaceData(RenderableImage image) {
@@ -44,11 +68,27 @@ public class NewRenderedImageInstance implements AutoCloseable {
         if (texture.getPixels() == null)
             return;
 
-        for (int y = 0; y < this.image.getHeight(); y++) {
-            for (int x = 0; x < this.image.getWidth(); x++) {
+        int width = this.image.getWidth();
+        int height = this.image.getHeight();
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 int ARGB = this.image.getPixelARGB(x, y);
                 this.texture.getPixels().setPixelRGBA(x, y, Color.ARGBtoABGR(ARGB)); // Texture is in ABGR format
             }
+        }
+
+        int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
+        if (mipmapLevel > 0) {
+            texture.setFilter(false,true);
+            TextureUtil.prepareImage(texture.getId(), mipmapLevel, width, height);
+            SpriteContents spriteContents = new SpriteContents(this.textureLocation, new FrameSize(width, height),  texture.getPixels(), ResourceMetadata.EMPTY);
+            spriteContents.increaseMipLevel(mipmapLevel);
+            spriteContents.uploadFirstFrame(0,0);
+            renderType = TEXT_MIPMAP.apply(spriteContents.name());
+        }
+        else {
+            renderType = RenderType.text(textureLocation);
         }
 
         this.texture.upload();
