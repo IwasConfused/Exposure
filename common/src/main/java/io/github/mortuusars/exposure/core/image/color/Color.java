@@ -227,4 +227,8 @@ public class Color {
     public static int RGBFromHex(String hexColor) {
         return new Color((int) Long.parseLong(hexColor.replace("#", ""), 16), true).getRGB();
     }
+
+    public NeatColor toNeatColor() {
+        return NeatColor.argb(a, r, g, b);
+    }
 }
