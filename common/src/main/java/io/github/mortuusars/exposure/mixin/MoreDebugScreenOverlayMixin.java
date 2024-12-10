@@ -26,7 +26,7 @@ public class MoreDebugScreenOverlayMixin {
         String str = "[<-] and [->] to switch pages";
         int strWidth = Minecraft.getInstance().font.width(str);
         int x = guiGraphics.guiWidth() / 2 - strWidth / 2;
-        guiGraphics.fill(x - 1, 1, x + strWidth + 1, 11, -1873784752);
+        guiGraphics.fill(x - 1, 1, x + strWidth + 1, 10, -1873784752);
         guiGraphics.drawString(Minecraft.getInstance().font, str, x, 2, 0xFFFFFFFF, false);
     }
 }

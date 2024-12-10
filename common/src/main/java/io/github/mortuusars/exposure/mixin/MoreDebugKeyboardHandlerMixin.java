@@ -11,10 +11,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(net.minecraft.client.KeyboardHandler.class)
 public class MoreDebugKeyboardHandlerMixin {
-    @Inject(method = "keyPress", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "keyPress", at = @At(value = "RETURN"), cancellable = true)
     private void keyPress(long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo ci) {
         if (!PlatformHelper.isInDevEnv()) return;
         if (!Minecraft.getInstance().gui.getDebugOverlay().showDebugScreen()) return;
+        if (Minecraft.getInstance().screen != null) return;
         if (action == InputConstants.PRESS && MoreDebug.onKeyPress(key, scanCode)) ci.cancel();
         if (action == InputConstants.RELEASE && MoreDebug.onKeyRelease(key, scanCode)) ci.cancel();
     }
