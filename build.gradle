@@ -101,6 +101,7 @@ subprojects {
         modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
         modCompileOnlyApi("curse.maven:jade-324717:${jade_neoforge_id}")
         modCompileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}")
+
         //modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
     }
 

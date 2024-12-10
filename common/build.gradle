@@ -6,6 +6,10 @@ loom {
     accessWidenerPath = file("src/main/resources/exposure.accesswidener")
 }
 
+configurations {
+    create("junit")
+}
+
 dependencies {
     // We depend on Fabric Loader here to use the Fabric @Environment annotations,
     // which get remapped to the correct annotations on each platform.
@@ -17,4 +21,15 @@ dependencies {
     modCompileOnlyApi "mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"
 
     modCompileOnly("curse.maven:real-camera-851574:${realcamera_neoforge_id}")
+
+    testImplementation(platform("org.junit:junit-bom:${project.property("jupiterVersion")}"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    "junit"(platform("org.junit:junit-bom:${project.property("jupiterVersion")}"))
+    "junit"("org.junit.jupiter:junit-jupiter")
+}
+
+tasks {
+    test {
+        useJUnitPlatform()
+    }
 }

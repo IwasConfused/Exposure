@@ -323,12 +323,12 @@ public class Color {
     }
 
     public record Unbounded(int r, int g, int b) {
-        public Color clamp() {
-            return Color.rgb(Color.clamp(r), Color.clamp(g), Color.clamp(b));
-        }
-
         public Color.Unbounded multiply(double scalar) {
             return new Color.Unbounded((int) (this.r * scalar), (int) (this.g * scalar), (int) (this.b * scalar));
+        }
+
+        public Color clamp() {
+            return Color.rgb(Color.clamp(r), Color.clamp(g), Color.clamp(b));
         }
     }
 }
