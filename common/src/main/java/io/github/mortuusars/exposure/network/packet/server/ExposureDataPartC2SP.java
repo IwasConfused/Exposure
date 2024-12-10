@@ -33,7 +33,7 @@ public record ExposureDataPartC2SP(ExposureIdentifier identifier, byte[] partByt
     @Override
     public boolean handle(PacketFlow flow, Player player) {
         //TODO: log player name for invalid exposures
-        ExposureServer.exposureReceiver().receivePart(identifier, partBytes, isLast);
+        ExposureServer.exposureReceiver().receivePart(player, identifier, partBytes, isLast);
         return true;
     }
 }

@@ -5,6 +5,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.ItemAbilities;
 
 import java.util.List;
@@ -37,6 +38,10 @@ public class PlatformHelperImpl {
 
     public static boolean isModLoaded(String modId) {
         return ModList.get().isLoaded(modId);
+    }
+
+    public static boolean isInDevEnv() {
+        return !FMLEnvironment.production;
     }
 
 //    public static boolean fireShutterOpeningEvent(Player player, ItemStack cameraStack, int lightLevel, boolean shouldFlashFire) {

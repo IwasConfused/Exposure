@@ -131,7 +131,7 @@ public class ColorPalette {
         return colors[index & 0xFF];
     }
 
-    public int closestColorIndexTo(Color color) {
+    public int closestTo(Color color) {
         int closest = 0;
         int closestDistance = Integer.MAX_VALUE;
 

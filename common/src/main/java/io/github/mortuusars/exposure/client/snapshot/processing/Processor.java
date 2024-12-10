@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.snapshot.processing;
 import io.github.mortuusars.exposure.client.image.CroppedImage;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ResizedImage;
-import io.github.mortuusars.exposure.util.ChromaChannel;
+import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.util.Rect2i;
 
 import java.util.function.Function;

@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
  * which doesn't sound good (and doesn't make sense either).
  */
 public class OnePerEntitySounds {
-    public static void play(@Nullable Player player, @NotNull Entity sourceEntity, SoundEvent soundEvent,
+    public static void play(@Nullable Player excludedPlayer, @NotNull Entity sourceEntity, SoundEvent soundEvent,
                             SoundSource source, float volume, float pitch) {
         if (!(sourceEntity.level() instanceof ServerLevel serverLevel)) {
             OnePerEntitySoundsClient.play(sourceEntity, soundEvent, source, volume, pitch);
@@ -29,18 +29,18 @@ public class OnePerEntitySounds {
         }
 
         Packets.sendToPlayersNear(new PlayOnePerEntitySoundS2CP(sourceEntity.getUUID(), soundEvent, source, volume, pitch),
-                serverLevel, (ServerPlayer)player, sourceEntity.getX(), sourceEntity.getY(), sourceEntity.getZ(),
+                serverLevel, (ServerPlayer)excludedPlayer, sourceEntity.getX(), sourceEntity.getY(), sourceEntity.getZ(),
                 soundEvent.getRange(1f) * 2);
     }
 
-    public static void stop(@Nullable Player player, Entity sourceEntity, SoundEvent soundEvent) {
+    public static void stop(@Nullable Player excludedPlayer, Entity sourceEntity, SoundEvent soundEvent) {
         if (!(sourceEntity.level() instanceof ServerLevel serverLevel)) {
             OnePerEntitySoundsClient.stop(sourceEntity, soundEvent);
             return;
         }
 
         Packets.sendToPlayersNear(new StopOnePerEntitySoundS2CP(sourceEntity.getUUID(), soundEvent),
-                serverLevel, (ServerPlayer)player, sourceEntity.getX(), sourceEntity.getY(), sourceEntity.getZ(),
+                serverLevel, (ServerPlayer)excludedPlayer, sourceEntity.getX(), sourceEntity.getY(), sourceEntity.getZ(),
                 soundEvent.getRange(1f) * 2);
     }
 

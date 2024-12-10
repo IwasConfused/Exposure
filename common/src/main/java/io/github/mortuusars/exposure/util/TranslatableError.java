@@ -19,10 +19,6 @@ public class TranslatableError extends Error {
         super(baseTranslationKey, cause);
     }
 
-    public static ErrorMessage create(String translationKey) {
-        return new ErrorMessage(translationKey + ".technical", translationKey + ".casual");
-    }
-
     public MutableComponent technical() {
         return Component.translatable(getMessage() + ".technical");
     }

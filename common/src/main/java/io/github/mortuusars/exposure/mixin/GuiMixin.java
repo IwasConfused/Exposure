@@ -17,8 +17,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GuiMixin {
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
     private void renderGui(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (Viewfinder.isLookingThrough())
+        if (Viewfinder.isLookingThrough()) {
             ci.cancel();
+        }
     }
 
     @Inject(method = "renderCrosshair", at = @At(value = "HEAD"), cancellable = true)

@@ -25,7 +25,7 @@ public class DitheredPalettizer implements ImagePalettizer {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Color oldColor = pixels[y][x];
-                int colorIndex = palette.closestColorIndexTo(oldColor);
+                int colorIndex = palette.closestTo(oldColor);
 
                 indexedPixels[y * width + x] = (byte)colorIndex;
 

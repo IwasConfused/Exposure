@@ -47,6 +47,11 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
+    public static boolean isInDevEnv() {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static boolean fireShutterOpeningEvent(Player player, ItemStack cameraStack, int lightLevel, boolean shouldFlashFire) {
         throw new AssertionError();
     }

@@ -28,12 +28,4 @@ public class Camera extends ItemAndStack<CameraItem> {
     public boolean isInHand() {
         return getHand().isPresent();
     }
-
-    //    public void activate(Player player) {
-//        getItem().activateViewfinder(player, getItemStack());
-//    }
-//
-//    public void deactivate(Player player) {
-//        getItem().deactivateViewfinder(player, getItemStack());
-//    }
 }

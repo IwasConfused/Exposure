@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.util;
+package io.github.mortuusars.exposure.core;
 
 import io.github.mortuusars.exposure.Exposure;
 import net.minecraft.util.StringRepresentable;

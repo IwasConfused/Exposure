@@ -9,6 +9,7 @@ import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -41,10 +42,11 @@ public class ServersideExposureReceiver {
         waitForExposure(identifier, type, creator, new CompoundTag());
     }
 
-    public void receivePart(ExposureIdentifier identifier, byte[] partBytes, boolean isLast) {
+    public void receivePart(Player player, ExposureIdentifier identifier, byte[] partBytes, boolean isLast) {
         @Nullable PendingExposure pendingExposure = pendingExposures.get(identifier);
         if (pendingExposure == null) {
-            LOGGER.warn("Received unexpected exposure part with exposureId '{}'. Discarding.", identifier);
+            LOGGER.warn("Received unexpected exposure part with id '{}' from player '{}'. Discarding.",
+                    identifier, player.getScoreboardName());
             receivedParts.remove(identifier);
             return;
         }
@@ -60,7 +62,7 @@ public class ServersideExposureReceiver {
             }
 
             ExposureClientData exposureData = ExposureClientData.STREAM_CODEC.decode(buffer);
-            receive(identifier, exposureData);
+            receive(player, identifier, exposureData);
         }
     }
 
@@ -79,12 +81,13 @@ public class ServersideExposureReceiver {
 //        }
 //    }
 
-    public void receive(ExposureIdentifier identifier, ExposureClientData exposureClientData) {
+    public void receive(Player player, ExposureIdentifier identifier, ExposureClientData exposureClientData) {
         cleanupTimedOutExposures();
 
         @Nullable PendingExposure pendingExposure = pendingExposures.get(identifier);
         if (pendingExposure == null) {
-            LOGGER.warn("Received unexpected exposure with identifier '{}'. Discarding.", identifier);
+            LOGGER.warn("Received unexpected exposure part with id '{}' from player '{}'. Discarding.",
+                    identifier, player.getScoreboardName());
             receivedParts.remove(identifier);
             return;
         }
@@ -93,6 +96,9 @@ public class ServersideExposureReceiver {
         pendingExposures.remove(identifier);
         ExposureData exposureData = createExposureData(pendingExposure, exposureClientData);
         exposureStorage.put(identifier, exposureData);
+
+        LOGGER.debug("Received and saved exposure '{}' from player '{}'.",
+                identifier, player.getScoreboardName());
     }
 
     protected ExposureData createExposureData(PendingExposure pendingExposure, ExposureClientData clientData) {
@@ -105,8 +111,8 @@ public class ServersideExposureReceiver {
             extraData.merge(extraDataFromClient);
         }
         else {
-            LOGGER.warn("Refusing to accept extraData from client: size is too large. '{}bytes'. Max: '{}'",
-                    clientDataBytesCount, MAX_CLIENT_EXTRA_DATA_SIZE);
+            LOGGER.warn("Refusing to accept extraData from client '{}': size of '{}bytes' is too large. Max: '{}'",
+                    pendingExposure.creator, clientDataBytesCount, MAX_CLIENT_EXTRA_DATA_SIZE);
         }
 
         return new ExposureData(clientData.width(), clientData.height(), clientData.pixels(),
@@ -122,7 +128,7 @@ public class ServersideExposureReceiver {
         pendingExposures.entrySet().removeIf(entry -> {
             PendingExposure exposure = entry.getValue();
             if (isTimedOut(exposure)) {
-                LOGGER.warn("Exposure with exposureId '{}' was not received in time.", entry.getKey());
+                LOGGER.warn("Exposure with id '{}' from creator '{}' was not received in time.", entry.getKey(), exposure.creator);
                 return true;
             }
             return false;

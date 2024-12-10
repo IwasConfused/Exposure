@@ -19,7 +19,7 @@ public class ImageUploader {
     public void upload(PalettizedImage image) {
         ExposureClientData exposureClientData = new ExposureClientData(image.getWidth(), image.getHeight(),
                 image.pixels(), image.palette(), false, new CompoundTag());
-        LOGGER.info("Sending exposure '{}' to server.", identifier);
+        LOGGER.debug("Sending exposure '{}' to server...", identifier);
         ExposureClient.exposureUploader().uploadToServer(identifier, exposureClientData);
     }
 }

@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class KeyboardHandlerMixin {
     @Inject(method = "keyPress", at = @At(value = "HEAD"), cancellable = true)
     private void keyPress(long windowPointer, int key, int scanCode, int action, int modifiers, CallbackInfo ci) {
-        if (KeyboardHandler.handleViewfinderKeyPress(windowPointer, key, scanCode, action, modifiers))
+        if (KeyboardHandler.handleKeyPress(windowPointer, key, scanCode, action, modifiers))
             ci.cancel();
     }
 }

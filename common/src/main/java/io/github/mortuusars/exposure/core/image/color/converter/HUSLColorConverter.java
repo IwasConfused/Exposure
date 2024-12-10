@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * From: <a href="https://github.com/hsluv/hsluv-java">Github Project Page</a>
+ * From: <a href="https://github.com/hsluv/hsluv-java">hsluv-java github repo</a>
  */
 public class HUSLColorConverter {
     private static double[][] m = new double[][]

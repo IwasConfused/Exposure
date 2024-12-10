@@ -8,7 +8,6 @@ import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -82,6 +81,10 @@ public class PlatformHelperImpl {
 
     public static boolean isModLoaded(String modId) {
         return FabricLoader.getInstance().isModLoaded(modId);
+    }
+
+    public static boolean isInDevEnv() {
+        return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
     public static boolean fireShutterOpeningEvent(Player player, ItemStack cameraStack, int lightLevel, boolean shouldFlashFire) {

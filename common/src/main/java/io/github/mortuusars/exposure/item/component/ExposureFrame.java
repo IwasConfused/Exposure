@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.util.ChromaChannel;
+import io.github.mortuusars.exposure.core.ChromaChannel;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

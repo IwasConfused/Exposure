@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 
-public class NativeImageFileSaver implements Saver {
+public class NativeImageFileSaver {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final File file;
@@ -21,7 +21,6 @@ public class NativeImageFileSaver implements Saver {
         this.file = new File(filePath);
     }
 
-    @Override
     public void save(Image image) {
         //TODO: support different image formats like in loader (buffered and native) because NativeImage does not exist on server
 
