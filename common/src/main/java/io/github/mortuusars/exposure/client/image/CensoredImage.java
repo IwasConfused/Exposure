@@ -1,12 +1,21 @@
 package io.github.mortuusars.exposure.client.image;
 
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 
 public class CensoredImage implements Image {
     private final Image image;
+    private final Integer[][] cache;
 
     public CensoredImage(Image image) {
         this.image = image;
+        float blockSize = getBlockSize();
+        this.cache = new Integer[Mth.ceil(getWidth() / blockSize)][Mth.ceil(getHeight() / blockSize)];
+    }
+
+    public int getBlockSize() {
+        int largerSize = Math.max(getWidth(), getHeight());
+        return Math.max(largerSize / 16, 1);
     }
 
     @Override
@@ -26,12 +35,20 @@ public class CensoredImage implements Image {
 
     @Override
     public int getPixelARGB(int x, int y) {
-        // Apply obscuring effect (e.g., pixelation)
-        int blockSize = 8; // Size of the pixelation block (tune for effect)
-        int blockX = (x / blockSize) * blockSize;
-        int blockY = (y / blockSize) * blockSize;
+        int blockSize = getBlockSize();
+        int blockXIndex = x / blockSize;
+        int blockYIndex = y / blockSize;
+        int blockX = blockXIndex * blockSize;
+        int blockY = blockYIndex * blockSize;
 
-        return calculateAverageBlockColor(blockX, blockY, blockSize);
+        Integer value = cache[blockXIndex][blockYIndex];
+
+        if (value == null) {
+            value = calculateAverageBlockColor(blockX, blockY, blockSize);
+            cache[blockXIndex][blockYIndex] = value;
+        }
+
+        return value;
     }
 
     private int calculateAverageBlockColor(int startX, int startY, int blockSize) {
@@ -59,6 +76,6 @@ public class CensoredImage implements Image {
         int avgG = totalG / pixelCount;
         int avgB = totalB / pixelCount;
 
-        return FastColor.ARGB32.color(avgA << 24, avgR << 16, avgG << 8, avgB);
+        return FastColor.ARGB32.color(avgA, avgR, avgG, avgB);
     }
 }

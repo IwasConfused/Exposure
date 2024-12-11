@@ -7,8 +7,6 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 public class Censor {
-//    public static final Image HIDDEN_IMAGE = ResourceImage.getOrCreate(Exposure.resource("textures/exposure/pack.png"));
-
     public static boolean isAllowedToRender(ExposureFrame frame) {
         @Nullable Player player = Minecraft.getInstance().player;
 
