@@ -3,13 +3,11 @@ package io.github.mortuusars.exposure.client.input;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.core.camera.ZoomDirection;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
-import io.github.mortuusars.exposure.util.Debug;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -17,19 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class KeyboardHandler {
     public static boolean handleKeyPress(long windowId, int key, int scanCode, int action, int modifiers) {
-//        if (PlatformHelper.isInDevEnv()) {
-//            handleDebugKeys(key, scanCode, action);
-//        }
-
         return handleCameraKeyPress(key, scanCode, action);
     }
-
-//    private static void handleDebugKeys(int key, int scanCode, int action) {
-//        if (action == InputConstants.PRESS)
-//            Debug.onKeyPress(key, scanCode);
-//        if (action == InputConstants.RELEASE)
-//            Debug.onKeyRelease(key, scanCode);
-//    }
 
     private static boolean handleCameraKeyPress(int key, int scanCode, int action) {
         Minecraft minecraft = Minecraft.getInstance();
