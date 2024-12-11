@@ -6,9 +6,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.command.ExposureCommand;
 import io.github.mortuusars.exposure.command.ShaderCommand;
-import io.github.mortuusars.exposure.command.TestCommand;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
-import io.github.mortuusars.exposure.fabric.integration.create.CreateFilmDeveloping;
 import io.github.mortuusars.exposure.fabric.resources.FabricLensesDataLoader;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.network.fabric.PacketsImpl;
@@ -52,7 +50,6 @@ public class ExposureFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
             ExposureCommand.register(dispatcher);
             ShaderCommand.register(dispatcher);
-            TestCommand.register(dispatcher);
         });
 
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(content -> {

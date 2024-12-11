@@ -3,7 +3,6 @@ package io.github.mortuusars.exposure.neoforge.event;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.command.ExposureCommand;
 import io.github.mortuusars.exposure.command.ShaderCommand;
-import io.github.mortuusars.exposure.command.TestCommand;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.lenses.LensesDataLoader;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
@@ -126,7 +125,6 @@ public class CommonEvents {
         public static void registerCommands(RegisterCommandsEvent event) {
             ExposureCommand.register(event.getDispatcher());
             ShaderCommand.register(event.getDispatcher());
-            TestCommand.register(event.getDispatcher());
         }
     }
 }
