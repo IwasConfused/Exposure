@@ -2,6 +2,9 @@ package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,18 +14,20 @@ import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 
-public record ShowExposureCommandS2CP(ExposureIdentifier identifier,
-                                      boolean negative,
-                                      boolean showLatest) implements IPacket {
+import java.util.Collections;
+import java.util.List;
+
+public record ShowExposureCommandS2CP(List<ExposureFrame> frames,
+                                      boolean negative) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("show_exposure_command");
     public static final CustomPacketPayload.Type<ShowExposureCommandS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, ShowExposureCommandS2CP> STREAM_CODEC = StreamCodec.composite(
-            ExposureIdentifier.STREAM_CODEC, ShowExposureCommandS2CP::identifier,
+            ExposureFrame.STREAM_CODEC.apply(ByteBufCodecs.list()), ShowExposureCommandS2CP::frames,
             ByteBufCodecs.BOOL, ShowExposureCommandS2CP::negative,
-            ByteBufCodecs.BOOL, ShowExposureCommandS2CP::showLatest,
             ShowExposureCommandS2CP::new
     );
 
@@ -31,12 +36,9 @@ public record ShowExposureCommandS2CP(ExposureIdentifier identifier,
         return TYPE;
     }
 
-    public static ShowExposureCommandS2CP latest(boolean negative) {
-        return new ShowExposureCommandS2CP(ExposureIdentifier.EMPTY, negative, true);
-    }
-
     public static ShowExposureCommandS2CP identifier(ExposureIdentifier identifier, boolean negative) {
-        return new ShowExposureCommandS2CP(identifier, negative, false);
+        ExposureFrame frame = new ExposureFrame(identifier, ExposureType.COLOR, Photographer.EMPTY, Collections.emptyList(), CustomData.EMPTY);
+        return new ShowExposureCommandS2CP(List.of(frame), negative);
     }
 
     @Override

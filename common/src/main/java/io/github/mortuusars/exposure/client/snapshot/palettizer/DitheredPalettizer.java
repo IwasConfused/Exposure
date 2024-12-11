@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.snapshot.palettizer;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.warehouse.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettizedImage;
 
 /**
  * Floyd-Steinberg dithering algorithm.

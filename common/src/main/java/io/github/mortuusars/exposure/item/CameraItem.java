@@ -35,7 +35,7 @@ import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.task.Task;
-import io.github.mortuusars.exposure.warehouse.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -805,6 +805,9 @@ public class CameraItem extends Item {
 //        Exposure.CriteriaTriggers.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frame, entities);
 
         addFrameToFilm(cameraStack, exposureFrame);
+
+        ExposureServer.exposureFrameHistory().add(player, exposureFrame);
+
         onFrameAdded(player, cameraStack, exposureFrame);
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
         Packets.sendToClient(new OnFrameAddedS2CP(exposureFrame), player);

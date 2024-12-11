@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.camera.capture.*;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
@@ -17,8 +16,7 @@ import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.warehouse.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
@@ -30,10 +28,11 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,50 +111,18 @@ public class ClientPacketsHandler {
                 return;
             }
 
-            boolean negative = packet.negative();
+            List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(packet.frames().stream().map(frame -> {
+                ItemStack photographStack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
+                photographStack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
+                return new ItemAndStack<PhotographItem>(photographStack);
+            }).toList());
 
-            @Nullable Screen screen;
+            Collections.reverse(photographs);
 
-            if (packet.showLatest()) {
-                screen = createLatestScreen(player, negative);
-            } else {
-                if (negative) {
-                    screen = new NegativeExposureScreen(List.of(packet.identifier()));
-                } else {
-                    ExposureFrame frame = ExposureFrame.EMPTY.toMutable().setIdentifier(packet.identifier()).toImmutable();
+            @Nullable Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
 
-                    ItemStack stack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
-                    stack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
-
-                    screen = new PhotographScreen(List.of(new ItemAndStack<>(stack)));
-                }
-            }
-
-            if (screen != null)
-                Minecraft.getInstance().setScreen(screen);
+            Minecraft.getInstance().setScreen(screen);
         });
-    }
-
-    private static @Nullable Screen createLatestScreen(Player player, boolean negative) {
-        List<ExposureFrame> latestFrames = CapturedFramesHistory.get();
-
-        if (latestFrames.isEmpty()) {
-            player.displayClientMessage(Component.translatable("command.exposure.show.latest.error.no_exposures"), false);
-            return null;
-        }
-
-        if (negative) {
-            List<ExposureIdentifier> exposures = latestFrames.stream().map(ExposureFrame::identifier).toList();
-            return new NegativeExposureScreen(exposures);
-        } else {
-            List<ItemAndStack<PhotographItem>> photographs = latestFrames.stream().map(frame -> {
-                ItemStack stack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
-                stack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
-                return new ItemAndStack<PhotographItem>(stack);
-            }).toList();
-
-            return new PhotographScreen(photographs);
-        }
     }
 
     public static void clearRenderingCache() {
@@ -178,7 +145,7 @@ public class ClientPacketsHandler {
     }
 
     public static void onFrameAdded(OnFrameAddedS2CP packet) {
-        executeOnMainThread(() -> CapturedFramesHistory.add(packet.frame()));
+//        executeOnMainThread(() -> CapturedFramesHistory.add(packet.frame()));
     }
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {

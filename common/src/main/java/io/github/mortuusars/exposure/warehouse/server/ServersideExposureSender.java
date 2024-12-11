@@ -11,7 +11,9 @@ import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 public class ServersideExposureSender {
-    public static final int TO_CLIENT_PACKET_SPLIT_THRESHOLD = 512_000; // ToServer packet size limit is 8mb
+    // Packet size limit from server to client is 8mb, but, from my limited testing, it causes problems sometimes.
+    // So we split if >512kb, it should be more than enough for regular-sized exposures.
+    public static final int TO_CLIENT_PACKET_SPLIT_THRESHOLD = 512_000;
 
     public synchronized void sendTo(ExposureIdentifier identifier, ExposureData exposureData, @NotNull ServerPlayer receivingPlayer) {
         ByteBuf buffer = Unpooled.buffer();

@@ -5,7 +5,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.capture.CapturedFramesHistory;
+import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.item.ChromaticSheetItem;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
@@ -49,12 +49,10 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
-        //TODO: per player capture history, to not mix up exposures on server.
-
-        List<ExposureFrame> frames = CapturedFramesHistory.get();
+        List<ExposureFrame> frames = ExposureServer.exposureFrameHistory().getFramesOf(player);
 
         if (frames.size() < 3) {
-            stack.sendFailure(Component.literal("Not enough frames were captured in this session. 3 is required."));
+            stack.sendFailure(Component.literal("Not enough frames captured. 3 is required."));
             return 1;
         }
 
@@ -62,9 +60,9 @@ public class DebugCommand {
             ChromaticSheetItem item = Exposure.Items.CHROMATIC_SHEET.get();
             ItemStack itemStack = new ItemStack(item);
 
-            item.addLayer(itemStack, frames.get(2)); // Red
-            item.addLayer(itemStack, frames.get(1)); // Green
-            item.addLayer(itemStack, frames.get(0)); // Blue
+            item.addLayer(itemStack, frames.get(frames.size() - 3)); // Red
+            item.addLayer(itemStack, frames.get(frames.size() - 2)); // Green
+            item.addLayer(itemStack, frames.getLast()); // Blue
 
             ItemStack photographStack = item.combineIntoPhotograph(player, itemStack);
             @Nullable ExposureFrame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);

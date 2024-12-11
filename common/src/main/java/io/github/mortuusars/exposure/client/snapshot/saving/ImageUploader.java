@@ -4,7 +4,7 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.warehouse.ExposureClientData;
-import io.github.mortuusars.exposure.warehouse.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import net.minecraft.nbt.CompoundTag;
 import org.slf4j.Logger;
 

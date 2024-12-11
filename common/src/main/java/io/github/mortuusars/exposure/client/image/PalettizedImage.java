@@ -1,7 +1,6 @@
-package io.github.mortuusars.exposure.warehouse;
+package io.github.mortuusars.exposure.client.image;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 

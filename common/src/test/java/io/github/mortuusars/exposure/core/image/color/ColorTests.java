@@ -13,8 +13,8 @@ public class ColorTests {
     @Test
     void floats() {
         Color color = Color.rgb(0xFFFFFF).multiply(0.5);
-        assertEquals(color.getRF(), 0.498f, 0.01f);
-        assertEquals(color.getGF(), 0.498f, 0.01f);
-        assertEquals(color.getBF(), 0.498f, 0.01f);
+        assertEquals(0.498f, color.getRF(), 0.01f);
+        assertEquals(0.498f, color.getGF(), 0.01f);
+        assertEquals(0.498f, color.getBF(), 0.01f);
     }
 }

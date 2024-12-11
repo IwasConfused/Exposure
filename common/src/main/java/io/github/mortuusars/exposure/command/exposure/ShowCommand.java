@@ -6,23 +6,32 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.command.suggestion.ExposureIdSuggestionProvider;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ShowExposureCommandS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ShowCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> get() {
         return Commands.literal("show")
                 .then(Commands.literal("latest")
-                        .executes(context -> latest(context.getSource(), false))
+                        .executes(context -> latest(context.getSource(), context.getSource().getPlayerOrException(), false))
+                        .then(Commands.argument("player", EntityArgument.player())
+                                .executes(context -> latest(context.getSource(), EntityArgument.getPlayer(context, "player"), false))
+                                .then(Commands.literal("negative")
+                                        .executes(context -> latest(context.getSource(), EntityArgument.getPlayer(context, "player"), true))))
                         .then(Commands.literal("negative")
-                                .executes(context -> latest(context.getSource(), true))))
+                                .executes(context -> latest(context.getSource(), context.getSource().getPlayerOrException(), true))))
                 .then(Commands.literal("id")
                         .then(Commands.argument("id", StringArgumentType.string())
                                 .suggests(new ExposureIdSuggestionProvider())
@@ -40,14 +49,15 @@ public class ShowCommand {
                                                 ResourceLocationArgument.getId(context, "path"), true)))));
     }
 
-    private static int latest(CommandSourceStack stack, boolean negative) {
-        ServerPlayer player = stack.getPlayer();
-        if (player == null) {
-            stack.sendFailure(Component.translatable("command.exposure.show.error.not_a_player"));
-            return 1;
+    private static int latest(CommandSourceStack stack, @NotNull ServerPlayer player, boolean negative) {
+        List<ExposureFrame> frames = ExposureServer.exposureFrameHistory().getFramesOf(player);
+
+        if (frames.isEmpty()) {
+            stack.sendFailure(Component.literal(player.getScoreboardName() + " has not taken any photos yet."));
+            return 0;
         }
 
-        Packets.sendToClient(ShowExposureCommandS2CP.latest(negative), player);
+        Packets.sendToClient(new ShowExposureCommandS2CP(frames, negative), player);
         return 0;
     }
 

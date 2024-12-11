@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.warehouse.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import net.minecraft.core.NonNullList;
 import org.jetbrains.annotations.Nullable;
 

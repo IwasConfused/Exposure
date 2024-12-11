@@ -11,6 +11,9 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
+import io.github.mortuusars.exposure.item.PhotographItem;
+import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
@@ -43,11 +46,11 @@ public class NegativeExposureScreen extends ZoomableScreen {
     public static final int FRAME_SIZE = 54;
 
     private final Pager pager = new Pager(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get());
-    private final List<ExposureIdentifier> exposures;
+    private final List<ItemAndStack<PhotographItem>> photographs;
 
-    public NegativeExposureScreen(List<ExposureIdentifier> exposures) {
+    public NegativeExposureScreen(List<ItemAndStack<PhotographItem>> exposures) {
         super(Component.empty());
-        this.exposures = exposures;
+        this.photographs = exposures;
         Preconditions.checkArgument(exposures != null && !exposures.isEmpty());
 
         zoom.step = 2f;
@@ -76,7 +79,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
                 button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
         addRenderableWidget(nextButton);
 
-        pager.init(exposures.size(), true, previousButton, nextButton);
+        pager.init(photographs.size(), true, previousButton, nextButton);
     }
 
     @Override
@@ -87,7 +90,8 @@ public class NegativeExposureScreen extends ZoomableScreen {
 
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
-        ExposureIdentifier exposureIdentifier = exposures.get(pager.getCurrentPage());
+        ExposureIdentifier exposureIdentifier = photographs.get(pager.getCurrentPage()).getItemStack()
+                .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY).identifier();
 
         @Nullable ExposureType type = exposureIdentifier.map(
                 id -> ExposureClient.exposureCache().getOrQuery(exposureIdentifier).map(ExposureData::getType)

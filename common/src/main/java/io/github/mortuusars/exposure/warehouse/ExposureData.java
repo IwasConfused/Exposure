@@ -123,6 +123,9 @@ public class ExposureData extends SavedData {
                         this, encodedTag.getType());
             }
         }
+        encodingResult.error().ifPresent(error -> {
+            Exposure.LOGGER.error("Cannot save FramesHistory: {}", error.message());
+        });
 
         return tag;
     }

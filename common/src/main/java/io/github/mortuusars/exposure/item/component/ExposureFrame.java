@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.ChromaChannel;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -40,8 +41,8 @@ public record ExposureFrame(ExposureIdentifier identifier,
             .apply(instance, ExposureFrame::new));
 
     @SuppressWarnings("deprecation")
-    public static final StreamCodec<RegistryFriendlyByteBuf, ExposureFrame> STREAM_CODEC = new StreamCodec<>() {
-        public @NotNull ExposureFrame decode(RegistryFriendlyByteBuf buffer) {
+    public static final StreamCodec<FriendlyByteBuf, ExposureFrame> STREAM_CODEC = new StreamCodec<>() {
+        public @NotNull ExposureFrame decode(FriendlyByteBuf buffer) {
             return new ExposureFrame(
                     ExposureIdentifier.STREAM_CODEC.decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
@@ -50,7 +51,7 @@ public record ExposureFrame(ExposureIdentifier identifier,
                     CustomData.STREAM_CODEC.decode(buffer));
         }
 
-        public void encode(RegistryFriendlyByteBuf buffer, ExposureFrame frame) {
+        public void encode(FriendlyByteBuf buffer, ExposureFrame frame) {
             ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.identifier());
             ExposureType.STREAM_CODEC.encode(buffer, frame.type());
             Photographer.STREAM_CODEC.encode(buffer, frame.photographer);
