@@ -22,6 +22,7 @@ public class PacketsImpl {
         PayloadTypeRegistry.playC2S().register(AlbumSignC2SP.TYPE, AlbumSignC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(CameraAddFrameC2SP.TYPE, CameraAddFrameC2SP.STREAM_CODEC);
+        PayloadTypeRegistry.playC2S().register(CameraSetSettingC2SP.TYPE, CameraSetSettingC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(CameraSetCompositionGuideC2SP.TYPE, CameraSetCompositionGuideC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(CameraSetFlashModeC2SP.TYPE, CameraSetFlashModeC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(CameraSetSelfieModeC2SP.TYPE, CameraSetSelfieModeC2SP.STREAM_CODEC);

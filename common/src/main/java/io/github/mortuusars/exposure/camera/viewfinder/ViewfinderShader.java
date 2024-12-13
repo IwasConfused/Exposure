@@ -5,7 +5,7 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
@@ -113,7 +113,7 @@ public class ViewfinderShader {
 
     public static void update() {
         CameraClient.getActiveCamera().ifPresentOrElse(camera -> {
-            ItemStack filterStack = camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILTER).getForReading();
+            ItemStack filterStack = camera.getItem().getAttachment(camera.getItemStack(), Attachment.FILTER).getForReading();
             Filters.getShaderOf(filterStack).ifPresentOrElse(ViewfinderShader::apply, ViewfinderShader::remove);
         }, ViewfinderShader::remove);
     }

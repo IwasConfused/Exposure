@@ -2,14 +2,11 @@ package io.github.mortuusars.exposure.menu;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import net.minecraft.core.NonNullList;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
-import net.minecraft.world.ContainerListener;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -21,14 +18,12 @@ import org.joml.Vector2i;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class CameraAttachmentsMenu extends AbstractContainerMenu {
     protected final Player player;
     protected final int cameraSlotIndex;
     protected final ItemAndStack<CameraItem> camera;
-    protected final List<AttachmentType> attachments;
+    protected final List<Attachment<?>> attachments;
 
     protected boolean clientContentsInitialized;
 
@@ -65,7 +60,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
 
         container.addListener(listener -> {
             for (int slotId = 0; slotId < listener.getContainerSize(); slotId++) {
-                AttachmentType attachmentType = attachments.get(slotId);
+                Attachment<?> attachmentType = attachments.get(slotId);
 
                 camera.getItem().setAttachment(camera.getItemStack(), attachmentType, listener.getItem(slotId));
 
@@ -93,14 +88,14 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
     }
 
     protected void addAttachmentSlots(Container container) {
-        Map<AttachmentType, Vector2i> slotPositions = Map.of(
-                AttachmentType.FILM, new Vector2i(13, 42),
-                AttachmentType.FLASH, new Vector2i(147, 15),
-                AttachmentType.LENS, new Vector2i(147, 43),
-                AttachmentType.FILTER, new Vector2i(147, 71));
+        Map<Attachment<?>, Vector2i> slotPositions = Map.of(
+                Attachment.FILM, new Vector2i(13, 42),
+                Attachment.FLASH, new Vector2i(147, 15),
+                Attachment.LENS, new Vector2i(147, 43),
+                Attachment.FILTER, new Vector2i(147, 71));
 
         for (int index = 0; index < attachments.size(); index++) {
-            AttachmentType attachmentType = attachments.get(index);
+            Attachment<?> attachmentType = attachments.get(index);
             Vector2i pos = slotPositions.get(attachmentType);
             addSlot(new FilteredSlot(container, index, pos.x(), pos.y(), 1,
                     this::onItemInSlotChanged, attachmentType.itemPredicate()));
@@ -156,7 +151,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         int slotId = args.slot().getSlotId();
         ItemStack newStack = args.newStack();
 
-        AttachmentType attachmentType = attachments.get(slotId);
+        Attachment attachmentType = attachments.get(slotId);
         camera.getItem().setAttachment(camera.getItemStack(), attachmentType, newStack);
 
         if (player.level().isClientSide() && clientContentsInitialized)

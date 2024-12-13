@@ -1,15 +1,13 @@
 package io.github.mortuusars.exposure.warehouse;
 
 import com.google.common.base.Preconditions;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.ListBuilder;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.util.ByteArrayUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -21,25 +19,10 @@ import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
 public class ExposureData extends SavedData {
-    public static final Codec<byte[]> BYTE_ARRAY_CODEC = new Codec<>() {
-        @Override
-        public <T> DataResult<T> encode(byte[] input, DynamicOps<T> ops, T prefix) {
-            ListBuilder<T> builder = ops.listBuilder();
-            for (byte inp : input)
-                builder.add(ops.createByte(inp));
-            return builder.build(prefix);
-        }
-
-        @Override
-        public <T> DataResult<Pair<byte[], T>> decode(DynamicOps<T> ops, T input) {
-            return ops.getByteBuffer(input).map(t -> Pair.of(t.array(), input));
-        }
-    };
-
     public static final Codec<ExposureData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.fieldOf("width").forGetter(ExposureData::getWidth),
             Codec.INT.fieldOf("height").forGetter(ExposureData::getHeight),
-            BYTE_ARRAY_CODEC.fieldOf("pixels").forGetter(ExposureData::getPixels),
+            ByteArrayUtils.CODEC.fieldOf("pixels").forGetter(ExposureData::getPixels),
             ColorPalette.CODEC.optionalFieldOf("palette", ColorPalette.MAP_COLORS).forGetter(ExposureData::getPalette),
             ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(ExposureData::getType),
             Codec.STRING.optionalFieldOf("creator", "").forGetter(ExposureData::getCreator),
@@ -123,16 +106,14 @@ public class ExposureData extends SavedData {
                         this, encodedTag.getType());
             }
         }
-        encodingResult.error().ifPresent(error -> {
-            Exposure.LOGGER.error("Cannot save FramesHistory: {}", error.message());
-        });
+        encodingResult.error().ifPresent(error -> Exposure.LOGGER.error("Cannot save FramesHistory: {}", error.message()));
 
         return tag;
     }
 
     public static SavedData.Factory<ExposureData> factory() {
         return new SavedData.Factory<>(() -> {
-            throw new IllegalStateException("Should never create an empty exposure saved data");
+            throw new IllegalStateException("Should never create an empty exposure saved encodedValue");
         }, ExposureData::load, null);
     }
 

@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core.camera;
+package io.github.mortuusars.exposure.core.camera.component;
 
 import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.Exposure;
@@ -20,6 +20,8 @@ public record CompositionGuide(String name) {
     public MutableComponent translate() {
         return Component.translatable("gui." + Exposure.ID + ".composition_guide." + name);
     }
+
+    //TODO: store texture location and get from here
 
     public ResourceLocation buttonSpriteLocation() {
         return Exposure.resource("camera/composition_guide/button/" + name);

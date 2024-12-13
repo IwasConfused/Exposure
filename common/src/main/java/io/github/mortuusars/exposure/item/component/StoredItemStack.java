@@ -6,6 +6,9 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
+import java.util.Optional;
+import java.util.function.BiFunction;
+
 /**
  * ItemStacks cannot be used in DataComponentType because when the stack is changed
  * - it can change in more than one place and cause unwanted side effects.
@@ -17,8 +20,9 @@ import net.minecraft.world.item.ItemStack;
  */
 public class StoredItemStack {
     public static final StoredItemStack EMPTY = new StoredItemStack(ItemStack.EMPTY);
+
     public static final Codec<StoredItemStack> CODEC = ItemStack.CODEC.xmap(StoredItemStack::new, StoredItemStack::getForReading);
-    public static final StreamCodec<? super RegistryFriendlyByteBuf, StoredItemStack> STREAM_CODEC = ItemStack.STREAM_CODEC.map(
+    public static final StreamCodec<RegistryFriendlyByteBuf, StoredItemStack> STREAM_CODEC = ItemStack.STREAM_CODEC.map(
             StoredItemStack::new,
             StoredItemStack::getForReading
     );
@@ -43,6 +47,13 @@ public class StoredItemStack {
 
     public boolean isEmpty() {
         return getForReading().isEmpty();
+    }
+
+    public <T extends Item, R> Optional<R> mapIf(Class<T> clazz, BiFunction<T, ItemStack, R> func) {
+        if (getForReading().getItem().getClass().equals(clazz)) {
+            return Optional.ofNullable(func.apply(clazz.cast(getForReading().getItem()), getForReading()));
+        }
+        return Optional.empty();
     }
 
     @Override

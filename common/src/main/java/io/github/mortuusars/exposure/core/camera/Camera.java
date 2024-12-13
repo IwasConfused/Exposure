@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core;
+package io.github.mortuusars.exposure.core.camera;
 
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;

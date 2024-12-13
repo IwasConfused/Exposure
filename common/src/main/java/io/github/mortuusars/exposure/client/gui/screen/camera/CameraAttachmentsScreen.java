@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
-import io.github.mortuusars.exposure.core.camera.FocalRange;
+import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.data.filter.Filter;
 import io.github.mortuusars.exposure.data.lenses.Lenses;

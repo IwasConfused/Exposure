@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 /**
- * Can be used to add additional data to the frame or modify existing data. This data can be used in advancements or quests afterward.
+ * Can be used to add additional encodedValue to the frame or modify existing encodedValue. This encodedValue can be used in advancements or quests afterward.
  * Fired only on the server side.
  */
 public interface ModifyFrameDataCallback {

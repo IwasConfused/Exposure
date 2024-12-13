@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.item.component.camera;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
+import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -34,6 +34,6 @@ public record ShutterState(boolean isOpen, long openedAtTick, ShutterSpeed shutt
     public long getCloseTick() {
         // Shutter speed duration should be at least 2 ticks so that it has enough time to be visible in a viewfinder overlay.
         // It probably would've been better to implement this prolongation client-side, but this is
-        return isOpen ? openedAtTick + Math.max(shutterSpeed.getDurationTicks(), 2) : -1;
+        return isOpen ? openedAtTick + shutterSpeed.getDurationTicks() : -1;
     }
 }

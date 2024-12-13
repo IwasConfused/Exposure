@@ -40,7 +40,7 @@ public class ClientTrichromeFinalizer {
                 new ImageUploader(item.getIdentifier()).upload(palettizedImage);
                 palettizedImage.close();
             } else {
-                Exposure.LOGGER.error("Cannot create chromatic image with id {}. Couldn't get all images data in time. {}",
+                Exposure.LOGGER.error("Cannot create chromatic image with id {}. Couldn't get all images encodedValue in time. {}",
                         item.getIdentifier(), String.join(", ", item.getLayers().stream().map(ExposureIdentifier::toString).toList()));
             }
 

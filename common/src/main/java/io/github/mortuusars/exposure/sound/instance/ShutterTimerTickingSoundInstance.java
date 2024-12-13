@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.sound.instance;
 
-import io.github.mortuusars.exposure.core.Camera;
-import io.github.mortuusars.exposure.core.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.component.camera.ShutterState;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
@@ -51,7 +51,7 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
             for (int i = 0; i < 9; i++) {
                 ItemStack stack = player.getInventory().getItem(i);
                 if (stack.getItem() instanceof CameraItem cameraItem) {
-                    ShutterState hotbarShutterState = cameraItem.getShutterState(stack);
+                    ShutterState hotbarShutterState = cameraItem.getShutter().getState(stack);
                     if (hotbarShutterState.isOpen() && hotbarShutterState.shutterSpeed().shouldCauseTickingSound()) {
                         volume = fullVolume * 0.35f;
                         return;
@@ -65,7 +65,7 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
         else {
             volume = fullVolume;
             Camera camera = cameraOpt.get();
-            ShutterState shutterState = camera.getItem().getShutterState(camera.getItemStack());
+            ShutterState shutterState = camera.getItem().getShutter().getState(camera.getItemStack());
             if (!shutterState.isOpen() || !shutterState.shutterSpeed().shouldCauseTickingSound()) {
                 stop();
             }

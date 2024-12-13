@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core;
+package io.github.mortuusars.exposure.core.camera;
 
 import com.mojang.serialization.Codec;
 import io.netty.buffer.ByteBuf;

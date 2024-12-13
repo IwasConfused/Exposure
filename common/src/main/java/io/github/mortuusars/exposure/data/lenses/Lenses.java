@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.data.lenses;
 
-import io.github.mortuusars.exposure.core.camera.FocalRange;
+import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.client.SyncLensesDataS2CP;

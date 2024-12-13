@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -49,7 +49,7 @@ public class FrameCounterButton extends ImageButton {
 
     protected String createText() {
         return CameraClient.getActiveCamera().map(camera -> {
-            ItemStack filmStack = camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILM).getForReading();
+            ItemStack filmStack = camera.getItem().getAttachment(camera.getItemStack(), Attachment.FILM).getForReading();
             if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
                 return "-";
             }
@@ -62,7 +62,7 @@ public class FrameCounterButton extends ImageButton {
 
     protected boolean cameraHasFilmRoll() {
         return CameraClient.getActiveCamera().map(camera ->
-                        camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILM).isEmpty())
+                        camera.getItem().getAttachment(camera.getItemStack(), Attachment.FILM).isEmpty())
                 .orElse(false);
     }
 }

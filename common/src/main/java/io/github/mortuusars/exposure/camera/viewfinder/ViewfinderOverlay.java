@@ -6,8 +6,8 @@ import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.Camera;
-import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
@@ -131,7 +131,7 @@ public class ViewfinderOverlay {
         drawRect(poseStack, -9999, opening.y + opening.height, width + 9999, height + 9999, backgroundColor);
 
         // Shutter
-        if (cameraItem.getShutterState(cameraStack).isOpen()) {
+        if (cameraItem.getShutter().isOpen(cameraStack)) {
             drawRect(poseStack, opening.x, opening.y, opening.x + opening.width, opening.y + opening.height, 0xfa1f1d1b);
         }
 
@@ -156,7 +156,7 @@ public class ViewfinderOverlay {
     }
 
     private static void renderIcons(PoseStack poseStack, CameraItem cameraItem, ItemStack cameraStack) {
-        ItemStack filmStack = cameraItem.getAttachment(cameraStack, AttachmentType.FILM).getForReading();
+        ItemStack filmStack = cameraItem.getAttachment(cameraStack, Attachment.FILM).getForReading();
 
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmRollItem) || !filmRollItem.canAddFrame(filmStack)) {
             renderNoFilmIcon(poseStack);

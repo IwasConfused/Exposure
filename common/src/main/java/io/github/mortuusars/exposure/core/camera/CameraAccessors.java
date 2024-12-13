@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core;
+package io.github.mortuusars.exposure.core.camera;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
@@ -38,7 +38,7 @@ public class CameraAccessors {
 
     public static CameraAccessor register(ResourceLocation id, CameraAccessor accessor) {
         Preconditions.checkState(!ACCESSORS.containsKey(id),
-                "Camera Accessor with exposureId '{}' is already registered.", id);
+                "Camera Accessor with id '{}' is already registered.", id);
         ACCESSORS.put(id, accessor);
         return accessor;
     }

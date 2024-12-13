@@ -9,14 +9,16 @@ import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
-import io.github.mortuusars.exposure.core.Camera;
-import io.github.mortuusars.exposure.core.CameraAccessor;
-import io.github.mortuusars.exposure.core.CameraAccessors;
-import io.github.mortuusars.exposure.core.camera.*;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.CameraAccessors;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderOverlay;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
+import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.item.FilmRollItem;
+import io.github.mortuusars.exposure.item.part.Attachment;
+import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
@@ -56,9 +58,6 @@ public class CameraControlsScreen extends Screen {
 
     public static final ResourceLocation SEPARATOR_SPRITE = Exposure.resource("camera_controls/button_separator");
 
-    public static final WidgetSprites SEPARATOR_SPRITES = new WidgetSprites(
-            Exposure.resource("camera_controls/button_separator"),
-            Exposure.resource("camera_controls/button_separator"));
     public static final int SEPARATOR_WIDTH = 1;
     private static final int BUTTON_HEIGHT = 18;
     private static final int SIDE_BUTTONS_WIDTH = 48;
@@ -73,12 +72,9 @@ public class CameraControlsScreen extends Screen {
 
     public CameraControlsScreen() {
         super(Component.empty());
-
         camera = CameraClient.getActiveCamera().orElseThrow();
-
         player = Minecraft.getInstance().player;
         level = Minecraft.getInstance().level;
-        assert level != null;
         openedAtTimestamp = level.getGameTime();
     }
 
@@ -151,7 +147,7 @@ public class CameraControlsScreen extends Screen {
                 .orElse(ShutterSpeed.DEFAULT);
 
         return new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, shutterSpeeds,
-                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> CameraClient.setShutterSpeed(speed))
+                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> CameraClient.setSetting(Setting.SHUTTER_SPEED, speed))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.shutter_speed.tooltip")))
                 .setTooltips(Collections.emptyMap())
                 .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
@@ -166,7 +162,7 @@ public class CameraControlsScreen extends Screen {
                 Exposure.resource("camera_controls/composition_guide/" + guide.name()));
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
-                currentGuide, spritesFunc, (b, guide) -> CameraClient.setCompositionGuide(guide))
+                currentGuide, spritesFunc, (b, guide) -> CameraClient.setSetting(Setting.COMPOSITION_GUIDE, guide))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")))
                 .setTooltips(guide -> Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")
                         .append(CommonComponents.NEW_LINE)
@@ -183,7 +179,7 @@ public class CameraControlsScreen extends Screen {
                 Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
-                currentMode, spritesFunc, (b, mode) -> CameraClient.setFlashMode(mode))
+                currentMode, spritesFunc, (b, mode) -> CameraClient.setSetting(Setting.FLASH_MODE, mode))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")))
                 .setTooltips(mode -> Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")
                         .append(CommonComponents.NEW_LINE)
@@ -193,7 +189,7 @@ public class CameraControlsScreen extends Screen {
 
     protected boolean cameraHasAvailableFrames() {
         return CameraClient.getActiveCamera().map(camera -> {
-            ItemStack filmStack = camera.getItem().getAttachment(camera.getItemStack(), AttachmentType.FILM).getForReading();
+            ItemStack filmStack = camera.getItem().getAttachment(camera.getItemStack(), Attachment.FILM).getForReading();
             if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
                 return false;
             }

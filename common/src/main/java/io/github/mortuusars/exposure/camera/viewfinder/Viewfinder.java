@@ -5,9 +5,10 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.Camera;
-import io.github.mortuusars.exposure.core.camera.FocalRange;
-import io.github.mortuusars.exposure.core.camera.ZoomDirection;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.component.FocalRange;
+import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
+import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.util.Fov;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -72,8 +73,7 @@ public class Viewfinder {
     }
 
     public static void updateSelfieMode() {
-        boolean inSelfieMode = Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT;
-        CameraClient.setSelfieMode(inSelfieMode);
+        CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
     }
 
     public static void close() {
@@ -121,7 +121,7 @@ public class Viewfinder {
         double focalLength = Fov.fovToFocalLength(fov);
 
         double zoom = Mth.map(focalLength, focalRange.min(), focalRange.max(), 0.0, 1.0);
-        CameraClient.setZoom(zoom);
+        CameraClient.setSetting(Setting.ZOOM, zoom);
     }
 
     public static double modifyMouseSensitivity(double sensitivity) {

@@ -14,16 +14,20 @@ import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
-import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.CameraAccessors;
+import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.core.frame.FrameProperties;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
-import io.github.mortuusars.exposure.item.component.camera.ShutterState;
+import io.github.mortuusars.exposure.item.part.Attachment;
+import io.github.mortuusars.exposure.item.part.Shutter;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
@@ -38,7 +42,6 @@ import io.github.mortuusars.exposure.util.task.Task;
 import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
@@ -92,13 +95,22 @@ public class CameraItem extends Item {
     private static final String ID_OF_LAST_SHOT = "id_of_last_shot";
     private static final String FLASH_HAS_FIRED_ON_LAST_SHOT = "flash_has_fired_on_last_shot";
     private static final String LIGHT_LEVEL_ON_LAST_SHOT = "light_level_on_last_shot";
+
     protected final List<ShutterSpeed> shutterSpeeds;
-    protected final List<AttachmentType> attachments;
+    protected final List<Attachment<?>> attachments;
+    protected final Shutter shutter;
 
     public CameraItem(Properties properties) {
         super(properties);
         shutterSpeeds = ImmutableList.copyOf(defineShutterSpeeds());
         attachments = ImmutableList.copyOf(defineAttachments());
+
+        shutter = new Shutter();
+        shutter.onClosed(this::onShutterClosed);
+    }
+
+    public Shutter getShutter() {
+        return shutter;
     }
 
     protected List<ShutterSpeed> defineShutterSpeeds() {
@@ -120,12 +132,12 @@ public class CameraItem extends Item {
         );
     }
 
-    protected List<AttachmentType> defineAttachments() {
+    protected List<Attachment<?>> defineAttachments() {
         return List.of(
-                AttachmentType.FILM,
-                AttachmentType.FLASH,
-                AttachmentType.LENS,
-                AttachmentType.FILTER
+                Attachment.FILM,
+                Attachment.FLASH,
+                Attachment.LENS,
+                Attachment.FILTER
         );
     }
 
@@ -133,7 +145,7 @@ public class CameraItem extends Item {
         return shutterSpeeds;
     }
 
-    public List<AttachmentType> getAttachments(ItemStack stack) {
+    public List<Attachment<?>> getAttachments(ItemStack stack) {
         return attachments;
     }
 
@@ -146,7 +158,7 @@ public class CameraItem extends Item {
         if (!Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get())
             return false;
 
-        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        StoredItemStack filmStack = getAttachment(stack, Attachment.FILM);
         return filmStack.getItem() instanceof FilmRollItem filmRollItem && filmRollItem.isBarVisible(filmStack.getForReading());
     }
 
@@ -154,7 +166,7 @@ public class CameraItem extends Item {
         if (!Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get())
             return 0;
 
-        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        StoredItemStack filmStack = getAttachment(stack, Attachment.FILM);
         return filmStack.getItem() instanceof FilmRollItem filmRollItem ? filmRollItem.getBarWidth(filmStack.getForReading()) : 0;
     }
 
@@ -162,7 +174,7 @@ public class CameraItem extends Item {
         if (!Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get())
             return 0;
 
-        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+        StoredItemStack filmStack = getAttachment(stack, Attachment.FILM);
         return filmStack.getItem() instanceof FilmRollItem filmRollItem ? filmRollItem.getBarColor(filmStack.getForReading()) : 0;
     }
 
@@ -176,7 +188,7 @@ public class CameraItem extends Item {
                 return false; // Cannot open when not in player's inventory
             }
 
-            if (player.isCreative() && player.level().isClientSide()/* && CameraItemClientExtensions.isInCreativeModeInventory()*/) {
+            if (player.isCreative() && player.level().isClientSide()) {
                 Packets.sendToServer(new OpenCameraAttachmentsInCreativePacketC2SP(slot.getContainerSlot()));
                 return true;
             }
@@ -210,7 +222,7 @@ public class CameraItem extends Item {
 //        }
 
         if (Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get()) {
-            for (AttachmentType attachmentType : getAttachments(stack)) {
+            for (Attachment attachmentType : getAttachments(stack)) {
                 if (attachmentType.matches(otherStack)) {
                     StoredItemStack currentAttachment = getAttachment(stack, attachmentType);
 
@@ -237,7 +249,7 @@ public class CameraItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag tooltipFlag) {
         if (Config.Client.CAMERA_SHOW_FILM_FRAMES_IN_TOOLTIP.get()) {
-            StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+            StoredItemStack filmStack = getAttachment(stack, Attachment.FILM);
             if (filmStack.getItem() instanceof FilmRollItem filmRollItem) {
                 int exposed = filmRollItem.getStoredFramesCount(filmStack.getForReading());
                 int max = filmRollItem.getMaxFrameCount(filmStack.getForReading());
@@ -301,51 +313,51 @@ public class CameraItem extends Item {
         }
     }
 
-    public ShutterState getShutterState(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.SHUTTER_STATE, ShutterState.CLOSED);
-    }
-
-    public void setShutterState(ItemStack stack, ShutterState shutterState) {
-        stack.set(Exposure.DataComponents.SHUTTER_STATE, shutterState);
-    }
-
-    public void openShutter(ServerPlayer player, Level level, ItemStack stack, ShutterSpeed shutterSpeed) {
-        setShutterState(stack, ShutterState.open(level.getGameTime(), shutterSpeed));
-
-        player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-        playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_OPEN.get(), 0.7f, 1.1f, 0.2f);
-    }
-
-    public void closeShutter(ServerPlayer player, ItemStack stack) {
-        ShutterState shutterState = getShutterState(stack);
-        long closeTick = shutterState.getCloseTick();
-        boolean flashHasFired = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe()
-                .getBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT);
-
-        setShutterState(stack, ShutterState.closed());
-
-        if (player.level().getGameTime() - closeTick >= 30 /*1.5 sec*/) {
-            // Skip effects if shutter was closed long ago
-            return;
-        }
-
-        player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
-        player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2); // TODO: long cooldown if projector used
-        playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
-
-        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
-        if (filmStack.getItem() instanceof FilmRollItem filmRollItem) {
-            float fullness = filmRollItem.getFullness(filmStack.getForReading());
-            boolean isFull = fullness == 1f;
-
-            if (isFull)
-                OnePerEntitySounds.play(null, player, Exposure.SoundEvents.FILM_ADVANCE_LAST.get(), SoundSource.PLAYERS, 1f, 1f);
-            else {
-                OnePerEntitySounds.play(null, player, Exposure.SoundEvents.FILM_ADVANCING.get(), SoundSource.PLAYERS,
-                        1f, 0.9f + 0.1f * fullness);
-            }
-        }
-    }
+//    public ShutterState getShutterState(ItemStack stack) {
+//        return stack.getOrDefault(Exposure.DataComponents.SHUTTER_STATE, ShutterState.CLOSED);
+//    }
+//
+//    public void setShutterState(ItemStack stack, ShutterState shutterState) {
+//        stack.set(Exposure.DataComponents.SHUTTER_STATE, shutterState);
+//    }
+//
+//    public void openShutter(ServerPlayer player, Level level, ItemStack stack, ShutterSpeed shutterSpeed) {
+//        setShutterState(stack, ShutterState.open(level.getGameTime(), shutterSpeed));
+//
+//        player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+//        playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_OPEN.get(), 0.7f, 1.1f, 0.2f);
+//    }
+//
+//    public void closeShutter(ServerPlayer player, ItemStack stack) {
+//        ShutterState shutterState = getShutterState(stack);
+//        long closeTick = shutterState.getCloseTick();
+//        boolean flashHasFired = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).getUnsafe()
+//                .getBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT);
+//
+//        setShutterState(stack, ShutterState.closed());
+//
+//        if (player.level().getGameTime() - closeTick >= 30 /*1.5 sec*/) {
+//            // Skip effects if shutter was closed long ago
+//            return;
+//        }
+//
+//        player.gameEvent(GameEvent.ITEM_INTERACT_FINISH);
+//        player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2); // TODO: long cooldown if projector used
+//        playCameraSound(null, player, Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
+//
+//        StoredItemStack filmStack = getAttachment(stack, AttachmentType.FILM);
+//        if (filmStack.getItem() instanceof FilmRollItem filmRollItem) {
+//            float fullness = filmRollItem.getFullness(filmStack.getForReading());
+//            boolean isFull = fullness == 1f;
+//
+//            if (isFull)
+//                OnePerEntitySounds.play(null, player, Exposure.SoundEvents.FILM_ADVANCE_LAST.get(), SoundSource.PLAYERS, 1f, 1f);
+//            else {
+//                OnePerEntitySounds.play(null, player, Exposure.SoundEvents.FILM_ADVANCING.get(), SoundSource.PLAYERS,
+//                        1f, 0.9f + 0.1f * fullness);
+//            }
+//        }
+//    }
 
     @SuppressWarnings("unused")
     public void playCameraSound(@NotNull Player player, SoundEvent sound, float volume, float pitch) {
@@ -368,14 +380,9 @@ public class CameraItem extends Item {
         if (!(entity instanceof Player player))
             return;
 
-        ShutterState shutterState = getShutterState(stack);
+        getShutter().tick(entity, stack);
 
-        if (shutterState.isOpen() && level.getGameTime() >= shutterState.getCloseTick() && player instanceof ServerPlayer serverPlayer) {
-            closeShutter(serverPlayer, stack);
-        }
-
-        boolean inOffhand = player.getOffhandItem().equals(stack);
-        boolean inHand = isSelected || inOffhand;
+        boolean inHand = isSelected || player.getOffhandItem().equals(stack);
 
         if (!inHand) {
             deactivate(player, stack);
@@ -384,6 +391,24 @@ public class CameraItem extends Item {
                 Viewfinder.close();
             }
         }
+    }
+
+    protected void onShutterClosed(Entity entity, ItemStack stack) {
+        // cooldowns:
+        // default   : 2
+        // flash     : 10
+        // projector : 20
+
+//        player.getCooldowns().addCooldown(this, flashHasFired ? 10 : 2);
+
+        Attachment.FILM.ifPresent(stack, (filmItem, filmStack) -> {
+            SoundEvent sound = filmItem.isFull(filmStack)
+                    ? Exposure.SoundEvents.FILM_ADVANCE_LAST.get()
+                    : Exposure.SoundEvents.FILM_ADVANCE.get();
+
+            float fullness = filmItem.getFullness(filmStack);
+            OnePerEntitySounds.play(null, entity, sound, SoundSource.PLAYERS, 1f, 0.9f + 0.1f * fullness);
+        });
     }
 
     @Override
@@ -428,7 +453,7 @@ public class CameraItem extends Item {
         boolean active = isActive(cameraStack);
 
         if (!active && player.isSecondaryUseActive()) {
-            if (getShutterState(cameraStack).isOpen()) {
+            if (getShutter().isOpen(cameraStack)) {
                 player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.shutter_open")
                         .withStyle(ChatFormatting.RED), true);
                 return InteractionResult.FAIL;
@@ -447,6 +472,7 @@ public class CameraItem extends Item {
             player.getCooldowns().addCooldown(this, 4);
 
             if (player.level().isClientSide) {
+                //TODO: Pass accessor as method argument, remove all dependency on hand so we can use it not only in hand
                 CameraClient.setActiveCameraAccessor(CameraAccessors.ofHand(hand));
                 // Release use key after activating. Otherwise, if right click is still held - camera will take a shot
                 CameraItemClientExtensions.releaseUseButton();
@@ -462,7 +488,7 @@ public class CameraItem extends Item {
 
         playCameraSound(null, player, Exposure.SoundEvents.CAMERA_RELEASE_BUTTON_CLICK.get(), 0.3f, 1f, 0.1f);
 
-        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
+        StoredItemStack filmStack = getAttachment(cameraStack, Attachment.FILM);
 
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem))
             return InteractionResult.FAIL;
@@ -472,7 +498,7 @@ public class CameraItem extends Item {
         if (!exposingFilm)
             return InteractionResult.FAIL;
 
-        if (getShutterState(cameraStack).isOpen())
+        if (getShutter().isOpen(cameraStack))
             return InteractionResult.FAIL;
 
         int lightLevel = LevelUtil.getLightLevelAt(player.level(), player.blockPosition());
@@ -484,7 +510,7 @@ public class CameraItem extends Item {
 
         boolean flashHasFired = shouldFlashFire && tryUseFlash(player, cameraStack);
 
-        openShutter(serverPlayer, player.level(), cameraStack, shutterSpeed);
+        getShutter().open(player, cameraStack, shutterSpeed);
 
         if (shutterSpeed.shouldCauseTickingSound()) {
             OnePerEntitySounds.playShutterTickingSoundForAllPlayers(CameraAccessors.ofHand(hand), player,
@@ -493,6 +519,7 @@ public class CameraItem extends Item {
 
         ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(player);
 
+        //TODO: create persistent serverside camera object and reference it from id stored in item
         CustomData.update(DataComponents.CUSTOM_DATA, cameraStack, tag -> {
             tag.putString(ID_OF_LAST_SHOT, exposureIdentifier.getId());
             tag.putBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT, flashHasFired);
@@ -528,7 +555,7 @@ public class CameraItem extends Item {
         }
 
         CompoundTag extraData = new CompoundTag();
-        //TODO: get additional data event
+        //TODO: get additional encodedValue event
 
         return new ExposureFrameClientData(projectingFile, entitiesInFrame, extraData);
     }
@@ -575,11 +602,11 @@ public class CameraItem extends Item {
     }
 
     protected void startCapture(Player player, ItemStack cameraStack, ExposureIdentifier identifier, boolean flashHasFired) {
-        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
+        StoredItemStack filmStack = getAttachment(cameraStack, Attachment.FILM);
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
             throw new IllegalStateException("Film attachment should be present at the time of capture.");
         }
-        StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
+        StoredItemStack filterStack = getAttachment(cameraStack, Attachment.FILTER);
 
         int frameSize = filmItem.getFrameSize(filmStack.getForReading());
         float brightnessStops = getShutterSpeed(cameraStack).getStopsDifference(ShutterSpeed.DEFAULT);
@@ -669,11 +696,11 @@ public class CameraItem extends Item {
         String id = cameraCustomData.getString(ID_OF_LAST_SHOT);
 
         if (StringUtil.isBlank(id)) {
-            Exposure.LOGGER.error("Cannot create an exposure frame: '{}' is missing or empty in Camera's custom data.", ID_OF_LAST_SHOT);
+            Exposure.LOGGER.error("Cannot create an exposure frame: '{}' is missing or empty in Camera's custom encodedValue.", ID_OF_LAST_SHOT);
             return ExposureFrame.EMPTY;
         }
 
-        ExposureType type = getAttachment(cameraStack, AttachmentType.FILM).getItem() instanceof IFilmItem filmItem
+        ExposureType type = getAttachment(cameraStack, Attachment.FILM).getItem() instanceof IFilmItem filmItem
                 ? filmItem.getType() : ExposureType.COLOR;
 
         ExposureFrameTag tag = new ExposureFrameTag();
@@ -688,10 +715,10 @@ public class CameraItem extends Item {
         }
 
         // Chromatic channel
-        ChromaChannel.fromFilterStack(getAttachment(cameraStack, AttachmentType.FILTER).getForReading())
+        ChromaChannel.fromFilterStack(getAttachment(cameraStack, Attachment.FILTER).getForReading())
                 .ifPresent(channel -> tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
-        // Do not forget to add data from client:
+        // Do not forget to add encodedValue from client:
         if (dataFromClient.loadingFromFile()) {
             tag.putBoolean(ExposureFrameTag.FROM_FILE, true);
         }
@@ -815,7 +842,7 @@ public class CameraItem extends Item {
 
     public void onFrameAdded(ServerPlayer player, ItemStack cameraStack, ExposureFrame frame) {
         if (frame.isFromFile()) {
-            StoredItemStack filterStack = getAttachment(cameraStack, AttachmentType.FILTER);
+            StoredItemStack filterStack = getAttachment(cameraStack, Attachment.FILTER);
             if (!filterStack.isEmpty() && filterStack.getItem() instanceof InterplanarProjectorItem interplanarProjector) {
                 // Player sound to other players
                 player.level().playSound(player, player, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(),
@@ -824,14 +851,14 @@ public class CameraItem extends Item {
                 if (interplanarProjector.isConsumable(filterStack.getForReading())) {
                     ItemStack filterCopy = filterStack.getCopy();
                     filterCopy.shrink(1);
-                    setAttachment(cameraStack, AttachmentType.FILTER, filterCopy);
+                    setAttachment(cameraStack, Attachment.FILTER, filterCopy);
                 }
             }
         }
     }
 
     public void addFrameToFilm(ItemStack cameraStack, ExposureFrame frame) {
-        StoredItemStack filmStack = getAttachment(cameraStack, AttachmentType.FILM);
+        StoredItemStack filmStack = getAttachment(cameraStack, Attachment.FILM);
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
             Exposure.LOGGER.error("Cannot add frame: no film attachment is present.");
             return;
@@ -840,11 +867,11 @@ public class CameraItem extends Item {
         ItemStack filmStackCopy = filmStack.getCopy();
 
         filmItem.addFrame(filmStackCopy, frame);
-        setAttachment(cameraStack, AttachmentType.FILM, filmStackCopy);
+        setAttachment(cameraStack, Attachment.FILM, filmStackCopy);
     }
 
     protected boolean shouldFlashFire(Player player, ItemStack cameraStack, int lightLevel) {
-        if (!hasFlash(cameraStack))
+        if (Attachment.FLASH.isPresent(cameraStack))
             return false;
 
         return switch (getFlashMode(cameraStack)) {
@@ -980,91 +1007,35 @@ public class CameraItem extends Item {
         return -1;
     }
 
-    /**
-     * This method is called only server-side and then gets sent to client in a packet
-     * because gameTime is different between client/server, and IDs won't match.
-     */
-    protected String createExposureId(Player player) {
-        // Filtering just to avoid potential issues with IDs. Although it may not be necessary anymore
-        String playerName = Util.sanitizeName(player.getName().getString(), ResourceLocation::validPathChar);
-        return playerName + "_" + player.level().getGameTime();
-    }
+    public FocalRange getFocalRange(ItemStack stack) {
+        return Attachment.LENS.mapOrElse(stack, FocalRange::ofStack, this::getDefaultFocalRange);
 
-    public FocalRange getFocalRange(ItemStack cameraStack) {
-        StoredItemStack lensStack = getAttachment(cameraStack, AttachmentType.LENS);
-        if (lensStack.isEmpty()) {
-            return getDefaultFocalRange();
-        }
-
-        return FocalRange.ofStack(lensStack.getForReading());
     }
 
     public FocalRange getDefaultFocalRange() {
         return FocalRange.getDefault();
     }
 
-    /**
-     * This method is called after we take a screenshot. Otherwise, due to the delays (flash, etc) - particles would be captured as well.
-     */
-    @SuppressWarnings("unused")
-//    public void spawnClientsideFlashEffects(@NotNull Player player, ItemStack cameraStack) {
-//        Preconditions.checkState(player.level().isClientSide, "This methods should only be called client-side.");
-//        Level level = player.level();
-//        Vec3 pos = player.position();
-//        Vec3 lookAngle = player.getLookAngle();
-//        pos = pos.add(0, 1, 0).add(lookAngle.multiply(0.8f, 0.8f, 0.8f));
-//
-//        RandomSource r = level.getRandom();
-//        for (int i = 0; i < 3; i++) {
-//            level.addParticle(ParticleTypes.END_ROD,
-//                    pos.x + r.nextFloat() - 0.5f,
-//                    pos.y + r.nextFloat() + 0.15f,
-//                    pos.z + r.nextFloat() - 0.5f,
-//                    lookAngle.x * 0.025f + r.nextFloat() * 0.025f,
-//                    lookAngle.y * 0.025f + r.nextFloat() * 0.025f,
-//                    lookAngle.z * 0.025f + r.nextFloat() * 0.025f);
-//        }
-//    }
 
-    // ---
 
-//    @SuppressWarnings("unused")
-//    public List<AttachmentType> getAttachmentTypes(ItemStack cameraStack) {
-//        return ATTACHMENTS;
-//    }
-//
-//    public Optional<AttachmentType> getAttachmentTypeForSlot(ItemStack cameraStack, int slot) {
-//        List<AttachmentType> attachmentTypes = getAttachmentTypes(cameraStack);
-//        for (AttachmentType attachmentType : attachmentTypes) {
-//            if (attachmentType.slot() == slot)
-//                return Optional.of(attachmentType);
-//        }
-//        return Optional.empty();
-//    }
-//
-//    public Optional<ItemAndStack<FilmRollItem>> getFilm(ItemStack cameraStack) {
-//        return getAttachment(cameraStack, FILM_ATTACHMENT).map(ItemAndStack::new);
-//    }
-//
-//    public void setFilm(ItemStack cameraStack, ItemStack filmStack) {
-//        setAttachment(cameraStack, FILM_ATTACHMENT, filmStack);
-//    }
-
-    public StoredItemStack getAttachment(ItemStack stack, AttachmentType type) {
-        return stack.getOrDefault(type.componentType(), StoredItemStack.EMPTY);
+    public StoredItemStack getAttachment(ItemStack stack, Attachment type) {
+        return stack.getOrDefault(type.component(), StoredItemStack.EMPTY);
     }
 
-    public void setAttachment(ItemStack stack, AttachmentType type, ItemStack attachmentStack) {
+    public void setAttachment(ItemStack stack, Attachment type, ItemStack attachmentStack) {
         if (attachmentStack.isEmpty()) {
-            stack.remove(type.componentType());
+            stack.remove(type.component());
         } else {
-            stack.set(type.componentType(), new StoredItemStack(attachmentStack));
+            stack.set(type.component(), new StoredItemStack(attachmentStack));
         }
     }
 
     public boolean hasFlash(ItemStack stack) {
-        return !getAttachment(stack, AttachmentType.FLASH).isEmpty();
+        return !getAttachment(stack, Attachment.FLASH).isEmpty();
     }
+
+
+
 
     public ShutterSpeed getShutterSpeed(ItemStack stack) {
         return stack.getOrDefault(Exposure.DataComponents.SHUTTER_SPEED, ShutterSpeed.DEFAULT);
@@ -1081,6 +1052,10 @@ public class CameraItem extends Item {
     public void setZoomPercentage(ItemStack stack, double zoom) {
         stack.set(Exposure.DataComponents.ZOOM, Mth.clamp(zoom, 0.0, 1.0));
     }
+
+//    public <T> T getSetting(ItemStack stack, DataComponentType<T> type) {
+//        return stack.getOrDefault(type, null);
+//    }
 
     public CompositionGuide getCompositionGuide(ItemStack stack) {
         return stack.getOrDefault(Exposure.DataComponents.COMPOSITION_GUIDE, CompositionGuides.NONE);
@@ -1099,7 +1074,7 @@ public class CameraItem extends Item {
     }
 
     public boolean hasInterplanarProjectorFilter(ItemStack cameraStack) {
-        StoredItemStack filter = getAttachment(cameraStack, AttachmentType.FILTER);
+        StoredItemStack filter = getAttachment(cameraStack, Attachment.FILTER);
         return !filter.isEmpty() && filter.getItem() instanceof InterplanarProjectorItem;
     }
 

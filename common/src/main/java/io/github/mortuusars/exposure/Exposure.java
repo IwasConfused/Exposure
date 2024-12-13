@@ -7,15 +7,15 @@ import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.block.LightroomBlock;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
-import io.github.mortuusars.exposure.core.camera.CompositionGuide;
-import io.github.mortuusars.exposure.core.camera.FlashMode;
+import io.github.mortuusars.exposure.core.camera.component.CompositionGuide;
+import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.command.argument.ExposureLookArgument;
 import io.github.mortuusars.exposure.command.argument.ExposureSizeArgument;
 import io.github.mortuusars.exposure.command.argument.ShaderLocationArgument;
 import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.InterplanarProjectorMode;
-import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
+import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
@@ -186,7 +186,7 @@ public class Exposure {
 
     public static class DataComponents {
         // Camera State
-        public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_viewfinder_active",
+        public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_active",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 
         public static final DataComponentType<Boolean> SELFIE_MODE = Register.dataComponentType("camera_selfie_mode",
@@ -223,7 +223,7 @@ public class Exposure {
 
         // Film
         public static final DataComponentType<Integer> FILM_FRAME_COUNT = Register.dataComponentType("film_frame_count",
-                arg -> arg.persistent(ExtraCodecs.intRange(1, 512)).networkSynchronized(ByteBufCodecs.VAR_INT));
+                arg -> arg.persistent(ExtraCodecs.intRange(1, 256)).networkSynchronized(ByteBufCodecs.VAR_INT));
 
         public static final DataComponentType<Integer> FILM_FRAME_SIZE = Register.dataComponentType("film_frame_size",
                 arg -> arg.persistent(ExtraCodecs.intRange(1, 2048)).networkSynchronized(ByteBufCodecs.VAR_INT));
@@ -307,7 +307,7 @@ public class Exposure {
         public static final Supplier<SoundEvent> SHUTTER_OPEN = register("item", "camera.shutter_open");
         public static final Supplier<SoundEvent> SHUTTER_CLOSE = register("item", "camera.shutter_close");
         public static final Supplier<SoundEvent> SHUTTER_TICKING = register("item", "camera.shutter_ticking");
-        public static final Supplier<SoundEvent> FILM_ADVANCING = register("item", "camera.film_advance");
+        public static final Supplier<SoundEvent> FILM_ADVANCE = register("item", "camera.film_advance");
         public static final Supplier<SoundEvent> FILM_ADVANCE_LAST = register("item", "camera.film_advance_last");
         public static final Supplier<SoundEvent> FILM_REMOVED = register("item", "camera.film_removed");
         public static final Supplier<SoundEvent> CAMERA_GENERIC_CLICK = register("item", "camera.generic_click");

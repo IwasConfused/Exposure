@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.sound;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.PlayOnePerEntityShutterTickingSoundS2CP;
 import io.github.mortuusars.exposure.network.packet.client.PlayOnePerEntitySoundS2CP;

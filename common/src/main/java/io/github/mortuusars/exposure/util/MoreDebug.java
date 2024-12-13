@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.core.camera.NewAccessor;
-import io.github.mortuusars.exposure.core.camera.component.AttachmentType;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.mixin.MoreDebugScreenRenderLinesInvoker;
@@ -57,7 +57,7 @@ public class MoreDebug {
         List<String> lines = new ArrayList<>();
 
         lines.add(NewAccessor.MAIN_HAND.ifInHandOfType(Minecraft.getInstance().player, CameraItem.class)
-                .map(inHand -> inHand.map((item, stack, hand) -> item.getAttachment(stack, AttachmentType.FILM)
+                .map(inHand -> inHand.map((item, stack, hand) -> item.getAttachment(stack, Attachment.FILM)
                         .mapIf(FilmRollItem.class, (fItem, fStack) ->
                                 fItem.getStoredFramesCount(fStack) + "/" + fItem.getMaxFrameCount(fStack))
                         .orElse("No Film in " + hand)))

@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.integration.compat;
 
 import com.xtracr.realcamera.compat.DisableHelper;
 import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.CameraAccessor;
-import io.github.mortuusars.exposure.core.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 

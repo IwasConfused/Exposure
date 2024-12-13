@@ -44,9 +44,10 @@ public abstract class MultiPlayerGameModeMixin {
         }
 
         return CameraClient.getActiveCamera().map(camera ->
-                camera.getHand().map(hand -> {
-                    gameMode.useItem(player, hand);
-                    return true;
-                }).orElse(false)).orElse(false);
+                        camera.getHand().map(hand -> {
+                            gameMode.useItem(player, hand);
+                            return true;
+                        }).orElse(false))
+                .orElse(false);
     }
 }

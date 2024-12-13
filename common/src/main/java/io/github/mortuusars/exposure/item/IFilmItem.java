@@ -48,4 +48,8 @@ public interface IFilmItem {
     default float getFullness(ItemStack stack) {
         return (float) getStoredFramesCount(stack) / getMaxFrameCount(stack);
     }
+
+    default boolean isFull(ItemStack stack) {
+        return getStoredFramesCount(stack) == getMaxFrameCount(stack);
+    }
 }

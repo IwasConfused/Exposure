@@ -6,7 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.FocalRange;
+import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -32,7 +32,7 @@ public class LensesDataLoader extends SimpleJsonResourceReloadListener {
         Exposure.LOGGER.info("Loading exposure lenses:");
 
         for (var entry : content.entrySet()) {
-            // Lenses should be in data/exposure/lens folder.
+            // Lenses should be in encodedValue/exposure/lens folder.
             // Excluding other namespaces because it potentially can cause conflicts,
             // if some other mod adds their own type of 'lens'.
             if (!entry.getKey().getNamespace().equals(Exposure.ID))

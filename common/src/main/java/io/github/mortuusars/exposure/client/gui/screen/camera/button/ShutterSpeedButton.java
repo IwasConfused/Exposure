@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
-import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
+import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

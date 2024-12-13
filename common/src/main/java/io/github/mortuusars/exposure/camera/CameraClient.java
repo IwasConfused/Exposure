@@ -3,10 +3,11 @@ package io.github.mortuusars.exposure.camera;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.*;
-import io.github.mortuusars.exposure.core.camera.CompositionGuide;
-import io.github.mortuusars.exposure.core.camera.FlashMode;
-import io.github.mortuusars.exposure.core.camera.ShutterSpeed;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.CameraAccessors;
 import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.*;
 import net.minecraft.client.Minecraft;
@@ -21,15 +22,6 @@ import java.util.Optional;
 
 public class CameraClient {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    public static void handleExposureStart(Player player, CameraAccessor cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
-        cameraAccessor.getCamera(player).ifPresentOrElse(camera -> {
-                    camera.getItem().exposeFrameClientside(player, camera, identifier, flashHasFired);
-                    ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
-                    Packets.sendToServer(new CameraAddFrameC2SP(cameraAccessor, clientSideFrameData));
-                },
-                () -> LOGGER.error("Cannot start exposure '{}': cannot get a camera with accessor '{}'.", identifier, cameraAccessor));
-    }
 
     @Nullable
     private static CameraAccessor activeCameraAccessor;
@@ -97,58 +89,19 @@ public class CameraClient {
         Viewfinder.close();
     }
 
-    public static void setZoom(double zoom) {
-        if (getActiveCameraAccessor() == null) {
-            return;
-        }
-
-        getActiveCamera().ifPresent(camera -> {
-            camera.getItem().setZoomPercentage(camera.getItemStack(), zoom);
-            Packets.sendToServer(new CameraSetZoomC2SP(getActiveCameraAccessor(), zoom));
-        });
+    public static void handleExposureStart(Player player, CameraAccessor cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
+        cameraAccessor.getCamera(player).ifPresentOrElse(camera -> {
+                    camera.getItem().exposeFrameClientside(player, camera, identifier, flashHasFired);
+                    ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
+                    Packets.sendToServer(new CameraAddFrameC2SP(cameraAccessor, clientSideFrameData));
+                },
+                () -> LOGGER.error("Cannot start exposure '{}': cannot get a camera with accessor '{}'.", identifier, cameraAccessor));
     }
 
-    public static void setShutterSpeed(ShutterSpeed shutterSpeed) {
-        if (getActiveCameraAccessor() == null) {
-            return;
+    public static <T> void setSetting(Setting<T> setting, T value) {
+        @Nullable CameraAccessor accessor = getActiveCameraAccessor();
+        if (accessor != null) {
+            setting.setAndSync(accessor, Minecraft.getInstance().player, value);
         }
-
-        getActiveCamera().ifPresent(camera -> {
-            camera.getItem().setShutterSpeed(camera.getItemStack(), shutterSpeed);
-            Packets.sendToServer(new CameraSetShutterSpeedC2SP(getActiveCameraAccessor(), shutterSpeed));
-        });
-    }
-
-    public static void setFlashMode(FlashMode flashMode) {
-        if (getActiveCameraAccessor() == null) {
-            return;
-        }
-
-        getActiveCamera().ifPresent(camera -> {
-            camera.getItem().setFlashMode(camera.getItemStack(), flashMode);
-            Packets.sendToServer(new CameraSetFlashModeC2SP(getActiveCameraAccessor(), flashMode));
-        });
-    }
-
-    public static void setCompositionGuide(CompositionGuide guide) {
-        if (getActiveCameraAccessor() == null) {
-            return;
-        }
-
-        getActiveCamera().ifPresent(camera -> {
-            camera.getItem().setCompositionGuide(camera.getItemStack(), guide);
-            Packets.sendToServer(new CameraSetCompositionGuideC2SP(getActiveCameraAccessor(), guide));
-        });
-    }
-
-    public static void setSelfieMode(boolean inSelfieMode) {
-        if (getActiveCameraAccessor() == null) {
-            return;
-        }
-
-        getActiveCamera().ifPresent(camera -> {
-            camera.getItem().setSelfieModeWithEffects(Minecraft.getInstance().player, camera.getItemStack(), inSelfieMode);
-            Packets.sendToServer(new CameraSetSelfieModeC2SP(getActiveCameraAccessor(), inSelfieMode));
-        });
     }
 }

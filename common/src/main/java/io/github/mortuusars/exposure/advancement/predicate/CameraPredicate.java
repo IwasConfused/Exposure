@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.advancement.predicate;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.core.camera.AttachmentType;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.advancements.critereon.ItemPredicate;
@@ -37,9 +37,9 @@ public record CameraPredicate(Optional<ItemPredicate> camera,
         return (camera.isEmpty() || camera.get().test(stack))
                 && (shutterSpeedMS.isEmpty() || shutterSpeedMS.get().matches(item.getShutterSpeed(stack).getDurationMilliseconds()))
                 && (focalLength.isEmpty() || focalLength.get().matches(Mth.ceil(item.getZoomPercentage(stack))))
-                && (film.isEmpty() || film.get().test(item.getAttachment(stack, AttachmentType.FILM).getForReading()))
-                && (flash.isEmpty() || flash.get().test(item.getAttachment(stack, AttachmentType.FLASH).getForReading()))
-                && (lens.isEmpty() || lens.get().test(item.getAttachment(stack, AttachmentType.LENS).getForReading()))
-                && (filter.isEmpty() || filter.get().test(item.getAttachment(stack, AttachmentType.FILTER).getForReading()));
+                && (film.isEmpty() || film.get().test(item.getAttachment(stack, Attachment.FILM).getForReading()))
+                && (flash.isEmpty() || flash.get().test(item.getAttachment(stack, Attachment.FLASH).getForReading()))
+                && (lens.isEmpty() || lens.get().test(item.getAttachment(stack, Attachment.LENS).getForReading()))
+                && (filter.isEmpty() || filter.get().test(item.getAttachment(stack, Attachment.FILTER).getForReading()));
     }
 }

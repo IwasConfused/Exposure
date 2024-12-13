@@ -61,9 +61,9 @@ public record ExposureFrame(ExposureIdentifier identifier,
     };
 
     /**
-     * Creates an object that has data common to all objects in a provided list.
+     * Creates an object that has encodedValue common to all objects in a provided list.
      * If value is not common to all objects - default value will be used.
-     * Currently used in Chromatic Sheets to create a common data object from 3 layers.
+     * Currently used in Chromatic Sheets to create a common encodedValue object from 3 layers.
      */
     public static ExposureFrame intersect(ExposureIdentifier identifier, List<ExposureFrame> objects) {
         Mutable result = EMPTY.toMutable().setIdentifier(identifier);

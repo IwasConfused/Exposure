@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 
 public class AttachmentSound {
     public static final AttachmentSound NONE = new AttachmentSound(null, 0f, 0f, null, 0f, 0f);
-    public static final AttachmentSound FILM = new AttachmentSound(Exposure.SoundEvents.FILM_ADVANCING, 0.9f, 1f,
+    public static final AttachmentSound FILM = new AttachmentSound(Exposure.SoundEvents.FILM_ADVANCE, 0.9f, 1f,
             Exposure.SoundEvents.FILM_REMOVED, 0.7f, 1f);
     public static final AttachmentSound FLASH = new AttachmentSound(Exposure.SoundEvents.CAMERA_GENERIC_CLICK, 0.6f, 1.15f,
             Exposure.SoundEvents.CAMERA_GENERIC_CLICK, 0.35f, 0.95f);

@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core.camera;
+package io.github.mortuusars.exposure.core.camera.component;
 
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;

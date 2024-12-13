@@ -66,7 +66,7 @@ public class DebugCommand {
 
             ItemStack photographStack = item.combineIntoPhotograph(player, itemStack);
             @Nullable ExposureFrame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
-            Preconditions.checkState(frame != null, "Frame data cannot be empty after combining.");
+            Preconditions.checkState(frame != null, "Frame encodedValue cannot be empty after combining.");
 
             Packets.sendToClient(new OnFrameAddedS2CP(frame), player); // Adds frame to client CapturedFramesHistory
 
