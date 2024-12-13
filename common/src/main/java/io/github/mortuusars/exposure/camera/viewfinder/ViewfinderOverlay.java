@@ -7,10 +7,12 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.camera.CameraClient;
 import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
+import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
 import net.minecraft.client.Minecraft;
@@ -144,8 +146,7 @@ public class ViewfinderOverlay {
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, 0f, 0f, 1f, 0f, 1f);
 
         // Guide
-        RenderSystem.setShaderTexture(0, Exposure.resource("textures/gui/viewfinder/composition_guide/" +
-                cameraItem.getCompositionGuide(cameraStack).name() + ".png"));
+        RenderSystem.setShaderTexture(0, Setting.COMPOSITION_GUIDE.getOrDefault(cameraStack, CompositionGuides.NONE).overlayTextureLocation());
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, -1f, 0f, 1f, 0f, 1f);
 
         if (!(minecraft.screen instanceof CameraControlsScreen)) {
@@ -156,7 +157,7 @@ public class ViewfinderOverlay {
     }
 
     private static void renderIcons(PoseStack poseStack, CameraItem cameraItem, ItemStack cameraStack) {
-        ItemStack filmStack = cameraItem.getAttachment(cameraStack, Attachment.FILM).getForReading();
+        ItemStack filmStack = Attachment.FILM.get(cameraStack).getForReading();
 
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmRollItem) || !filmRollItem.canAddFrame(filmStack)) {
             renderNoFilmIcon(poseStack);

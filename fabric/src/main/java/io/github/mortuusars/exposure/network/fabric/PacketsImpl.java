@@ -23,11 +23,6 @@ public class PacketsImpl {
         PayloadTypeRegistry.playC2S().register(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(CameraAddFrameC2SP.TYPE, CameraAddFrameC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(CameraSetSettingC2SP.TYPE, CameraSetSettingC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraSetCompositionGuideC2SP.TYPE, CameraSetCompositionGuideC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraSetFlashModeC2SP.TYPE, CameraSetFlashModeC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraSetSelfieModeC2SP.TYPE, CameraSetSelfieModeC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraSetShutterSpeedC2SP.TYPE, CameraSetShutterSpeedC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraSetZoomC2SP.TYPE, CameraSetZoomC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(DeactivateCameraC2SP.TYPE, DeactivateCameraC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(ExposureDataPartC2SP.TYPE, ExposureDataPartC2SP.STREAM_CODEC);
         PayloadTypeRegistry.playC2S().register(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, OpenCameraAttachmentsInCreativePacketC2SP.STREAM_CODEC);
@@ -36,11 +31,6 @@ public class PacketsImpl {
         ServerPlayNetworking.registerGlobalReceiver(AlbumSignC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(AlbumSyncNoteC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(CameraAddFrameC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetCompositionGuideC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetFlashModeC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetSelfieModeC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetShutterSpeedC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(CameraSetZoomC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(DeactivateCameraC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(ExposureDataPartC2SP.TYPE, PacketsImpl::handleServerboundPacket);
         ServerPlayNetworking.registerGlobalReceiver(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, PacketsImpl::handleServerboundPacket);

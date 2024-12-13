@@ -79,6 +79,17 @@ public record Attachment<T extends Item>(ResourceLocation id,
     /**
      * ItemStacks gotten from this method should NOT be modified under any circumstances.
      */
+    public Attachment<T> ifPresent(ItemStack stack, Consumer<ItemStack> ifPresent) {
+        StoredItemStack storedItemStack = get(stack);
+        if (itemType.isInstance(storedItemStack.getItem())) {
+            ifPresent.accept(storedItemStack.getForReading());
+        }
+        return this;
+    }
+
+    /**
+     * ItemStacks gotten from this method should NOT be modified under any circumstances.
+     */
     public Attachment<T> orElse(ItemStack stack, Runnable orElse) {
         StoredItemStack storedItemStack = get(stack);
         if (!itemType.isInstance(storedItemStack.getItem())) {

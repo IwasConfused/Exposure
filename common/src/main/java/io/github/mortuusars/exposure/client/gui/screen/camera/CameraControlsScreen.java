@@ -16,7 +16,6 @@ import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderOverlay;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.core.camera.component.*;
-import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.ChatFormatting;
@@ -31,7 +30,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
@@ -97,7 +95,7 @@ public class CameraControlsScreen extends Screen {
         leftPos = (width - 256) / 2;
         topPos = Math.round(ViewfinderOverlay.opening.y + ViewfinderOverlay.opening.height - 256);
 
-        boolean hasFlash = camera.getItem().hasFlash(camera.getItemStack());
+        boolean hasFlash = Attachment.FLASH.isPresent(camera.getItemStack());
 
         int elementX = leftPos + 128 - (SIDE_BUTTONS_WIDTH + 1 + BUTTON_WIDTH + 1 + (hasFlash ? BUTTON_WIDTH + 1 : 0) + SIDE_BUTTONS_WIDTH) / 2;
         int elementY = topPos + 238;
@@ -143,7 +141,7 @@ public class CameraControlsScreen extends Screen {
                 .map(camera -> camera.getItem().getShutterSpeeds(camera.getItemStack()))
                 .orElse(List.of(ShutterSpeed.DEFAULT));
         ShutterSpeed currentShutterSpeed = CameraClient.getActiveCamera()
-                .map(camera -> camera.getItem().getShutterSpeed(camera.getItemStack()))
+                .map(camera -> Setting.SHUTTER_SPEED.getOrDefault(camera.getItemStack(), ShutterSpeed.DEFAULT))
                 .orElse(ShutterSpeed.DEFAULT);
 
         return new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, shutterSpeeds,
@@ -156,7 +154,7 @@ public class CameraControlsScreen extends Screen {
     protected @NotNull Button createCompositionGuideButton() {
         List<CompositionGuide> guides = CompositionGuides.getGuides();
         CompositionGuide currentGuide = CameraClient.getActiveCamera()
-                .map(camera -> camera.getItem().getCompositionGuide(camera.getItemStack()))
+                .map(camera -> Setting.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack(), CompositionGuides.NONE))
                 .orElse(CompositionGuides.NONE);
         Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/composition_guide/" + guide.name()));
@@ -173,7 +171,7 @@ public class CameraControlsScreen extends Screen {
     protected @NotNull Button createFlashModeButton() {
         List<FlashMode> modes = Arrays.asList(FlashMode.values());
         FlashMode currentMode = CameraClient.getActiveCamera()
-                .map(camera -> camera.getItem().getFlashMode(camera.getItemStack()))
+                .map(camera -> Setting.FLASH_MODE.getOrDefault(camera.getItemStack(), FlashMode.OFF))
                 .orElse(FlashMode.OFF);
         Function<FlashMode, WidgetSprites> spritesFunc = mode -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
@@ -185,16 +183,6 @@ public class CameraControlsScreen extends Screen {
                         .append(CommonComponents.NEW_LINE)
                         .append(mode.translate().withStyle(ChatFormatting.GRAY)))
                 .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
-    }
-
-    protected boolean cameraHasAvailableFrames() {
-        return CameraClient.getActiveCamera().map(camera -> {
-            ItemStack filmStack = camera.getItem().getAttachment(camera.getItemStack(), Attachment.FILM).getForReading();
-            if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
-                return false;
-            }
-            return filmItem.canAddFrame(filmStack);
-        }).orElse(false);
     }
 
     protected void addSeparator(int x, int y) {

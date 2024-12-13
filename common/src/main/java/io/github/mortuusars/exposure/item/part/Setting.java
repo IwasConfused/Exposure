@@ -81,7 +81,11 @@ public record Setting<T>(DataComponentType<T> component) {
     }
 
     public Setting<T> set(ItemStack stack, T value) {
-        stack.set(component, value);
+        if (value instanceof Boolean bool && !bool) {
+            stack.remove(component);
+        } else {
+            stack.set(component, value);
+        }
         return this;
     }
 

@@ -63,11 +63,6 @@ public class CommonEvents {
             registrar.playToServer(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToServer(CameraAddFrameC2SP.TYPE, CameraAddFrameC2SP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToServer(CameraSetSettingC2SP.TYPE, CameraSetSettingC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraSetCompositionGuideC2SP.TYPE, CameraSetCompositionGuideC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraSetFlashModeC2SP.TYPE, CameraSetFlashModeC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraSetSelfieModeC2SP.TYPE, CameraSetSelfieModeC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraSetShutterSpeedC2SP.TYPE, CameraSetShutterSpeedC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraSetZoomC2SP.TYPE, CameraSetZoomC2SP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToServer(DeactivateCameraC2SP.TYPE, DeactivateCameraC2SP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToServer(ExposureDataPartC2SP.TYPE, ExposureDataPartC2SP.STREAM_CODEC, PacketsImpl::handle);
             registrar.playToServer(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, OpenCameraAttachmentsInCreativePacketC2SP.STREAM_CODEC, PacketsImpl::handle);

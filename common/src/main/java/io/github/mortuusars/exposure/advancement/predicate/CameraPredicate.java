@@ -34,12 +34,12 @@ public record CameraPredicate(Optional<ItemPredicate> camera,
         ItemStack stack = cameraItemAndStack.getItemStack();
         CameraItem item = cameraItemAndStack.getItem();
 
-        return (camera.isEmpty() || camera.get().test(stack))
-                && (shutterSpeedMS.isEmpty() || shutterSpeedMS.get().matches(item.getShutterSpeed(stack).getDurationMilliseconds()))
-                && (focalLength.isEmpty() || focalLength.get().matches(Mth.ceil(item.getZoomPercentage(stack))))
-                && (film.isEmpty() || film.get().test(item.getAttachment(stack, Attachment.FILM).getForReading()))
-                && (flash.isEmpty() || flash.get().test(item.getAttachment(stack, Attachment.FLASH).getForReading()))
-                && (lens.isEmpty() || lens.get().test(item.getAttachment(stack, Attachment.LENS).getForReading()))
-                && (filter.isEmpty() || filter.get().test(item.getAttachment(stack, Attachment.FILTER).getForReading()));
+        return (camera.isEmpty() || camera.get().test(stack));
+//                && (shutterSpeedMS.isEmpty() || shutterSpeedMS.get().matches(item.getShutterSpeed(stack).getDurationMilliseconds()))
+//                && (focalLength.isEmpty() || focalLength.get().matches(Mth.ceil(item.getZoomPercentage(stack)))) //TODO wrong
+//                && (film.isEmpty() || film.get().test(item.getAttachment(stack, Attachment.FILM).getForReading()))
+//                && (flash.isEmpty() || flash.get().test(item.getAttachment(stack, Attachment.FLASH).getForReading()))
+//                && (lens.isEmpty() || lens.get().test(item.getAttachment(stack, Attachment.LENS).getForReading()))
+//                && (filter.isEmpty() || filter.get().test(item.getAttachment(stack, Attachment.FILTER).getForReading()));
     }
 }

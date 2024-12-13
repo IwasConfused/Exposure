@@ -21,7 +21,9 @@ public record CompositionGuide(String name) {
         return Component.translatable("gui." + Exposure.ID + ".composition_guide." + name);
     }
 
-    //TODO: store texture location and get from here
+    public ResourceLocation overlayTextureLocation() {
+        return Exposure.resource("textures/gui/viewfinder/composition_guide/" + name + ".png");
+    }
 
     public ResourceLocation buttonSpriteLocation() {
         return Exposure.resource("camera/composition_guide/button/" + name);

@@ -113,7 +113,7 @@ public class ViewfinderShader {
 
     public static void update() {
         CameraClient.getActiveCamera().ifPresentOrElse(camera -> {
-            ItemStack filterStack = camera.getItem().getAttachment(camera.getItemStack(), Attachment.FILTER).getForReading();
+            ItemStack filterStack = Attachment.FILTER.get(camera.getItemStack()).getForReading();
             Filters.getShaderOf(filterStack).ifPresentOrElse(ViewfinderShader::apply, ViewfinderShader::remove);
         }, ViewfinderShader::remove);
     }

@@ -48,7 +48,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
 
     protected @NotNull SimpleContainer createAttachmentsContainer(int cameraSlotIndex) {
         ItemStack[] attachmentItems = attachments.stream()
-                .map(type -> camera.getItem().getAttachment(camera.getItemStack(), type).getCopy())
+                .map(attachment -> attachment.get(camera.getItemStack()).getCopy())
                 .toArray(ItemStack[]::new);
 
         SimpleContainer container = new SimpleContainer(attachmentItems) {
@@ -58,11 +58,11 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
             }
         };
 
-        container.addListener(listener -> {
-            for (int slotId = 0; slotId < listener.getContainerSize(); slotId++) {
-                Attachment<?> attachmentType = attachments.get(slotId);
+        container.addListener(c -> {
+            for (int slotId = 0; slotId < c.getContainerSize(); slotId++) {
+                Attachment<?> attachment = attachments.get(slotId);
 
-                camera.getItem().setAttachment(camera.getItemStack(), attachmentType, listener.getItem(slotId));
+                attachment.set(camera.getItemStack(), c.getItem(slotId));
 
                 if (!player.level().isClientSide() && player.isCreative()) {
                     // Fixes item not updating properly when not in "Inventory" tab of creative inventory
@@ -151,11 +151,11 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         int slotId = args.slot().getSlotId();
         ItemStack newStack = args.newStack();
 
-        Attachment attachmentType = attachments.get(slotId);
-        camera.getItem().setAttachment(camera.getItemStack(), attachmentType, newStack);
+        Attachment<?> attachment = attachments.get(slotId);
+        attachment.set(camera.getItemStack(), newStack);
 
         if (player.level().isClientSide() && clientContentsInitialized)
-            attachmentType.sound().playOnePerPlayer(player, newStack.isEmpty());
+            attachment.sound().playOnePerPlayer(player, newStack.isEmpty());
 
         if (!player.level().isClientSide() && player.isCreative()) {
             // Fixes item not updating properly when not in "Inventory" tab of creative inventory
