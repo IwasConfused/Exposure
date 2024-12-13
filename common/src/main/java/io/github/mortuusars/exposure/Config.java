@@ -188,7 +188,7 @@ public class Config {
         public static final ModConfigSpec.BooleanValue DISABLE_POST_EFFECT;
 
         // VIEWFINDER
-        public static final ModConfigSpec.DoubleValue VIEWFINDER_ZOOM_SENSITIVITY_MODIFIER;
+        public static final ModConfigSpec.DoubleValue VIEWFINDER_ZOOM_SENSITIVITY_INFLUENCE;
         public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_BACKGROUND_COLOR;
         public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_FONT_MAIN_COLOR;
         public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_FONT_SECONDARY_COLOR;
@@ -256,9 +256,12 @@ public class Config {
 
                 {
                     builder.push("Viewfinder");
-                    VIEWFINDER_ZOOM_SENSITIVITY_MODIFIER = builder
-                            .comment("Mouse sensitivity modifier per 5 degrees of fov. Set to 0 to disable sensitivity changes.")
-                            .defineInRange("ZoomSensitivityModifier", 0.048, 0.0, 1.0);
+                    VIEWFINDER_ZOOM_SENSITIVITY_INFLUENCE = builder
+                            .comment("How much zooming influences mouse sensitivity." +
+                                    "0 - no change to sensitivity.",
+                                    "1 - full effect.",
+                                    "Default: 0.75")
+                            .defineInRange("ZoomSensitivityInfluence", 0.75, 0.0, 1.0);
                     VIEWFINDER_BACKGROUND_COLOR = builder.define("BackgroundColorHex", "FA1F1D1B");
                     VIEWFINDER_FONT_MAIN_COLOR = builder.define("FontMainColorHex", "FF2B2622");
                     VIEWFINDER_FONT_SECONDARY_COLOR = builder.define("FontSecondaryColorHex", "FF7A736C");

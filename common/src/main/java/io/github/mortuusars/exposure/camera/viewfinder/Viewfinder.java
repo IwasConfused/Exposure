@@ -124,13 +124,19 @@ public class Viewfinder {
         CameraClient.setSetting(Setting.ZOOM, zoom);
     }
 
-    public static double modifyMouseSensitivity(double sensitivity) {
+    public static double modifyMouseSensitivity(double originalSensitivity) {
         if (!isLookingThrough())
-            return sensitivity;
+            return originalSensitivity;
 
-        double modifier = Mth.clamp(1f - (Config.Client.VIEWFINDER_ZOOM_SENSITIVITY_MODIFIER.get()
-                * ((Minecraft.getInstance().options.fov().get() - currentFov) / 5f)), 0.01, 2f);
-        return sensitivity * modifier;
+        double scale = originalSensitivity / Minecraft.getInstance().options.fov().get();
+        double scaledSensitivity = currentFov * scale;
+
+        double normalizedDifference = Mth.map(originalSensitivity - scaledSensitivity, 0, originalSensitivity, 0, 1);
+        double influence = Config.Client.VIEWFINDER_ZOOM_SENSITIVITY_INFLUENCE.get();
+        double strength = 1f - normalizedDifference * influence;
+        strength *= strength; // more influence at smaller FOVs
+
+        return Mth.lerp(strength, scaledSensitivity, originalSensitivity);
     }
 
     public static boolean handleMouseScroll(double yOffset) {

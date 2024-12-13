@@ -56,13 +56,6 @@ public class MoreDebug {
     private static List<String> collectLeftLines() {
         List<String> lines = new ArrayList<>();
 
-//        lines.add(NewAccessor.MAIN_HAND.ifInHandOfType(Minecraft.getInstance().player, CameraItem.class)
-//                .map(inHand -> inHand.map((item, stack, hand) -> item.getAttachment(stack, Attachment.FILM)
-//                        .mapIf(FilmRollItem.class, (fItem, fStack) ->
-//                                fItem.getStoredFramesCount(fStack) + "/" + fItem.getMaxFrameCount(fStack))
-//                        .orElse("No Film in " + hand)))
-//                .orElse("No Camera"));
-
         return lines;
     }
 
