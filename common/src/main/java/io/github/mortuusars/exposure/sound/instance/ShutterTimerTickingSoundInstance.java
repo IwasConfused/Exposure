@@ -10,17 +10,16 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-
-import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
-    protected final CameraAccessor cameraAccessor;
+    protected final CameraAccessor<?> cameraAccessor;
     protected final Entity entity;
     protected final float fullVolume;
     protected final int durationTicks;
     protected final long endsAtTick;
 
-    public ShutterTimerTickingSoundInstance(CameraAccessor cameraAccessor, Entity sourceEntity, SoundEvent soundEvent,
+    public ShutterTimerTickingSoundInstance(CameraAccessor<?> cameraAccessor, Entity sourceEntity, SoundEvent soundEvent,
                                             SoundSource soundSource, float volume, float pitch, int durationTicks, long seed) {
         super(soundEvent, soundSource, volume, pitch, sourceEntity, seed);
         this.cameraAccessor = cameraAccessor;
@@ -41,8 +40,8 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
             return;
         }
 
-        Optional<Camera> cameraOpt = cameraAccessor.getCamera(entity);
-        if (cameraOpt.isEmpty()) {
+        @Nullable Camera<?> camera = cameraAccessor.get(entity);
+        if (camera == null) {
             if (!(entity instanceof Player player)) {
                 stop();
                 return;
@@ -64,7 +63,6 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
         }
         else {
             volume = fullVolume;
-            Camera camera = cameraOpt.get();
             ShutterState shutterState = camera.getItem().getShutter().getState(camera.getItemStack());
             if (!shutterState.isOpen() || !shutterState.shutterSpeed().shouldCauseTickingSound()) {
                 stop();

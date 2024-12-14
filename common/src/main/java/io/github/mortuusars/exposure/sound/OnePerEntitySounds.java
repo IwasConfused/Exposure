@@ -56,7 +56,7 @@ public class OnePerEntitySounds {
         }
     }
 
-    public static void playShutterTickingSoundForAllPlayers(CameraAccessor cameraAccessor, Entity sourceEntity,
+    public static void playShutterTickingSoundForAllPlayers(CameraAccessor<?> cameraAccessor, Entity sourceEntity,
                                                             float volume, float pitch, int durationTicks) {
         if (!sourceEntity.level().isClientSide) {
             Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(cameraAccessor,

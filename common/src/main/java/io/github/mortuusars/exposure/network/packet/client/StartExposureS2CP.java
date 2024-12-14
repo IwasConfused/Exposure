@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,7 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public record StartExposureS2CP(ExposureIdentifier identifier,
-                                CameraAccessor cameraAccessor,
+                                CameraAccessor<?> cameraAccessor,
                                 boolean flashHasFired,
                                 int lightLevelBeforeShot) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("start_exposure");

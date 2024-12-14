@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureFrameClientData;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,7 +15,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record CameraAddFrameC2SP(CameraAccessor cameraAccessor,
+public record CameraAddFrameC2SP(CameraAccessor<?> cameraAccessor,
                                  ExposureFrameClientData frameDataFromClient) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("camera_add_frame");
     public static final CustomPacketPayload.Type<CameraAddFrameC2SP> TYPE = new CustomPacketPayload.Type<>(ID);
@@ -36,7 +36,7 @@ public record CameraAddFrameC2SP(CameraAccessor cameraAccessor,
         Preconditions.checkState(player != null, "Cannot handle packet: Player was null");
         ServerPlayer serverPlayer = ((ServerPlayer) player);
 
-        cameraAccessor.getCamera(player).ifPresent(camera -> {
+        cameraAccessor.ifPresent(player, camera -> {
             ExposureFrame frame = camera.getItem().createExposureFrame(serverPlayer, camera.getItemStack(), frameDataFromClient);
             camera.getItem().addFrame(serverPlayer, camera.getItemStack(), frame);
         });

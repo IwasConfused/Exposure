@@ -15,6 +15,7 @@ import io.github.mortuusars.exposure.core.camera.CameraAccessors;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderOverlay;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
+import io.github.mortuusars.exposure.core.camera.CameraInHand;
 import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.Setting;
@@ -64,7 +65,7 @@ public class CameraControlsScreen extends Screen {
     private final Player player;
     private final ClientLevel level;
     private final long openedAtTimestamp;
-    private final Camera camera;
+    private final Camera<?> camera;
     private int leftPos;
     private int topPos;
 
@@ -249,13 +250,13 @@ public class CameraControlsScreen extends Screen {
             return true;
 
         if (button == InputConstants.MOUSE_BUTTON_RIGHT && Minecraft.getInstance().gameMode != null) {
-            CameraAccessor cameraAccessor = CameraClient.getActiveCameraAccessor();
-
-            if (cameraAccessor == CameraAccessors.MAIN_HAND || cameraAccessor == CameraAccessors.OFF_HAND) {
-                Minecraft.getInstance().startUseItem();
-            }
-
-            return true;
+            return CameraClient.getActiveCamera().map(c -> {
+                if (c instanceof CameraInHand<?> cameraInHand) {
+                    Minecraft.getInstance().gameMode.useItem(player, cameraInHand.getHand());
+                    return true;
+                }
+                return false;
+            }).orElse(false);
         }
 
         return false;

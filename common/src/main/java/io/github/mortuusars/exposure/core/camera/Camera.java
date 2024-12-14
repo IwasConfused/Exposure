@@ -2,30 +2,29 @@ package io.github.mortuusars.exposure.core.camera;
 
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
-public class Camera extends ItemAndStack<CameraItem> {
-    protected final Optional<InteractionHand> hand;
-
-    public Camera(ItemStack stack, @Nullable InteractionHand hand) {
+public class Camera<T extends CameraItem> extends ItemAndStack<T> {
+    public Camera(ItemStack stack) {
         super(stack);
-        this.hand = Optional.ofNullable(hand);
+    }
+
+    public Optional<CameraInHand<?>> inHand() {
+        return this instanceof CameraInHand<T> cameraInHand ? Optional.of(cameraInHand) : Optional.empty();
     }
 
     public boolean isActive() {
         return getItem().isActive(getItemStack());
     }
 
-    //TODO: move to CameraInHand class
-    public Optional<InteractionHand> getHand() {
-        return hand;
+    public void activate(Entity entity) {
+        getItem().activate(entity, getItemStack());
     }
 
-    public boolean isInHand() {
-        return getHand().isPresent();
+    public void deactivate(Entity entity) {
+        getItem().deactivate(entity, getItemStack());
     }
 }

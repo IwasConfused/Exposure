@@ -1,10 +1,6 @@
 package io.github.mortuusars.exposure.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.core.camera.NewAccessor;
-import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.mixin.MoreDebugScreenRenderLinesInvoker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

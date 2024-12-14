@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-public record PlayOnePerEntityShutterTickingSoundS2CP(CameraAccessor cameraAccessor, UUID sourceEntityID,
+public record PlayOnePerEntityShutterTickingSoundS2CP(CameraAccessor<?> cameraAccessor, UUID sourceEntityID,
                                                       float volume, float pitch, int durationTicks) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("play_one_per_entity_shutter_ticking_sound");
     public static final Type<PlayOnePerEntityShutterTickingSoundS2CP> TYPE = new Type<>(ID);

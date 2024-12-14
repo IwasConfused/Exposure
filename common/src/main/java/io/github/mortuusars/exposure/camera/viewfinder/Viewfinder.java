@@ -46,12 +46,12 @@ public class Viewfinder {
         if (isOpen())
             return;
 
-        Optional<Camera> activeCamera = CameraClient.getActiveCamera();
+        Optional<Camera<?>> activeCamera = CameraClient.getActiveCamera();
         if (activeCamera.isEmpty()) {
             return;
         }
 
-        Camera camera = activeCamera.get();
+        Camera<?> camera = activeCamera.get();
 
         double zoomPercentage = Setting.ZOOM.getOrDefault(camera.getItemStack(), 0.0);
         focalRange = camera.getItem().getFocalRange(camera.getItemStack());

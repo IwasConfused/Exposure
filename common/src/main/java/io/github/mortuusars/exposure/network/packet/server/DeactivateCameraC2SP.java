@@ -12,7 +12,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record DeactivateCameraC2SP(CameraAccessor accessor) implements IPacket {
+public record DeactivateCameraC2SP(CameraAccessor<?> accessor) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("deactivate_cameras");
     public static final CustomPacketPayload.Type<DeactivateCameraC2SP> TYPE = new CustomPacketPayload.Type<>(ID);
 
@@ -29,8 +29,7 @@ public record DeactivateCameraC2SP(CameraAccessor accessor) implements IPacket {
     @Override
     public boolean handle(PacketFlow direction, Player player) {
         Preconditions.checkState(player != null, "Cannot handle packet {}: Player was null", ID);
-        accessor.getCamera(player)
-                .ifPresent(camera -> camera.getItem().deactivate(player, camera.getItemStack()));
+        accessor.ifPresent(player, camera -> camera.deactivate(player));
         return true;
     }
 }

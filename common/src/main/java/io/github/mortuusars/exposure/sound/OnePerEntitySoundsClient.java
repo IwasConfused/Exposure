@@ -48,7 +48,7 @@ public class OnePerEntitySoundsClient {
         }
     }
 
-    public static void playShutterTickingSound(CameraAccessor cameraAccessor, Entity sourceEntity,
+    public static void playShutterTickingSound(CameraAccessor<?> cameraAccessor, Entity sourceEntity,
                                                float volume, float pitch, int durationTicks) {
         SoundEvent soundEvent = Exposure.SoundEvents.SHUTTER_TICKING.get();
         SoundInstance soundInstance = createShutterTickingSoundInstance(cameraAccessor, sourceEntity,

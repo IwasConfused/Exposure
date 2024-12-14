@@ -11,9 +11,9 @@ import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
+import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.client.image.PalettizedImage;
@@ -98,7 +98,7 @@ public class ClientPacketsHandler {
     public static void startExposure(StartExposureS2CP packet) {
         executeOnMainThread(() -> {
             LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
-            CameraAccessor cameraAccessor = packet.cameraAccessor();
+            CameraAccessor<?> cameraAccessor = packet.cameraAccessor();
             CameraClient.handleExposureStart(player, cameraAccessor, packet.identifier(), packet.flashHasFired());
         });
     }

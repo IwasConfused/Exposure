@@ -5,10 +5,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.function.TriFunction;
 
-public class NewCameraInHand<T extends CameraItem> extends NewCamera<T> {
+public class CameraInHand<T extends CameraItem> extends Camera<T> {
     private final InteractionHand hand;
 
-    public NewCameraInHand(ItemStack stack, InteractionHand hand) {
+    public CameraInHand(ItemStack stack, InteractionHand hand) {
         super(stack);
         this.hand = hand;
     }

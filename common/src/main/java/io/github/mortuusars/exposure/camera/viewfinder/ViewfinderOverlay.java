@@ -70,12 +70,12 @@ public class ViewfinderOverlay {
         if (minecraft.options.hideGui)
             return;
 
-        Optional<Camera> activeCamera = CameraClient.getActiveCamera();
+        Optional<Camera<?>> activeCamera = CameraClient.getActiveCamera();
         if (activeCamera.isEmpty() || !activeCamera.get().isActive()) {
             return;
         }
 
-        Camera camera = activeCamera.get();
+        Camera<?> camera = activeCamera.get();
         CameraItem cameraItem = camera.getItem();
         ItemStack cameraStack = camera.getItemStack();
 

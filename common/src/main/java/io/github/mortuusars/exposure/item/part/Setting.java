@@ -95,8 +95,8 @@ public record Setting<T>(DataComponentType<T> component) {
         return this;
     }
 
-    public void setAndSync(CameraAccessor accessor, Player player, T value) {
-        accessor.getCamera(player).ifPresent(camera -> {
+    public void setAndSync(CameraAccessor<?> accessor, Player player, T value) {
+        accessor.ifPresent(player, camera -> {
             set(camera.getItemStack(), value);
 
             RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());

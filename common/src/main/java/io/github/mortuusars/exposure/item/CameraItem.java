@@ -16,7 +16,6 @@ import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
-import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.camera.CameraAccessors;
 import io.github.mortuusars.exposure.core.camera.component.*;
@@ -34,6 +33,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
+import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.util.Fov;
@@ -265,19 +265,29 @@ public class CameraItem extends Item {
         return Setting.ACTIVE.getOrDefault(stack, false);
     }
 
-    public void activate(Player player, ItemStack stack) {
+    public void activate(Entity entity, ItemStack stack) {
         if (!isActive(stack)) {
             Setting.ACTIVE.set(stack, true);
-            player.gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
-            playCameraSound(player, Exposure.SoundEvents.VIEWFINDER_OPEN.get(), 0.35f, 0.9f, 0.2f);
+            entity.gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
+            @Nullable Player excludedPlayer = entity instanceof Player player ? player : null;
+            playCameraSound(excludedPlayer, entity, Exposure.SoundEvents.VIEWFINDER_OPEN.get(), 0.35f, 0.9f, 0.2f);
+
+            if (!entity.level().isClientSide) {
+                if (!stack.has(Exposure.DataComponents.CAMERA_ID)) {
+                    UUID uuid = UUID.randomUUID();
+//                    CameraInstances.addNewCamera(uuid);
+                }
+
+            }
         }
     }
 
-    public void deactivate(Player player, ItemStack stack) {
+    public void deactivate(Entity entity, ItemStack stack) {
         if (isActive(stack)) {
             Setting.ACTIVE.set(stack, false);
-            player.gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
-            playCameraSound(player, Exposure.SoundEvents.VIEWFINDER_CLOSE.get(), 0.35f, 0.9f, 0.2f);
+            entity.gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
+            @Nullable Player excludedPlayer = entity instanceof Player player ? player : null;
+            playCameraSound(excludedPlayer, entity, Exposure.SoundEvents.VIEWFINDER_CLOSE.get(), 0.35f, 0.9f, 0.2f);
         }
     }
 
@@ -500,7 +510,7 @@ public class CameraItem extends Item {
 
         ExposureServer.awaitExposure(exposureIdentifier, filmItem.getType(), player.getScoreboardName());
 
-        CameraAccessor cameraAccessor = CameraAccessors.ofHand(hand);
+        CameraAccessor<?> cameraAccessor = CameraAccessors.ofHand(hand);
         Packets.sendToClient(new StartExposureS2CP(exposureIdentifier, cameraAccessor, flashHasFired, lightLevel), serverPlayer);
 
         return InteractionResult.CONSUME; // Consume to not play swing animation
@@ -533,7 +543,7 @@ public class CameraItem extends Item {
         return new ExposureFrameClientData(projectingFile, entitiesInFrame, extraData);
     }
 
-    public void exposeFrameClientside(Player player, Camera camera, ExposureIdentifier identifier, boolean flashHasFired) {
+    public void exposeFrameClientside(Player player, ItemStack stack, ExposureIdentifier identifier, boolean flashHasFired) {
 //        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
 
 //        if (PlatformHelper.fireShutterOpeningEvent(player, cameraStack, lightLevelBeforeShot, flashHasFired))
@@ -571,7 +581,7 @@ public class CameraItem extends Item {
 
 //        ExposureClient.captureManager().enqueue();
 
-        startCapture(player, camera.getItemStack(), identifier, flashHasFired);
+        startCapture(player, stack, identifier, flashHasFired);
     }
 
     protected void startCapture(Player player, ItemStack stack, ExposureIdentifier identifier, boolean flashHasFired) {
