@@ -32,7 +32,7 @@ public class LensesDataLoader extends SimpleJsonResourceReloadListener {
         Exposure.LOGGER.info("Loading exposure lenses:");
 
         for (var entry : content.entrySet()) {
-            // Lenses should be in encodedValue/exposure/lens folder.
+            // Lenses should be in data/exposure/lens folder.
             // Excluding other namespaces because it potentially can cause conflicts,
             // if some other mod adds their own type of 'lens'.
             if (!entry.getKey().getNamespace().equals(Exposure.ID))

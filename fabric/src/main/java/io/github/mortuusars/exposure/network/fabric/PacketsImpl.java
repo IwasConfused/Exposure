@@ -2,10 +2,7 @@ package io.github.mortuusars.exposure.network.fabric;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.network.packet.IPacket;
-import io.github.mortuusars.exposure.network.packet.server.*;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -18,35 +15,8 @@ public class PacketsImpl {
     @Nullable
     private static MinecraftServer server;
 
-    public static void registerC2SPackets() {
-        PayloadTypeRegistry.playC2S().register(AlbumSignC2SP.TYPE, AlbumSignC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraAddFrameC2SP.TYPE, CameraAddFrameC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(CameraSetSettingC2SP.TYPE, CameraSetSettingC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(DeactivateCameraC2SP.TYPE, DeactivateCameraC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(ExposureDataPartC2SP.TYPE, ExposureDataPartC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, OpenCameraAttachmentsInCreativePacketC2SP.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(QueryExposureDataC2SP.TYPE, QueryExposureDataC2SP.STREAM_CODEC);
-
-        ServerPlayNetworking.registerGlobalReceiver(AlbumSignC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(AlbumSyncNoteC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(CameraAddFrameC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(DeactivateCameraC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(ExposureDataPartC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-        ServerPlayNetworking.registerGlobalReceiver(QueryExposureDataC2SP.TYPE, PacketsImpl::handleServerboundPacket);
-    }
-
-    private static <T extends IPacket> void handleServerboundPacket(T payload, ServerPlayNetworking.Context context) {
-        payload.handle(PacketFlow.SERVERBOUND, context.player());
-    }
-
-    public static void registerS2CPackets() {
-        ClientPackets.registerS2CPackets();
-    }
-
     public static void sendToServer(IPacket packet) {
-        ClientPackets.sendToServer(packet);
+        FabricS2CPackets.sendToServer(packet);
     }
 
     public static void sendToClient(IPacket packet, ServerPlayer player) {

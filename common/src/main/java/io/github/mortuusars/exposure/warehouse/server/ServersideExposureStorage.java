@@ -61,7 +61,7 @@ public class ServersideExposureStorage {
     }
 
     public ExposureData get(ExposureIdentifier identifier) {
-        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get an exposure encodedValue. Only ID is supported.");
+        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get an exposure data. Only ID is supported.");
 
         DimensionDataStorage dataStorage = levelStorageSupplier.get();
         @Nullable ExposureData exposureData = dataStorage.get(ExposureData.factory(), getSaveId(identifier));

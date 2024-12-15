@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 public record ApplyShaderS2CP(ResourceLocation shaderLocation) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("apply_shader");
     public static final CustomPacketPayload.Type<ApplyShaderS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
-
     public static final StreamCodec<FriendlyByteBuf, ApplyShaderS2CP> STREAM_CODEC = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC, ApplyShaderS2CP::shaderLocation,
             ApplyShaderS2CP::new

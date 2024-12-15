@@ -23,6 +23,7 @@ import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.item.component.album.AlbumContent;
 import io.github.mortuusars.exposure.item.component.album.SignedAlbumContent;
 import io.github.mortuusars.exposure.item.component.camera.ShutterState;
+import io.github.mortuusars.exposure.item.part.Shutter;
 import io.github.mortuusars.exposure.menu.*;
 import io.github.mortuusars.exposure.recipe.FilmDevelopingRecipe;
 import io.github.mortuusars.exposure.recipe.PhotographAgingRecipe;
@@ -131,7 +132,13 @@ public class Exposure {
     public static class Items {
         public static final Supplier<CameraItem> CAMERA = Register.item("camera",
                 () -> new CameraItem(new Item.Properties()
-                        .stacksTo(1)));
+                        .stacksTo(1)
+                        .component(DataComponents.CAMERA_VIEWFINDER_OPEN, false)));
+
+        public static final Supplier<NewCameraItem> NEW_CAMERA = Register.item("new_camera",
+                () -> new NewCameraItem(new Shutter(), new Item.Properties()
+                        .stacksTo(1)
+                        .component(DataComponents.CAMERA_VIEWFINDER_OPEN, false)));
 
         public static final Supplier<FilmRollItem> BLACK_AND_WHITE_FILM = Register.item("black_and_white_film",
                 () -> new FilmRollItem(ExposureType.BLACK_AND_WHITE, Mth.color(0.8F, 0.8F, 0.9F),
@@ -191,7 +198,7 @@ public class Exposure {
         public static final DataComponentType<UUID> CAMERA_ID = Register.dataComponentType("camera_id",
                 arg -> arg.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
 
-        public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_active",
+        public static final DataComponentType<Boolean> CAMERA_VIEWFINDER_OPEN = Register.dataComponentType("camera_viewfinder_open",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 
         public static final DataComponentType<Boolean> SELFIE_MODE = Register.dataComponentType("camera_selfie_mode",

@@ -6,8 +6,12 @@ import io.github.mortuusars.exposure.command.ShaderCommand;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.lenses.LensesDataLoader;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
-import io.github.mortuusars.exposure.network.packet.client.*;
-import io.github.mortuusars.exposure.network.packet.server.*;
+import io.github.mortuusars.exposure.network.packet.C2SPackets;
+import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.S2CPackets;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -36,37 +40,20 @@ public class CommonEvents {
             });
         }
 
-        @SuppressWarnings("unused")
+        @SuppressWarnings("unchecked")
         @SubscribeEvent
         public static void onRegisterPackets(RegisterPayloadHandlersEvent event) {
             PayloadRegistrar registrar = event.registrar("1");
+            // This monstrosity is to avoid having to define packets for forge and fabric separately.
+            for (CustomPacketPayload.TypeAndCodec<? extends FriendlyByteBuf, ? extends CustomPacketPayload> definition : S2CPackets.getDefinitions()) {
+                registrar.playToClient((CustomPacketPayload.Type<IPacket>)definition.type(),
+                        (StreamCodec<FriendlyByteBuf, IPacket>)definition.codec(), PacketsImpl::handle);
+            }
 
-            registrar.playToClient(ApplyShaderS2CP.TYPE, ApplyShaderS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(ClearRenderingCacheS2CP.TYPE, ClearRenderingCacheS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(CreateChromaticExposureS2CP.TYPE, CreateChromaticExposureS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(ExposeCommandS2CP.TYPE, ExposeCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(ExposureChangedS2CP.TYPE, ExposureChangedS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(ExposureDataPartS2CP.TYPE, ExposureDataPartS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(ExposureDataS2CP.TYPE, ExposureDataS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(LoadExposureFromFileCommandS2CP.TYPE, LoadExposureFromFileCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(OnFrameAddedS2CP.TYPE, OnFrameAddedS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(PlayOnePerEntityShutterTickingSoundS2CP.TYPE, PlayOnePerEntityShutterTickingSoundS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(StartExposureS2CP.TYPE, StartExposureS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(StopOnePerEntitySoundS2CP.TYPE, StopOnePerEntitySoundS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(SyncLensesDataS2CP.TYPE, SyncLensesDataS2CP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToClient(WaitForExposureChangeS2CP.TYPE, WaitForExposureChangeS2CP.STREAM_CODEC, PacketsImpl::handle);
-
-
-            registrar.playToServer(AlbumSignC2SP.TYPE, AlbumSignC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraAddFrameC2SP.TYPE, CameraAddFrameC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(CameraSetSettingC2SP.TYPE, CameraSetSettingC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(DeactivateCameraC2SP.TYPE, DeactivateCameraC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(ExposureDataPartC2SP.TYPE, ExposureDataPartC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, OpenCameraAttachmentsInCreativePacketC2SP.STREAM_CODEC, PacketsImpl::handle);
-            registrar.playToServer(QueryExposureDataC2SP.TYPE, QueryExposureDataC2SP.STREAM_CODEC, PacketsImpl::handle);
+            for (CustomPacketPayload.TypeAndCodec<? extends FriendlyByteBuf, ? extends CustomPacketPayload> definition : C2SPackets.getDefinitions()) {
+                registrar.playToServer((CustomPacketPayload.Type<IPacket>)definition.type(),
+                        (StreamCodec<FriendlyByteBuf, IPacket>)definition.codec(), PacketsImpl::handle);
+            }
         }
 
         @SubscribeEvent

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.client.Client;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
 import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
@@ -33,7 +34,6 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
-import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.util.Fov;
@@ -275,7 +275,7 @@ public class CameraItem extends Item {
             if (!entity.level().isClientSide) {
                 if (!stack.has(Exposure.DataComponents.CAMERA_ID)) {
                     UUID uuid = UUID.randomUUID();
-//                    CameraInstances.addNewCamera(uuid);
+//                    CameraInstances.addNewCamera(UUID);
                 }
 
             }
@@ -362,7 +362,7 @@ public class CameraItem extends Item {
         if (!(entity instanceof Player player))
             return;
 
-        getShutter().tick(entity, stack);
+        getShutter().tick(player, stack);
 
         boolean inHand = isSelected || player.getOffhandItem().equals(stack);
 
@@ -457,7 +457,7 @@ public class CameraItem extends Item {
                 //TODO: Pass accessor as method argument, remove all dependency on hand so we can use it not only in hand
                 CameraClient.setActiveCameraAccessor(CameraAccessors.ofHand(hand));
                 // Release use key after activating. Otherwise, if right click is still held - camera will take a shot
-                CameraItemClientExtensions.releaseUseButton();
+                Client.releaseUseButton();
             }
 
             return InteractionResult.CONSUME; // Consume to not play animation
@@ -538,7 +538,7 @@ public class CameraItem extends Item {
         }
 
         CompoundTag extraData = new CompoundTag();
-        //TODO: get additional encodedValue event
+        //TODO: get additional data event
 
         return new ExposureFrameClientData(projectingFile, entitiesInFrame, extraData);
     }
@@ -681,7 +681,7 @@ public class CameraItem extends Item {
         String id = cameraCustomData.getString(ID_OF_LAST_SHOT);
 
         if (StringUtil.isBlank(id)) {
-            Exposure.LOGGER.error("Cannot create an exposure frame: '{}' is missing or empty in Camera's custom encodedValue.", ID_OF_LAST_SHOT);
+            Exposure.LOGGER.error("Cannot create an exposure frame: '{}' is missing or empty in Camera's custom data.", ID_OF_LAST_SHOT);
             return ExposureFrame.EMPTY;
         }
 
@@ -702,7 +702,7 @@ public class CameraItem extends Item {
         Attachment.FILTER.ifPresent(stack, filterStack -> ChromaChannel.fromFilterStack(filterStack)
                 .ifPresent(channel -> tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName())));
 
-        // Do not forget to add encodedValue from client:
+        // Do not forget to add data from client:
         if (dataFromClient.loadingFromFile()) {
             tag.putBoolean(ExposureFrameTag.FROM_FILE, true);
         }

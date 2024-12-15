@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.fabric.resources.FabricLensesDataLoader;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.network.fabric.PacketsImpl;
+import io.github.mortuusars.exposure.network.fabric.FabricC2SPackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -84,7 +85,7 @@ public class ExposureFabric implements ModInitializer {
 
         LootTableEvents.MODIFY.register(ExposureFabric::modifyLoot);
 
-        PacketsImpl.registerC2SPackets();
+        FabricC2SPackets.register();
     }
 
     private static void modifyLoot(ResourceKey<LootTable> tableKey, LootTable.Builder builder,

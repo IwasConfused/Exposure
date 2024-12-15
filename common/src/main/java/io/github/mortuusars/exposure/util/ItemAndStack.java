@@ -36,6 +36,8 @@ public class ItemAndStack<T extends Item> {
         return "ItemAndStack{" + stack.toString() + '}';
     }
 
+    //TODO: rework or delete
+
     public static <T extends Item> void executeIfItemMatches(Class<T> c, Item item, Consumer<T> ifMatches) {
         if (c.isInstance(item)) {
             //noinspection unchecked

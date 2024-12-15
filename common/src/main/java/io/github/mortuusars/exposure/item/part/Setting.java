@@ -58,7 +58,7 @@ public record Setting<T>(DataComponentType<T> component) {
     // --
 
     public static final Setting<Boolean> ACTIVE =
-            register(Exposure.resource("active"), new Setting<>(Exposure.DataComponents.CAMERA_ACTIVE));
+            register(Exposure.resource("active"), new Setting<>(Exposure.DataComponents.CAMERA_VIEWFINDER_OPEN));
     public static final Setting<Boolean> SELFIE =
             register(Exposure.resource("selfie"), new Setting<>(Exposure.DataComponents.SELFIE_MODE));
     public static final Setting<Double> ZOOM =

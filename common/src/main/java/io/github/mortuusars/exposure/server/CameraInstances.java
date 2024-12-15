@@ -27,36 +27,6 @@ public class CameraInstances extends SavedData {
     public Map<UUID, List<CameraInstance>> getInstances() {
         return instances;
     }
-//
-//    public List<ExposureFrame> getFramesOf(ServerPlayer player) {
-//        return getFramesOf(player.getUUID());
-//    }
-//
-//    public List<ExposureFrame> getFramesOf(UUID uuid) {
-//        return frames.getOrDefault(uuid, Collections.emptyList());
-//    }
-//
-//    public void add(ServerPlayer player, ExposureFrame frame) {
-//        add(player.getUUID(), frame);
-//    }
-//
-//    public void add(UUID uuid, ExposureFrame frame) {
-//        List<ExposureFrame> list = frames.compute(uuid, (id, framesList) ->
-//                framesList == null ? new ArrayList<>() : new ArrayList<>(framesList));
-//        while (list.size() >= LIMIT) {
-//            list.removeFirst();
-//        }
-//        list.add(frame);
-//        setDirty();
-//    }
-//
-//    public void clear() {
-//        frames.clear();
-//    }
-//
-//    public void clearOf(ServerPlayer player) {
-//        frames.remove(player.getUUID());
-//    }
 
     @Override
     public @NotNull CompoundTag save(CompoundTag tag, HolderLookup.Provider registries) {

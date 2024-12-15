@@ -26,7 +26,7 @@ public class ClientsideExposureCache {
     }
 
     public ExposureData getOrQueryAndEmpty(ExposureIdentifier identifier) {
-        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get or query an exposure encodedValue. Only ID is supported.");
+        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get or query an exposure data. Only ID is supported.");
 
         ExposureData exposureData = cache.get(identifier);
 

@@ -25,6 +25,7 @@ public record Photographer(String name, UUID uuid) {
             Photographer::new
     );
 
+    //TODO: use Player player here and create other constructor for mob (without UUID) (potentially add 3rd param for original name, ie: Bob (Skeleton))
     public Photographer(LivingEntity entity) {
         this(entity.getScoreboardName(), entity.getUUID());
     }

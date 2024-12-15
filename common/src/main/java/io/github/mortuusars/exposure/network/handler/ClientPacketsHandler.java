@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.network.handler;
 
 import com.google.common.base.Preconditions;
+import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.CameraClient;
@@ -14,6 +15,7 @@ import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.NewCameraInHand;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.client.image.PalettizedImage;
@@ -25,11 +27,15 @@ import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +43,8 @@ import java.util.List;
 import java.util.Objects;
 
 public class ClientPacketsHandler {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static void applyShader(ApplyShaderS2CP packet) {
         executeOnMainThread(() -> {
             if (packet.shouldRemove()) {
@@ -107,7 +115,7 @@ public class ClientPacketsHandler {
         executeOnMainThread(() -> {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null) {
-                Exposure.LOGGER.error("Cannot show exposures. Player is null.");
+                LOGGER.error("Cannot show exposures. Player is null.");
                 return;
             }
 
@@ -158,5 +166,17 @@ public class ClientPacketsHandler {
 
     private static void executeOnMainThread(Runnable runnable) {
         Minecraft.getInstance().execute(runnable);
+    }
+
+    public static void setInHandActiveCamera(SetActiveInHandCameraS2CP packet) {
+        ClientLevel level = Objects.requireNonNull(Minecraft.getInstance().level, "level");
+        LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player, "player");
+
+        Entity owner = level.getEntities().get(packet.ownerUUID());
+        if (owner instanceof LivingEntity livingOwner) {
+            player.setActiveCamera(new NewCameraInHand(livingOwner, packet.hand()));
+        } else {
+            LOGGER.error("Cannot set active camera in hand: owner should be a LivingEntity. Got '{}' instead.", owner);
+        }
     }
 }

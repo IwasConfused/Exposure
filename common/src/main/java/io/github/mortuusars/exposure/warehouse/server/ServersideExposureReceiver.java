@@ -69,8 +69,8 @@ public class ServersideExposureReceiver {
 //    //TODO: Neoforge seems to have a packet splitter built in. Should try to send large packet to test it.
 //    // And if it works - use totalParts only on fabric.
 //    public void receivePart(String exposureId, int width, int height, byte[] pixelsPart, int offset, boolean isFromFile) {
-//        byte[] pixels = receivedParts.compute(exposureId, (key, encodedValue) ->
-//                encodedValue == null ? new byte[width * height] : encodedValue);
+//        byte[] pixels = receivedParts.compute(exposureId, (key, data) ->
+//                data == null ? new byte[width * height] : data);
 //
 //        System.arraycopy(pixelsPart, 0, pixels, offset, pixelsPart.length);
 //        receivedParts.put(exposureId, pixels);

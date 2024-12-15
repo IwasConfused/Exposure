@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.item.component;
 
 import com.mojang.serialization.Codec;
+import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.Item;
@@ -39,6 +40,10 @@ public class StoredItemStack {
 
     public ItemStack getCopy() {
         return stack.copy();
+    }
+
+    public <T extends Item> ItemAndStack<T> getItemAndStackCopy() {
+        return new ItemAndStack<>(getCopy());
     }
 
     public Item getItem() {

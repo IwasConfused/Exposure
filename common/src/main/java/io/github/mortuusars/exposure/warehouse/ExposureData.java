@@ -113,7 +113,7 @@ public class ExposureData extends SavedData {
 
     public static SavedData.Factory<ExposureData> factory() {
         return new SavedData.Factory<>(() -> {
-            throw new IllegalStateException("Should never create an empty exposure saved encodedValue");
+            throw new IllegalStateException("Should never create an empty exposure saved data");
         }, ExposureData::load, null);
     }
 

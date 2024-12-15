@@ -300,7 +300,7 @@ public class LightroomMenu extends AbstractContainerMenu {
 
     private static LightroomBlockEntity getBlockEntity(final Inventory playerInventory, final FriendlyByteBuf data) {
         Objects.requireNonNull(playerInventory, "playerInventory cannot be null");
-        Objects.requireNonNull(data, "encodedValue cannot be null");
+        Objects.requireNonNull(data, "data cannot be null");
         final BlockEntity blockEntityAtPos = playerInventory.player.level().getBlockEntity(data.readBlockPos());
         if (blockEntityAtPos instanceof LightroomBlockEntity blockEntity)
             return blockEntity;

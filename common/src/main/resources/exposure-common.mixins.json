@@ -15,12 +15,12 @@
     "KeyMappingMixin",
     "LocalPlayerTickMixin",
     "MinecraftMixin",
-    "MultiPlayerGameModeMixin",
-    "SelfieCameraMixin",
-    "ViewfinderSensitivityMixin",
+    "MoreDebugKeyboardHandlerMixin",
     "MoreDebugScreenOverlayMixin",
     "MoreDebugScreenRenderLinesInvoker",
-    "MoreDebugKeyboardHandlerMixin"
+    "MultiPlayerGameModeMixin",
+    "SelfieCameraMixin",
+    "ViewfinderSensitivityMixin"
   ],
   "mixins": [
     "BookPageCountMixin",
@@ -29,7 +29,8 @@
     "LecternMixin",
     "PlayerMixin",
     "PotionContentsMixin",
-    "ServerGamePacketListenerMixin"
+    "ServerGamePacketListenerMixin",
+    "ServerPlayerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

@@ -1,25 +1,54 @@
 package io.github.mortuusars.exposure.mixin;
 
-import io.github.mortuusars.exposure.CommonFunctionality;
+import io.github.mortuusars.exposure.core.camera.ActiveCameraHolder;
+import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.item.NewCameraItem;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Optional;
+
 @Mixin(Player.class)
-public abstract class PlayerMixin extends LivingEntity {
+@SuppressWarnings("AddedMixinMembersNamePattern")
+public abstract class PlayerMixin extends LivingEntity implements ActiveCameraHolder {
+    @Unique
+    @Nullable
+    private NewCamera exposureNewCamera;
+
     protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
     }
 
+
+    @Override
+    public Optional<NewCamera> getActiveCamera() {
+        return Optional.ofNullable(exposureNewCamera);
+    }
+
+    @Override
+    public void setActiveCamera(@Nullable NewCamera camera) {
+        exposureNewCamera = camera;
+    }
+
+    @Override
+    public void removeActiveCamera() {
+        setActiveCamera(null);
+    }
+
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
     void onDrop(ItemStack droppedItem, boolean dropAround, boolean includeThrowerName, CallbackInfoReturnable<ItemEntity> cir) {
-        CommonFunctionality.handleItemDrop((Player)(Object)this, cir.getReturnValue());
+        if (droppedItem.getItem() instanceof NewCameraItem cameraItem && cameraItem.isActive(droppedItem)) {
+            cameraItem.deactivate((Player)(Object)this, droppedItem);
+        }
     }
 }

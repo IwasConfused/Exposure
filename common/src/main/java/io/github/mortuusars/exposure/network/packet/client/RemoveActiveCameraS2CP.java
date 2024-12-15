@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -11,25 +10,22 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class ClearRenderingCacheS2CP implements IPacket {
-    public static final ClearRenderingCacheS2CP INSTANCE = new ClearRenderingCacheS2CP();
+public record RemoveActiveCameraS2CP() implements IPacket {
+    private static final RemoveActiveCameraS2CP INSTANCE = new RemoveActiveCameraS2CP();
 
-    public static final ResourceLocation ID = Exposure.resource("clear_rendering_cache");
-    public static final CustomPacketPayload.Type<ClearRenderingCacheS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
+    public static final ResourceLocation ID = Exposure.resource("remove_active_camera");
+    public static final Type<RemoveActiveCameraS2CP> TYPE = new Type<>(ID);
 
-    public static final StreamCodec<FriendlyByteBuf, ClearRenderingCacheS2CP> STREAM_CODEC = StreamCodec.unit(INSTANCE);
-
-    private ClearRenderingCacheS2CP() { }
+    public static final StreamCodec<FriendlyByteBuf, RemoveActiveCameraS2CP> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
     @Override
-
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        ClientPacketsHandler.clearRenderingCache();
+        player.removeActiveCamera();
         return true;
     }
 }
