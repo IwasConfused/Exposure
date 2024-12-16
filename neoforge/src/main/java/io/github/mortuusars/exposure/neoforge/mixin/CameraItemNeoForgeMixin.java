@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.mixin;
 
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.neoforge.item.CameraItemForgeClientExtensions;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Consumer;
 
-@Mixin(value = CameraItem.class, remap = false)
+@Mixin(value = OldCameraItem.class, remap = false)
 public abstract class CameraItemNeoForgeMixin extends Item implements IItemExtension {
     public CameraItemNeoForgeMixin(Properties properties) {
         super(properties);

@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -33,7 +33,7 @@ public record OpenCameraAttachmentsInCreativePacketC2SP(int cameraSlotIndex) imp
             throw new IllegalStateException("Cannot handle the packet: Player was null");
 
         ItemStack stack = player.getInventory().getItem(cameraSlotIndex);
-        if (stack.getItem() instanceof CameraItem cameraItem)
+        if (stack.getItem() instanceof OldCameraItem cameraItem)
             cameraItem.openCameraAttachmentsMenu(player, cameraSlotIndex);
 
         return true;

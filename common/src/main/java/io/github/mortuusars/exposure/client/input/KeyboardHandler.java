@@ -8,6 +8,8 @@ import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
+import io.github.mortuusars.exposure.network.Packets;
+import io.github.mortuusars.exposure.network.packet.client.RemoveActiveCameraS2CP;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -51,8 +53,9 @@ public class KeyboardHandler {
             if (action == InputConstants.PRESS) { // TODO: Check if activating on release is not causing problems
                 if (minecraft.screen instanceof CameraControlsScreen viewfinderControlsScreen) {
                     viewfinderControlsScreen.onClose();
-                } else {
-                    CameraClient.deactivateCameraAndSendToServer();
+                } else if (Minecraft.getInstance().player != null) {
+                    Minecraft.getInstance().player.removeActiveCamera();
+                    Packets.sendToServer(new RemoveActiveCameraS2CP());
                 }
             }
             return true;

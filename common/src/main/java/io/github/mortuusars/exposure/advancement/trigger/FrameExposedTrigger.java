@@ -1,16 +1,12 @@
 package io.github.mortuusars.exposure.advancement.trigger;
 
-import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.advancement.predicate.CameraPredicate;
-import io.github.mortuusars.exposure.advancement.predicate.ExposurePredicate;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;

@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 
 public class CameraItemClientExtensions {
     public static float itemPropertyFunction(ItemStack stack, ClientLevel clientLevel, LivingEntity livingEntity, int seed) {
-        if (stack.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(stack)) {
+        if (stack.getItem() instanceof OldCameraItem cameraItem && cameraItem.isActive(stack)) {
             if (cameraItem.isInSelfieMode(stack))
                 // Longer selfie stick for current player (to not obscure the view) and shorter for everyone else
                 return livingEntity == Minecraft.getInstance().player ? 0.2f : 0.3f;

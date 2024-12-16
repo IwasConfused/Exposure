@@ -63,19 +63,18 @@ public class Capture<T> extends Task<Result<T>> {
                     setDone();
                     // Execution of components and stuff should be on the RenderThread
                     // because it may need to access something in the game that may throw if executed from other threads.
-                    Minecraft.getInstance().execute(component::afterCapture);
+                    Minecraft.getInstance().execute(() -> {
+                        if (result.isSuccessful()) {
+                            component.onSuccess();
+                        } else {
+                            component.onFailure();
+                        }
+                        component.afterCapture();
+                    });
                     return result;
                 })
                 .thenAccept(completableFuture::complete);
     }
-
-//    public Task<Result<T>> overridenBy(Task<Result<T>> override) {
-//        return new OverrideTask<>(this, override);
-//    }
-//
-//    public Task<Result<T>> fallbackTo(Task<Result<T>> fallback) {
-//        return new FallbackTask<>(this, fallback);
-//    }
 
     public Task<T> handleErrorAndGetResult() {
         return handleErrorAndGetResult(err -> {});
@@ -84,20 +83,6 @@ public class Capture<T> extends Task<Result<T>> {
     public Task<T> handleErrorAndGetResult(Consumer<TranslatableError> errorConsumer) {
         return onError(errorConsumer).then(Result::unwrap);
     }
-
-    public static class StacklessThrowable extends Throwable {
-        protected StacklessThrowable(String message) {
-            super(message, null, false, false);
-        }
-    }
-
-    // --
-
-//    public static <T> Task<T> compose(Task<Result<T>> capture) {
-//        return capture
-//                .onError(err -> Exposure.LOGGER.error(err.getLocalizedMessage()))
-//                .then(Result::unwrap);
-//    }
 
     public static <T> Capture<T> of(Task<Result<T>> capturingTask) {
         return new Capture<>(capturingTask, CaptureAction.EMPTY);
@@ -117,6 +102,8 @@ public class Capture<T> extends Task<Result<T>> {
                 : new BackgroundScreenshotCaptureTask();
     }
 
+    //TODO: maybe add timeout for 1-2 seconds, so result is not that delayed when loading big images.
+    // But this might be problematic if used has slow hdd or loading takes long for other reasons.
     public static Task<Result<Image>> file(String filePath) {
         return new FileCaptureTask(filePath);
     }

@@ -12,7 +12,7 @@ import io.github.mortuusars.exposure.warehouse.server.ServersideExposureReceiver
 import net.minecraft.server.MinecraftServer;
 
 public class ExposureServer {
-    private static CameraInstances cameraInstanceStorage;
+//    private static CameraInstances cameraInstanceStorage;
 
     private static ServersideExposureStorage exposureStorage;
     private static ServersideExposureSender exposureSender;
@@ -21,7 +21,7 @@ public class ExposureServer {
     private static ExposureFrameHistory exposureFrameHistory;
 
     public static void init(MinecraftServer server) {
-        cameraInstanceStorage = CameraInstances.loadOrCreate(server);
+//        cameraInstanceStorage = CameraInstances.loadOrCreate(server);
 
         exposureStorage = new ServersideExposureStorage(server);
         exposureSender = new ServersideExposureSender();

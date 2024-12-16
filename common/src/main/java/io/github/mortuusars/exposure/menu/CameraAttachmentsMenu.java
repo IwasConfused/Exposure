@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.menu;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
@@ -22,7 +22,7 @@ import java.util.Map;
 public class CameraAttachmentsMenu extends AbstractContainerMenu {
     protected final Player player;
     protected final int cameraSlotIndex;
-    protected final ItemAndStack<CameraItem> camera;
+    protected final ItemAndStack<OldCameraItem> camera;
     protected final List<Attachment<?>> attachments;
 
     protected boolean clientContentsInitialized;
@@ -31,7 +31,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         super(Exposure.MenuTypes.CAMERA.get(), containerId);
 
         ItemStack cameraStack = playerInventory.items.get(cameraSlotIndex);
-        Preconditions.checkState(cameraStack.getItem() instanceof CameraItem,
+        Preconditions.checkState(cameraStack.getItem() instanceof OldCameraItem,
                 "Failed to open Camera Attachments. " + cameraStack + " is not a CameraItem.");
 
         this.player = playerInventory.player;
@@ -73,7 +73,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         return container;
     }
 
-    public ItemAndStack<CameraItem> getCamera() {
+    public ItemAndStack<OldCameraItem> getCamera() {
         return camera;
     }
 

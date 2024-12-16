@@ -1,6 +1,10 @@
 package io.github.mortuusars.exposure.core;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +15,9 @@ public enum ChromaChannel implements StringRepresentable {
     RED(0xFFD8523E),
     GREEN(0xFF7BC64B),
     BLUE(0xFF4E73CE);
+
+    public static final StreamCodec<ByteBuf, ChromaChannel> STREAM_CODEC =
+            ByteBufCodecs.idMapper(id -> ChromaChannel.values()[id], ChromaChannel::ordinal);
 
     // Used in UI to color text, etc.
     private final int color;

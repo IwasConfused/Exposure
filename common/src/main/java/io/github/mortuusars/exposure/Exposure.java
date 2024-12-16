@@ -131,12 +131,7 @@ public class Exposure {
 
     public static class Items {
         public static final Supplier<CameraItem> CAMERA = Register.item("camera",
-                () -> new CameraItem(new Item.Properties()
-                        .stacksTo(1)
-                        .component(DataComponents.CAMERA_VIEWFINDER_OPEN, false)));
-
-        public static final Supplier<NewCameraItem> NEW_CAMERA = Register.item("new_camera",
-                () -> new NewCameraItem(new Shutter(), new Item.Properties()
+                () -> new CameraItem(new Shutter(), new Item.Properties()
                         .stacksTo(1)
                         .component(DataComponents.CAMERA_VIEWFINDER_OPEN, false)));
 

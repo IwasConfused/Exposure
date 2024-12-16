@@ -2,12 +2,10 @@ package io.github.mortuusars.exposure.advancement.predicate;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;

@@ -18,6 +18,12 @@ public interface CaptureAction {
     default void beforeCapture() {
     }
 
+    default void onSuccess() {
+    }
+
+    default void onFailure() {
+    }
+
     default void afterCapture() {
     }
 

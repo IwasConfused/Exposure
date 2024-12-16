@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.core.camera.ActiveCameraHolder;
 import io.github.mortuusars.exposure.core.camera.NewCamera;
-import io.github.mortuusars.exposure.item.NewCameraItem;
+import io.github.mortuusars.exposure.item.CameraItem;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -47,7 +47,7 @@ public abstract class PlayerMixin extends LivingEntity implements ActiveCameraHo
 
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
     void onDrop(ItemStack droppedItem, boolean dropAround, boolean includeThrowerName, CallbackInfoReturnable<ItemEntity> cir) {
-        if (droppedItem.getItem() instanceof NewCameraItem cameraItem && cameraItem.isActive(droppedItem)) {
+        if (droppedItem.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(droppedItem)) {
             cameraItem.deactivate((Player)(Object)this, droppedItem);
         }
     }

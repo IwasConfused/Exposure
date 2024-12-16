@@ -10,7 +10,7 @@ import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.util.GuiUtil;
@@ -76,7 +76,7 @@ public class ViewfinderOverlay {
         }
 
         Camera<?> camera = activeCamera.get();
-        CameraItem cameraItem = camera.getItem();
+        OldCameraItem cameraItem = camera.getItem();
         ItemStack cameraStack = camera.getItemStack();
 
         RenderSystem.enableBlend();
@@ -156,7 +156,7 @@ public class ViewfinderOverlay {
         poseStack.popPose();
     }
 
-    private static void renderIcons(PoseStack poseStack, CameraItem cameraItem, ItemStack cameraStack) {
+    private static void renderIcons(PoseStack poseStack, OldCameraItem cameraItem, ItemStack cameraStack) {
         ItemStack filmStack = Attachment.FILM.get(cameraStack).getForReading();
 
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmRollItem) || !filmRollItem.canAddFrame(filmStack)) {

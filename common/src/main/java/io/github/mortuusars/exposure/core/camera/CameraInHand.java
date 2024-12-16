@@ -1,11 +1,11 @@
 package io.github.mortuusars.exposure.core.camera;
 
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.function.TriFunction;
 
-public class CameraInHand<T extends CameraItem> extends Camera<T> {
+public class CameraInHand<T extends OldCameraItem> extends Camera<T> {
     private final InteractionHand hand;
 
     public CameraInHand(ItemStack stack, InteractionHand hand) {

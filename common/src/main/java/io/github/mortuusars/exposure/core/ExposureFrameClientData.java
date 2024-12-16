@@ -13,12 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public record ExposureFrameClientData(boolean loadingFromFile,
-                                      List<UUID> capturedEntities,
+public record ExposureFrameClientData(List<UUID> capturedEntities,
                                       CompoundTag extraData) {
 
     public static final StreamCodec<ByteBuf, ExposureFrameClientData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL, ExposureFrameClientData::loadingFromFile,
             UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list(16)), ExposureFrameClientData::capturedEntities,
             ByteBufCodecs.COMPOUND_TAG, ExposureFrameClientData::extraData,
             ExposureFrameClientData::new

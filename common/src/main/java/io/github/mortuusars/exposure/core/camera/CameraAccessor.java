@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.core.camera;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public interface CameraAccessor<C extends Camera<? extends CameraItem>> {
+public interface CameraAccessor<C extends Camera<? extends OldCameraItem>> {
     Codec<CameraAccessor<?>> CODEC = ResourceLocation.CODEC.xmap(CameraAccessors::byId, CameraAccessors::idOf);
 
     StreamCodec<ByteBuf, CameraAccessor<?>> STREAM_CODEC = StreamCodec.composite(
@@ -58,7 +58,7 @@ public interface CameraAccessor<C extends Camera<? extends CameraItem>> {
         return Optional.empty();
     }
 
-    default <T extends CameraItem> Optional<CameraInHand<T>> ifInHandOfType(Entity entity, Class<T> clazz) {
+    default <T extends OldCameraItem> Optional<CameraInHand<T>> ifInHandOfType(Entity entity, Class<T> clazz) {
         @Nullable C camera = get(entity);
         if (camera instanceof CameraInHand<?> cameraInHand && clazz.isInstance(cameraInHand.getItem())) {
             //noinspection unchecked
@@ -67,7 +67,7 @@ public interface CameraAccessor<C extends Camera<? extends CameraItem>> {
         return Optional.empty();
     }
 
-    static <T extends CameraItem> CameraAccessor<@Nullable CameraInHand<T>> createInHand(InteractionHand hand, Class<T> clazz) {
+    static <T extends OldCameraItem> CameraAccessor<@Nullable CameraInHand<T>> createInHand(InteractionHand hand, Class<T> clazz) {
         return entity -> {
             if (entity instanceof LivingEntity livingEntity) {
                 ItemStack stack = livingEntity.getItemInHand(hand);

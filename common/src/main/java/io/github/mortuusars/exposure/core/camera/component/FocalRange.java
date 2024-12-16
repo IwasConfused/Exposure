@@ -49,17 +49,6 @@ public final class FocalRange implements StringRepresentable {
         this.max = fixedValue;
     }
 
-    public static FocalRange fromNetwork(FriendlyByteBuf buffer) {
-        int min = buffer.readInt();
-        int max = buffer.readInt();
-        return new FocalRange(min, max);
-    }
-
-    public void toNetwork(FriendlyByteBuf buffer) {
-        buffer.writeInt(min);
-        buffer.writeInt(max);
-    }
-
     public boolean isPrime() {
         return min == max;
     }

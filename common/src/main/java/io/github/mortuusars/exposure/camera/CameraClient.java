@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.camera.CameraAccessors;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.*;
@@ -112,7 +112,7 @@ public class CameraClient {
             return Optional.empty();
         }
 
-        @Nullable Camera<? extends CameraItem> camera = activeCameraAccessor.get(Minecraft.getInstance().player);
+        @Nullable Camera<? extends OldCameraItem> camera = activeCameraAccessor.get(Minecraft.getInstance().player);
         if (camera != null && camera.isActive()) {
             return Optional.of(camera);
         }
@@ -120,27 +120,12 @@ public class CameraClient {
         return Optional.empty();
     }
 
-    public static void deactivateCameraAndSendToServer() {
-        if (activeCameraAccessor == null || Minecraft.getInstance().player == null) {
-            LOGGER.warn("Attempted to close viewfinder without an active camera.");
-            return;
-        }
-
-        getActiveCamera().ifPresentOrElse(camera -> {
-                    camera.deactivate(Minecraft.getInstance().player);
-                    Packets.sendToServer(new DeactivateCameraC2SP(activeCameraAccessor));
-                },
-                () -> LOGGER.warn("Cannot access a camera to deactivate it."));
-
-        activeCameraAccessor = null;
-    }
-
     public static void onLocalPlayerTick(LocalPlayer player) {
         // TODO: Needs thorough testing. It's still convoluted as hell.
 
         for (InteractionHand hand : InteractionHand.values()) {
             ItemStack itemInHand = player.getItemInHand(hand);
-            if (itemInHand.getItem() instanceof CameraItem cameraItem
+            if (itemInHand.getItem() instanceof OldCameraItem cameraItem
                     && cameraItem.isActive(itemInHand)
                     && activeCameraAccessor == null
                     && !Viewfinder.isOpen()) {

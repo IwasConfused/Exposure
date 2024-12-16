@@ -1,13 +1,13 @@
 package io.github.mortuusars.exposure.core.camera;
 
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
 
-public class Camera<T extends CameraItem> extends ItemAndStack<T> {
+public class Camera<T extends OldCameraItem> extends ItemAndStack<T> {
     public Camera(ItemStack stack) {
         super(stack);
     }

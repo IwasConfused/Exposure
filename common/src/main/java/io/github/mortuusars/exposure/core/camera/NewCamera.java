@@ -3,7 +3,6 @@ package io.github.mortuusars.exposure.core.camera;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
@@ -28,13 +27,13 @@ public abstract class NewCamera extends ItemAndStack<CameraItem> {
         return getItem().isActive(getItemStack());
     }
 
-    public void activate(LivingEntity entity) {
-        getItem().activate(entity, getItemStack());
-    }
-
-    public void deactivate(LivingEntity entity) {
-        getItem().deactivate(entity, getItemStack());
-    }
+//    public abstract void activate(LivingEntity entity) {
+//        getItem().activate(entity, getItemStack());
+//    }
+//
+//    public void deactivate(LivingEntity entity) {
+//        getItem().deactivate(entity, getItemStack());
+//    }
 
     public abstract IPacket createClientboundPacket();
 
