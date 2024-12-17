@@ -9,6 +9,7 @@ import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.CameraSetSettingC2SP;
+import io.github.mortuusars.exposure.network.packet.server.NewCameraSetSettingC2SP;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.component.DataComponentType;
@@ -95,14 +96,26 @@ public record Setting<T>(DataComponentType<T> component) {
         return this;
     }
 
-    public void setAndSync(CameraAccessor<?> accessor, Player player, T value) {
-        accessor.ifPresent(player, camera -> {
+//    public void setAndSync(CameraAccessor<?> accessor, Player player, T value) {
+//        accessor.ifPresent(player, camera -> {
+//            set(camera.getItemStack(), value);
+//
+//            RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());
+//            component.streamCodec().encode(buffer, value);
+//            byte[] bytes = buffer.array();
+//            Packets.sendToServer(new CameraSetSettingC2SP(accessor, this, bytes));
+//            buffer.clear();
+//        });
+//    }
+
+    public void setAndSync(Player player, T value) {
+        player.getActiveCamera().ifPresent(camera -> {
             set(camera.getItemStack(), value);
 
             RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());
             component.streamCodec().encode(buffer, value);
             byte[] bytes = buffer.array();
-            Packets.sendToServer(new CameraSetSettingC2SP(accessor, this, bytes));
+            Packets.sendToServer(new NewCameraSetSettingC2SP(this, bytes));
             buffer.clear();
         });
     }

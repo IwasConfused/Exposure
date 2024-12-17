@@ -7,6 +7,7 @@ import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.lenses.LensesDataLoader;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
 import io.github.mortuusars.exposure.network.packet.C2SPackets;
+import io.github.mortuusars.exposure.network.packet.CommonPackets;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.S2CPackets;
 import net.minecraft.network.FriendlyByteBuf;
@@ -42,7 +43,7 @@ public class CommonEvents {
 
         @SuppressWarnings("unchecked")
         @SubscribeEvent
-        public static void onRegisterPackets(RegisterPayloadHandlersEvent event) {
+        public static void registerPackets(RegisterPayloadHandlersEvent event) {
             PayloadRegistrar registrar = event.registrar("1");
             // This monstrosity is to avoid having to define packets for forge and fabric separately.
             for (CustomPacketPayload.TypeAndCodec<? extends FriendlyByteBuf, ? extends CustomPacketPayload> definition : S2CPackets.getDefinitions()) {
@@ -52,6 +53,11 @@ public class CommonEvents {
 
             for (CustomPacketPayload.TypeAndCodec<? extends FriendlyByteBuf, ? extends CustomPacketPayload> definition : C2SPackets.getDefinitions()) {
                 registrar.playToServer((CustomPacketPayload.Type<IPacket>)definition.type(),
+                        (StreamCodec<FriendlyByteBuf, IPacket>)definition.codec(), PacketsImpl::handle);
+            }
+
+            for (CustomPacketPayload.TypeAndCodec<? extends FriendlyByteBuf, ? extends CustomPacketPayload> definition : CommonPackets.getDefinitions()) {
+                registrar.playBidirectional((CustomPacketPayload.Type<IPacket>)definition.type(),
                         (StreamCodec<FriendlyByteBuf, IPacket>)definition.codec(), PacketsImpl::handle);
             }
         }

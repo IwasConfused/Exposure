@@ -61,7 +61,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
 
     @Override
     public void added() {
-        getMenu().getCamera().getItem().playCameraSound(null, player,
+        getMenu().getCamera().getItem().playSound(null, player,
                 Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 0.9f, 0.9f, 0.2f);
     }
 

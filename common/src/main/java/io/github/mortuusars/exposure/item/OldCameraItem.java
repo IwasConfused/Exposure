@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
-import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.core.camera.CameraAccessors;
@@ -368,8 +368,8 @@ public class OldCameraItem extends Item {
         if (!inHand) {
             deactivate(player, stack);
 
-            if (level.isClientSide() && Viewfinder.isOpen()) {
-                Viewfinder.close();
+            if (level.isClientSide() && OldViewfinder.isOpen()) {
+                OldViewfinder.close();
             }
         }
     }
@@ -454,7 +454,7 @@ public class OldCameraItem extends Item {
 
             if (player.level().isClientSide) {
                 //TODO: Pass accessor as method argument, remove all dependency on hand so we can use it not only in hand
-                CameraClient.setActiveCameraAccessor(CameraAccessors.ofHand(hand));
+//                CameraClient.setActiveCameraAccessor(CameraAccessors.ofHand(hand));
                 // Release use key after activating. Otherwise, if right click is still held - camera will take a shot
                 Client.releaseUseButton();
             }
@@ -530,7 +530,7 @@ public class OldCameraItem extends Item {
         if (projectingFile) {
             entitiesInFrame = Collections.emptyList();
         } else {
-            entitiesInFrame = EntitiesInFrame.get(player, Viewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
+            entitiesInFrame = EntitiesInFrame.get(player, OldViewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
                     .stream()
                     .map(Entity::getUUID)
                     .toList();

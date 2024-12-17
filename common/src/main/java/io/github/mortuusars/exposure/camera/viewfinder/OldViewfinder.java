@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 
-public class Viewfinder {
+public class OldViewfinder {
     public static final float ZOOM_STEP = 8f;
     public static final float ZOOM_PRECISE_MODIFIER = 0.25f;
     private static boolean isOpen;
@@ -46,22 +46,22 @@ public class Viewfinder {
         if (isOpen())
             return;
 
-        Optional<Camera<?>> activeCamera = CameraClient.getActiveCamera();
-        if (activeCamera.isEmpty()) {
-            return;
-        }
+//        Optional<Camera<?>> activeCamera = CameraClient.getActiveCamera();
+//        if (activeCamera.isEmpty()) {
+//            return;
+//        }
+//
+//        Camera<?> camera = activeCamera.get();
 
-        Camera<?> camera = activeCamera.get();
-
-        double zoomPercentage = Setting.ZOOM.getOrDefault(camera.getItemStack(), 0.0);
-        focalRange = camera.getItem().getFocalRange(camera.getItemStack());
-        double focalLength = Mth.map(zoomPercentage, 0.0, 1.0, focalRange.min(), focalRange.max());
-        targetFov = Fov.focalLengthToFov(focalLength);
+//        double zoomPercentage = Setting.ZOOM.getOrDefault(camera.getItemStack(), 0.0);
+//        focalRange = camera.getItem().getFocalRange(camera.getItemStack());
+//        double focalLength = Mth.map(zoomPercentage, 0.0, 1.0, focalRange.min(), focalRange.max());
+//        targetFov = Fov.focalLengthToFov(focalLength);
 
         isOpen = true;
 
-        ViewfinderShader.update();
-        ViewfinderOverlay.setup();
+        OldViewfinderShader.update();
+        OldViewfinderOverlay.setup();
     }
 
     public static void update() {
@@ -69,7 +69,7 @@ public class Viewfinder {
         if (player == null) return;
 
         updateSelfieMode();
-        ViewfinderShader.update();
+        OldViewfinderShader.update();
     }
 
     public static void updateSelfieMode() {
@@ -84,7 +84,7 @@ public class Viewfinder {
         isOpen = false;
         targetFov = Minecraft.getInstance().options.fov().get();
 
-        ViewfinderShader.remove();
+        OldViewfinderShader.remove();
     }
 
     public static FocalRange getFocalRange() {

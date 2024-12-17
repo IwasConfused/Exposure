@@ -22,7 +22,6 @@ public class ClearRenderingCacheS2CP implements IPacket {
     private ClearRenderingCacheS2CP() { }
 
     @Override
-
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }

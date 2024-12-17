@@ -23,21 +23,20 @@ import java.util.Optional;
 public abstract class PlayerMixin extends LivingEntity implements ActiveCameraHolder {
     @Unique
     @Nullable
-    private NewCamera exposureNewCamera;
+    private NewCamera activeCamera;
 
     protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
     }
 
-
     @Override
     public Optional<NewCamera> getActiveCamera() {
-        return Optional.ofNullable(exposureNewCamera);
+        return Optional.ofNullable(activeCamera);
     }
 
     @Override
     public void setActiveCamera(@Nullable NewCamera camera) {
-        exposureNewCamera = camera;
+        activeCamera = camera;
     }
 
     @Override

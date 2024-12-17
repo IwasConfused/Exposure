@@ -4,7 +4,8 @@ import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.viewfinder.ViewfinderShader;
+import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.image.Image;
@@ -65,11 +66,21 @@ public class BackgroundScreenshotCaptureTask extends Task<Result<Image>> {
     }
 
     private static void applyShaderEffects(RenderTarget renderTarget) {
-        @Nullable PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
-        if (effect != null && Minecraft.getInstance().gameRenderer.effectActive) {
-            ViewfinderShader.processWith(effect, renderTarget);
-        }
+        Viewfinders.getActive().flatMap(Viewfinder::getShader).ifPresent(shader -> {
+            @Nullable PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
+            if (effect != null && Minecraft.getInstance().gameRenderer.effectActive) {
+                shader.processWith(effect, renderTarget);
+            }
 
-        ViewfinderShader.process(renderTarget);
+            shader.process(renderTarget);
+        });
+
+//        @Nullable PostChain effect = Minecraft.getInstance().gameRenderer.currentEffect();
+//        if (effect != null && Minecraft.getInstance().gameRenderer.effectActive) {
+//
+//            OldViewfinderShader.processWith(effect, renderTarget);
+//        }
+//
+//        OldViewfinderShader.process(renderTarget);
     }
 }

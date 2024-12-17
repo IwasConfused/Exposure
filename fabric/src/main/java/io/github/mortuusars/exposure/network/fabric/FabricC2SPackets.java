@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.network.fabric;
 
+import io.github.mortuusars.exposure.network.packet.CommonPackets;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.S2CPackets;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -14,6 +15,13 @@ public class FabricC2SPackets {
     public static void register() {
         // This monstrosity is to avoid having to define packets for forge and fabric separately.
         for (var definition : S2CPackets.getDefinitions()) {
+            PayloadTypeRegistry.playC2S().register(
+                    (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
+                    (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec().cast());
+            ServerPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<IPacket>) definition.type(), FabricC2SPackets::handleServerboundPacket);
+        }
+
+        for (var definition : CommonPackets.getDefinitions()) {
             PayloadTypeRegistry.playC2S().register(
                     (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
                     (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec().cast());

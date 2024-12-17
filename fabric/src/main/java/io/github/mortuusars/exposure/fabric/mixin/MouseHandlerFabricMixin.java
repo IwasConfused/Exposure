@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import net.minecraft.client.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -14,7 +14,7 @@ public abstract class MouseHandlerFabricMixin {
             cancellable = true)
     void onScroll(long windowPointer, double xOffset, double yOffset, CallbackInfo ci,
                   @Local(ordinal = 4 /* Magic number that corresponds to yScroll variable*/) double yScroll) {
-        if (yScroll != 0 && Viewfinder.handleMouseScroll(yScroll)) {
+        if (yScroll != 0 && OldViewfinder.handleMouseScroll(yScroll)) {
             ci.cancel();
         }
     }

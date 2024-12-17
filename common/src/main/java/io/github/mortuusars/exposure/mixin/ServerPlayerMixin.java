@@ -24,9 +24,9 @@ public abstract class ServerPlayerMixin extends Player {
     @Inject(method = "tick", at = @At("RETURN"))
     private void onTick(CallbackInfo ci) {
         Optional<NewCamera> camera = getActiveCamera();
-        if (camera.isEmpty() || !camera.get().isActive()) {
+        if (camera.isPresent() && !camera.get().isActive()) {
             removeActiveCamera();
-            Packets.sendToClient(new RemoveActiveCameraS2CP(), ((ServerPlayer) (Object) this));
+            Packets.sendToClient(RemoveActiveCameraS2CP.INSTANCE, ((ServerPlayer) (Object) this));
         }
     }
 }

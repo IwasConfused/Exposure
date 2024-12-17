@@ -1,30 +1,40 @@
-package io.github.mortuusars.exposure.camera.viewfinder;
+package io.github.mortuusars.exposure.client.gui.viewfinder;
 
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.item.part.Attachment;
+import io.github.mortuusars.exposure.client.MC;
+import io.github.mortuusars.exposure.core.camera.NewCamera;
 import io.github.mortuusars.exposure.data.filter.Filters;
+import io.github.mortuusars.exposure.item.part.Attachment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 
-public class ViewfinderShader {
+public class ViewfinderShader implements AutoCloseable {
     private static final Logger LOGGER = LogUtils.getLogger();
-    private static final Minecraft minecraft = Minecraft.getInstance();
-    @Nullable
-    private static PostChain shader;
-    private static boolean active;
 
-    public static void apply(ResourceLocation shaderLocation) {
+    private final Minecraft minecraft;
+    private final Viewfinder viewfinder;
+    private final NewCamera camera;
+
+    @Nullable
+    private PostChain shader;
+    private boolean active;
+
+    public ViewfinderShader(Viewfinder viewfinder, NewCamera camera) {
+        this.minecraft = MC.get();
+        this.viewfinder = viewfinder;
+        this.camera = camera;
+    }
+
+    public void apply(ResourceLocation shaderLocation) {
         if (shader != null) {
             if (shader.getName().equals(shaderLocation.toString())) {
                 return;
@@ -47,7 +57,7 @@ public class ViewfinderShader {
         }
     }
 
-    public static void resize(int width, int height) {
+    public void resize(int width, int height) {
         if (shader != null) {
             shader.resize(width, height);
         }
@@ -56,7 +66,7 @@ public class ViewfinderShader {
     /**
      * Processes current viewfinder shader (if it is present and active).
      */
-    public static void process() {
+    public void process() {
         if (shader != null && active) {
             RenderSystem.disableBlend();
             RenderSystem.disableDepthTest();
@@ -71,7 +81,7 @@ public class ViewfinderShader {
      * Since this method creates a temp PostChain on every call, this probably should not be used when performance matters.
      * Main use for this is to apply a shader when capturing a photograph.
      */
-    public static void process(RenderTarget renderTarget) {
+    public void process(RenderTarget renderTarget) {
         if (shader != null && active) {
             processWith(shader, renderTarget);
         }
@@ -84,7 +94,7 @@ public class ViewfinderShader {
      * Main use for this is to apply a shader when capturing a photograph.
      */
     // This is probably wrong class for it, but it'll do for now.
-    public static void processWith(@NotNull PostChain shader, @NotNull RenderTarget renderTarget) {
+    public void processWith(@NotNull PostChain shader, @NotNull RenderTarget renderTarget) {
         try {
             ResourceLocation shaderLocation = ResourceLocation.parse(shader.getName());
 
@@ -103,7 +113,7 @@ public class ViewfinderShader {
         }
     }
 
-    public static void remove() {
+    public void remove() {
         if (shader != null) {
             shader.close();
         }
@@ -111,10 +121,13 @@ public class ViewfinderShader {
         shader = null;
     }
 
-    public static void update() {
-        CameraClient.getActiveCamera().ifPresentOrElse(camera -> {
-            ItemStack filterStack = Attachment.FILTER.get(camera.getItemStack()).getForReading();
-            Filters.getShaderOf(filterStack).ifPresentOrElse(ViewfinderShader::apply, ViewfinderShader::remove);
-        }, ViewfinderShader::remove);
+    public void update() {
+        Filters.getShaderOf(Attachment.FILTER.get(camera.getItemStack()).getForReading())
+                .ifPresentOrElse(this::apply, this::remove);
+    }
+
+    @Override
+    public void close() {
+        remove();
     }
 }

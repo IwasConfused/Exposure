@@ -1,9 +1,11 @@
 package io.github.mortuusars.exposure.item;
 
+import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.block.FlashBlock;
-import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.client.Client;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
@@ -20,9 +22,11 @@ import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.item.part.Shutter;
+import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartCaptureS2CP;
+import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
 import io.github.mortuusars.exposure.server.CameraInstance;
 import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
@@ -32,6 +36,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.*;
@@ -47,11 +52,13 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -167,13 +174,15 @@ public class CameraItem extends Item {
 
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
-        if (!(entity instanceof Player player)) return;
+        if (!(entity instanceof Player player)) return; // It should always be player. Not casting just to be safe.
 
-        if (!level.isClientSide()) {
+        if (player instanceof ServerPlayer serverPlayer) {
             CameraInstances.ifPresent(stack, instance -> instance.tick(player, stack));
 
-            if (isActive(stack) && !player.activeCameraMatches(stack)) {
+            boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
+            if (isActive(stack) && (!isHolding || !player.activeCameraMatches(stack))) {
                 deactivate(player, stack);
+                Packets.sendToClient(DeactivateActiveCameraCommonPacket.INSTANCE, serverPlayer);
             }
         }
     }
@@ -188,15 +197,11 @@ public class CameraItem extends Item {
             return InteractionResultHolder.pass(stack);
         }
 
-        if (isActive(stack)) {
-            return release(level, player, hand, stack);
+        if (!isActive(stack)) {
+            return player.isSecondaryUseActive() ? openCameraAttachments(player, stack) : activate(player, stack, hand);
         }
 
-        if (player.isSecondaryUseActive()) {
-            return openCameraAttachments(player, stack);
-        }
-
-        return activate(player, stack, hand);
+        return release(level, player, hand, stack);
     }
 
     public @NotNull InteractionResultHolder<ItemStack> release(Level level, Player player, InteractionHand hand, ItemStack stack) {
@@ -264,7 +269,7 @@ public class CameraItem extends Item {
     }
 
     public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack stack) {
-        List<UUID> entitiesInFrame = EntitiesInFrame.get(player, Viewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
+        List<UUID> entitiesInFrame = EntitiesInFrame.get(player, OldViewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
                 .stream()
                 .map(Entity::getUUID)
                 .toList();
@@ -285,6 +290,23 @@ public class CameraItem extends Item {
         int cameraSlot = getMatchingSlotInInventory(player.getInventory(), stack);
         if (cameraSlot < 0)
             return InteractionResultHolder.fail(stack);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            MenuProvider menuProvider = new MenuProvider() {
+                @Override
+                public @NotNull Component getDisplayName() {
+                    return stack.get(DataComponents.CUSTOM_NAME) != null
+                            ? stack.getHoverName() : Component.translatable("container.exposure.camera");
+                }
+
+                @Override
+                public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
+                    return new CameraAttachmentsMenu(containerId, playerInventory, cameraSlot);
+                }
+            };
+
+            PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(cameraSlot));
+        }
 
         return InteractionResultHolder.success(stack);
     }

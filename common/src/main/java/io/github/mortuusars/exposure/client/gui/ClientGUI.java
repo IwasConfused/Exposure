@@ -32,9 +32,9 @@ public class ClientGUI {
         Minecraft.getInstance().setScreen(new PhotographScreen(photographs));
     }
 
-    public static void openViewfinderControlsScreen() {
-        Minecraft.getInstance().setScreen(new CameraControlsScreen());
-    }
+//    public static void openViewfinderControlsScreen() {
+//        Minecraft.getInstance().setScreen(new CameraControlsScreen());
+//    }
 
     public static void addFilmRollDevelopingTooltip(ItemStack filmStack, Item.TooltipContext tooltipContext,
                                                     @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {

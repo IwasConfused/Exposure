@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.util.Fov;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -26,7 +26,7 @@ public class FocalLengthButton extends ImageButton {
     public void renderWidget(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         super.renderWidget(guiGraphics, mouseX, mouseY, partialTick);
 
-        int focalLength = (int)Math.round(Fov.fovToFocalLength(Viewfinder.getCurrentFov()));
+        int focalLength = (int)Math.round(Fov.fovToFocalLength(OldViewfinder.getCurrentFov()));
 
         Font font = Minecraft.getInstance().font;
         MutableComponent text = Component.translatable("gui.exposure.camera_controls.focal_length", focalLength);

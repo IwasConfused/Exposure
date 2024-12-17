@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.client.MC;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import net.minecraft.client.Minecraft;
@@ -48,7 +48,7 @@ public class FrameCounterButton extends ImageButton {
     }
 
     protected String createText() {
-        return CameraClient.getActiveCamera().map(camera -> {
+        return MC.player().getActiveCamera().map(camera -> {
             ItemStack filmStack = Attachment.FILM.get(camera.getItemStack()).getForReading();
             if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
                 return "-";
@@ -61,6 +61,6 @@ public class FrameCounterButton extends ImageButton {
     }
 
     protected boolean cameraHasFilmRoll() {
-        return CameraClient.getActiveCamera().map(camera -> Attachment.FILM.isPresent(camera.getItemStack())).orElse(false);
+        return MC.player().getActiveCamera().map(camera -> Attachment.FILM.isPresent(camera.getItemStack())).orElse(false);
     }
 }

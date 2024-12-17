@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.neoforge.event;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
@@ -93,13 +93,13 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void renderOverlay(RenderGuiEvent.Pre event) {
-            if (Viewfinder.isLookingThrough())
+            if (OldViewfinder.isLookingThrough())
                 event.setCanceled(true);
         }
 
         @SubscribeEvent
         public static void mouseScroll(InputEvent.MouseScrollingEvent event) {
-            if (Viewfinder.handleMouseScroll(event.getScrollDeltaY())) {
+            if (OldViewfinder.handleMouseScroll(event.getScrollDeltaY())) {
                 event.setCanceled(true);
             }
         }
@@ -110,7 +110,7 @@ public class ClientEvents {
                 return;
 
             double prevFov = event.getFOV();
-            double modifiedFov = Viewfinder.modifyFov(prevFov);
+            double modifiedFov = OldViewfinder.modifyFov(prevFov);
             if (prevFov != modifiedFov)
                 event.setFOV(modifiedFov);
         }

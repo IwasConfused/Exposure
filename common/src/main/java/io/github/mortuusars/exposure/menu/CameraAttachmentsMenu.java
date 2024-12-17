@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.menu;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
@@ -22,7 +23,7 @@ import java.util.Map;
 public class CameraAttachmentsMenu extends AbstractContainerMenu {
     protected final Player player;
     protected final int cameraSlotIndex;
-    protected final ItemAndStack<OldCameraItem> camera;
+    protected final ItemAndStack<CameraItem> camera;
     protected final List<Attachment<?>> attachments;
 
     protected boolean clientContentsInitialized;
@@ -31,14 +32,14 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         super(Exposure.MenuTypes.CAMERA.get(), containerId);
 
         ItemStack cameraStack = playerInventory.items.get(cameraSlotIndex);
-        Preconditions.checkState(cameraStack.getItem() instanceof OldCameraItem,
+        Preconditions.checkState(cameraStack.getItem() instanceof CameraItem,
                 "Failed to open Camera Attachments. " + cameraStack + " is not a CameraItem.");
 
         this.player = playerInventory.player;
         this.cameraSlotIndex = cameraSlotIndex;
         this.camera = new ItemAndStack<>(cameraStack);
 
-        this.attachments = camera.getItem().getAttachments(camera.getItemStack());
+        this.attachments = List.of(Attachment.FILM, Attachment.FLASH, Attachment.LENS, Attachment.FILTER);
 
         SimpleContainer container = createAttachmentsContainer(cameraSlotIndex);
 
@@ -73,7 +74,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         return container;
     }
 
-    public ItemAndStack<OldCameraItem> getCamera() {
+    public ItemAndStack<CameraItem> getCamera() {
         return camera;
     }
 

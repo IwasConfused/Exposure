@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
-import io.github.mortuusars.exposure.camera.CameraClient;
+import io.github.mortuusars.exposure.client.MC;
 import io.github.mortuusars.exposure.client.animation.ModelPoses;
-import io.github.mortuusars.exposure.core.camera.CameraInHand;
+import io.github.mortuusars.exposure.core.camera.NewCameraInHand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;
@@ -32,8 +32,8 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
         if (!(entity instanceof Player))
             return;
 
-        CameraClient.getActiveCamera().ifPresent(camera -> {
-            if (camera instanceof CameraInHand<?> cameraInHand) {
+        MC.player().getActiveCamera().ifPresent(camera -> {
+            if (camera instanceof NewCameraInHand cameraInHand) {
                 HumanoidArm arm = Minecraft.getInstance().options.mainHand().get();
                 if (cameraInHand.getHand() == InteractionHand.OFF_HAND)
                     arm = arm.getOpposite();
