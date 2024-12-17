@@ -19,7 +19,7 @@ public class C2SPackets {
                 new CustomPacketPayload.TypeAndCodec<>(QueryExposureDataC2SP.TYPE, QueryExposureDataC2SP.STREAM_CODEC),
 
                 new CustomPacketPayload.TypeAndCodec<>(NewCameraSetSettingC2SP.TYPE, NewCameraSetSettingC2SP.STREAM_CODEC),
-
+                new CustomPacketPayload.TypeAndCodec<>(ActiveCameraAddFrameC2SP.TYPE, ActiveCameraAddFrameC2SP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(InterplanarProjectionFinishedC2SP.TYPE, InterplanarProjectionFinishedC2SP.STREAM_CODEC)
         );
     }

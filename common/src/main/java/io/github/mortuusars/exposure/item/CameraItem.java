@@ -1,5 +1,7 @@
 package io.github.mortuusars.exposure.item;
 
+import com.google.common.base.Preconditions;
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.PlatformHelper;
@@ -26,6 +28,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartCaptureS2CP;
 import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
+import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.server.CameraInstance;
 import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
@@ -54,10 +57,13 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SlotAccess;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickAction;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.CustomData;
@@ -79,11 +85,12 @@ import java.util.*;
 
 public class CameraItem extends Item {
     protected final Shutter shutter;
+    protected final List<Attachment<?>> attachments;
 
     public CameraItem(Shutter shutter, Properties properties) {
         super(properties);
         this.shutter = shutter;
-
+        this.attachments = List.of(Attachment.FILM, Attachment.FLASH, Attachment.LENS, Attachment.FILTER);
         //TODO: shutter on open on close
 //        shutter.onClosed((entity, stack) -> {});
     }
@@ -92,6 +99,10 @@ public class CameraItem extends Item {
 
     public Shutter getShutter() {
         return shutter;
+    }
+
+    public List<Attachment<?>> getAttachments() {
+        return attachments;
     }
 
     public SoundEvent getViewfinderOpenSound() {
@@ -172,10 +183,80 @@ public class CameraItem extends Item {
     // --
 
     @Override
+    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess access) {
+        if (action != ClickAction.SECONDARY) return false;
+
+        if (otherStack.isEmpty() && Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get()) {
+            if (!(slot.container instanceof Inventory)) {
+                return false; // Cannot open when not in player's inventory
+            }
+
+            if (player.isCreative() && player.level().isClientSide()) {
+                Packets.sendToServer(new OpenCameraAttachmentsInCreativePacketC2SP(slot.getContainerSlot()));
+                return true;
+            }
+
+            openCameraAttachments(player, stack);
+            return true;
+        }
+
+//        if (PlatformHelper.canShear(otherStack) && !isTooltipRemoved(stack)) {
+//            if (otherStack.isDamageableItem() && player instanceof ServerPlayer serverPlayer) {
+//                // broadcasting break event is expecting item to be in hand,
+//                // but making it work for carried items would be too much work for such small feature.
+//                // No one will ever notice it anyway.
+//                otherStack.hurtAndBreak(1, serverPlayer.serverLevel(),
+//                        serverPlayer, item -> serverPlayer.onEquippedItemBroken(item, EquipmentSlot.MAINHAND));
+//            }
+//
+//            if (player.level().isClientSide)
+//                player.playSound(SoundEvents.SHEEP_SHEAR);
+//
+//            setTooltipRemoved(stack, true);
+//            return true;
+//        }
+//
+//        if (isTooltipRemoved(stack) && (otherStack.getItem() instanceof BookItem || otherStack.getItem() instanceof WritableBookItem
+//                || otherStack.getItem() instanceof WrittenBookItem || otherStack.getItem() instanceof KnowledgeBookItem)) {
+//            setTooltipRemoved(stack, false);
+//            if (player.level().isClientSide)
+//                player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT);
+//            return true;
+//        }
+
+        if (Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get()) {
+            for (Attachment<?> attachment : getAttachments()) {
+                if (attachment.matches(otherStack)) {
+                    StoredItemStack currentAttachment = attachment.get(stack);
+
+                    if (otherStack.getCount() > 1 && !currentAttachment.isEmpty()) {
+                        if (player.level().isClientSide())
+                            playSound(null, player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f, 0);
+                        return true; // Cannot swap when holding more than one item
+                    }
+
+                    attachment.set(stack, otherStack.split(1));
+
+                    ItemStack returnedStack = !currentAttachment.isEmpty() ? currentAttachment.getCopy() : otherStack;
+                    access.set(returnedStack);
+
+                    attachment.sound().playOnePerPlayer(player, false);
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof Player player)) return; // It should always be player. Not casting just to be safe.
 
+        getShutter().tick(player, stack);
+
         if (player instanceof ServerPlayer serverPlayer) {
+
             CameraInstances.ifPresent(stack, instance -> instance.tick(player, stack));
 
             boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
@@ -279,7 +360,9 @@ public class CameraItem extends Item {
         return new ExposureFrameClientData(entitiesInFrame, extraData);
     }
 
-    protected @NotNull InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack) {
+    public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack) {
+        Preconditions.checkArgument(stack.getItem() instanceof CameraItem, "%s is not a CameraItem.", stack);
+
         if (getShutter().isOpen(stack)) {
             player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.shutter_open")
                     .withStyle(ChatFormatting.RED), true);
@@ -287,8 +370,20 @@ public class CameraItem extends Item {
         }
 
         int cameraSlot = getMatchingSlotInInventory(player.getInventory(), stack);
-        if (cameraSlot < 0)
+        if (cameraSlot < 0) {
+            Exposure.LOGGER.error("Cannot open camera attachments: slot index is not found for item '{}'.", stack);
             return InteractionResultHolder.fail(stack);
+        }
+
+        return openCameraAttachments(player, cameraSlot);
+    }
+
+    public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, int slotIndex) {
+        Preconditions.checkArgument(slotIndex >= 0,
+                "slotIndex '%s' is invalid. Should be larger than 0", slotIndex);
+        ItemStack stack = player.getInventory().getItem(slotIndex);
+        Preconditions.checkArgument(stack.getItem() instanceof CameraItem,
+                "Item in slotIndex '%s' is not a CameraItem but '%s'.", slotIndex, stack);
 
         if (player instanceof ServerPlayer serverPlayer) {
             MenuProvider menuProvider = new MenuProvider() {
@@ -300,11 +395,11 @@ public class CameraItem extends Item {
 
                 @Override
                 public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-                    return new CameraAttachmentsMenu(containerId, playerInventory, cameraSlot);
+                    return new CameraAttachmentsMenu(containerId, playerInventory, slotIndex);
                 }
             };
 
-            PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(cameraSlot));
+            PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(slotIndex));
         }
 
         return InteractionResultHolder.success(stack);

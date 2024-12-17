@@ -3,12 +3,15 @@ package io.github.mortuusars.exposure.client;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.NewCamera;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
 import io.github.mortuusars.exposure.network.packet.server.*;
 import net.minecraft.world.entity.player.Player;
 import org.slf4j.Logger;
+
+import java.util.Optional;
 
 /*
 
@@ -86,6 +89,20 @@ Client:
 public class CameraClient {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    public static Optional<NewCamera> getActive() {
+        return Minecrft.player().getActiveCamera();
+    }
+
+    public static boolean isActive() {
+        return getActive().isPresent();
+    }
+
+    public static void deactivate() {
+        Minecrft.player().getActiveCamera().ifPresent(camera -> camera.getItem().deactivate(Minecrft.player(), camera.getItemStack()));
+        Minecrft.player().removeActiveCamera();
+        Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
+    }
+
     public static void startCapture(Player player, CameraAccessor<?> cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
         cameraAccessor.ifPresentOrElse(player, camera -> {
             camera.getItem().exposeFrameClientside(player, camera.getItemStack(), identifier, flashHasFired);
@@ -98,11 +115,5 @@ public class CameraClient {
         Minecrft.player().getActiveCamera().ifPresent(camera -> {
             setting.setAndSync(Minecrft.player(), value);
         });
-    }
-
-    public static void deactivate() {
-        Minecrft.player().getActiveCamera().ifPresent(camera -> camera.getItem().deactivate(Minecrft.player(), camera.getItemStack()));
-        Minecrft.player().removeActiveCamera();
-        Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
     }
 }

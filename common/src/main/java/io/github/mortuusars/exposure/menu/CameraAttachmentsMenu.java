@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
@@ -39,7 +38,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         this.cameraSlotIndex = cameraSlotIndex;
         this.camera = new ItemAndStack<>(cameraStack);
 
-        this.attachments = List.of(Attachment.FILM, Attachment.FLASH, Attachment.LENS, Attachment.FILTER);
+        this.attachments = camera.getItem().getAttachments();
 
         SimpleContainer container = createAttachmentsContainer(cameraSlotIndex);
 
