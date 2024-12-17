@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.item.part;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.AttachmentSound;
+import io.github.mortuusars.exposure.core.camera.AttachmentSound;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import net.minecraft.core.component.DataComponentType;

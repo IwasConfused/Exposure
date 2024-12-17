@@ -5,14 +5,9 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
-import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
 import net.minecraft.client.Minecraft;
@@ -22,8 +17,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.joml.Matrix4f;
-
-import java.util.Optional;
 
 public class OldViewfinderOverlay {
     public static final ResourceLocation VIEWFINDER_TEXTURE = Exposure.resource("textures/gui/viewfinder/viewfinder.png");

@@ -4,8 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.client.Client;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
 import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
@@ -456,7 +455,7 @@ public class OldCameraItem extends Item {
                 //TODO: Pass accessor as method argument, remove all dependency on hand so we can use it not only in hand
 //                CameraClient.setActiveCameraAccessor(CameraAccessors.ofHand(hand));
                 // Release use key after activating. Otherwise, if right click is still held - camera will take a shot
-                Client.releaseUseButton();
+                Minecrft.releaseUseButton();
             }
 
             return InteractionResult.CONSUME; // Consume to not play animation

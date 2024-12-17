@@ -1,12 +1,11 @@
 package io.github.mortuusars.exposure.item;
 
-import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
-import io.github.mortuusars.exposure.client.Client;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
@@ -153,7 +152,7 @@ public class CameraItem extends Item {
         playSound(excludedPlayer, entity, getViewfinderOpenSound(), 0.35f, 0.9f, 0.2f);
 
         if (entity.level().isClientSide) {
-            Client.releaseUseButton(); // Releasing use key to not take a shot immediately, if right click is still held.
+            Minecrft.releaseUseButton(); // Releasing use key to not take a shot immediately, if right click is still held.
         }
 
         return InteractionResultHolder.consume(stack);

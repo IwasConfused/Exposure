@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.capture;
+package io.github.mortuusars.exposure.client.capture_template;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;

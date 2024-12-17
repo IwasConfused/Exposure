@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.client.MC;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
@@ -25,7 +25,7 @@ public abstract class GuiMixin {
 
     @Inject(method = "renderCrosshair", at = @At(value = "HEAD"), cancellable = true)
     private void renderCrosshair(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        LocalPlayer player = MC.player();
+        LocalPlayer player = Minecrft.player();
         if (Config.Client.PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR.get() && player.getXRot() > 25f
                 && (player.getMainHandItem().getItem() instanceof PhotographItem || player.getMainHandItem().getItem() instanceof StackedPhotographsItem)
                 && player.getOffhandItem().isEmpty())

@@ -7,7 +7,7 @@ import net.minecraft.client.player.LocalPlayer;
 
 import java.util.Objects;
 
-public class MC {
+public class Minecrft {
     public static Minecraft get() {
         return Minecraft.getInstance();
     }
@@ -22,5 +22,9 @@ public class MC {
 
     public static Options options() {
         return Minecraft.getInstance().options;
+    }
+
+    public static void releaseUseButton() {
+        Minecraft.getInstance().options.keyUse.setDown(false);
     }
 }

@@ -4,7 +4,7 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.client.MC;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.core.camera.NewCamera;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.item.part.Attachment;
@@ -29,7 +29,7 @@ public class ViewfinderShader implements AutoCloseable {
     private boolean active;
 
     public ViewfinderShader(Viewfinder viewfinder, NewCamera camera) {
-        this.minecraft = MC.get();
+        this.minecraft = Minecrft.get();
         this.viewfinder = viewfinder;
         this.camera = camera;
     }

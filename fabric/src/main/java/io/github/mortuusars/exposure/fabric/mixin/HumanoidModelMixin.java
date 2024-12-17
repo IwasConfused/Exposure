@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
-import io.github.mortuusars.exposure.client.MC;
 import io.github.mortuusars.exposure.client.animation.ModelPoses;
 import io.github.mortuusars.exposure.core.camera.NewCameraInHand;
 import net.minecraft.client.Minecraft;
@@ -29,10 +28,10 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
 
     @Inject(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V", at = @At("RETURN"))
     void onSetupAnim(T entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch, CallbackInfo ci) {
-        if (!(entity instanceof Player))
+        if (!(entity instanceof Player player))
             return;
 
-        MC.player().getActiveCamera().ifPresent(camera -> {
+        player.getActiveCamera().ifPresent(camera -> {
             if (camera instanceof NewCameraInHand cameraInHand) {
                 HumanoidArm arm = Minecraft.getInstance().options.mainHand().get();
                 if (cameraInHand.getHand() == InteractionHand.OFF_HAND)

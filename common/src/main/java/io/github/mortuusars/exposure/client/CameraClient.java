@@ -1,7 +1,6 @@
-package io.github.mortuusars.exposure.camera;
+package io.github.mortuusars.exposure.client;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.client.MC;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.item.part.Setting;
@@ -87,60 +86,7 @@ Client:
 public class CameraClient {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-//    @Nullable
-//    private static CameraAccessor<?> activeCameraAccessor;
-
-//    public static @Nullable CameraAccessor<?> getActiveCameraAccessor() {
-//        return activeCameraAccessor;
-//    }
-
-//    public static void setActiveCameraAccessor(@Nullable CameraAccessor<?> cameraAccessor) {
-//        activeCameraAccessor = cameraAccessor;
-//    }
-
-//    public static Optional<Camera<?>> getActiveCamera() {
-//        if (activeCameraAccessor == null || Minecraft.getInstance().player == null) {
-//            return Optional.empty();
-//        }
-//
-//        @Nullable Camera<? extends OldCameraItem> camera = activeCameraAccessor.get(Minecraft.getInstance().player);
-//        if (camera != null && camera.isActive()) {
-//            return Optional.of(camera);
-//        }
-//
-//        return Optional.empty();
-//    }
-
-//    public static void onLocalPlayerTick(LocalPlayer player) {
-//        // TODO: Needs thorough testing. It's still convoluted as hell.
-//
-//        for (InteractionHand hand : InteractionHand.values()) {
-//            ItemStack itemInHand = player.getItemInHand(hand);
-//            if (itemInHand.getItem() instanceof OldCameraItem cameraItem
-//                    && cameraItem.isActive(itemInHand)
-//                    && activeCameraAccessor == null
-//                    && !OldViewfinder.isOpen()) {
-//                activeCameraAccessor = CameraAccessors.ofHand(hand);
-//            }
-//        }
-//
-//        @Nullable CameraAccessor<?> cameraAccessor = getActiveCameraAccessor();
-//        if (cameraAccessor != null) {
-//            cameraAccessor.ifPresent(player, camera -> {
-//                if (!OldViewfinder.isOpen()) {
-//                    OldViewfinder.open();
-//                } else {
-//                    OldViewfinder.update();
-//                }
-//            });
-//            return;
-//        }
-//
-//        setActiveCameraAccessor(null);
-//        OldViewfinder.close();
-//    }
-
-    public static void handleExposureStart(Player player, CameraAccessor<?> cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
+    public static void startCapture(Player player, CameraAccessor<?> cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
         cameraAccessor.ifPresentOrElse(player, camera -> {
             camera.getItem().exposeFrameClientside(player, camera.getItemStack(), identifier, flashHasFired);
             ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
@@ -148,22 +94,15 @@ public class CameraClient {
         }, () -> LOGGER.error("Cannot start exposure '{}': cannot get a camera with accessor '{}'.", identifier, cameraAccessor));
     }
 
-//    public static <T> void setSetting(Setting<T> setting, T value) {
-//        @Nullable CameraAccessor<?> accessor = getActiveCameraAccessor();
-//        if (accessor != null) {
-//            setting.setAndSync(accessor, Minecraft.getInstance().player, value);
-//        }
-//    }
-
     public static <T> void setSetting(Setting<T> setting, T value) {
-        MC.player().getActiveCamera().ifPresent(camera -> {
-            setting.setAndSync(MC.player(), value);
+        Minecrft.player().getActiveCamera().ifPresent(camera -> {
+            setting.setAndSync(Minecrft.player(), value);
         });
     }
 
     public static void deactivate() {
-        MC.player().getActiveCamera().ifPresent(camera -> camera.getItem().deactivate(MC.player(), camera.getItemStack()));
-        MC.player().removeActiveCamera();
+        Minecrft.player().getActiveCamera().ifPresent(camera -> camera.getItem().deactivate(Minecrft.player(), camera.getItemStack()));
+        Minecrft.player().removeActiveCamera();
         Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
     }
 }

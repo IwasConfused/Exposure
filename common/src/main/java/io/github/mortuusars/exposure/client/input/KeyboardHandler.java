@@ -1,11 +1,11 @@
 package io.github.mortuusars.exposure.client.input;
 
-import io.github.mortuusars.exposure.client.MC;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
 
 public class KeyboardHandler {
     public static boolean handleKeyPress(long windowId, int key, int scanCode, int action, int modifiers) {
-        return MC.get().player != null && Viewfinders.keyPressed(key, scanCode, action);
+        return Minecrft.get().player != null && Viewfinders.keyPressed(key, scanCode, action);
     }
 
 //    private static boolean handleCameraKeyPress(int key, int scanCode, int action) {

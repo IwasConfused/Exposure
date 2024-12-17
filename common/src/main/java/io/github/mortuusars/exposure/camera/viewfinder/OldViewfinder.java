@@ -4,8 +4,7 @@ package io.github.mortuusars.exposure.camera.viewfinder;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.client.CameraClient;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.item.part.Setting;
@@ -17,7 +16,6 @@ import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.Optional;
 
 public class OldViewfinder {
     public static final float ZOOM_STEP = 8f;

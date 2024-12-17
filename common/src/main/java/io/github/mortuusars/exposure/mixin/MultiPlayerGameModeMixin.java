@@ -1,8 +1,6 @@
 package io.github.mortuusars.exposure.mixin;
 
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.client.MC;
-import io.github.mortuusars.exposure.core.camera.CameraInHand;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.core.camera.NewCameraInHand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -46,7 +44,7 @@ public abstract class MultiPlayerGameModeMixin {
             return false;
         }
 
-        return MC.player().getActiveCamera().map(camera -> {
+        return Minecrft.player().getActiveCamera().map(camera -> {
             if (camera instanceof NewCameraInHand cameraInHand) {
                 gameMode.useItem(player, cameraInHand.getHand());
                 return true;

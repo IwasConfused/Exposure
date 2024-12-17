@@ -5,19 +5,13 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.client.gui.Widgets;
-import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinderOverlay;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
-import io.github.mortuusars.exposure.core.camera.CameraInHand;
 import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.part.Setting;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -25,17 +19,12 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class CameraControlsScreen extends Screen {
     public static final WidgetSprites SHUTTER_SPEED_SPRITES = new WidgetSprites(

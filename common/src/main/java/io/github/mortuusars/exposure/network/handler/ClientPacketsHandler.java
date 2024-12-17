@@ -4,8 +4,8 @@ import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.client.capture.CaptureTemplates;
+import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.capture_template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
@@ -125,7 +125,7 @@ public class ClientPacketsHandler {
         executeOnMainThread(() -> {
             LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
             CameraAccessor<?> cameraAccessor = packet.cameraAccessor();
-            CameraClient.handleExposureStart(player, cameraAccessor, packet.identifier(), packet.flashHasFired());
+            CameraClient.startCapture(player, cameraAccessor, packet.identifier(), packet.flashHasFired());
         });
     }
 

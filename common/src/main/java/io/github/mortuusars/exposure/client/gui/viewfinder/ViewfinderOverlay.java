@@ -5,7 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.MC;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.NewCamera;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
@@ -45,7 +45,7 @@ public class ViewfinderOverlay {
     private Float yRot0 = null;
 
     public ViewfinderOverlay(Viewfinder viewfinder, NewCamera camera) {
-        this.player = MC.player();
+        this.player = Minecrft.player();
         this.camera = camera;
         this.viewfinder = viewfinder;
         this.backgroundColor = Config.Client.getBackgroundColor();
@@ -61,10 +61,10 @@ public class ViewfinderOverlay {
     }
 
     public void render() {
-        final int width = MC.get().getWindow().getGuiScaledWidth();
-        final int height = MC.get().getWindow().getGuiScaledHeight();
+        final int width = Minecrft.get().getWindow().getGuiScaledWidth();
+        final int height = Minecrft.get().getWindow().getGuiScaledHeight();
 
-        float partialTicks = MC.get().getTimer().getGameTimeDeltaTicks();
+        float partialTicks = Minecrft.get().getTimer().getGameTimeDeltaTicks();
         scale = Mth.lerp(Math.min(0.8f * partialTicks, 0.8f), scale, 1f);
         float openingSize = Math.min(width, height);
 
@@ -73,7 +73,7 @@ public class ViewfinderOverlay {
         opening.width = openingSize;
         opening.height = openingSize;
 
-        if (MC.options().hideGui)
+        if (Minecrft.options().hideGui)
             return;
 
         CameraItem cameraItem = camera.getItem();
@@ -119,7 +119,7 @@ public class ViewfinderOverlay {
 
         poseStack.translate(-width / 2f - yDelay, -height / 2f - xDelay, 0);
 
-        if (MC.options().bobView().get())
+        if (Minecrft.options().bobView().get())
             bobView(poseStack, partialTicks);
 
         // -9999 to cover all screen when poseStack is scaled down.
@@ -149,7 +149,7 @@ public class ViewfinderOverlay {
         RenderSystem.setShaderTexture(0, Setting.COMPOSITION_GUIDE.getOrDefault(cameraStack, CompositionGuides.NONE).overlayTextureLocation());
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, -1f, 0f, 1f, 0f, 1f);
 
-        if (!(MC.get().screen instanceof CameraControlsScreen)) {
+        if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
             renderIcons(poseStack, cameraStack);
         }
 
@@ -211,7 +211,7 @@ public class ViewfinderOverlay {
     }
 
     public void bobView(PoseStack poseStack, float partialTicks) {
-        if (MC.get().getCameraEntity() instanceof Player pl) {
+        if (Minecrft.get().getCameraEntity() instanceof Player pl) {
             float f = pl.walkDist - pl.walkDistO;
             float f1 = -(pl.walkDist + f * partialTicks);
             float f2 = Mth.lerp(partialTicks, pl.oBob, pl.bob);

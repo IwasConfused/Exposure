@@ -4,13 +4,11 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.CameraClient;
-import io.github.mortuusars.exposure.client.MC;
+import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.NewCamera;
-import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
 import net.minecraft.client.CameraType;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,11 +56,11 @@ public class Viewfinder {
     public void openControlsScreen() {
         Preconditions.checkNotNull(camera, "No active camera");
         controls = controlsScreenSupplier.apply(this, camera);
-        MC.get().setScreen(controls);
+        Minecrft.get().setScreen(controls);
     }
 
     public boolean isLookingThrough() {
-        CameraType cameraType = MC.options().getCameraType();
+        CameraType cameraType = Minecrft.options().getCameraType();
         return cameraType == CameraType.FIRST_PERSON || cameraType == CameraType.THIRD_PERSON_FRONT;
     }
 
@@ -85,33 +83,33 @@ public class Viewfinder {
             shader = null;
         }
 
-        if (MC.get().screen instanceof ViewfinderCameraControlsScreen) {
-            MC.get().setScreen(null);
+        if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) {
+            Minecrft.get().setScreen(null);
         }
     }
 
     public boolean keyPressed(int key, int scanCode, int action) {
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
-                && MC.options().keyAttack.matches(key, scanCode)
-                && !(MC.get().screen instanceof CameraControlsScreen)) {
+                && Minecrft.options().keyAttack.matches(key, scanCode)
+                && !(Minecrft.get().screen instanceof CameraControlsScreen)) {
             return true;
         }
 
-        if (MC.options().keyTogglePerspective.matches(key, scanCode)) {
+        if (Minecrft.options().keyTogglePerspective.matches(key, scanCode)) {
             if (action == InputConstants.PRESS)
                 return true;
 
-            CameraType currentCameraType = MC.options().getCameraType();
+            CameraType currentCameraType = Minecrft.options().getCameraType();
             CameraType newCameraType = currentCameraType == CameraType.FIRST_PERSON ? CameraType.THIRD_PERSON_FRONT
                     : CameraType.FIRST_PERSON;
 
-            MC.options().setCameraType(newCameraType);
+            Minecrft.options().setCameraType(newCameraType);
             return true;
         }
 
-        if (key == InputConstants.KEY_ESCAPE || MC.options().keyInventory.matches(key, scanCode)) {
+        if (key == InputConstants.KEY_ESCAPE || Minecrft.options().keyInventory.matches(key, scanCode)) {
             if (action == InputConstants.PRESS) {
-                if (MC.get().screen instanceof ViewfinderCameraControlsScreen viewfinderControlsScreen) {
+                if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen viewfinderControlsScreen) {
                     viewfinderControlsScreen.onClose();
                 } else {
                     CameraClient.deactivate();
@@ -124,7 +122,7 @@ public class Viewfinder {
         if (!isLookingThrough())
             return false;
 
-        if (!(MC.get().screen instanceof CameraControlsScreen)) {
+        if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
             if (ExposureClient.getCameraControlsKey().matches(key, scanCode)) {
                 openControlsScreen();
                 return false; // false not handle and keep moving/sneaking
@@ -147,9 +145,9 @@ public class Viewfinder {
     }
 
     public boolean mouseClicked(int button, int action) {
-        if (MC.get().screen instanceof ViewfinderCameraControlsScreen) return false;
+        if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) return false;
 
-        if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && MC.options().keyAttack.matchesMouse(button))
+        if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && Minecrft.options().keyAttack.matchesMouse(button))
             return true; // Block attacks
 
         if (ExposureClient.getCameraControlsKey().matchesMouse(button)) {
