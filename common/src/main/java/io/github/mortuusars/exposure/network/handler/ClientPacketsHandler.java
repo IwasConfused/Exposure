@@ -106,14 +106,6 @@ public class ClientPacketsHandler {
         });
     }
 
-    public static void startExposure(StartExposureS2CP packet) {
-        executeOnMainThread(() -> {
-            LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player);
-            CameraAccessor<?> cameraAccessor = packet.cameraAccessor();
-            CameraClient.startCapture(player, cameraAccessor, packet.identifier(), packet.flashHasFired());
-        });
-    }
-
     public static void showExposure(ShowExposureCommandS2CP packet) {
         executeOnMainThread(() -> {
             LocalPlayer player = Minecraft.getInstance().player;

@@ -30,7 +30,6 @@ import io.github.mortuusars.exposure.item.part.Shutter;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
-import io.github.mortuusars.exposure.network.packet.client.StartExposureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.core.ChromaChannel;
@@ -509,7 +508,7 @@ public class OldCameraItem extends Item {
         ExposureServer.awaitExposure(exposureIdentifier, filmItem.getType(), player.getScoreboardName());
 
         CameraAccessor<?> cameraAccessor = CameraAccessors.ofHand(hand);
-        Packets.sendToClient(new StartExposureS2CP(exposureIdentifier, cameraAccessor, flashHasFired), serverPlayer);
+//        Packets.sendToClient(new StartExposureS2CP(exposureIdentifier, cameraAccessor, flashHasFired), serverPlayer);
 
         return InteractionResult.CONSUME; // Consume to not play swing animation
     }

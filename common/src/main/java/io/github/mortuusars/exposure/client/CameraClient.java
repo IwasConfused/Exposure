@@ -102,14 +102,6 @@ public class CameraClient {
         Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
     }
 
-    public static void startCapture(Player player, CameraAccessor<?> cameraAccessor, ExposureIdentifier identifier, boolean flashHasFired) {
-        cameraAccessor.ifPresentOrElse(player, camera -> {
-            camera.getItem().exposeFrameClientside(player, camera.getItemStack(), identifier, flashHasFired);
-            ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
-            Packets.sendToServer(new CameraAddFrameC2SP(cameraAccessor, clientSideFrameData));
-        }, () -> LOGGER.error("Cannot start exposure '{}': cannot get a camera with accessor '{}'.", identifier, cameraAccessor));
-    }
-
     public static <T> void setSetting(Setting<T> setting, T value) {
         Minecrft.player().getActiveExposureCamera().ifPresent(camera -> {
             setting.setAndSync(Minecrft.player(), value);
