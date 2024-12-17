@@ -20,6 +20,8 @@ public class ModelPoses {
             AnimationUtils.animateCrossbowHold(model.rightArm, model.leftArm, model.head, false);
         }
         model.head.xRot += 0.3f;
+
+        model.hat.copyFrom(model.head);
     }
 
     public static void applyCameraSelfiePose(HumanoidModel<?> model, LivingEntity entity, HumanoidArm arm, boolean undoArmBobbing) {

@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.sound.instance;
 
-import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.OtherCamera;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.item.component.camera.ShutterState;
@@ -40,7 +40,7 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
             return;
         }
 
-        @Nullable Camera<?> camera = cameraAccessor.get(entity);
+        @Nullable OtherCamera<?> camera = cameraAccessor.get(entity);
         if (camera == null) {
             if (!(entity instanceof Player player)) {
                 stop();

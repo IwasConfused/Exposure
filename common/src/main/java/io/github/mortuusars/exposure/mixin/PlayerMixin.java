@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.core.camera.ActiveCameraHolder;
-import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.item.CameraItem;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,32 +16,30 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
-
 @Mixin(Player.class)
 @SuppressWarnings("AddedMixinMembersNamePattern")
 public abstract class PlayerMixin extends LivingEntity implements ActiveCameraHolder {
     @Unique
     @Nullable
-    private NewCamera activeCamera;
+    private Camera activeCamera;
 
     protected PlayerMixin(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
     }
 
     @Override
-    public Optional<NewCamera> getActiveCamera() {
-        return Optional.ofNullable(activeCamera);
+    public @Nullable Camera activeExposureCamera() {
+        return activeCamera;
     }
 
     @Override
-    public void setActiveCamera(@Nullable NewCamera camera) {
+    public void setActiveExposureCamera(@Nullable Camera camera) {
         activeCamera = camera;
     }
 
     @Override
-    public void removeActiveCamera() {
-        setActiveCamera(null);
+    public void removeActiveExposureCamera() {
+        setActiveExposureCamera(null);
     }
 
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))

@@ -26,7 +26,6 @@ public class S2CPackets {
                 new CustomPacketPayload.TypeAndCodec<>(SyncLensesDataS2CP.TYPE, SyncLensesDataS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(WaitForExposureChangeS2CP.TYPE, WaitForExposureChangeS2CP.STREAM_CODEC),
 
-                new CustomPacketPayload.TypeAndCodec<>(SetActiveInHandCameraS2CP.TYPE, SetActiveInHandCameraS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(RemoveActiveCameraS2CP.TYPE, RemoveActiveCameraS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(StartCaptureS2CP.TYPE, StartCaptureS2CP.STREAM_CODEC)
         );

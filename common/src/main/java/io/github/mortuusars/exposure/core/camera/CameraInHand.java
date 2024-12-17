@@ -1,15 +1,14 @@
 package io.github.mortuusars.exposure.core.camera;
 
-import io.github.mortuusars.exposure.item.OldCameraItem;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import org.apache.commons.lang3.function.TriFunction;
 
-public class CameraInHand<T extends OldCameraItem> extends Camera<T> {
-    private final InteractionHand hand;
+public class CameraInHand extends Camera {
+    protected final InteractionHand hand;
 
-    public CameraInHand(ItemStack stack, InteractionHand hand) {
-        super(stack);
+    public CameraInHand(LivingEntity owner, InteractionHand hand) {
+        super(owner);
         this.hand = hand;
     }
 
@@ -17,7 +16,8 @@ public class CameraInHand<T extends OldCameraItem> extends Camera<T> {
         return hand;
     }
 
-    public <R> R map(TriFunction<T, ItemStack, InteractionHand, R> func) {
-        return func.apply(getItem(), getItemStack(), getHand());
+    @Override
+    public ItemStack getItemStack() {
+        return getOwner().getItemInHand(getHand());
     }
 }

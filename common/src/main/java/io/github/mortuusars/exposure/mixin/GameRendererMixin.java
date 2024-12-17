@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
-import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinder;
-import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;

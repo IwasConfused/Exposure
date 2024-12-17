@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.gui.viewfinder;
+package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -7,9 +7,8 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
-import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
-import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.Setting;
@@ -32,7 +31,7 @@ public class ViewfinderOverlay {
     private static final PoseStack POSE_STACK = new PoseStack();
 
     private final LocalPlayer player;
-    private final NewCamera camera;
+    private final Camera camera;
     private final Viewfinder viewfinder;
     private final int backgroundColor;
     private final Rect2f opening;
@@ -44,7 +43,7 @@ public class ViewfinderOverlay {
     private Float xRot0 = null;
     private Float yRot0 = null;
 
-    public ViewfinderOverlay(Viewfinder viewfinder, NewCamera camera) {
+    public ViewfinderOverlay(Viewfinder viewfinder, Camera camera) {
         this.player = Minecrft.player();
         this.camera = camera;
         this.viewfinder = viewfinder;
@@ -61,6 +60,8 @@ public class ViewfinderOverlay {
     }
 
     public void render() {
+        if (camera.isEmpty()) return;
+
         final int width = Minecrft.get().getWindow().getGuiScaledWidth();
         final int height = Minecrft.get().getWindow().getGuiScaledHeight();
 
@@ -73,11 +74,7 @@ public class ViewfinderOverlay {
         opening.width = openingSize;
         opening.height = openingSize;
 
-        if (Minecrft.options().hideGui)
-            return;
-
-        CameraItem cameraItem = camera.getItem();
-        ItemStack cameraStack = camera.getItemStack();
+        if (Minecrft.options().hideGui) return;
 
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
@@ -133,7 +130,7 @@ public class ViewfinderOverlay {
         drawRect(poseStack, -9999, opening.y + opening.height, width + 9999, height + 9999, backgroundColor);
 
         // Shutter
-        if (cameraItem.getShutter().isOpen(cameraStack)) {
+        if (camera.map((item, stack) -> item.getShutter().isOpen(stack), false)) {
             drawRect(poseStack, opening.x, opening.y, opening.x + opening.width, opening.y + opening.height, 0xfa1f1d1b);
         }
 
@@ -146,17 +143,17 @@ public class ViewfinderOverlay {
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, 0f, 0f, 1f, 0f, 1f);
 
         // Guide
-        RenderSystem.setShaderTexture(0, Setting.COMPOSITION_GUIDE.getOrDefault(cameraStack, CompositionGuides.NONE).overlayTextureLocation());
+        RenderSystem.setShaderTexture(0, Setting.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack(), CompositionGuides.NONE).overlayTextureLocation());
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, -1f, 0f, 1f, 0f, 1f);
 
         if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
-            renderIcons(poseStack, cameraStack);
+            renderStatusIcons(poseStack, camera.getItemStack());
         }
 
         poseStack.popPose();
     }
 
-    private void renderIcons(PoseStack poseStack, ItemStack cameraStack) {
+    private void renderStatusIcons(PoseStack poseStack, ItemStack cameraStack) {
         ItemStack filmStack = Attachment.FILM.get(cameraStack).getForReading();
 
         if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmRollItem) || !filmRollItem.canAddFrame(filmStack)) {

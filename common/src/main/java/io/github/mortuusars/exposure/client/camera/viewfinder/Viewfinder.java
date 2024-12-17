@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.gui.viewfinder;
+package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
@@ -8,26 +8,28 @@ import io.github.mortuusars.exposure.client.CameraClient;
 import io.github.mortuusars.exposure.client.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
-import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.client.CameraType;
+import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class Viewfinder {
-    protected final BiFunction<Viewfinder, NewCamera, ViewfinderOverlay> overlaySupplier;
-    protected final BiFunction<Viewfinder, NewCamera, ViewfinderShader> shaderSupplier;
-    protected final BiFunction<Viewfinder, NewCamera, ViewfinderCameraControlsScreen> controlsScreenSupplier;
+    protected final BiFunction<Viewfinder, Camera, ViewfinderOverlay> overlaySupplier;
+    protected final BiFunction<Viewfinder, Camera, ViewfinderShader> shaderSupplier;
+    protected final BiFunction<Viewfinder, Camera, ViewfinderCameraControlsScreen> controlsScreenSupplier;
 
     protected @Nullable ViewfinderOverlay overlay;
     protected @Nullable ViewfinderShader shader;
     protected @Nullable ViewfinderCameraControlsScreen controls;
-    protected @Nullable NewCamera camera;
+    protected @Nullable Camera camera;
 
-    public Viewfinder(BiFunction<Viewfinder, NewCamera, ViewfinderOverlay> overlaySupplier,
-                      BiFunction<Viewfinder, NewCamera, ViewfinderShader> shaderSupplier,
-                      BiFunction<Viewfinder, NewCamera, ViewfinderCameraControlsScreen> controlsScreenSupplier) {
+    public Viewfinder(BiFunction<Viewfinder, Camera, ViewfinderOverlay> overlaySupplier,
+                      BiFunction<Viewfinder, Camera, ViewfinderShader> shaderSupplier,
+                      BiFunction<Viewfinder, Camera, ViewfinderCameraControlsScreen> controlsScreenSupplier) {
         this.overlaySupplier = overlaySupplier;
         this.shaderSupplier = shaderSupplier;
         this.controlsScreenSupplier = controlsScreenSupplier;
@@ -45,12 +47,14 @@ public class Viewfinder {
         return Optional.ofNullable(controls);
     }
 
-    public void setup(NewCamera camera) {
+    public void setup(Camera camera) {
         overlay = overlaySupplier.apply(this, camera);
         this.camera = camera;
         overlay.setup();
         shader = shaderSupplier.apply(this, camera);
         shader.update();
+
+        CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
     }
 
     public void openControlsScreen() {
@@ -104,6 +108,7 @@ public class Viewfinder {
                     : CameraType.FIRST_PERSON;
 
             Minecrft.options().setCameraType(newCameraType);
+            CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
             return true;
         }
 
@@ -128,7 +133,7 @@ public class Viewfinder {
                 return false; // false not handle and keep moving/sneaking
             }
 
-            if (action == 1 || action == 2) { // Press or Hold
+            if (action == InputConstants.PRESS || action == InputConstants.REPEAT) {
                 if (key == InputConstants.KEY_ADD || key == InputConstants.KEY_EQUALS) {
 //                    OldViewfinder.zoom(ZoomDirection.IN, false);
                     return true;

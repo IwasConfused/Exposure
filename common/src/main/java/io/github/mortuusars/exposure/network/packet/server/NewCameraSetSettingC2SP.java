@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.netty.buffer.ByteBuf;
@@ -36,7 +35,7 @@ public record NewCameraSetSettingC2SP(Setting<?> setting, byte[] encodedValue) i
     public boolean handle(PacketFlow direction, Player player) {
         Preconditions.checkState(player != null, "Cannot handle packet {}: Player was null", ID);
 
-        player.getActiveCamera().ifPresentOrElse(camera -> {
+        player.getActiveExposureCamera().ifPresentOrElse(camera -> {
             ByteBuf buf = Unpooled.buffer();
             buf.writeBytes(encodedValue);
             RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());

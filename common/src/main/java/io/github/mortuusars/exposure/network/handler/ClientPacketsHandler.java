@@ -5,7 +5,8 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.CameraClient;
-import io.github.mortuusars.exposure.client.capture_template.CaptureTemplates;
+import io.github.mortuusars.exposure.client.Minecrft;
+import io.github.mortuusars.exposure.client.snapshot.template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
 import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
@@ -17,7 +18,6 @@ import io.github.mortuusars.exposure.core.ExposureFrameClientData;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
-import io.github.mortuusars.exposure.core.camera.NewCameraInHand;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
@@ -33,12 +33,9 @@ import io.github.mortuusars.exposure.util.task.Task;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -50,18 +47,6 @@ import java.util.Objects;
 
 public class ClientPacketsHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    public static void setInHandActiveCamera(SetActiveInHandCameraS2CP packet) {
-        ClientLevel level = Objects.requireNonNull(Minecraft.getInstance().level, "level");
-        LocalPlayer player = Objects.requireNonNull(Minecraft.getInstance().player, "player");
-
-        Entity owner = level.getEntities().get(packet.ownerUUID());
-        if (owner instanceof LivingEntity livingOwner) {
-            player.setActiveCamera(new NewCameraInHand(livingOwner, packet.hand()));
-        } else {
-            LOGGER.error("Cannot set active camera in hand: owner should be a LivingEntity. Got '{}' instead.", owner);
-        }
-    }
 
     public static void applyShader(ApplyShaderS2CP packet) {
         executeOnMainThread(() -> {
@@ -187,19 +172,17 @@ public class ClientPacketsHandler {
     }
 
     public static void startCapture(StartCaptureS2CP packet) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        Preconditions.checkNotNull(player, "Minecraft.getInstance().player");
-
+        LocalPlayer player = Minecrft.player();
         CaptureData data = packet.captureData();
 
         executeOnMainThread(() -> {
-            player.getActiveCamera().ifPresentOrElse(camera -> {
-                ExposureFrameClientData clientSideFrameData = camera.getItem().getClientSideFrameData(player, camera.getItemStack());
+            player.ifActiveExposureCameraPresent((item, stack) -> {
+                ExposureFrameClientData clientSideFrameData = item.getClientSideFrameData(player, stack);
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.cameraHolderID(), clientSideFrameData));
 
-                Task<?> captureTask = CaptureTemplates.getOrThrow(camera.getItem()).createTask(player, data);
+                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data);
                 SnapShot.enqueue(captureTask);
-            }, () -> LOGGER.error("Cannot start capture: not active camera."));
+            }, () -> LOGGER.error("Cannot start capture: no active camera."));
         });
     }
 }

@@ -55,7 +55,8 @@ public record Attachment<T extends Item>(ResourceLocation id,
     }
 
     public boolean isEmpty(ItemStack stack) {
-        return !isPresent(stack);
+        StoredItemStack storedItemStack = get(stack);
+        return storedItemStack.isEmpty() || !itemType.isInstance(storedItemStack.getItem());
     }
 
     /**

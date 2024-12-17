@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.Minecrft;
-import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import net.minecraft.client.DeltaTracker;

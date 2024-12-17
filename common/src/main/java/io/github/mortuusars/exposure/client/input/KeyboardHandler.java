@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.input;
 
 import io.github.mortuusars.exposure.client.Minecrft;
-import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
 
 public class KeyboardHandler {
     public static boolean handleKeyPress(long windowId, int key, int scanCode, int action, int modifiers) {

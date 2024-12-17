@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public interface CameraAccessor<C extends Camera<? extends OldCameraItem>> {
+public interface CameraAccessor<C extends OtherCamera<? extends OldCameraItem>> {
     Codec<CameraAccessor<?>> CODEC = ResourceLocation.CODEC.xmap(CameraAccessors::byId, CameraAccessors::idOf);
 
     StreamCodec<ByteBuf, CameraAccessor<?>> STREAM_CODEC = StreamCodec.composite(
@@ -50,28 +50,28 @@ public interface CameraAccessor<C extends Camera<? extends OldCameraItem>> {
         return Optional.ofNullable(camera);
     }
 
-    default Optional<CameraInHand<?>> ifInHand(Entity entity) {
+    default Optional<OtherCameraInHand<?>> ifInHand(Entity entity) {
         @Nullable C camera = get(entity);
-        if (camera instanceof CameraInHand<?> cameraInHand) {
+        if (camera instanceof OtherCameraInHand<?> cameraInHand) {
             return Optional.of(cameraInHand);
         }
         return Optional.empty();
     }
 
-    default <T extends OldCameraItem> Optional<CameraInHand<T>> ifInHandOfType(Entity entity, Class<T> clazz) {
+    default <T extends OldCameraItem> Optional<OtherCameraInHand<T>> ifInHandOfType(Entity entity, Class<T> clazz) {
         @Nullable C camera = get(entity);
-        if (camera instanceof CameraInHand<?> cameraInHand && clazz.isInstance(cameraInHand.getItem())) {
+        if (camera instanceof OtherCameraInHand<?> cameraInHand && clazz.isInstance(cameraInHand.getItem())) {
             //noinspection unchecked
-            return Optional.of((CameraInHand<T>) cameraInHand);
+            return Optional.of((OtherCameraInHand<T>) cameraInHand);
         }
         return Optional.empty();
     }
 
-    static <T extends OldCameraItem> CameraAccessor<@Nullable CameraInHand<T>> createInHand(InteractionHand hand, Class<T> clazz) {
+    static <T extends OldCameraItem> CameraAccessor<@Nullable OtherCameraInHand<T>> createInHand(InteractionHand hand, Class<T> clazz) {
         return entity -> {
             if (entity instanceof LivingEntity livingEntity) {
                 ItemStack stack = livingEntity.getItemInHand(hand);
-                return clazz.isInstance(stack.getItem()) ? new CameraInHand<>(stack, hand) : null;
+                return clazz.isInstance(stack.getItem()) ? new OtherCameraInHand<>(stack, hand) : null;
             }
             return null;
         };

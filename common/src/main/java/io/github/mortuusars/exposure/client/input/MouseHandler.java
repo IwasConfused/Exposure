@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.client.gui.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
 
 public class MouseHandler {
     private static final boolean[] heldMouseButtons = new boolean[12];

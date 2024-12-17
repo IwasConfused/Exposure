@@ -4,14 +4,16 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.util.Fov;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class EntitiesInFrame {
-    public static List<Entity> get(LivingEntity photographer, double fov, int limit, boolean inSelfieMode) {
+    public static List<Entity> get(Entity photographer, double fov, int limit, boolean inSelfieMode) {
         double currentFov = fov / Exposure.CROP_FACTOR;
         double currentFocalLength = Fov.fovToFocalLength(currentFov);
 
@@ -41,7 +43,7 @@ public class EntitiesInFrame {
             if (getWeightedDistance(cameraPos, entity) > currentFocalLength)
                 continue; // Too far to be in frame
 
-            if (!photographer.hasLineOfSight(entity))
+            if (!hasLineOfSight(photographer, entity))
                 continue; // Not visible
 
             entitiesInFrame.add(entity);
@@ -51,6 +53,24 @@ public class EntitiesInFrame {
             entitiesInFrame.addFirst(photographer);
 
         return entitiesInFrame;
+    }
+
+    /**
+     * Copy of LivingEntity#hasLineOfSight just to accept Entity instead of LivingEntity. Entity does not have this method.
+     */
+    public static boolean hasLineOfSight(Entity photographer, Entity entity) {
+        if (entity.level() != photographer.level()) {
+            return false;
+        } else {
+            Vec3 vec3 = new Vec3(photographer.getX(), photographer.getEyeY(), photographer.getZ());
+            Vec3 vec32 = new Vec3(entity.getX(), entity.getEyeY(), entity.getZ());
+            if (vec32.distanceTo(vec3) > 128.0) {
+                return false;
+            } else {
+                return photographer.level().clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER,
+                        ClipContext.Fluid.NONE, photographer)).getType() == HitResult.Type.MISS;
+            }
+        }
     }
 
     /**

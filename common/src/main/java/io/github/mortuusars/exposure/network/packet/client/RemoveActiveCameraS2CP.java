@@ -10,8 +10,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public class RemoveActiveCameraS2CP implements IPacket {
     public static final RemoveActiveCameraS2CP INSTANCE = new RemoveActiveCameraS2CP();
 
@@ -29,7 +27,7 @@ public class RemoveActiveCameraS2CP implements IPacket {
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        player.removeActiveCamera();
+        player.removeActiveExposureCamera();
         return true;
     }
 }

@@ -1,11 +1,11 @@
-package io.github.mortuusars.exposure.client.gui.viewfinder;
+package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.client.Minecrft;
-import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import net.minecraft.client.Minecraft;
@@ -22,13 +22,13 @@ public class ViewfinderShader implements AutoCloseable {
 
     private final Minecraft minecraft;
     private final Viewfinder viewfinder;
-    private final NewCamera camera;
+    private final Camera camera;
 
     @Nullable
     private PostChain shader;
     private boolean active;
 
-    public ViewfinderShader(Viewfinder viewfinder, NewCamera camera) {
+    public ViewfinderShader(Viewfinder viewfinder, Camera camera) {
         this.minecraft = Minecrft.get();
         this.viewfinder = viewfinder;
         this.camera = camera;

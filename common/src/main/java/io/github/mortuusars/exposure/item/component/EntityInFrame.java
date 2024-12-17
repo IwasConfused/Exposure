@@ -34,16 +34,16 @@ public record EntityInFrame(ResourceLocation id, String name, BlockPos pos, int 
             EntityInFrame::new
     );
 
-    public static EntityInFrame of(LivingEntity cameraHolder, Entity entity) {
+    public static EntityInFrame of(Entity cameraHolder, Entity entity) {
         return of(cameraHolder, entity, CustomData.EMPTY);
     }
 
-    public static EntityInFrame of(LivingEntity cameraHolder, Entity entity, Consumer<CompoundTag> customDataInput) {
+    public static EntityInFrame of(Entity cameraHolder, Entity entity, Consumer<CompoundTag> customDataInput) {
         CustomData customData = CustomData.EMPTY.update(customDataInput);
         return of(cameraHolder, entity, customData);
     }
 
-    public static EntityInFrame of(LivingEntity cameraHolder, Entity entity, CustomData customData) {
+    public static EntityInFrame of(Entity cameraHolder, Entity entity, CustomData customData) {
         return new EntityInFrame(EntityType.getKey(entity.getType()), entity.getScoreboardName(), entity.blockPosition(),
                 ((int) cameraHolder.distanceTo(entity)), customData);
     }

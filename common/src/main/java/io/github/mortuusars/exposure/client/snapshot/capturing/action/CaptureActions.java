@@ -34,6 +34,10 @@ public interface CaptureActions {
         return new InterplanarProjectionAction(photographer, cameraID);
     }
 
+    static CaptureAction setCameraEntity(Entity viewEntity) {
+        return new SetCameraEntityAction(viewEntity);
+    }
+
     // --
 
     static CaptureAction of(CaptureAction... actions) {

@@ -154,7 +154,7 @@ public class CameraItem extends Item {
         setActive(stack, true);
 
         if (entity instanceof ActiveCameraHolder cameraHolder) {
-            cameraHolder.setActiveCamera(new NewCameraInHand(entity, hand));
+            cameraHolder.setActiveExposureCamera(new CameraInHand(entity, hand));
         }
 
         entity.gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
@@ -172,7 +172,7 @@ public class CameraItem extends Item {
     public @NotNull InteractionResultHolder<ItemStack> deactivate(LivingEntity entity, ItemStack stack) {
         setActive(stack, false);
         if (entity instanceof ActiveCameraHolder cameraHolder) {
-            cameraHolder.removeActiveCamera();
+            cameraHolder.removeActiveExposureCamera();
         }
         @Nullable Player excludedPlayer = entity instanceof Player player ? player : null;
         playSound(excludedPlayer, entity, getViewfinderCloseSound(), 0.35f, 0.9f, 0.2f);
@@ -256,11 +256,10 @@ public class CameraItem extends Item {
         getShutter().tick(player, stack);
 
         if (player instanceof ServerPlayer serverPlayer) {
-
             CameraInstances.ifPresent(stack, instance -> instance.tick(player, stack));
 
             boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
-            if (isActive(stack) && (!isHolding || !player.activeCameraMatches(stack))) {
+            if (isActive(stack) && (!isHolding || !player.activeExposureCameraMatches(stack))) {
                 deactivate(player, stack);
                 Packets.sendToClient(DeactivateActiveCameraCommonPacket.INSTANCE, serverPlayer);
             }
@@ -298,7 +297,7 @@ public class CameraItem extends Item {
 
         if (player instanceof ServerPlayer serverPlayer) {
             int lightLevel = LevelUtil.getLightLevelAt(level, player.blockPosition());
-            boolean shouldFlashFire = shouldFlashFire(player, stack, lightLevel);
+            boolean shouldFlashFire = shouldFlashFire(stack, lightLevel);
             ShutterSpeed shutterSpeed = Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT);
 
             boolean flashHasFired = shouldFlashFire && tryUseFlash(player, stack);
@@ -405,7 +404,7 @@ public class CameraItem extends Item {
         return InteractionResultHolder.success(stack);
     }
 
-    protected boolean shouldFlashFire(Player player, ItemStack stack, int lightLevel) {
+    protected boolean shouldFlashFire(ItemStack stack, int lightLevel) {
         if (Attachment.FLASH.isEmpty(stack))
             return false;
 
@@ -570,7 +569,7 @@ public class CameraItem extends Item {
     }
 
 
-    public ExposureFrame createExposureFrame(ServerLevel level, LivingEntity cameraHolder, ItemStack stack, ExposureFrameClientData dataFromClient) {
+    public ExposureFrame createExposureFrame(ServerLevel level, Entity cameraHolder, ItemStack stack, ExposureFrameClientData dataFromClient) {
         @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
         if (cameraInstance == null) {
             Exposure.LOGGER.error("Cannot create an exposure frame: Camera Instance with id '{}' does not exists.", getOrCreateID(stack));
@@ -611,17 +610,18 @@ public class CameraItem extends Item {
         tag.put(ExposureFrameTag.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
         tag.putInt(ExposureFrameTag.DAY_TIME, (int) level.getDayTime());
         tag.putString(ExposureFrameTag.DIMENSION, level.dimension().location().toString());
-        level.getBiome(cameraHolder.blockPosition()).unwrapKey().map(ResourceKey::location)
+        BlockPos blockPos = cameraHolder.blockPosition();
+        level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
                 .ifPresent(biome -> tag.putString(ExposureFrameTag.BIOME, biome.toString()));
         int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
         level.updateSkyBrightness();
-        int skyLight = level.getBrightness(LightLayer.SKY, cameraHolder.blockPosition());
+        int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
         if (cameraHolder.isUnderWater())
             tag.putBoolean(ExposureFrameTag.UNDERWATER, true);
         if (cameraHolder.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0)
             tag.putBoolean(ExposureFrameTag.IN_CAVE, true);
         else if (!cameraHolder.isUnderWater()) {
-            Biome.Precipitation precipitation = level.getBiome(cameraHolder.blockPosition()).value().getPrecipitationAt(cameraHolder.blockPosition());
+            Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
             if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
                 tag.putString(ExposureFrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
             else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
@@ -630,7 +630,7 @@ public class CameraItem extends Item {
                 tag.putString(ExposureFrameTag.WEATHER, "Clear");
         }
 
-        addStructuresInfo(level, cameraHolder.blockPosition(), tag);
+        addStructuresInfo(level, blockPos, tag);
 
         List<EntityInFrame> entitiesInFrame;
 
@@ -668,7 +668,7 @@ public class CameraItem extends Item {
     /**
      * Returns an intersection of entities on both sides, i.e. if entity is captured on client but not on server - discard it.
      */
-    public List<Entity> intersectCapturedEntities(LivingEntity photographer, ItemStack stack, List<Entity> entitiesOnClient) {
+    public List<Entity> intersectCapturedEntities(Entity photographer, ItemStack stack, List<Entity> entitiesOnClient) {
         if (entitiesOnClient.isEmpty()) {
             return entitiesOnClient;
         }

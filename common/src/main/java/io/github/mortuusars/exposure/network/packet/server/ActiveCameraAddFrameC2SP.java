@@ -45,11 +45,13 @@ public record ActiveCameraAddFrameC2SP(UUID cameraHolderID,
             return true;
         }
 
+        //TODO: add checks
+
         serverPlayer.server.execute(() -> {
-            cameraHolder.getActiveCamera().ifPresentOrElse(camera -> {
-                ExposureFrame frame = camera.getItem().createExposureFrame(serverPlayer.serverLevel(),
-                        serverPlayer, camera.getItemStack(), frameDataFromClient);
-                camera.getItem().addFrame(serverPlayer, camera.getItemStack(), frame);
+            cameraHolder.ifActiveExposureCameraPresent((item, stack) -> {
+
+                ExposureFrame frame = item.createExposureFrame(serverPlayer.serverLevel(), serverPlayer, stack, frameDataFromClient);
+                item.addFrame(serverPlayer, stack, frame);
             }, () -> Exposure.LOGGER.error("Cannot create and add ExposureFrame: Entity '{}' does not have an active camera.", entity));
         });
 

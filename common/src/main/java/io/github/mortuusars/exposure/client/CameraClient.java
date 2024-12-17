@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.CameraAccessor;
-import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
@@ -89,8 +89,8 @@ Client:
 public class CameraClient {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static Optional<NewCamera> getActive() {
-        return Minecrft.player().getActiveCamera();
+    public static Optional<Camera> getActive() {
+        return Minecrft.player().getActiveExposureCamera();
     }
 
     public static boolean isActive() {
@@ -98,8 +98,7 @@ public class CameraClient {
     }
 
     public static void deactivate() {
-        Minecrft.player().getActiveCamera().ifPresent(camera -> camera.getItem().deactivate(Minecrft.player(), camera.getItemStack()));
-        Minecrft.player().removeActiveCamera();
+        Minecrft.player().ifActiveExposureCameraPresent((item, stack) -> item.deactivate(Minecrft.player(), stack));
         Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
     }
 
@@ -112,7 +111,7 @@ public class CameraClient {
     }
 
     public static <T> void setSetting(Setting<T> setting, T value) {
-        Minecrft.player().getActiveCamera().ifPresent(camera -> {
+        Minecrft.player().getActiveExposureCamera().ifPresent(camera -> {
             setting.setAndSync(Minecrft.player(), value);
         });
     }

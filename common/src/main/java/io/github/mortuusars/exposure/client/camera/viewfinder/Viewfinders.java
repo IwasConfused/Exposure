@@ -1,9 +1,9 @@
-package io.github.mortuusars.exposure.client.gui.viewfinder;
+package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
-import io.github.mortuusars.exposure.core.camera.NewCamera;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.item.CameraItem;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,9 +36,9 @@ public class Viewfinders {
 
     //TODO: move to CameraClient.setViewfinder()
 
-    public static void setActiveCamera(@Nullable NewCamera camera) {
-        if (camera != null) {
-            activeViewfinder = getOrThrow(camera.getItem());
+    public static void setActiveCamera(@Nullable Camera camera) {
+        if (camera != null && camera.getItemStack().getItem() instanceof CameraItem cameraItem) {
+            activeViewfinder = getOrThrow(cameraItem);
             activeViewfinder.setup(camera);
         } else if (activeViewfinder != null) {
             activeViewfinder.close();

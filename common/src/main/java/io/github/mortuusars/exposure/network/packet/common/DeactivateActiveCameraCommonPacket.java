@@ -18,7 +18,8 @@ public class DeactivateActiveCameraCommonPacket implements IPacket {
 
     public static final StreamCodec<FriendlyByteBuf, DeactivateActiveCameraCommonPacket> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    private DeactivateActiveCameraCommonPacket() { }
+    private DeactivateActiveCameraCommonPacket() {
+    }
 
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
@@ -27,12 +28,9 @@ public class DeactivateActiveCameraCommonPacket implements IPacket {
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        player.getActiveCamera().ifPresentOrElse(
-                camera -> {
-                    camera.getItem().deactivate(player, camera.getItemStack());
-                    player.removeActiveCamera();
-                },
-                () -> Exposure.LOGGER.error("Cannot deactivate a camera: player '{}' does not have an active camera.", player.getScoreboardName()));
+        player.ifActiveExposureCameraPresent((item, stack) -> item.deactivate(player, stack),
+                () -> Exposure.LOGGER.error("Cannot deactivate a camera: player '{}' does not have an active camera.",
+                        player.getScoreboardName()));
         return true;
     }
 }

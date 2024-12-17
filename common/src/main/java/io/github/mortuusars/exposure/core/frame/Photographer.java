@@ -7,7 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Entity;
 
 import java.util.UUID;
 
@@ -26,11 +26,11 @@ public record Photographer(String name, UUID uuid) {
     );
 
     //TODO: use Player player here and create other constructor for mob (without UUID) (potentially add 3rd param for original name, ie: Bob (Skeleton))
-    public Photographer(LivingEntity entity) {
+    public Photographer(Entity entity) {
         this(entity.getScoreboardName(), entity.getUUID());
     }
 
-    public boolean matches(LivingEntity entity) {
+    public boolean matches(Entity entity) {
         return uuid.equals(entity.getUUID());
     }
 
