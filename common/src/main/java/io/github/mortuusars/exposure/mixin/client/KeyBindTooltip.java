@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.mixin;
+package io.github.mortuusars.exposure.mixin.client;
 
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.Tooltip;

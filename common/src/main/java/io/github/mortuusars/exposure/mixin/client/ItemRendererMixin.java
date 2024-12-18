@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.mixin;
+package io.github.mortuusars.exposure.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.mortuusars.exposure.Exposure;

@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.mixin;
+package io.github.mortuusars.exposure.mixin.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;

@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.mixin;
+package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.item.CameraItem;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;

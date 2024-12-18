@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.mixin;
+package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.CameraClient;
