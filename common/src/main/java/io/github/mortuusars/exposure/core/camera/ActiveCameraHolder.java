@@ -56,7 +56,7 @@ public interface ActiveCameraHolder {
         }
     }
 
-    default void setActiveExposureCamera(@Nullable Camera camera) {
+    default void setActiveExposureCamera(Camera camera) {
     }
 
     default void removeActiveExposureCamera() {

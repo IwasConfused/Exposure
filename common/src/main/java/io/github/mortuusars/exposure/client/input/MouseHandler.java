@@ -1,7 +1,8 @@
 package io.github.mortuusars.exposure.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderRegistry;
 
 public class MouseHandler {
     private static final boolean[] heldMouseButtons = new boolean[12];
@@ -10,27 +11,7 @@ public class MouseHandler {
         if (button >= 0 && button < heldMouseButtons.length)
             heldMouseButtons[button] = action == InputConstants.PRESS;
 
-        return Viewfinders.mouseClicked(button, action);
-
-//        if (CameraClient.getActiveCamera().isEmpty()) {
-//            return false;
-//        }
-//
-//        if (!(Minecraft.getInstance().screen instanceof CameraControlsScreen)) {
-//            if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && Minecraft.getInstance().options.keyAttack.matchesMouse(button))
-//                return true; // Block attacks
-//
-//            if (ExposureClient.getCameraControlsKey().matchesMouse(button)) {
-//                ClientGUI.openViewfinderControlsScreen();
-//                // Do not cancel the event to keep sneaking
-//            }
-//            else if (Config.Client.VIEWFINDER_MIDDLE_CLICK_CONTROLS.get() && button == InputConstants.MOUSE_BUTTON_MIDDLE) {
-//                ClientGUI.openViewfinderControlsScreen();
-//                return true;
-//            }
-//        }
-//
-//        return false;
+        return CameraClient.viewfinder() != null && CameraClient.viewfinder().mouseClicked(button, action);
     }
 
     public static boolean isMouseButtonHeld(int button) {

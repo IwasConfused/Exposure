@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
-import io.github.mortuusars.exposure.util.GuiUtil;
+import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

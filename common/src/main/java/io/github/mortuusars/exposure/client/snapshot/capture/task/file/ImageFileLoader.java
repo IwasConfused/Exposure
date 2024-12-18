@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.method.file;
+package io.github.mortuusars.exposure.client.snapshot.capture.task.file;
 
 import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.client.image.Image;

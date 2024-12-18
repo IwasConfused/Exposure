@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.client.Minecrft;
-import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import net.minecraft.client.DeltaTracker;
@@ -18,7 +18,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class GuiMixin {
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
     private void renderGui(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-        if (Viewfinders.active() != null && Viewfinders.active().isLookingThrough()) {
+        if (CameraClient.viewfinder() != null && CameraClient.viewfinder().isLookingThrough()) {
             ci.cancel();
         }
     }

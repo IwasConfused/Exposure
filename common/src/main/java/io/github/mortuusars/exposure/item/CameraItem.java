@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
-import io.github.mortuusars.exposure.client.Minecrft;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
@@ -462,78 +462,6 @@ public class CameraItem extends Item {
         }
         return true;
     }
-
-//    private @NotNull Consumer<TranslatableError> printCasualErrorInChat() {
-//        return err -> Minecraft.getInstance().execute(() ->
-//        {
-//            assert Minecraft.getInstance().player != null;
-//            Minecraft.getInstance().player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false);
-//        });
-//    }
-//
-//    protected Processor chooseColorProcessor(CaptureData data) {
-//        if (data.filmType() == ExposureType.COLOR) {
-//            return Processor.EMPTY;
-//        }
-//
-//        return data.chromaChannel()
-//                .map(Processor::singleChannelBlackAndWhite).
-//                orElse(Processor.blackAndWhite());
-//    }
-//
-//    //TODO: maybe move to it's own CaptureHandler class and store Map<Item, CaptureHandler> with ability to register per item
-//    public void startCapture(CaptureData data) {
-//        assert Minecraft.getInstance().level != null;
-//        Entity photographer = Minecraft.getInstance().level.getEntities().get(data.cameraHolderID());
-//
-//        int frameSize = data.frameSize();
-//        float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
-//
-//        Task<PalettizedImage> captureTask = Capture.of(Capture.screenshot(),
-//                        CaptureActions.hideGui(),
-//                        CaptureActions.forceRegularOrSelfieCamera(),
-//                        CaptureActions.disablePostEffect(),
-//                        CaptureActions.modifyGamma(brightnessStops),
-//                        CaptureAction.optional(data.flashHasFired(), () -> CaptureActions.flash(photographer)))
-//                .handleErrorAndGetResult(printCasualErrorInChat())
-//                .thenAsync(Process.with(
-//                        Processor.Crop.SQUARE,
-//                        Processor.Crop.factor(data.cropFactor()),
-//                        Processor.Resize.to(frameSize),
-//                        Processor.brightness(brightnessStops),
-//                        chooseColorProcessor(data)))
-//                .thenAsync(image -> {
-//                    PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
-//                    image.close();
-//                    return palettizedImage;
-//                });
-//
-//        if (data.fileProjectingInfo().isPresent()) {
-//            FileProjectingInfo fileLoadingData = data.fileProjectingInfo().get();
-//            String filepath = fileLoadingData.getFilepath();
-//            boolean dither = fileLoadingData.shouldDither();
-//
-//            captureTask = captureTask.overridenBy(Capture.of(Capture.file(filepath),
-//                            CaptureActions.interplanarProjection(photographer, data.cameraID()))
-//                    .handleErrorAndGetResult(printCasualErrorInChat())
-//                    .thenAsync(Process.with(
-//                            Processor.Crop.SQUARE,
-//                            Processor.Resize.to(frameSize),
-//                            Processor.brightness(brightnessStops),
-//                            chooseColorProcessor(data)))
-//                    .thenAsync(image -> {
-//                        PalettizedImage palettizedImage = (dither
-//                                ? ImagePalettizer.DITHERED_MAP_COLORS
-//                                : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
-//                        image.close();
-//                        return palettizedImage;
-//                    }));
-//        }
-//
-//        SnapShot.enqueue(captureTask
-//                .acceptAsync(new ImageUploader(data.identifier())::upload)
-//                .onError(printCasualErrorInChat()));
-//    }
 
     public void handleProjectionResult(LivingEntity cameraHolder, ItemStack stack, CameraInstance.ProjectionResult projectionResult) {
         StoredItemStack filter = Attachment.FILTER.get(stack);

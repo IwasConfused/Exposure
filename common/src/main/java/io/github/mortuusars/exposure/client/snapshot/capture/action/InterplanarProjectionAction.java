@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.action;
+package io.github.mortuusars.exposure.client.snapshot.capture.action;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.network.Packets;

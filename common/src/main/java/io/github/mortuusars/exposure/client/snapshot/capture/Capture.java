@@ -1,14 +1,14 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.client.snapshot.capture;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.snapshot.capturing.action.CompositeAction;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.*;
+import io.github.mortuusars.exposure.client.snapshot.capture.action.CompositeAction;
+import io.github.mortuusars.exposure.client.snapshot.capture.task.*;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.task.*;
-import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
+import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureAction;
 import net.minecraft.client.Minecraft;
 
 import java.util.concurrent.CompletableFuture;

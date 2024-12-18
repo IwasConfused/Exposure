@@ -1,14 +1,16 @@
 package io.github.mortuusars.exposure.client;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.core.*;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
+import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderRegistry;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
-import io.github.mortuusars.exposure.network.packet.server.*;
-import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.Optional;
@@ -106,5 +108,26 @@ public class CameraClient {
         Minecrft.player().getActiveExposureCamera().ifPresent(camera -> {
             setting.setAndSync(Minecrft.player(), value);
         });
+    }
+
+    private static @Nullable Viewfinder activeViewfinder;
+
+    public static @Nullable Viewfinder viewfinder() {
+        return activeViewfinder;
+    }
+
+    public static void setupViewfinder(@NotNull Camera camera) {
+        removeViewfinder();
+
+        if (camera.getItemStack().getItem() instanceof CameraItem item) {
+            activeViewfinder = ViewfinderRegistry.getOrThrow(item).apply(camera);
+        }
+    }
+
+    public static void removeViewfinder() {
+        if (activeViewfinder != null) {
+            activeViewfinder.close();
+            activeViewfinder = null;
+        }
     }
 }

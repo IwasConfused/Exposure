@@ -9,7 +9,8 @@
 - Added config option to change default exposure size.
 - Added config option to disable loading images from file with Interplanar Projector.
 
-- Camera filter shaders are now processed separately. Vanilla shaders (that sometimes used by other mods) will not be rendered when camera captures an image.     
+- Camera filter shaders are now processed separately. 
+  - Vanilla shaders (which sometimes used by other mods) will not be rendered when camera captures an image.     
 
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.

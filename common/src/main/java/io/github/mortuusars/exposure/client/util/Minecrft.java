@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client;
+package io.github.mortuusars.exposure.client.util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;

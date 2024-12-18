@@ -1,9 +1,9 @@
 
-package io.github.mortuusars.exposure.client.snapshot.capturing.method;
+package io.github.mortuusars.exposure.client.snapshot.capture.task;
 
 import com.google.common.io.Files;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.client.snapshot.capturing.method.file.ImageFileLoader;
+import io.github.mortuusars.exposure.client.snapshot.capture.task.file.ImageFileLoader;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.util.task.Result;
 import io.github.mortuusars.exposure.util.task.Task;

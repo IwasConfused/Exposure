@@ -1,6 +1,6 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.action;
+package io.github.mortuusars.exposure.client.snapshot.capture.action;
 
-import io.github.mortuusars.exposure.client.Minecrft;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import net.minecraft.world.entity.Entity;
 
 public class SetCameraEntityAction implements CaptureAction {
@@ -15,11 +15,13 @@ public class SetCameraEntityAction implements CaptureAction {
     @Override
     public void beforeCapture() {
         cameraEntityBeforeCapture = Minecrft.get().getCameraEntity();
-        Minecrft.get().setCameraEntity(cameraEntity);
+        // Using field directly instead of Minecraft#setCameraEntity here because it's removing currently active postEffect(shader).
+        // postEffect will be disabled anyway for the capture (unless turned off in a config).
+        Minecrft.get().cameraEntity = cameraEntity;
     }
 
     @Override
     public void afterCapture() {
-        Minecrft.get().setCameraEntity(cameraEntityBeforeCapture);
+        Minecrft.get().cameraEntity = cameraEntityBeforeCapture;
     }
 }

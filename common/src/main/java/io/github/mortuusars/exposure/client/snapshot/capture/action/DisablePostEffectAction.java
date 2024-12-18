@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.action;
+package io.github.mortuusars.exposure.client.snapshot.capture.action;
 
 import net.minecraft.client.Minecraft;
 

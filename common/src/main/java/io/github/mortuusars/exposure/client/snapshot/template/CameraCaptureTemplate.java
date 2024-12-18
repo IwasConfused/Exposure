@@ -1,11 +1,11 @@
 package io.github.mortuusars.exposure.client.snapshot.template;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.Minecrft;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.image.PalettizedImage;
-import io.github.mortuusars.exposure.client.snapshot.capturing.Capture;
-import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureAction;
-import io.github.mortuusars.exposure.client.snapshot.capturing.action.CaptureActions;
+import io.github.mortuusars.exposure.client.snapshot.capture.Capture;
+import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureAction;
+import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;

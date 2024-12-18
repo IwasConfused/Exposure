@@ -4,8 +4,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
-import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinders;
+import io.github.mortuusars.exposure.client.CameraClient;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import net.minecraft.client.player.AbstractClientPlayer;
@@ -40,7 +39,7 @@ public abstract class ItemInHandRendererMixin {
     private void renderPhotograph(AbstractClientPlayer player, float partialTicks, float pitch, InteractionHand hand,
                                   float swingProgress, ItemStack stack, float equipProgress, PoseStack poseStack,
                                   MultiBufferSource buffer, int combinedLight, CallbackInfo ci, @Local boolean isMainHand, @Local HumanoidArm arm) {
-        if (Viewfinders.active() != null && Viewfinders.active().isLookingThrough()) {
+        if (CameraClient.viewfinder() != null && CameraClient.viewfinder().isLookingThrough()) {
             poseStack.popPose();
             ci.cancel();
             return;

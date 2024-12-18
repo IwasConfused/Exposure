@@ -18,6 +18,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
+//TODO: Create dedicated FocalLength class
 public final class FocalRange implements StringRepresentable {
     public static final StreamCodec<ByteBuf, FocalRange> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, FocalRange::min,

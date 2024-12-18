@@ -6,20 +6,20 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 
 public class ViewfinderCameraControlsScreen extends Screen {
-    private final Viewfinder viewfinder;
     private final Camera camera;
+    private final Viewfinder viewfinder;
 
-    public ViewfinderCameraControlsScreen(Viewfinder viewfinder, Camera camera) {
+    public ViewfinderCameraControlsScreen(Camera camera, Viewfinder viewfinder) {
         super(CommonComponents.EMPTY);
-        this.viewfinder = viewfinder;
         this.camera = camera;
-    }
-
-    public Viewfinder getViewfinder() {
-        return viewfinder;
+        this.viewfinder = viewfinder;
     }
 
     public Camera getCamera() {
         return camera;
+    }
+
+    public Viewfinder getViewfinder() {
+        return viewfinder;
     }
 }

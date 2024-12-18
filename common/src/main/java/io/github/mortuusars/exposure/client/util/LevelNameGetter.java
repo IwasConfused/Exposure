@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.util;
+package io.github.mortuusars.exposure.client.util;
 
 import io.github.mortuusars.exposure.Exposure;
 import net.minecraft.client.Minecraft;
@@ -6,8 +6,7 @@ import net.minecraft.client.Minecraft;
 import java.io.File;
 import java.nio.file.Path;
 
-public class ClientsideWorldNameGetter {
-    
+public class LevelNameGetter {
     public static String getWorldName() {
         try {
             if (Minecraft.getInstance().isSingleplayer()) {

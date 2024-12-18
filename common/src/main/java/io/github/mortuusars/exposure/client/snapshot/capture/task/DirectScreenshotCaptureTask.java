@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing.method;
+package io.github.mortuusars.exposure.client.snapshot.capture.task;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Config;

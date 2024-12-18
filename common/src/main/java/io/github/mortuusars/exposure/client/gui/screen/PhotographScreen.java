@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.util.ClientsideWorldNameGetter;
+import io.github.mortuusars.exposure.client.util.LevelNameGetter;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
@@ -264,7 +264,7 @@ public class PhotographScreen extends Screen {
 
                 CompletableFuture.runAsync(() -> new ClientsideExposureExporter(filename)
                         .withDefaultFolder()
-                        .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), ClientsideWorldNameGetter::getWorldName)
+                        .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), LevelNameGetter::getWorldName)
                         .withModifier(photographFeatures.pixelModifier())
                         .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
                         .export(exposureData));

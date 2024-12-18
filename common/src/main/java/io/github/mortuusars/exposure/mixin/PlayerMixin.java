@@ -33,19 +33,20 @@ public abstract class PlayerMixin extends LivingEntity implements ActiveCameraHo
     }
 
     @Override
-    public void setActiveExposureCamera(@Nullable Camera camera) {
+    public void setActiveExposureCamera(Camera camera) {
         activeCamera = camera;
     }
 
     @Override
     public void removeActiveExposureCamera() {
-        setActiveExposureCamera(null);
+        activeCamera = null;
     }
 
     @Inject(method = "drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;", at = @At(value = "RETURN"))
     void onDrop(ItemStack droppedItem, boolean dropAround, boolean includeThrowerName, CallbackInfoReturnable<ItemEntity> cir) {
-        if (droppedItem.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(droppedItem)) {
-            cameraItem.deactivate((Player)(Object)this, droppedItem);
+        if (droppedItem.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(droppedItem)
+                && (activeCamera == null || activeCamera.getItemStack().equals(droppedItem))) {
+            cameraItem.deactivate((Player) (Object) this, droppedItem);
         }
     }
 }

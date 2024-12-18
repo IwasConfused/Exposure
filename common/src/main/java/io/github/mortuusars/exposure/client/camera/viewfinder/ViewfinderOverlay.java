@@ -5,14 +5,14 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.Minecrft;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.Setting;
-import io.github.mortuusars.exposure.util.GuiUtil;
+import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -36,23 +36,24 @@ public class ViewfinderOverlay {
     private final int backgroundColor;
     private final Rect2f opening;
 
-    private float scale = 1f;
+    private float scale = 0.5f; // Start small to animate expanding
 
-    private Float xRot = null;
-    private Float yRot = null;
-    private Float xRot0 = null;
-    private Float yRot0 = null;
+    private float xRot;
+    private float yRot;
+    private float xRot0;
+    private float yRot0;
 
-    public ViewfinderOverlay(Viewfinder viewfinder, Camera camera) {
+    public ViewfinderOverlay(Camera camera, Viewfinder viewfinder) {
         this.player = Minecrft.player();
         this.camera = camera;
         this.viewfinder = viewfinder;
         this.backgroundColor = Config.Client.getBackgroundColor();
         this.opening = new Rect2f(0, 0, 0, 0);
-    }
 
-    public void setup() {
-        this.scale = 0.5f;
+        this.xRot = player.getXRot();
+        this.yRot = player.getYRot();
+        this.xRot0 = xRot;
+        this.yRot0 = yRot;
     }
 
     public float getScale() {
@@ -60,8 +61,6 @@ public class ViewfinderOverlay {
     }
 
     public void render() {
-        if (camera.isEmpty()) return;
-
         final int width = Minecrft.get().getWindow().getGuiScaledWidth();
         final int height = Minecrft.get().getWindow().getGuiScaledHeight();
 
@@ -74,7 +73,7 @@ public class ViewfinderOverlay {
         opening.width = openingSize;
         opening.height = openingSize;
 
-        if (Minecrft.options().hideGui) return;
+        if (!viewfinder.isLookingThrough() || Minecrft.options().hideGui || camera.isEmpty()) return;
 
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
@@ -82,12 +81,6 @@ public class ViewfinderOverlay {
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
-        if (xRot == null || yRot == null || xRot0 == null || yRot0 == null) {
-            xRot = player.getXRot();
-            yRot = player.getYRot();
-            xRot0 = xRot;
-            yRot0 = yRot;
-        }
         float delta = Math.min(0.7f * partialTicks, 0.8f);
         xRot0 = Mth.lerp(delta, xRot0, xRot);
         yRot0 = Mth.lerp(delta, yRot0, yRot);
@@ -130,7 +123,7 @@ public class ViewfinderOverlay {
         drawRect(poseStack, -9999, opening.y + opening.height, width + 9999, height + 9999, backgroundColor);
 
         // Shutter
-        if (camera.map((item, stack) -> item.getShutter().isOpen(stack), false)) {
+        if (camera.isShutterOpen()) {
             drawRect(poseStack, opening.x, opening.y, opening.x + opening.width, opening.y + opening.height, 0xfa1f1d1b);
         }
 
@@ -147,6 +140,7 @@ public class ViewfinderOverlay {
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, -1f, 0f, 1f, 0f, 1f);
 
         if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
+            //TODO: don't move with opening. render fixed in place
             renderStatusIcons(poseStack, camera.getItemStack());
         }
 

@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.snapshot.capturing;
+package io.github.mortuusars.exposure.client.snapshot.capture;
 
 import com.google.common.base.Preconditions;
 import net.minecraft.client.Minecraft;

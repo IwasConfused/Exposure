@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.OldCameraItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
-import io.github.mortuusars.exposure.util.GuiUtil;
+import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;

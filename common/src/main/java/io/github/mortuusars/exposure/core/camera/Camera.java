@@ -30,6 +30,10 @@ public abstract class Camera {
         return map(CameraItem::isActive, false);
     }
 
+    public boolean isShutterOpen() {
+        return map((item, stack) -> item.getShutter().isOpen(stack), false);
+    }
+
     // --
 
     public Camera ifPresent(BiConsumer<CameraItem, ItemStack> ifPresent) {

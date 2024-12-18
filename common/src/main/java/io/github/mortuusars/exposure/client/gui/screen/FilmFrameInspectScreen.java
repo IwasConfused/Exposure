@@ -10,7 +10,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
-import io.github.mortuusars.exposure.util.GuiUtil;
+import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

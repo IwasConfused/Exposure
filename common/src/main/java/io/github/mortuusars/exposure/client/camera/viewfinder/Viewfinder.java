@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.CameraClient;
-import io.github.mortuusars.exposure.client.Minecrft;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.Camera;
@@ -15,81 +15,57 @@ import net.minecraft.client.Minecraft;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 
 public class Viewfinder {
-    protected final BiFunction<Viewfinder, Camera, ViewfinderOverlay> overlaySupplier;
-    protected final BiFunction<Viewfinder, Camera, ViewfinderShader> shaderSupplier;
-    protected final BiFunction<Viewfinder, Camera, ViewfinderCameraControlsScreen> controlsScreenSupplier;
+    protected final Camera camera;
+    protected final ViewfinderOverlay overlay;
+    protected final ViewfinderShader shader;
+    protected final ComponentConstructor<ViewfinderCameraControlsScreen> controlsScreenConstructor;
 
-    protected @Nullable ViewfinderOverlay overlay;
-    protected @Nullable ViewfinderShader shader;
-    protected @Nullable ViewfinderCameraControlsScreen controls;
-    protected @Nullable Camera camera;
+    protected @Nullable ViewfinderCameraControlsScreen controlsScreen;
 
-    public Viewfinder(BiFunction<Viewfinder, Camera, ViewfinderOverlay> overlaySupplier,
-                      BiFunction<Viewfinder, Camera, ViewfinderShader> shaderSupplier,
-                      BiFunction<Viewfinder, Camera, ViewfinderCameraControlsScreen> controlsScreenSupplier) {
-        this.overlaySupplier = overlaySupplier;
-        this.shaderSupplier = shaderSupplier;
-        this.controlsScreenSupplier = controlsScreenSupplier;
-    }
-
-    public Optional<ViewfinderOverlay> getOverlay() {
-        return Optional.ofNullable(overlay);
-    }
-
-    public Optional<ViewfinderShader> getShader() {
-        return Optional.ofNullable(shader);
-    }
-
-    public Optional<ViewfinderCameraControlsScreen> getControlsScreen() {
-        return Optional.ofNullable(controls);
-    }
-
-    public void setup(Camera camera) {
-        overlay = overlaySupplier.apply(this, camera);
+    public Viewfinder(Camera camera,
+                      ComponentConstructor<ViewfinderOverlay> overlay,
+                      ComponentConstructor<ViewfinderShader> shader,
+                      ComponentConstructor<ViewfinderCameraControlsScreen> controlsScreen) {
         this.camera = camera;
-        overlay.setup();
-        shader = shaderSupplier.apply(this, camera);
-        shader.update();
-
+        this.overlay = overlay.construct(camera, this);
+        this.shader = shader.construct(camera, this);
+        this.controlsScreenConstructor = controlsScreen;
         CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
     }
 
-    public void openControlsScreen() {
-        Preconditions.checkNotNull(camera, "No active camera");
-        controls = controlsScreenSupplier.apply(this, camera);
-        Minecrft.get().setScreen(controls);
+    public ViewfinderOverlay getOverlay() {
+        return overlay;
     }
 
-    public boolean isLookingThrough() {
-        CameraType cameraType = Minecrft.options().getCameraType();
-        return cameraType == CameraType.FIRST_PERSON || cameraType == CameraType.THIRD_PERSON_FRONT;
+    public ViewfinderShader getShader() {
+        return shader;
     }
 
-    public void processShader() {
-        if (shader != null && isLookingThrough()) {
-            shader.update();
-            shader.process();
-        }
-    }
-
-    public void render() {
-        if (overlay != null && isLookingThrough()) overlay.render();
+    public Optional<ViewfinderCameraControlsScreen> getControlsScreen() {
+        return Optional.ofNullable(controlsScreen);
     }
 
     public void close() {
-        overlay = null;
-
         if (shader != null) {
             shader.close();
-            shader = null;
         }
 
         if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) {
             Minecrft.get().setScreen(null);
         }
+    }
+
+    public void openControlsScreen() {
+        Preconditions.checkNotNull(camera, "No active camera");
+        controlsScreen = controlsScreenConstructor.construct(camera, this);
+        Minecrft.get().setScreen(controlsScreen);
+    }
+
+    public boolean isLookingThrough() {
+        CameraType cameraType = Minecrft.options().getCameraType();
+        return cameraType == CameraType.FIRST_PERSON || cameraType == CameraType.THIRD_PERSON_FRONT;
     }
 
     public boolean keyPressed(int key, int scanCode, int action) {
@@ -166,5 +142,14 @@ public class Viewfinder {
         }
 
         return false;
+    }
+
+    public double modifyFov(double original) {
+        return original;
+    }
+
+    @FunctionalInterface
+    public interface ComponentConstructor<T> {
+        T construct(Camera camera, Viewfinder viewfinder);
     }
 }
