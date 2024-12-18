@@ -44,7 +44,8 @@ public record EntityInFrame(ResourceLocation id, String name, BlockPos pos, int 
     }
 
     public static EntityInFrame of(Entity cameraHolder, Entity entity, CustomData customData) {
-        return new EntityInFrame(EntityType.getKey(entity.getType()), entity.getScoreboardName(), entity.blockPosition(),
+        //TODO: check name on server, will not work probably
+        return new EntityInFrame(EntityType.getKey(entity.getType()), entity.getName().getString(), entity.blockPosition(),
                 ((int) cameraHolder.distanceTo(entity)), customData);
     }
 }

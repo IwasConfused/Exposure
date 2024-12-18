@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.client.snapshot.template;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import io.github.mortuusars.exposure.client.snapshot.capture.Capture;
 import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureAction;
@@ -21,9 +20,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.phys.AABB;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -33,17 +29,14 @@ public class CameraCaptureTemplate implements CaptureTemplate {
     public Task<?> createTask(LocalPlayer localPlayer, CaptureData data) {
         Preconditions.checkNotNull(Minecraft.getInstance().level, "Minecraft.getInstance().level");
 
-        Entity cameraHolder = Minecrft.level().getEntities(EntityTypeTest.forClass(ArmorStand.class),
-                AABB.ofSize(localPlayer.position(), 256, 256, 256), stand -> true).stream()
-                .findFirst()
-                .map(stand -> ((Entity) stand))
-                .orElse(Minecraft.getInstance().level.getEntities().get(data.cameraHolderID()));
+        Entity cameraHolder = data.photographer().asEntity();
 
         int frameSize = data.frameSize();
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
         Task<PalettizedImage> captureTask = Capture.of(Capture.screenshot(),
-                        CaptureActions.setCameraEntity(cameraHolder),
+                        CaptureAction.optional(!data.photographer().getExecutingPlayer().equals(cameraHolder),
+                                () -> CaptureActions.setCameraEntity(cameraHolder)),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
                         CaptureActions.disablePostEffect(),

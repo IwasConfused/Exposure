@@ -5,16 +5,23 @@ import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class PlatformHelper {
+    @ExpectPlatform
+    public static @Nullable MinecraftServer getServer() {
+        throw new AssertionError();
+    }
+
     @ExpectPlatform
     public static boolean canShear(ItemStack stack) {
         throw new AssertionError();

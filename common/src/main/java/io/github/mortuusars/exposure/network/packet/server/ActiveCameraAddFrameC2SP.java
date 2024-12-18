@@ -2,29 +2,25 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureFrameClientData;
-import io.github.mortuusars.exposure.core.camera.ActiveCameraHolder;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.network.packet.IPacket;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
-public record ActiveCameraAddFrameC2SP(UUID cameraHolderID,
+public record ActiveCameraAddFrameC2SP(PhotographerEntity photographer,
                                        ExposureFrameClientData frameDataFromClient) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("active_camera_add_frame");
     public static final Type<ActiveCameraAddFrameC2SP> TYPE = new Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, ActiveCameraAddFrameC2SP> STREAM_CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, ActiveCameraAddFrameC2SP::cameraHolderID,
+            PhotographerEntity.STREAM_CODEC, ActiveCameraAddFrameC2SP::photographer,
             ExposureFrameClientData.STREAM_CODEC, ActiveCameraAddFrameC2SP::frameDataFromClient,
             ActiveCameraAddFrameC2SP::new
     );
@@ -36,24 +32,12 @@ public record ActiveCameraAddFrameC2SP(UUID cameraHolderID,
 
     @Override
     public boolean handle(PacketFlow direction, Player player) {
-        ServerPlayer serverPlayer = ((ServerPlayer) player);
+        ServerLevel level = ((ServerPlayer) player).serverLevel();
 
-        Entity entity = serverPlayer.serverLevel().getEntity(cameraHolderID);
-
-        if (!(entity instanceof ActiveCameraHolder cameraHolder)) {
-            Exposure.LOGGER.error("Cannot handle '{}' packet: Entity '{}' is not ActiveCameraHolder", ID, entity);
-            return true;
-        }
-
-        //TODO: add checks
-
-        serverPlayer.server.execute(() -> {
-            cameraHolder.ifActiveExposureCameraPresent((item, stack) -> {
-
-                ExposureFrame frame = item.createExposureFrame(serverPlayer.serverLevel(), serverPlayer, stack, frameDataFromClient);
-                item.addFrame(serverPlayer, stack, frame);
-            }, () -> Exposure.LOGGER.error("Cannot create and add ExposureFrame: Entity '{}' does not have an active camera.", entity));
-        });
+        level.getServer().execute(() -> photographer.ifActiveExposureCameraPresent(
+                (item, stack) -> item.addNewFrame(photographer, level, stack, frameDataFromClient),
+                () -> Exposure.LOGGER.error("Cannot create and add ExposureFrame: " +
+                        "Photographer '{}' does not have an active camera.", photographer)));
 
         return true;
     }

@@ -29,7 +29,6 @@ import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.item.part.Shutter;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.core.ChromaChannel;
@@ -102,7 +101,7 @@ public class OldCameraItem extends Item {
         attachments = ImmutableList.copyOf(defineAttachments());
 
         shutter = new Shutter();
-        shutter.onClosed(this::onShutterClosed);
+//        shutter.onClosed(this::onShutterClosed);
     }
 
     public Shutter getShutter() {
@@ -817,7 +816,7 @@ public class OldCameraItem extends Item {
 
         onFrameAdded(player, cameraStack, exposureFrame);
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
-        Packets.sendToClient(new OnFrameAddedS2CP(exposureFrame), player);
+//        Packets.sendToClient(new OnFrameAddedS2CP(exposureFrame), player);
     }
 
     public void onFrameAdded(ServerPlayer player, ItemStack stack, ExposureFrame frame) {

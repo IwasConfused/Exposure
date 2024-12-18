@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.core.frame;
 import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import net.minecraft.core.UUIDUtil;
@@ -16,7 +17,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public record CaptureData(ExposureIdentifier identifier,
-                          UUID cameraHolderID,
+                          PhotographerEntity photographer,
                           UUID cameraID,
                           ShutterSpeed shutterSpeed,
                           Optional<Integer> focalLengthOverride,
@@ -33,7 +34,7 @@ public record CaptureData(ExposureIdentifier identifier,
         public @NotNull CaptureData decode(RegistryFriendlyByteBuf buffer) {
             return new CaptureData(
                     ExposureIdentifier.STREAM_CODEC.decode(buffer),
-                    UUIDUtil.STREAM_CODEC.decode(buffer),
+                    PhotographerEntity.STREAM_CODEC.decode(buffer),
                     UUIDUtil.STREAM_CODEC.decode(buffer),
                     ShutterSpeed.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
@@ -50,7 +51,7 @@ public record CaptureData(ExposureIdentifier identifier,
 
         public void encode(RegistryFriendlyByteBuf buffer, CaptureData data) {
             ExposureIdentifier.STREAM_CODEC.encode(buffer, data.identifier());
-            UUIDUtil.STREAM_CODEC.encode(buffer, data.cameraHolderID());
+            PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
             UUIDUtil.STREAM_CODEC.encode(buffer, data.cameraID());
             ShutterSpeed.STREAM_CODEC.encode(buffer, data.shutterSpeed());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.focalLengthOverride());

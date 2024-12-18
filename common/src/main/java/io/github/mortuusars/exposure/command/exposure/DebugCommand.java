@@ -13,7 +13,6 @@ import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
-import io.github.mortuusars.exposure.network.packet.client.OnFrameAddedS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.*;
@@ -68,13 +67,13 @@ public class DebugCommand {
             @Nullable ExposureFrame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
             Preconditions.checkState(frame != null, "Frame data cannot be empty after combining.");
 
-            Packets.sendToClient(new OnFrameAddedS2CP(frame), player); // Adds frame to client CapturedFramesHistory
+            ExposureServer.exposureFrameHistory().add(player, frame);
 
             Supplier<Component> msg = () -> Component.literal("Created chromatic exposure: ")
                     .append(Component.literal(frame.identifier().toString())
                             .withStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/exposure show id " + frame.identifier().toString()))
+                                            "/exposure show id " + frame.identifier()))
                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
                                     .withUnderlined(true)));
 

@@ -2,10 +2,12 @@ package io.github.mortuusars.exposure.core;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -136,11 +138,11 @@ public class ExposureIdentifier {
 
     // --
 
-    public static ExposureIdentifier createId(@NotNull Player player, String... middleParts) {
+    public static ExposureIdentifier createId(Entity entity, String... middleParts) {
         List<String> parts = new ArrayList<>();
-        parts.add(player.getScoreboardName());
+        parts.add(entity.getScoreboardName());
         parts.addAll(Arrays.asList(middleParts));
-        parts.add(Long.toString(player.level().getGameTime()));
+        parts.add(Long.toString(entity.level().getGameTime()));
         return composeId(parts.toArray(String[]::new));
     }
 

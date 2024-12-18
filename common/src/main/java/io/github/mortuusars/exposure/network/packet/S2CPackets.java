@@ -17,7 +17,6 @@ public class S2CPackets {
                 new CustomPacketPayload.TypeAndCodec<>(ExposureDataPartS2CP.TYPE, ExposureDataPartS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ExposureDataS2CP.TYPE, ExposureDataS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(LoadExposureFromFileCommandS2CP.TYPE, LoadExposureFromFileCommandS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(OnFrameAddedS2CP.TYPE, OnFrameAddedS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(PlayOnePerEntityShutterTickingSoundS2CP.TYPE, PlayOnePerEntityShutterTickingSoundS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC),

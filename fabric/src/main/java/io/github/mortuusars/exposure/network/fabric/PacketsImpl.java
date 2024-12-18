@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.network.fabric;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.fabric.ExposureFabric;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.MinecraftServer;
@@ -12,9 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public class PacketsImpl {
-    @Nullable
-    private static MinecraftServer server;
-
     public static void sendToServer(IPacket packet) {
         FabricS2CPackets.sendToServer(packet);
     }
@@ -24,12 +22,12 @@ public class PacketsImpl {
     }
 
     public static void sendToClients(IPacket packet, Predicate<ServerPlayer> filter) {
-        if (server == null) {
+        if (ExposureFabric.server == null) {
             Exposure.LOGGER.error("Cannot send a packet to players. Server is not available.");
             return;
         }
 
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+        for (ServerPlayer player : ExposureFabric.server.getPlayerList().getPlayers()) {
             if (filter.test(player)) {
                 sendToClient(packet, player);
             }
@@ -37,12 +35,12 @@ public class PacketsImpl {
     }
 
     public static void sendToAllClients(IPacket packet) {
-        if (server == null) {
+        if (ExposureFabric.server == null) {
             Exposure.LOGGER.error("Cannot send a packet to all players. Server is not available.");
             return;
         }
 
-        for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+        for (ServerPlayer player : ExposureFabric.server.getPlayerList().getPlayers()) {
             sendToClient(packet, player);
         }
     }
@@ -59,14 +57,5 @@ public class PacketsImpl {
 
             return false;
         });
-    }
-
-    public static void onServerStarting(MinecraftServer server) {
-        // Store server to access from static context:
-        PacketsImpl.server = server;
-    }
-
-    public static void onServerStopped(MinecraftServer server) {
-        PacketsImpl.server = null;
     }
 }

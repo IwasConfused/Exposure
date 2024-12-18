@@ -144,10 +144,6 @@ public class ClientPacketsHandler {
         });
     }
 
-    public static void onFrameAdded(OnFrameAddedS2CP packet) {
-//        executeOnMainThread(() -> CapturedFramesHistory.add(packet.frame()));
-    }
-
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
         Preconditions.checkState(!packet.identifier().isEmpty(),
                 "Cannot create chromatic exposure: identifier is empty.");
@@ -167,7 +163,7 @@ public class ClientPacketsHandler {
         executeOnMainThread(() -> {
             player.ifActiveExposureCameraPresent((item, stack) -> {
                 ExposureFrameClientData clientSideFrameData = item.getClientSideFrameData(player, stack);
-                Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.cameraHolderID(), clientSideFrameData));
+                Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
                 Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data);
                 SnapShot.enqueue(captureTask);

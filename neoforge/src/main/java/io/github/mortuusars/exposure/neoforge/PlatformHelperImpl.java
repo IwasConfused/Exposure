@@ -1,17 +1,24 @@
 package io.github.mortuusars.exposure.neoforge;
 
 import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class PlatformHelperImpl {
+    public static @Nullable MinecraftServer getServer() {
+        return ServerLifecycleHooks.getCurrentServer();
+    }
+
     public static boolean canShear(ItemStack stack) {
         return stack.canPerformAction(ItemAbilities.SHEARS_CARVE);
     }

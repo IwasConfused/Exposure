@@ -8,7 +8,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,16 +30,16 @@ public class ExposureFrameHistory extends SavedData {
         return frames;
     }
 
-    public List<ExposureFrame> getFramesOf(ServerPlayer player) {
-        return getFramesOf(player.getUUID());
+    public List<ExposureFrame> getFramesOf(Entity entity) {
+        return getFramesOf(entity.getUUID());
     }
 
     public List<ExposureFrame> getFramesOf(UUID uuid) {
         return frames.getOrDefault(uuid, Collections.emptyList());
     }
 
-    public void add(ServerPlayer player, ExposureFrame frame) {
-        add(player.getUUID(), frame);
+    public void add(Entity entity, ExposureFrame frame) {
+        add(entity.getUUID(), frame);
     }
 
     public void add(UUID uuid, ExposureFrame frame) {
@@ -56,8 +56,8 @@ public class ExposureFrameHistory extends SavedData {
         frames.clear();
     }
 
-    public void clearOf(ServerPlayer player) {
-        frames.remove(player.getUUID());
+    public void clearOf(Entity entity) {
+        frames.remove(entity.getUUID());
     }
 
     @Override

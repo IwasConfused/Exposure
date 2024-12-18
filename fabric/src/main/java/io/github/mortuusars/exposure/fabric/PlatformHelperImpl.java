@@ -10,6 +10,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.Entity;
@@ -26,6 +27,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class PlatformHelperImpl {
+    public static @Nullable MinecraftServer getServer() {
+        return ExposureFabric.server;
+    }
+
     public static boolean canShear(ItemStack stack) {
         return stack.getItem() instanceof ShearsItem;
     }

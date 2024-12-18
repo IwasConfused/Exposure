@@ -85,8 +85,6 @@ public class Exposure {
         RecipeSerializers.init();
         SoundEvents.init();
         ArgumentTypes.init();
-
-//        Camera.registerCameraGetter(Exposure.resource("camera_in_hand"), player -> CameraInHand.ofPlayer(player, CameraItem.class));
     }
 
     public static void initServer(MinecraftServer server) {
