@@ -24,6 +24,10 @@ public class Minecrft {
         return Minecraft.getInstance().options;
     }
 
+    public static void execute(Runnable runnable) {
+        get().execute(runnable);
+    }
+
     public static void releaseUseButton() {
         Minecraft.getInstance().options.keyUse.setDown(false);
     }

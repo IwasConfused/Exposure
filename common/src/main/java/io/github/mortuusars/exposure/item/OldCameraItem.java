@@ -16,8 +16,6 @@ import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
-import io.github.mortuusars.exposure.core.camera.CameraAccessors;
 import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
@@ -358,7 +356,7 @@ public class OldCameraItem extends Item {
         if (!(entity instanceof Player player))
             return;
 
-        getShutter().tick(player, stack);
+//        getShutter().tick(player, stack);
 
         boolean inHand = isSelected || player.getOffhandItem().equals(stack);
 
@@ -488,12 +486,12 @@ public class OldCameraItem extends Item {
 
         boolean flashHasFired = shouldFlashFire && tryUseFlash(player, stack);
 
-        getShutter().open(player, stack, shutterSpeed);
+//        getShutter().open(player, stack, shutterSpeed);
 
-        if (shutterSpeed.shouldCauseTickingSound()) {
-            OnePerEntitySounds.playShutterTickingSoundForAllPlayers(CameraAccessors.ofHand(hand), player,
-                    1f, 1f, shutterSpeed.getDurationTicks());
-        }
+//        if (shutterSpeed.shouldCauseTickingSound()) {
+//            OnePerEntitySounds.playShutterTickingSoundForAllPlayers(CameraAccessors.ofHand(hand), player,
+//                    1f, 1f, shutterSpeed.getDurationTicks());
+//        }
 
         ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(player);
 
@@ -506,7 +504,6 @@ public class OldCameraItem extends Item {
 
         ExposureServer.awaitExposure(exposureIdentifier, filmItem.getType(), player.getScoreboardName());
 
-        CameraAccessor<?> cameraAccessor = CameraAccessors.ofHand(hand);
 //        Packets.sendToClient(new StartExposureS2CP(exposureIdentifier, cameraAccessor, flashHasFired), serverPlayer);
 
         return InteractionResult.CONSUME; // Consume to not play swing animation

@@ -29,6 +29,7 @@ import io.github.mortuusars.exposure.network.packet.client.StartCaptureS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.server.CameraInstance;
 import io.github.mortuusars.exposure.server.CameraInstances;
+import io.github.mortuusars.exposure.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.*;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
@@ -345,9 +346,10 @@ public class CameraItem extends Item {
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (!(entity instanceof Player player)) return; // It should always be player. Not casting just to be safe.
 
-        getShutter().tick(player, stack);
 
-        if (!level.isClientSide()) {
+        if (level instanceof ServerLevel serverLevel) {
+            getShutter().tick(player, serverLevel, stack);
+
             CameraInstances.ifPresent(stack, instance -> instance.tick(player, stack));
 
             boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
@@ -393,7 +395,7 @@ public class CameraItem extends Item {
         if (!film.getItem().canAddFrame(film.getItemStack()))
             return InteractionResultHolder.consume(stack);
 
-        if (!level.isClientSide()) {
+        if (level instanceof ServerLevel serverLevel) {
             Entity entity = photographer.asEntity();
 
             int lightLevel = LevelUtil.getLightLevelAt(level, entity.blockPosition());
@@ -402,21 +404,20 @@ public class CameraItem extends Item {
 
             boolean flashHasFired = shouldFlashFire && tryUseFlash(photographer, stack);
 
-            //TODO: execute on both sides? May improve shutter rendering in viewfinder. But closing is harder that way.
-            // Since it's closed in inventory tick, it often is not executed if server closes first. And sound is not played.
-            // Potential solution is to play closing sound from server every time.
-            getShutter().open(photographer, stack, shutterSpeed);
+            getShutter().open(photographer, serverLevel, stack, shutterSpeed);
 
-//            if (shutterSpeed.shouldCauseTickingSound()) {
-//                OnePerEntitySounds.playShutterTickingSoundForAllPlayers(CameraAccessors.ofHand(hand), player,
-//                        1f, 1f, shutterSpeed.getDurationTicks());
-//            }
+            CameraID cameraID = getOrCreateID(stack);
+
+            if (shutterSpeed.shouldCauseTickingSound()) {
+                OnePerEntitySounds.playShutterTickingSoundForAllPlayers(photographer, cameraID,
+                        1f, 1f, shutterSpeed.getDurationTicks());
+            }
 
             ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
             CaptureData captureData = new CaptureData(exposureIdentifier,
                     photographer,
-                    getOrCreateID(stack),
+                    cameraID,
                     Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT),
                     Optional.empty(),
                     film.getItem().getType(),
@@ -432,7 +433,7 @@ public class CameraItem extends Item {
             //TODO: use Photographer instead of creator string
             //TODO: accept CaptureData in awaitExposure
             ExposureServer.awaitExposure(exposureIdentifier, captureData.filmType(), photographer.getExecutingPlayer().getScoreboardName());
-            CameraInstances.createOrUpdate(getOrCreateID(stack), instance -> instance.setCurrentCaptureData(level, captureData));
+            CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
 
             if (photographer.getExecutingPlayer() instanceof  ServerPlayer serverPlayer) {
                 Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
@@ -444,16 +445,25 @@ public class CameraItem extends Item {
         return InteractionResultHolder.consume(stack);
     }
 
-    protected void onShutterOpen(PhotographerEntity photographer, ItemStack stack) {
+    protected void onShutterOpen(PhotographerEntity photographer, ServerLevel serverLevel, ItemStack stack) {
 
     }
 
-    protected void onShutterClosed(PhotographerEntity photographer, ItemStack stack) {
-        if (photographer.asEntity() instanceof Player player && !player.level().isClientSide()) {
+    protected void onShutterClosed(PhotographerEntity photographer, ServerLevel serverLevel, ItemStack stack) {
+        if (photographer.asEntity() instanceof Player player) {
             int cooldown = getCooldownAfterShot(photographer, stack);
             // Moving this to photographer.addCooldown can be nice for stand or other photographer entities.
             player.getCooldowns().addCooldown(this, cooldown);
         }
+
+        Attachment.FILM.ifPresent(stack, (filmItem, filmStack) -> {
+            SoundEvent sound = filmItem.isFull(filmStack)
+                    ? Exposure.SoundEvents.FILM_ADVANCE_LAST.get()
+                    : Exposure.SoundEvents.FILM_ADVANCE.get();
+
+            float fullness = filmItem.getFullness(filmStack);
+            OnePerEntitySounds.play(null, photographer.asEntity(), sound, SoundSource.PLAYERS, 1f, 0.85f + 0.2f * fullness);
+        });
     }
 
     protected Optional<ChromaChannel> getChromaChannel(ItemStack stack) {

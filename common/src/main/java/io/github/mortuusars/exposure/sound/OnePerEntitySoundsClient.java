@@ -1,7 +1,8 @@
 package io.github.mortuusars.exposure.sound;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.CameraID;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.sound.instance.ShutterTimerTickingSoundInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
@@ -48,12 +49,11 @@ public class OnePerEntitySoundsClient {
         }
     }
 
-    public static void playShutterTickingSound(CameraAccessor<?> cameraAccessor, Entity sourceEntity,
+    public static void playShutterTickingSound(PhotographerEntity photographer, CameraID cameraID,
                                                float volume, float pitch, int durationTicks) {
         SoundEvent soundEvent = Exposure.SoundEvents.SHUTTER_TICKING.get();
-        SoundInstance soundInstance = createShutterTickingSoundInstance(cameraAccessor, sourceEntity,
-                soundEvent, volume, pitch, durationTicks);
-        Map<ResourceLocation, SoundInstance> instances = sounds.computeIfAbsent(sourceEntity, e -> new HashMap<>());
+        SoundInstance soundInstance = createShutterTickingSoundInstance(photographer, cameraID, soundEvent, volume, pitch, durationTicks);
+        Map<ResourceLocation, SoundInstance> instances = sounds.computeIfAbsent(photographer.asEntity(), e -> new HashMap<>());
 
         @Nullable SoundInstance previousInstance = instances.get(soundEvent.getLocation());
         if (previousInstance != null) {
@@ -75,9 +75,9 @@ public class OnePerEntitySoundsClient {
         return new EntityBoundSoundInstance(soundEvent, source, volume, pitch, sourceEntity, sourceEntity.getRandom().nextLong());
     }
 
-    private static SoundInstance createShutterTickingSoundInstance(CameraAccessor cameraAccessor, Entity sourceEntity,
+    private static SoundInstance createShutterTickingSoundInstance(PhotographerEntity photographer, CameraID cameraID,
                                                                    SoundEvent soundEvent, float volume, float pitch, int durationTicks) {
-        return new ShutterTimerTickingSoundInstance(cameraAccessor, sourceEntity, soundEvent, SoundSource.PLAYERS,
-                volume, pitch, durationTicks, sourceEntity.getRandom().nextLong());
+        return new ShutterTimerTickingSoundInstance(photographer, cameraID, soundEvent, SoundSource.PLAYERS,
+                volume, pitch, durationTicks);
     }
 }

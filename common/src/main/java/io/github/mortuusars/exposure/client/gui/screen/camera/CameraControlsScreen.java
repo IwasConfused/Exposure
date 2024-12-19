@@ -6,10 +6,10 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
-import io.github.mortuusars.exposure.core.camera.OtherCamera;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinderOverlay;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import net.minecraft.client.KeyMapping;
@@ -52,7 +52,7 @@ public class CameraControlsScreen extends Screen {
     private final Player player;
     private final ClientLevel level;
     private final long openedAtTimestamp;
-    private final OtherCamera<?> camera;
+    private final Camera camera;
     private int leftPos;
     private int topPos;
 

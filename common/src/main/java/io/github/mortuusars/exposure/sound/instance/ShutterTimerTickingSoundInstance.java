@@ -1,32 +1,30 @@
 package io.github.mortuusars.exposure.sound.instance;
 
-import io.github.mortuusars.exposure.core.camera.OtherCamera;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
-import io.github.mortuusars.exposure.item.OldCameraItem;
-import io.github.mortuusars.exposure.item.component.camera.ShutterState;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraID;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
+import io.github.mortuusars.exposure.item.CameraItem;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
-    protected final CameraAccessor<?> cameraAccessor;
-    protected final Entity entity;
+    protected final PhotographerEntity photographer;
+    protected final CameraID cameraID;
     protected final float fullVolume;
     protected final int durationTicks;
     protected final long endsAtTick;
 
-    public ShutterTimerTickingSoundInstance(CameraAccessor<?> cameraAccessor, Entity sourceEntity, SoundEvent soundEvent,
-                                            SoundSource soundSource, float volume, float pitch, int durationTicks, long seed) {
-        super(soundEvent, soundSource, volume, pitch, sourceEntity, seed);
-        this.cameraAccessor = cameraAccessor;
-        this.entity = sourceEntity;
+    public ShutterTimerTickingSoundInstance(PhotographerEntity photographer, CameraID cameraID, SoundEvent soundEvent,
+                                            SoundSource soundSource, float volume, float pitch, int durationTicks) {
+        super(soundEvent, soundSource, volume, pitch, photographer.asEntity(), photographer.asEntity().getRandom().nextLong());
+        this.photographer = photographer;
+        this.cameraID = cameraID;
         this.fullVolume = volume;
         this.durationTicks = durationTicks;
-        this.endsAtTick = sourceEntity.level().getGameTime() + durationTicks;
+        this.endsAtTick = photographer.asEntity().level().getGameTime() + durationTicks;
 
         this.looping = true;
     }
@@ -35,38 +33,32 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
     public void tick() {
         super.tick();
 
-        if (endsAtTick - entity.level().getGameTime() < 0) {
+        if (endsAtTick - photographer.asEntity().level().getGameTime() < 0) {
             stop();
             return;
         }
 
-        @Nullable OtherCamera<?> camera = cameraAccessor.get(entity);
-        if (camera == null) {
-            if (!(entity instanceof Player player)) {
-                stop();
-                return;
-            }
+        Camera activeCamera = photographer.activeExposureCamera();
+        if (activeCamera != null && activeCamera.idMatches(cameraID)) {
+            volume = fullVolume;
+            return;
+        }
 
-            for (int i = 0; i < 9; i++) {
-                ItemStack stack = player.getInventory().getItem(i);
-                if (stack.getItem() instanceof OldCameraItem cameraItem) {
-                    ShutterState hotbarShutterState = cameraItem.getShutter().getState(stack);
-                    if (hotbarShutterState.isOpen() && hotbarShutterState.shutterSpeed().shouldCauseTickingSound()) {
-                        volume = fullVolume * 0.35f;
-                        return;
-                    }
-                }
-            }
-
+        if (photographer.asEntity() instanceof Player player && isCameraOnHotbar(player)) {
+            volume = fullVolume * 0.35f;
+        } else {
             // Not stopping to resume sound if camera becomes available again.
             volume = fullVolume * 0.01f;
         }
-        else {
-            volume = fullVolume;
-            ShutterState shutterState = camera.getItem().getShutter().getState(camera.getItemStack());
-            if (!shutterState.isOpen() || !shutterState.shutterSpeed().shouldCauseTickingSound()) {
-                stop();
+    }
+
+    protected boolean isCameraOnHotbar(Player player) {
+        for (int i = 0; i < 9; i++) {
+            ItemStack stack = player.getInventory().getItem(i);
+            if (stack.getItem() instanceof CameraItem cameraItem && cameraItem.getOrCreateID(stack).equals(cameraID)) {
+                return true;
             }
         }
+        return false;
     }
 }

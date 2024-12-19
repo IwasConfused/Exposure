@@ -1,7 +1,8 @@
 package io.github.mortuusars.exposure.sound;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
+import io.github.mortuusars.exposure.core.camera.CameraID;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.PlayOnePerEntityShutterTickingSoundS2CP;
 import io.github.mortuusars.exposure.network.packet.client.PlayOnePerEntitySoundS2CP;
@@ -56,11 +57,10 @@ public class OnePerEntitySounds {
         }
     }
 
-    public static void playShutterTickingSoundForAllPlayers(CameraAccessor<?> cameraAccessor, Entity sourceEntity,
+    public static void playShutterTickingSoundForAllPlayers(PhotographerEntity photographer, CameraID cameraID,
                                                             float volume, float pitch, int durationTicks) {
-        if (!sourceEntity.level().isClientSide) {
-            Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(cameraAccessor,
-                    sourceEntity.getUUID(), volume, pitch, durationTicks));
+        if (!photographer.asEntity().level().isClientSide) {
+            Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(photographer, cameraID, volume, pitch, durationTicks));
         }
     }
 
