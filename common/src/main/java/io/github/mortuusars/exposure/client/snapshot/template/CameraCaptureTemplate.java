@@ -61,7 +61,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
             boolean dither = fileLoadingData.shouldDither();
 
             captureTask = captureTask.overridenBy(Capture.of(Capture.file(filepath),
-                            CaptureActions.interplanarProjection(cameraHolder, data.cameraID()))
+                            CaptureActions.interplanarProjection(data.photographer(), data.cameraID()))
                     .handleErrorAndGetResult(printCasualErrorInChat())
                     .thenAsync(Process.with(
                             Processor.Crop.SQUARE,

@@ -3,10 +3,10 @@ package io.github.mortuusars.exposure.core.frame;
 import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -14,11 +14,10 @@ import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public record CaptureData(ExposureIdentifier identifier,
                           PhotographerEntity photographer,
-                          UUID cameraID,
+                          CameraID cameraID,
                           ShutterSpeed shutterSpeed,
                           Optional<Integer> focalLengthOverride,
                           ExposureType filmType,
@@ -35,7 +34,7 @@ public record CaptureData(ExposureIdentifier identifier,
             return new CaptureData(
                     ExposureIdentifier.STREAM_CODEC.decode(buffer),
                     PhotographerEntity.STREAM_CODEC.decode(buffer),
-                    UUIDUtil.STREAM_CODEC.decode(buffer),
+                    CameraID.STREAM_CODEC.decode(buffer),
                     ShutterSpeed.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
@@ -52,7 +51,7 @@ public record CaptureData(ExposureIdentifier identifier,
         public void encode(RegistryFriendlyByteBuf buffer, CaptureData data) {
             ExposureIdentifier.STREAM_CODEC.encode(buffer, data.identifier());
             PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
-            UUIDUtil.STREAM_CODEC.encode(buffer, data.cameraID());
+            CameraID.STREAM_CODEC.encode(buffer, data.cameraID());
             ShutterSpeed.STREAM_CODEC.encode(buffer, data.shutterSpeed());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.focalLengthOverride());
             ExposureType.STREAM_CODEC.encode(buffer, data.filmType());

@@ -32,7 +32,6 @@ public class Viewfinder {
         this.overlay = overlay.construct(camera, this);
         this.shader = shader.construct(camera, this);
         this.controlsScreenConstructor = controlsScreen;
-        CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
     }
 
     public ViewfinderOverlay getOverlay() {
@@ -45,6 +44,9 @@ public class Viewfinder {
 
     public Optional<ViewfinderCameraControlsScreen> getControlsScreen() {
         return Optional.ofNullable(controlsScreen);
+    }
+
+    public void tick() {
     }
 
     public void close() {
@@ -84,7 +86,7 @@ public class Viewfinder {
                     : CameraType.FIRST_PERSON;
 
             Minecrft.options().setCameraType(newCameraType);
-            CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
+            CameraClient.setSetting(Setting.SELFIE_MODE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
             return true;
         }
 

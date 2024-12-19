@@ -1,22 +1,28 @@
 package io.github.mortuusars.exposure.core.camera;
 
 import io.github.mortuusars.exposure.item.CameraItem;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
+import java.util.Stack;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 public abstract class Camera {
-    private final LivingEntity owner;
+    protected final PhotographerEntity photographer;
+    protected final CameraID cameraID;
 
-    public Camera(LivingEntity owner) {
-        this.owner = owner;
+    public Camera(PhotographerEntity photographer, CameraID cameraID) {
+        this.photographer = photographer;
+        this.cameraID = cameraID;
     }
 
-    public LivingEntity getOwner() {
-        return owner;
+    public PhotographerEntity getPhotographer() {
+        return photographer;
+    }
+
+    public CameraID getCameraID() {
+        return cameraID;
     }
 
     public abstract ItemStack getItemStack();
@@ -28,6 +34,10 @@ public abstract class Camera {
 
     public boolean isActive() {
         return map(CameraItem::isActive, false);
+    }
+
+    public boolean idMatches(CameraID id) {
+        return cameraID.equals(id);
     }
 
     public boolean isShutterOpen() {

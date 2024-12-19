@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.core.camera.component.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.server.NewCameraSetSettingC2SP;
+import io.github.mortuusars.exposure.network.packet.server.CameraSetSettingC2SP;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.component.DataComponentType;
@@ -57,8 +57,8 @@ public record Setting<T>(DataComponentType<T> component) {
     // --
 
     public static final Setting<Boolean> ACTIVE =
-            register(Exposure.resource("active"), new Setting<>(Exposure.DataComponents.CAMERA_VIEWFINDER_OPEN));
-    public static final Setting<Boolean> SELFIE =
+            register(Exposure.resource("active"), new Setting<>(Exposure.DataComponents.CAMERA_ACTIVE));
+    public static final Setting<Boolean> SELFIE_MODE =
             register(Exposure.resource("selfie"), new Setting<>(Exposure.DataComponents.SELFIE_MODE));
     public static final Setting<Double> ZOOM =
             register(Exposure.resource("zoom"), new Setting<>(Exposure.DataComponents.ZOOM));
@@ -101,7 +101,7 @@ public record Setting<T>(DataComponentType<T> component) {
             RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());
             component.streamCodec().encode(buffer, value);
             byte[] bytes = buffer.array();
-            Packets.sendToServer(new NewCameraSetSettingC2SP(this, bytes));
+            Packets.sendToServer(new CameraSetSettingC2SP(this, bytes));
             buffer.clear();
         });
     }

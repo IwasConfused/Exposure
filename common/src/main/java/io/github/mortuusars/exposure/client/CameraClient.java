@@ -9,6 +9,7 @@ import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
+import net.minecraft.client.CameraType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -91,6 +92,13 @@ Client:
 public class CameraClient {
     private static final Logger LOGGER = LogUtils.getLogger();
 
+    private static @Nullable Viewfinder activeViewfinder;
+
+    public static void tick() {
+        if (activeViewfinder != null) activeViewfinder.tick();
+        updateSelfieMode();
+    }
+
     public static Optional<Camera> getActive() {
         return Minecrft.player().getActiveExposureCamera();
     }
@@ -110,7 +118,7 @@ public class CameraClient {
         });
     }
 
-    private static @Nullable Viewfinder activeViewfinder;
+    // --
 
     public static @Nullable Viewfinder viewfinder() {
         return activeViewfinder;
@@ -128,6 +136,18 @@ public class CameraClient {
         if (activeViewfinder != null) {
             activeViewfinder.close();
             activeViewfinder = null;
+        }
+    }
+
+    // --
+
+    public static void updateSelfieMode() {
+        @Nullable Camera camera = Minecrft.player().activeExposureCamera();
+        if (camera != null) {
+            boolean inSelfieMode = Minecrft.options().getCameraType() == CameraType.THIRD_PERSON_FRONT;
+            if (Setting.SELFIE_MODE.getOrDefault(camera.getItemStack(), false) != inSelfieMode) {
+                CameraClient.setSetting(Setting.SELFIE_MODE, inSelfieMode);
+            }
         }
     }
 }

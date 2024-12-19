@@ -288,7 +288,7 @@ public class OldCameraItem extends Item {
     }
 
     public boolean isInSelfieMode(ItemStack stack) {
-        return Setting.SELFIE.getOrDefault(stack, false);
+        return Setting.SELFIE_MODE.getOrDefault(stack, false);
     }
 
 //    public ShutterState getShutterState(ItemStack stack) {

@@ -112,7 +112,7 @@ public interface PhotographerEntity {
         return mapActiveExposureCamera((item, cStack) -> cStack.equals(stack), false);
     }
 
-    default void playCameraSound(SoundEvent sound, float volume, float pitch, float pitchVariety) {
+    default void playCameraSoundSided(SoundEvent sound, float volume, float pitch, float pitchVariety) {
         Entity entity = asEntity();
         @Nullable Player excludedPlayer = entity instanceof Player player ? player : null;
 
@@ -123,7 +123,7 @@ public interface PhotographerEntity {
         entity.level().playSound(excludedPlayer, entity, sound, SoundSource.PLAYERS, volume, pitch);
     }
 
-    default void playCameraSoundNoExclude(SoundEvent sound, float volume, float pitch, float pitchVariety) {
+    default void playCameraSound(SoundEvent sound, float volume, float pitch, float pitchVariety) {
         Entity entity = asEntity();
 
         if (pitchVariety > 0f) {

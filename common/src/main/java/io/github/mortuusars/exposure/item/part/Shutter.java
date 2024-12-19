@@ -68,10 +68,10 @@ public class Shutter {
     }
 
     public void playOpenSound(PhotographerEntity photographer) {
-        photographer.playCameraSoundNoExclude(Exposure.SoundEvents.SHUTTER_OPEN.get(), 0.7f, 1.1f, 0.2f);
+        photographer.playCameraSound(Exposure.SoundEvents.SHUTTER_OPEN.get(), 0.7f, 1.1f, 0.2f);
     }
 
     public void playCloseSound(PhotographerEntity photographer) {
-        photographer.playCameraSoundNoExclude(Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
+        photographer.playCameraSound(Exposure.SoundEvents.SHUTTER_CLOSE.get(), 0.7f, 1.1f, 0.2f);
     }
 }

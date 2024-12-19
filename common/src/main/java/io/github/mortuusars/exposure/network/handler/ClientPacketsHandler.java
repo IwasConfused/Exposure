@@ -59,11 +59,11 @@ public class ClientPacketsHandler {
         Preconditions.checkState(size > 0 && size <= 2048, size + " size is invalid. Should be larger than 0.");
 
         executeOnMainThread(() -> {
-            SnapShot.enqueue(Capture.of(Capture.screenshot(), CaptureActions.of(
+            SnapShot.enqueue(Capture.of(Capture.screenshot(),
                             CaptureActions.hideGui(),
                             CaptureActions.forceRegularOrSelfieCamera(),
                             CaptureActions.disablePostEffect(),
-                            CaptureActions.modifyGamma(brightnessStops)))
+                            CaptureActions.modifyGamma(brightnessStops))
                     .handleErrorAndGetResult()
                     .thenAsync(Process.with(
                             Processor.Crop.SQUARE,

@@ -26,6 +26,11 @@ public abstract class PlayerMixin extends LivingEntity implements PhotographerEn
     }
 
     @Override
+    public @Nullable Player getOwnerPlayer() {
+        return (Player) (Object) this;
+    }
+
+    @Override
     public @Nullable Camera activeExposureCamera() {
         return activeExposureCamera;
     }

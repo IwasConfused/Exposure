@@ -1,9 +1,9 @@
 package io.github.mortuusars.exposure.client.snapshot.capture.action;
 
+import io.github.mortuusars.exposure.core.camera.CameraID;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import net.minecraft.client.CameraType;
 import net.minecraft.world.entity.Entity;
-
-import java.util.UUID;
 
 public interface CaptureActions {
     static CaptureAction forceCamera(CameraType cameraType) {
@@ -30,17 +30,11 @@ public interface CaptureActions {
         return new FlashAction(photographer);
     }
 
-    static CaptureAction interplanarProjection(Entity photographer, UUID cameraID) {
+    static CaptureAction interplanarProjection(PhotographerEntity photographer, CameraID cameraID) {
         return new InterplanarProjectionAction(photographer, cameraID);
     }
 
     static CaptureAction setCameraEntity(Entity viewEntity) {
         return new SetCameraEntityAction(viewEntity);
-    }
-
-    // --
-
-    static CaptureAction of(CaptureAction... actions) {
-        return new CompositeAction(actions);
     }
 }

@@ -35,6 +35,9 @@ public abstract class LocalPlayerMixin extends Player {
     @Inject(method = "tick", at = @At("RETURN"))
     private void onTick(CallbackInfo ci) {
         @Nullable Camera camera = activeExposureCamera();
+
+        CameraClient.tick();
+
         if (camera != null && !camera.isActive()) {
             removeActiveExposureCamera();
         }

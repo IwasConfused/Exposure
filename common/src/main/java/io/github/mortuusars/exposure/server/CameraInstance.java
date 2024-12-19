@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.server;
 
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
@@ -19,10 +20,10 @@ public class CameraInstance {
     private int projectionTimeoutTicks = -1;
     private ProjectionResult projectionResult = ProjectionResult.TIMED_OUT;
 
-    public void tick(LivingEntity photographer, ItemStack stack) {
+    public void tick(PhotographerEntity photographer, ItemStack stack) {
         if (waitingForProjectionResult
                 && projectionTimeoutTicks >= 0
-                && photographer.level().getGameTime() - captureStartTick > projectionTimeoutTicks) {
+                && photographer.asEntity().level().getGameTime() - captureStartTick > projectionTimeoutTicks) {
             waitingForProjectionResult = false;
             projectionTimeoutTicks = -1;
             projectionResult = ProjectionResult.TIMED_OUT;

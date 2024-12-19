@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraAccessor;
 import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.netty.buffer.ByteBuf;
@@ -14,15 +13,17 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record CameraSetSettingC2SP(CameraAccessor<?> accessor, Setting<?> setting, byte[] encodedValue) implements IPacket {
+public record CameraSetSettingC2SP(Setting<?> setting, byte[] encodedValue) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("camera_set_setting");
     public static final Type<CameraSetSettingC2SP> TYPE = new Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, CameraSetSettingC2SP> STREAM_CODEC = StreamCodec.composite(
-            CameraAccessor.STREAM_CODEC, CameraSetSettingC2SP::accessor,
             Setting.STREAM_CODEC, CameraSetSettingC2SP::setting,
             ByteBufCodecs.byteArray(4096), CameraSetSettingC2SP::encodedValue,
             CameraSetSettingC2SP::new
@@ -37,13 +38,18 @@ public record CameraSetSettingC2SP(CameraAccessor<?> accessor, Setting<?> settin
     public boolean handle(PacketFlow direction, Player player) {
         Preconditions.checkState(player != null, "Cannot handle packet {}: Player was null", ID);
 
-        accessor.ifPresent(player, camera -> {
-                    ByteBuf buf = Unpooled.buffer();
-                    buf.writeBytes(encodedValue);
-                    RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
-                    setting.set(camera.getItemStack(), buffer);
-                    buffer.clear();
-                });
+        //TODO: redo this
+
+//        MinecraftServer server = ((ServerPlayer) player).server;
+//        server.tell(new TickTask(server.getTickCount(), () -> {
+            player.getActiveExposureCamera().ifPresentOrElse(camera -> {
+                ByteBuf buf = Unpooled.buffer();
+                buf.writeBytes(encodedValue);
+                RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
+                setting.set(camera.getItemStack(), buffer);
+                buffer.clear();
+            }, () -> Exposure.LOGGER.error("Cannot set camera setting '{}': player '{}' does not have active camera.", setting, player));
+//        }));
         return true;
     }
 }

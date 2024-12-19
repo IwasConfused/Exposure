@@ -2,18 +2,13 @@ package io.github.mortuusars.exposure.neoforge.mixin;
 
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.neoforge.item.CameraItemForgeClientExtensions;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
-import net.minecraft.world.item.context.UseOnContext;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
 import net.neoforged.neoforge.common.extensions.IItemExtension;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Consumer;
 
@@ -44,8 +39,11 @@ public abstract class CameraItemNeoForgeMixin extends Item implements IItemExten
 //    }
 
     @Override
-    public boolean shouldCauseReequipAnimation(ItemStack oldStack, ItemStack newStack, boolean slotChanged) {
-        return !oldStack.getItem().equals(newStack.getItem());
+    public boolean shouldCauseReequipAnimation(ItemStack oldStack, @NotNull ItemStack newStack, boolean slotChanged) {
+        if (oldStack.getItem() instanceof CameraItem oldItem && newStack.getItem() instanceof CameraItem newItem) {
+            return !oldItem.getOrCreateID(oldStack).equals(newItem.getOrCreateID(newStack));
+        }
+        return super.shouldCauseReequipAnimation(oldStack, newStack, slotChanged);
     }
 
     @Override

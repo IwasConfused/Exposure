@@ -132,33 +132,34 @@ public class CameraItem extends Item {
 
     // --
 
-    public UUID getOrCreateID(ItemStack stack) {
+    public CameraID getOrCreateID(ItemStack stack) {
         if (!stack.has(Exposure.DataComponents.CAMERA_ID)) {
-            stack.set(Exposure.DataComponents.CAMERA_ID, UUID.randomUUID());
+            stack.set(Exposure.DataComponents.CAMERA_ID, CameraID.createRandom());
         }
         return stack.get(Exposure.DataComponents.CAMERA_ID);
     }
 
     public boolean isInSelfieMode(ItemStack stack) {
-        return Setting.SELFIE.getOrDefault(stack, false);
+        return Setting.SELFIE_MODE.getOrDefault(stack, false);
     }
 
     public void setActive(ItemStack stack, boolean active) {
-        stack.set(Exposure.DataComponents.CAMERA_VIEWFINDER_OPEN, active);
+        stack.set(Exposure.DataComponents.CAMERA_ACTIVE, active);
     }
 
     public boolean isActive(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.CAMERA_VIEWFINDER_OPEN, false);
+        return stack.getOrDefault(Exposure.DataComponents.CAMERA_ACTIVE, false);
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> activate(PhotographerEntity photographer, ItemStack stack, @NotNull InteractionHand hand) {
+    public @NotNull InteractionResultHolder<ItemStack> activateInHand(PhotographerEntity photographer,
+                                                                      ItemStack stack, @NotNull InteractionHand hand) {
         setActive(stack, true);
 
-        if (photographer instanceof LivingEntity livingEntity) {
-            photographer.setActiveExposureCamera(new CameraInHand(livingEntity, hand));
+        if (photographer instanceof LivingEntity) {
+            photographer.setActiveExposureCamera(new CameraInHand(photographer, getOrCreateID(stack), hand));
         }
 
-        photographer.playCameraSoundNoExclude(getViewfinderOpenSound(), 0.35f, 0.9f, 0.2f);
+        photographer.playCameraSound(getViewfinderOpenSound(), 0.35f, 0.9f, 0.2f);
         photographer.asEntity().gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
 
         if (photographer instanceof Player player && player.level().isClientSide) {
@@ -170,8 +171,9 @@ public class CameraItem extends Item {
 
     public @NotNull InteractionResultHolder<ItemStack> deactivate(PhotographerEntity photographer, ItemStack stack) {
         setActive(stack, false);
+        Setting.SELFIE_MODE.set(stack, false);
         photographer.removeActiveExposureCamera();
-        photographer.playCameraSoundNoExclude(getViewfinderCloseSound(), 0.35f, 0.9f, 0.2f);
+        photographer.playCameraSound(getViewfinderCloseSound(), 0.35f, 0.9f, 0.2f);
         photographer.asEntity().gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
         return InteractionResultHolder.consume(stack);
     }
@@ -255,13 +257,11 @@ public class CameraItem extends Item {
             CameraInstances.ifPresent(stack, instance -> instance.tick(player, stack));
 
             boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
-            if (isActive(stack) && !isHolding) {
+            if (isActive(stack) && (!isHolding || player.activeExposureCamera() == null)) {
                 deactivate(player, stack);
             }
         }
     }
-
-
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
@@ -281,23 +281,23 @@ public class CameraItem extends Item {
         if (!isActive(stack)) {
             return photographer.asEntity() instanceof Player player && player.isSecondaryUseActive()
                     ? openCameraAttachments(player, stack)
-                    : activate(photographer, stack, hand);
+                    : activateInHand(photographer, stack, hand);
         }
 
         return release(level, photographer, stack);
     }
 
     public @NotNull InteractionResultHolder<ItemStack> release(Level level, PhotographerEntity photographer, ItemStack stack) {
-        photographer.playCameraSound(getReleaseButtonSound(), 0.3f, 1f, 0.1f);
+        photographer.playCameraSoundSided(getReleaseButtonSound(), 0.3f, 1f, 0.1f);
 
         if (getShutter().isOpen(stack) || Attachment.FILM.isEmpty(stack)) {
-            return InteractionResultHolder.fail(stack);
+            return InteractionResultHolder.consume(stack);
         }
 
         ItemAndStack<FilmRollItem> film = Attachment.FILM.get(stack).getItemAndStackCopy();
 
         if (!film.getItem().canAddFrame(film.getItemStack()))
-            return InteractionResultHolder.fail(stack);
+            return InteractionResultHolder.consume(stack);
 
         if (!level.isClientSide()) {
             Entity entity = photographer.asEntity();
@@ -480,7 +480,7 @@ public class CameraItem extends Item {
         return true;
     }
 
-    public void handleProjectionResult(Entity cameraHolder, ItemStack stack, CameraInstance.ProjectionResult projectionResult) {
+    public void handleProjectionResult(PhotographerEntity photographer, ItemStack stack, CameraInstance.ProjectionResult projectionResult) {
         StoredItemStack filter = Attachment.FILTER.get(stack);
         if (filter.isEmpty()) return;
         if (!(filter.getItem() instanceof InterplanarProjectorItem interplanarProjector)) return;

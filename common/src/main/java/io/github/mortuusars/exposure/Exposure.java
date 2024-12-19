@@ -7,6 +7,7 @@ import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.block.LightroomBlock;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
+import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.command.argument.ExposureLookArgument;
@@ -33,7 +34,6 @@ import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.Registry;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -63,7 +63,6 @@ import org.slf4j.Logger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Supplier;
 
 
@@ -131,7 +130,7 @@ public class Exposure {
         public static final Supplier<CameraItem> CAMERA = Register.item("camera",
                 () -> new CameraItem(new Shutter(), new Item.Properties()
                         .stacksTo(1)
-                        .component(DataComponents.CAMERA_VIEWFINDER_OPEN, false)));
+                        .component(DataComponents.CAMERA_ACTIVE, false)));
 
         public static final Supplier<FilmRollItem> BLACK_AND_WHITE_FILM = Register.item("black_and_white_film",
                 () -> new FilmRollItem(ExposureType.BLACK_AND_WHITE, Mth.color(0.8F, 0.8F, 0.9F),
@@ -188,10 +187,10 @@ public class Exposure {
 
     public static class DataComponents {
         // Camera State
-        public static final DataComponentType<UUID> CAMERA_ID = Register.dataComponentType("camera_id",
-                arg -> arg.persistent(UUIDUtil.CODEC).networkSynchronized(UUIDUtil.STREAM_CODEC));
+        public static final DataComponentType<CameraID> CAMERA_ID = Register.dataComponentType("camera_id",
+                arg -> arg.persistent(CameraID.CODEC).networkSynchronized(CameraID.STREAM_CODEC));
 
-        public static final DataComponentType<Boolean> CAMERA_VIEWFINDER_OPEN = Register.dataComponentType("camera_viewfinder_open",
+        public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_viewfinder_open",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 
         public static final DataComponentType<Boolean> SELFIE_MODE = Register.dataComponentType("camera_selfie_mode",

@@ -71,7 +71,7 @@ public class OldViewfinder {
     }
 
     public static void updateSelfieMode() {
-        CameraClient.setSetting(Setting.SELFIE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
+        CameraClient.setSetting(Setting.SELFIE_MODE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
     }
 
     public static void close() {
