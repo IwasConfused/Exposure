@@ -32,6 +32,7 @@ import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.util.*;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -63,6 +64,7 @@ import net.minecraft.world.inventory.ClickAction;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
@@ -81,21 +83,55 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class CameraItem extends Item {
+    public static final int BASE_COOLDOWN = 2;
+    public static final int FLASH_COOLDOWN = 10;
+    public static final int PROJECT_COOLDOWN = 20;
+
     protected final Shutter shutter;
     protected final List<Attachment<?>> attachments;
+    protected final List<ShutterSpeed> availableShutterSpeeds;
 
     public CameraItem(Shutter shutter, Properties properties) {
         super(properties);
         this.shutter = shutter;
-        this.attachments = List.of(Attachment.FILM, Attachment.FLASH, Attachment.LENS, Attachment.FILTER);
-        //TODO: shutter on open on close
-//        shutter.onClosed((entity, stack) -> {});
+        this.attachments = defineAttachments();
+        this.availableShutterSpeeds = defineShutterSpeeds();
+
+        shutter.onOpen(this::onShutterOpen);
+        shutter.onClosed(this::onShutterClosed);
+    }
+
+    protected @NotNull List<Attachment<?>> defineAttachments() {
+        return List.of(Attachment.FILM, Attachment.FLASH, Attachment.LENS, Attachment.FILTER);
+    }
+
+    protected List<ShutterSpeed> defineShutterSpeeds() {
+        return List.of(
+                new ShutterSpeed("1/500"),
+                new ShutterSpeed("1/250"),
+                new ShutterSpeed("1/125"),
+                new ShutterSpeed("1/60"),
+                new ShutterSpeed("1/30"),
+                new ShutterSpeed("1/15"),
+                new ShutterSpeed("1/8"),
+                new ShutterSpeed("1/4"),
+                new ShutterSpeed("1/2"),
+                new ShutterSpeed("1\""),
+                new ShutterSpeed("2\""),
+                new ShutterSpeed("4\""),
+                new ShutterSpeed("8\""),
+                new ShutterSpeed("15\"")
+        );
     }
 
     // --
 
     public Shutter getShutter() {
         return shutter;
+    }
+
+    public List<ShutterSpeed> getAvailableShutterSpeeds() {
+        return availableShutterSpeeds;
     }
 
     public List<Attachment<?>> getAttachments() {
@@ -178,7 +214,65 @@ public class CameraItem extends Item {
         return InteractionResultHolder.consume(stack);
     }
 
+    public int getCooldownAfterShot(PhotographerEntity photographer, ItemStack stack) {
+        @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
+
+        if (cameraInstance != null && cameraInstance.getCurrentCaptureData().isPresent()) {
+            CaptureData captureData = cameraInstance.getCurrentCaptureData().get();
+
+            if (captureData.fileProjectingInfo().isPresent()) {
+                return PROJECT_COOLDOWN;
+            }
+
+            if (captureData.flashHasFired()) {
+                return FLASH_COOLDOWN;
+            }
+        }
+
+        return BASE_COOLDOWN;
+    }
+
     // --
+
+    public boolean isBarVisible(@NotNull ItemStack stack) {
+        return Config.Client.CAMERA_SHOW_FILM_BAR_ON_ITEM.get()
+                && Attachment.FILM.map(stack, FilmRollItem::isBarVisible).orElse(false);
+    }
+
+    public int getBarWidth(@NotNull ItemStack stack) {
+        return Attachment.FILM.map(stack, FilmRollItem::getBarWidth).orElse(0);
+    }
+
+    public int getBarColor(@NotNull ItemStack stack) {
+        return Attachment.FILM.map(stack, FilmRollItem::getBarColor).orElse(0);
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag tooltipFlag) {
+        if (Config.Client.CAMERA_SHOW_FILM_FRAMES_IN_TOOLTIP.get()) {
+            Attachment.FILM.ifPresent(stack, (filmItem, filmStack) -> {
+                int exposed = filmItem.getStoredFramesCount(filmStack);
+                int max = filmItem.getMaxFrameCount(filmStack);
+                components.add(Component.translatable("item.exposure.camera.tooltip.film_roll_frames", exposed, max));
+            });
+        }
+
+        if (/*!isTooltipRemoved(stack) &&*/ Config.Client.CAMERA_SHOW_TOOLTIP_DETAILS.get()) {
+            boolean rClickAttachments = Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get();
+            boolean rClickHotswap = Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get();
+
+            if (rClickAttachments || rClickHotswap) {
+                if (Screen.hasShiftDown()) {
+                    if (rClickAttachments)
+                        components.add(Component.translatable("item.exposure.camera.tooltip.details_attachments_screen"));
+                    if (rClickHotswap)
+                        components.add(Component.translatable("item.exposure.camera.tooltip.details_hotswap"));
+                    // components.add(Component.translatable("item.exposure.camera.tooltip.details_remove_tooltip"));
+                } else
+                    components.add(Component.translatable("tooltip.exposure.hold_for_details"));
+            }
+        }
+    }
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess access) {
@@ -194,7 +288,7 @@ public class CameraItem extends Item {
                 return true;
             }
 
-            openCameraAttachments(player, stack);
+            openCameraAttachments(player, slot.getContainerSlot());
             return true;
         }
 
@@ -348,6 +442,18 @@ public class CameraItem extends Item {
         }
 
         return InteractionResultHolder.consume(stack);
+    }
+
+    protected void onShutterOpen(PhotographerEntity photographer, ItemStack stack) {
+
+    }
+
+    protected void onShutterClosed(PhotographerEntity photographer, ItemStack stack) {
+        if (photographer.asEntity() instanceof Player player && !player.level().isClientSide()) {
+            int cooldown = getCooldownAfterShot(photographer, stack);
+            // Moving this to photographer.addCooldown can be nice for stand or other photographer entities.
+            player.getCooldowns().addCooldown(this, cooldown);
+        }
     }
 
     protected Optional<ChromaChannel> getChromaChannel(ItemStack stack) {
