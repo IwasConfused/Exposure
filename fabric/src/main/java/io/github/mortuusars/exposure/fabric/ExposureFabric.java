@@ -80,7 +80,7 @@ public class ExposureFabric implements ModInitializer {
 
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricLensesDataLoader());
 
-        ServerLifecycleEvents.SERVER_STARTING.register(server -> {
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             Exposure.initServer(server);
             ExposureFabric.server = server;
         });

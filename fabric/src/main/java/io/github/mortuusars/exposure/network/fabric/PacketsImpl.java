@@ -14,7 +14,7 @@ import java.util.function.Predicate;
 
 public class PacketsImpl {
     public static void sendToServer(IPacket packet) {
-        FabricS2CPackets.sendToServer(packet);
+        FabricC2SPackets.sendToServer(packet);
     }
 
     public static void sendToClient(IPacket packet, ServerPlayer player) {

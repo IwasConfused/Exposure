@@ -32,8 +32,4 @@ public class FabricS2CPackets {
     private static <T extends IPacket> void handleClientboundPacket(T payload, ClientPlayNetworking.Context context) {
         payload.handle(PacketFlow.CLIENTBOUND, context.player());
     }
-
-    public static void sendToServer(IPacket packet) {
-        ClientPlayNetworking.send(packet);
-    }
 }

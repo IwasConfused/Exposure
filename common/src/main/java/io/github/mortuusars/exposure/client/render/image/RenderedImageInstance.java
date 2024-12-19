@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.image.ImageIdentifier;
 import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.Util;
@@ -89,8 +91,13 @@ public class RenderedImageInstance implements AutoCloseable {
             texture.setFilter(false,true);
             TextureUtil.prepareImage(texture.getId(), mipmapLevel, width, height);
             SpriteContents spriteContents = new SpriteContents(this.textureLocation, new FrameSize(width, height),  texture.getPixels(), ResourceMetadata.EMPTY);
-            spriteContents.increaseMipLevel(mipmapLevel);
-            spriteContents.uploadFirstFrame(0,0);
+
+            try {
+                spriteContents.increaseMipLevel(mipmapLevel);
+                spriteContents.uploadFirstFrame(0,0);
+            } catch (Exception e) {
+                Exposure.LOGGER.error("Failed to generate mipmaps: {}", e.getMessage());
+            }
         }
 
         this.texture.upload();
@@ -98,6 +105,10 @@ public class RenderedImageInstance implements AutoCloseable {
 
     public void draw(PoseStack poseStack, MultiBufferSource bufferSource, float minX, float minY, float maxX, float maxY,
                      float minU, float minV, float maxU, float maxV, int packedLight, int r, int g, int b, int a) {
+        if (image.getIdentifier().equals(ImageIdentifier.EMPTY)) {
+            return;
+        }
+
         if (this.requiresUpload) {
             this.updateTexture();
             this.requiresUpload = false;

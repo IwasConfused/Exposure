@@ -1,8 +1,10 @@
 package io.github.mortuusars.exposure.network.fabric;
 
+import io.github.mortuusars.exposure.network.packet.C2SPackets;
 import io.github.mortuusars.exposure.network.packet.CommonPackets;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.network.packet.S2CPackets;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.FriendlyByteBuf;
@@ -14,7 +16,7 @@ public class FabricC2SPackets {
     @SuppressWarnings("unchecked")
     public static void register() {
         // This monstrosity is to avoid having to define packets for forge and fabric separately.
-        for (var definition : S2CPackets.getDefinitions()) {
+        for (var definition : C2SPackets.getDefinitions()) {
             PayloadTypeRegistry.playC2S().register(
                     (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
                     (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec().cast());
@@ -31,5 +33,9 @@ public class FabricC2SPackets {
 
     private static <T extends IPacket> void handleServerboundPacket(T payload, ServerPlayNetworking.Context context) {
         payload.handle(PacketFlow.SERVERBOUND, context.player());
+    }
+
+    public static void sendToServer(IPacket packet) {
+        ClientPlayNetworking.send(packet);
     }
 }

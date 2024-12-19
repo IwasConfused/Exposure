@@ -630,9 +630,9 @@ public class CameraItem extends Item {
 
     public void addFrameToFilm(ItemStack stack, ExposureFrame frame) {
         Attachment.FILM.ifPresentOrElse(stack, (filmItem, filmStack) -> {
-            filmStack = filmStack.copy();
-            filmItem.addFrame(filmStack, frame);
-            Attachment.FILM.set(stack, filmStack);
+            ItemStack updatedFilmStack = filmStack.copy();
+            filmItem.addFrame(updatedFilmStack, frame);
+            Attachment.FILM.set(stack, updatedFilmStack);
         }, () -> Exposure.LOGGER.error("Cannot add frame: no film attachment is present."));
     }
 
