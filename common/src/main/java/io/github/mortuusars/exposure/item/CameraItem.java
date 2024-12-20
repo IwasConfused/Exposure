@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.block.FlashBlock;
-import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
+import io.github.mortuusars.exposure.client.CameraClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
@@ -49,7 +49,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -435,7 +434,7 @@ public class CameraItem extends Item {
             ExposureServer.awaitExposure(exposureIdentifier, captureData.filmType(), photographer.getExecutingPlayer().getScoreboardName());
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
 
-            if (photographer.getExecutingPlayer() instanceof  ServerPlayer serverPlayer) {
+            if (photographer.getExecutingPlayer() instanceof ServerPlayer serverPlayer) {
                 Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
             } else {
                 Exposure.LOGGER.error("Cannot start capture: photographer '{}' does not have valid executing player.", photographer);
@@ -478,16 +477,24 @@ public class CameraItem extends Item {
                 .orElse(Optional.empty());
     }
 
-    public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack stack) {
-        List<UUID> entitiesInFrame = EntitiesInFrame.get(player, OldViewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
+    public CaptureClientData getClientSideFrameData(PhotographerEntity photographer, ItemStack stack) {
+        Preconditions.checkState(photographer.asEntity().level().isClientSide(), "Should be called only on client.");
+
+
+        double fov = CameraClient.viewfinder() != null
+                ? CameraClient.viewfinder().zoom().getCurrentFov()
+                : Minecrft.options().fov().get();
+        fov = getFocalRange(stack).clampFov(fov);
+
+        List<UUID> entitiesInFrame = EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
                 .stream()
                 .map(Entity::getUUID)
                 .toList();
 
         CompoundTag extraData = new CompoundTag();
-        //TODO: get additional data event
+        //TODO: getAdditionalData event
 
-        return new ExposureFrameClientData(entitiesInFrame, extraData);
+        return new CaptureClientData(fov, entitiesInFrame, extraData);
     }
 
     public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack) {
@@ -563,8 +570,9 @@ public class CameraItem extends Item {
             }
         }
 
-        if (flashPos == null)
+        if (flashPos == null) {
             return false;
+        }
 
         level.setBlock(flashPos, Exposure.Blocks.FLASH.get().defaultBlockState()
                 .setValue(FlashBlock.WATERLOGGED, level.getFluidState(flashPos)
@@ -630,8 +638,7 @@ public class CameraItem extends Item {
     }
 
 
-
-    public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, ExposureFrameClientData dataFromClient) {
+    public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureClientData dataFromClient) {
         ExposureFrame frame = createFrame(photographer, level, stack, dataFromClient);
 
         //TODO: modifyEntityInFrameData event
@@ -640,12 +647,11 @@ public class CameraItem extends Item {
         addFrameToFilm(stack, frame);
 
 
-
         onFrameAdded(photographer, level, stack, frame);
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
     }
 
-    public ExposureFrame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, ExposureFrameClientData dataFromClient) {
+    public ExposureFrame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureClientData dataFromClient) {
         Entity photographerEntity = photographer.asEntity();
 
         @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
@@ -717,7 +723,7 @@ public class CameraItem extends Item {
         } else {
             if (photographerEntity instanceof ServerPlayer player) {
                 boolean lookingAtAngryEnderMan = !level.getEntities(EntityTypeTest.forClass(EnderMan.class),
-                                enderMan -> player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player)).isEmpty();
+                        enderMan -> player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player)).isEmpty();
 
                 if (lookingAtAngryEnderMan) {
                     // I wanted to implement this in a predicate,
@@ -727,7 +733,7 @@ public class CameraItem extends Item {
                 }
             }
 
-            List<Entity> capturedEntities = intersectCapturedEntities(photographerEntity, stack, dataFromClient.getCapturedEntities(level));
+            List<Entity> capturedEntities = intersectCapturedEntities(photographer, level, stack, dataFromClient);
             entitiesInFrame = capturedEntities.stream()
                     .map(entity -> EntityInFrame.of(photographerEntity, entity, customDataTag -> {
                         //TODO: modifyEntityInFrameData event
@@ -765,16 +771,19 @@ public class CameraItem extends Item {
     /**
      * Returns an intersection of entities on both sides, i.e. if entity is captured on client but not on server - discard it.
      */
-    public List<Entity> intersectCapturedEntities(Entity photographer, ItemStack stack, List<Entity> entitiesOnClient) {
+    public List<Entity> intersectCapturedEntities(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureClientData dataFromClient) {
+        List<Entity> entitiesOnClient = dataFromClient.getCapturedEntities(level)
+                .stream()
+                .limit(Exposure.MAX_ENTITIES_IN_FRAME)
+                .toList();
+
         if (entitiesOnClient.isEmpty()) {
             return entitiesOnClient;
         }
 
-        FocalRange focalRange = getFocalRange(stack);
-        double zoom = Setting.ZOOM.getOrDefault(stack, 0.0);
-        double fov = Mth.map(zoom, 0, 1, Fov.focalLengthToFov(focalRange.min()), Fov.focalLengthToFov(focalRange.max()));
+        double fov = getFocalRange(stack).clampFov(dataFromClient.fov());
 
-        List<Entity> entitiesOnServer = EntitiesInFrame.get(photographer, fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
+        List<Entity> entitiesOnServer = EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
 
         ArrayList<Entity> entities = new ArrayList<>(entitiesOnClient);
         entities.retainAll(entitiesOnServer);

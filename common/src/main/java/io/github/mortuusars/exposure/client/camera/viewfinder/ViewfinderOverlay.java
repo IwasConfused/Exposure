@@ -5,6 +5,8 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.animation.Animation;
+import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.Camera;
@@ -36,7 +38,9 @@ public class ViewfinderOverlay {
     private final int backgroundColor;
     private final Rect2f opening;
 
-    private float scale = 0.5f; // Start small to animate expanding
+    private final Animation scaleAnimation;
+    private final float initialScale;
+    private float scale;
 
     private float xRot;
     private float yRot;
@@ -49,6 +53,10 @@ public class ViewfinderOverlay {
         this.viewfinder = viewfinder;
         this.backgroundColor = Config.Client.getBackgroundColor();
         this.opening = new Rect2f(0, 0, 0, 0);
+
+        this.scaleAnimation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
+        this.initialScale = 0.5f;
+        this.scale = 0.5f; // Start small to animate expanding
 
         this.xRot = player.getXRot();
         this.yRot = player.getYRot();
@@ -65,7 +73,7 @@ public class ViewfinderOverlay {
         final int height = Minecrft.get().getWindow().getGuiScaledHeight();
 
         float partialTicks = Minecrft.get().getTimer().getGameTimeDeltaTicks();
-        scale = Mth.lerp(Math.min(0.8f * partialTicks, 0.8f), scale, 1f);
+        scale = Mth.lerp((float)scaleAnimation.getValue(), initialScale, 1f);
         float openingSize = Math.min(width, height);
 
         opening.x = (width - openingSize) / 2f;
@@ -89,8 +97,8 @@ public class ViewfinderOverlay {
         float xDelay = (xRot - xRot0);
         float yDelay = (yRot - yRot0);
         // Adjust for gui scale:
-        xDelay *= width / (float)Minecraft.getInstance().getWindow().getWidth();
-        yDelay *= height / (float)Minecraft.getInstance().getWindow().getHeight();
+        xDelay *= width / (float) Minecraft.getInstance().getWindow().getWidth();
+        yDelay *= height / (float) Minecraft.getInstance().getWindow().getHeight();
         xDelay *= 3.5f;
         yDelay *= 3.5f;
 

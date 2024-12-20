@@ -40,7 +40,7 @@ public class Config {
         public static final ModConfigSpec SPEC;
 
         // Camera
-        public static final ModConfigSpec.ConfigValue<String> CAMERA_DEFAULT_FOCAL_RANGE;
+        public static final ModConfigSpec.ConfigValue<String> CAMERA_DEFAULT_FOCAL_RANGE; //TODO: server config
         public static final ModConfigSpec.BooleanValue CAMERA_VIEWFINDER_ATTACK;
         public static final ModConfigSpec.BooleanValue CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN;
         public static final ModConfigSpec.BooleanValue CAMERA_GUI_RIGHT_CLICK_HOTSWAP;

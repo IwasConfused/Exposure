@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.util;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderZoom;
 import io.github.mortuusars.exposure.mixin.client.MoreDebugScreenRenderLinesInvoker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

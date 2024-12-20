@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.ExposureFrameClientData;
+import io.github.mortuusars.exposure.core.CaptureClientData;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -15,13 +15,13 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 public record ActiveCameraAddFrameC2SP(PhotographerEntity photographer,
-                                       ExposureFrameClientData frameDataFromClient) implements IPacket {
+                                       CaptureClientData frameDataFromClient) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("active_camera_add_frame");
     public static final Type<ActiveCameraAddFrameC2SP> TYPE = new Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, ActiveCameraAddFrameC2SP> STREAM_CODEC = StreamCodec.composite(
             PhotographerEntity.STREAM_CODEC, ActiveCameraAddFrameC2SP::photographer,
-            ExposureFrameClientData.STREAM_CODEC, ActiveCameraAddFrameC2SP::frameDataFromClient,
+            CaptureClientData.STREAM_CODEC, ActiveCameraAddFrameC2SP::frameDataFromClient,
             ActiveCameraAddFrameC2SP::new
     );
 

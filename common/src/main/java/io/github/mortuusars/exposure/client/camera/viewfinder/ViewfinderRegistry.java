@@ -31,6 +31,6 @@ public class ViewfinderRegistry {
 
     static {
         register(Exposure.Items.CAMERA.get(), camera ->
-                new Viewfinder(camera, ViewfinderOverlay::new, ViewfinderShader::new, ViewfinderCameraControlsScreen::new));
+                new Viewfinder(camera, ViewfinderZoom::new, ViewfinderOverlay::new, ViewfinderShader::new, ViewfinderCameraControlsScreen::new));
     }
 }

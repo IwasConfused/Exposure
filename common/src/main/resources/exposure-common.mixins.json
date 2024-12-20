@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
+    "client.CameraMixin",
     "client.ExposureLightTextureMixin",
     "client.GameRendererMixin",
     "client.GuiMixin",
@@ -18,8 +19,6 @@
     "client.MoreDebugScreenOverlayMixin",
     "client.MoreDebugScreenRenderLinesInvoker",
     "client.MultiPlayerGameModeMixin",
-    "client.SelfieCameraMixin",
-    "client.ViewfinderSensitivityMixin"
   ],
   "mixins": [
     "BookPageCountMixin",
@@ -29,7 +28,8 @@
     "PlayerMixin",
     "PotionContentsMixin",
     "ServerGamePacketListenerMixin",
-    "ServerPlayerMixin"
+    "ServerPlayerMixin",
+    "client.MouseHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

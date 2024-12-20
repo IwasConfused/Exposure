@@ -12,12 +12,14 @@ import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 public class Viewfinder {
     protected final Camera camera;
+    protected final ViewfinderZoom zoom;
     protected final ViewfinderOverlay overlay;
     protected final ViewfinderShader shader;
     protected final ComponentConstructor<ViewfinderCameraControlsScreen> controlsScreenConstructor;
@@ -25,20 +27,30 @@ public class Viewfinder {
     protected @Nullable ViewfinderCameraControlsScreen controlsScreen;
 
     public Viewfinder(Camera camera,
+                      ComponentConstructor<ViewfinderZoom> zoom,
                       ComponentConstructor<ViewfinderOverlay> overlay,
                       ComponentConstructor<ViewfinderShader> shader,
                       ComponentConstructor<ViewfinderCameraControlsScreen> controlsScreen) {
         this.camera = camera;
+        this.zoom = zoom.construct(camera, this);
         this.overlay = overlay.construct(camera, this);
         this.shader = shader.construct(camera, this);
         this.controlsScreenConstructor = controlsScreen;
     }
 
-    public ViewfinderOverlay getOverlay() {
+    public Camera camera() {
+        return camera;
+    }
+
+    public ViewfinderZoom zoom() {
+        return zoom;
+    }
+
+    public ViewfinderOverlay overlay() {
         return overlay;
     }
 
-    public ViewfinderShader getShader() {
+    public ViewfinderShader shader() {
         return shader;
     }
 
@@ -70,7 +82,15 @@ public class Viewfinder {
         return cameraType == CameraType.FIRST_PERSON || cameraType == CameraType.THIRD_PERSON_FRONT;
     }
 
+    public float getMaxSelfieCameraDistance() {
+        return 1.75f;
+    }
+
     public boolean keyPressed(int key, int scanCode, int action) {
+        if (!isLookingThrough()) {
+            return false;
+        }
+
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
                 && Minecrft.options().keyAttack.matches(key, scanCode)
                 && !(Minecrft.get().screen instanceof CameraControlsScreen)) {
@@ -102,25 +122,14 @@ public class Viewfinder {
             return true;
         }
 
-        if (!isLookingThrough())
-            return false;
-
         if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
             if (ExposureClient.getCameraControlsKey().matches(key, scanCode)) {
                 openControlsScreen();
                 return false; // false not handle and keep moving/sneaking
             }
 
-            if (action == InputConstants.PRESS || action == InputConstants.REPEAT) {
-                if (key == InputConstants.KEY_ADD || key == InputConstants.KEY_EQUALS) {
-//                    OldViewfinder.zoom(ZoomDirection.IN, false);
-                    return true;
-                }
-
-                if (key == 333 /*KEY_SUBTRACT*/ || key == InputConstants.KEY_MINUS) {
-//                    OldViewfinder.zoom(ZoomDirection.OUT, false);
-                    return true;
-                }
+            if (zoom.keyPressed(key, scanCode, action)) {
+                return true;
             }
         }
 
@@ -128,6 +137,10 @@ public class Viewfinder {
     }
 
     public boolean mouseClicked(int button, int action) {
+        if (!isLookingThrough()) {
+            return false;
+        }
+
         if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) return false;
 
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && Minecrft.options().keyAttack.matchesMouse(button))
@@ -146,8 +159,23 @@ public class Viewfinder {
         return false;
     }
 
-    public double modifyFov(double original) {
-        return original;
+    public boolean mouseScrolled(double amount) {
+        return isLookingThrough() && !(Minecrft.get().screen instanceof CameraControlsScreen) && zoom.mouseScrolled(amount);
+    }
+
+    public double modifyMouseSensitivity(double original) {
+        if (!isLookingThrough())
+            return original;
+
+        double scale = original / Minecraft.getInstance().options.fov().get();
+        double scaledSensitivity = zoom.getCurrentFov() * scale;
+
+        double normalizedDifference = Mth.map(original - scaledSensitivity, 0, original, 0, 1);
+        double influence = Config.Client.VIEWFINDER_ZOOM_SENSITIVITY_INFLUENCE.get();
+        double strength = 1f - normalizedDifference * influence;
+        strength *= strength; // more influence at smaller FOVs
+
+        return Mth.lerp(strength, scaledSensitivity, original);
     }
 
     @FunctionalInterface

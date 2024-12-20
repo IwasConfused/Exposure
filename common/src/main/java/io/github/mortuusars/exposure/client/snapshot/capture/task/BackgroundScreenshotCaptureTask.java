@@ -5,6 +5,7 @@ import com.mojang.blaze3d.pipeline.TextureTarget;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.util.Shader;
 import io.github.mortuusars.exposure.client.image.WrappedNativeImage;
 import io.github.mortuusars.exposure.client.snapshot.capture.Capture;
@@ -27,9 +28,15 @@ public class BackgroundScreenshotCaptureTask extends Task<Result<Image>> {
 
     @Override
     public CompletableFuture<Result<Image>> execute() {
-        Minecraft minecraft = Minecraft.getInstance();
+        if (ExposureClient.isIrisOrOculusInstalled()) {
+            LOGGER.warn("BackgroundScreenshotCaptureMethod is used while Iris or Oculus is installed. " +
+                    "Captured image most likely will not look as expected.");
+        }
 
-        RenderTarget renderTarget = new TextureTarget(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight(), true, Minecraft.ON_OSX);
+        Minecraft minecraft = Minecrft.get();
+
+        RenderTarget renderTarget = new TextureTarget(minecraft.getWindow().getWidth(),
+                minecraft.getWindow().getHeight(), true, Minecraft.ON_OSX);
         renderTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         renderTarget.clear(Minecraft.ON_OSX);
 
@@ -44,11 +51,6 @@ public class BackgroundScreenshotCaptureTask extends Task<Result<Image>> {
             minecraft.gameRenderer.renderLevel(minecraft.getTimer());
 
             applyShaderEffects(renderTarget);
-
-            if (ExposureClient.isIrisOrOculusInstalled()) {
-                LOGGER.warn("BackgroundScreenshotCaptureMethod is used while Iris or Oculus is installed. " +
-                        "Captured image most likely will not look as expected.");
-            }
 
             WrappedNativeImage image = new WrappedNativeImage(Screenshot.takeScreenshot(renderTarget));
 
@@ -72,7 +74,7 @@ public class BackgroundScreenshotCaptureTask extends Task<Result<Image>> {
         }
 
         if (CameraClient.viewfinder() != null) {
-            CameraClient.viewfinder().getShader().process(renderTarget);
+            CameraClient.viewfinder().shader().process(renderTarget);
         }
     }
 }

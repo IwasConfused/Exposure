@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public abstract class Camera {
     protected final PhotographerEntity photographer;
@@ -62,6 +63,22 @@ public abstract class Camera {
             orElse.run();
         }
         return this;
+    }
+
+    public <T> Optional<T> map(Function<ItemStack, T> map) {
+        ItemStack stack = getItemStack();
+        if (stack.getItem() instanceof CameraItem) {
+            return Optional.ofNullable(map.apply(stack));
+        }
+        return Optional.empty();
+    }
+
+    public <T> T map(Function<ItemStack, T> map, T orElse) {
+        ItemStack stack = getItemStack();
+        if (stack.getItem() instanceof CameraItem) {
+            return map.apply(stack);
+        }
+        return orElse;
     }
 
     public <T> Optional<T> map(BiFunction<CameraItem, ItemStack, T> map) {

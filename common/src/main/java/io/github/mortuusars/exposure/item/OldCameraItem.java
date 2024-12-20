@@ -514,27 +514,27 @@ public class OldCameraItem extends Item {
                 player.displayClientMessage(err.casual().withStyle(ChatFormatting.RED), false));
     }
 
-    public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack stack) {
-        //TODO: figure out how to know when image was loaded
-        boolean projectingFile = Attachment.FILTER.map(stack, (filterItem, filterStack) ->
-                filterItem instanceof InterplanarProjectorItem).orElse(false);
-
-        List<UUID> entitiesInFrame;
-
-        if (projectingFile) {
-            entitiesInFrame = Collections.emptyList();
-        } else {
-            entitiesInFrame = EntitiesInFrame.get(player, OldViewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
-                    .stream()
-                    .map(Entity::getUUID)
-                    .toList();
-        }
-
-        CompoundTag extraData = new CompoundTag();
-        //TODO: get additional data event
-
-        return new ExposureFrameClientData(entitiesInFrame, extraData);
-    }
+//    public ExposureFrameClientData getClientSideFrameData(Player player, ItemStack stack) {
+//        //TODO: figure out how to know when image was loaded
+//        boolean projectingFile = Attachment.FILTER.map(stack, (filterItem, filterStack) ->
+//                filterItem instanceof InterplanarProjectorItem).orElse(false);
+//
+//        List<UUID> entitiesInFrame;
+//
+//        if (projectingFile) {
+//            entitiesInFrame = Collections.emptyList();
+//        } else {
+//            entitiesInFrame = EntitiesInFrame.get(player, OldViewfinder.getCurrentFov(), Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
+//                    .stream()
+//                    .map(Entity::getUUID)
+//                    .toList();
+//        }
+//
+//        CompoundTag extraData = new CompoundTag();
+//        //TODO: get additional data event
+//
+//        return new ExposureFrameClientData(entitiesInFrame, extraData);
+//    }
 
     public void exposeFrameClientside(Player player, ItemStack stack, ExposureIdentifier identifier, boolean flashHasFired) {
 //        Preconditions.checkState(player.level().isClientSide, "Should only be called on client.");
@@ -668,7 +668,7 @@ public class OldCameraItem extends Item {
                 .orElse(Processor.blackAndWhite());
     }
 
-    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack stack, ExposureFrameClientData dataFromClient) {
+    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack stack, CaptureClientData dataFromClient) {
         CompoundTag cameraCustomData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 
         String id = cameraCustomData.getString(ID_OF_LAST_SHOT);

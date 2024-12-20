@@ -13,7 +13,7 @@ import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
-import io.github.mortuusars.exposure.core.ExposureFrameClientData;
+import io.github.mortuusars.exposure.core.CaptureClientData;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
@@ -162,7 +162,7 @@ public class ClientPacketsHandler {
 
         executeOnMainThread(() -> {
             player.ifActiveExposureCameraPresent((item, stack) -> {
-                ExposureFrameClientData clientSideFrameData = item.getClientSideFrameData(player, stack);
+                CaptureClientData clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
                 Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data);

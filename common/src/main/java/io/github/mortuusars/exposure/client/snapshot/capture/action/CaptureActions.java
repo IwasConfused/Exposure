@@ -37,4 +37,8 @@ public interface CaptureActions {
     static CaptureAction setCameraEntity(Entity viewEntity) {
         return new SetCameraEntityAction(viewEntity);
     }
+
+    static CaptureAction setFov(double fov) {
+        return new SetFovAction(fov);
+    }
 }

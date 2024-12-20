@@ -91,35 +91,35 @@ public class ClientEvents {
             ExposureClient.exposureReceiver().clear();
         }
 
-        @SubscribeEvent
-        public static void renderOverlay(RenderGuiEvent.Pre event) {
-            if (OldViewfinder.isLookingThrough())
-                event.setCanceled(true);
-        }
+//        @SubscribeEvent
+//        public static void renderOverlay(RenderGuiEvent.Pre event) {
+//            if (OldViewfinder.isLookingThrough())
+//                event.setCanceled(true);
+//        }
 
-        @SubscribeEvent
-        public static void mouseScroll(InputEvent.MouseScrollingEvent event) {
-            if (OldViewfinder.handleMouseScroll(event.getScrollDeltaY())) {
-                event.setCanceled(true);
-            }
-        }
-
-        @SubscribeEvent
-        public static void computeFOV(ViewportEvent.ComputeFov event) {
-            if (!event.usedConfiguredFov())
-                return;
-
-            double prevFov = event.getFOV();
-            double modifiedFov = OldViewfinder.modifyFov(prevFov);
-            if (prevFov != modifiedFov)
-                event.setFOV(modifiedFov);
-        }
-
-        @SubscribeEvent
-        public static void onMouseButtonPre(InputEvent.MouseButton.Pre event) {
-            if (MouseHandler.handleMouseButtonPress(event.getButton(), event.getAction(), event.getModifiers()))
-                event.setCanceled(true);
-        }
+//        @SubscribeEvent
+//        public static void mouseScroll(InputEvent.MouseScrollingEvent event) {
+//            if (OldViewfinder.handleMouseScroll(event.getScrollDeltaY())) {
+//                event.setCanceled(true);
+//            }
+//        }
+//
+//        @SubscribeEvent
+//        public static void computeFOV(ViewportEvent.ComputeFov event) {
+//            if (!event.usedConfiguredFov())
+//                return;
+//
+//            double prevFov = event.getFOV();
+//            double modifiedFov = OldViewfinder.modifyFov(prevFov);
+//            if (prevFov != modifiedFov)
+//                event.setFOV(modifiedFov);
+//        }
+//
+//        @SubscribeEvent
+//        public static void onMouseButtonPre(InputEvent.MouseButton.Pre event) {
+//            if (MouseHandler.buttonPressed(event.getButton(), event.getAction(), event.getModifiers()))
+//                event.setCanceled(true);
+//        }
 
         @SubscribeEvent
         public static void renderItemFrameItem(RenderItemInFrameEvent event) {
