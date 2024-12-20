@@ -356,7 +356,6 @@ public class Config {
             SPEC = builder.build();
         }
 
-        //TODO: store Color object
         public static int getBackgroundColor() {
             return Color.fromHex(VIEWFINDER_BACKGROUND_COLOR.get()).getARGB();
         }

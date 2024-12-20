@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.mixin.client;
 
-import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.render.FovModifier;
 import io.github.mortuusars.exposure.client.snapshot.SnapShot;
 import net.minecraft.client.Camera;

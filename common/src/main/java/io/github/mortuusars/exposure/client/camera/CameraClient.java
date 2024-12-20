@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client;
+package io.github.mortuusars.exposure.client.camera;
 
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;

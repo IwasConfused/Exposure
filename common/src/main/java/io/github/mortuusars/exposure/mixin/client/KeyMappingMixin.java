@@ -1,6 +1,10 @@
 package io.github.mortuusars.exposure.mixin.client;
 
+import io.github.mortuusars.exposure.client.camera.CameraClient;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
+import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(KeyMapping.class)
 public abstract class KeyMappingMixin {
     @Shadow
-    private boolean isDown;
+    public boolean isDown;
 
     /**
      * Allows moving when ControlsScreen is open.
@@ -20,7 +24,9 @@ public abstract class KeyMappingMixin {
      */
     @Inject(method = "isDown", at = @At(value = "HEAD"), cancellable = true)
     private void isDown(CallbackInfoReturnable<Boolean> cir) {
-        if (Minecraft.getInstance().screen instanceof CameraControlsScreen)
+        if (CameraClient.viewfinder() != null
+                && CameraClient.viewfinder().getControlsScreen().map(screen -> screen == Minecrft.get().screen).orElse(false)) {
             cir.setReturnValue(this.isDown);
+        }
     }
 }

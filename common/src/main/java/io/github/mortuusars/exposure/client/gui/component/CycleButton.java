@@ -35,7 +35,7 @@ public class CycleButton<T> extends Button {
     protected boolean loop = true;
     protected @Nullable Tooltip defaultTooltip;
     protected Map<T, @Nullable Tooltip> tooltips = Collections.emptyMap();
-    protected @Nullable SoundEvent soundEvent;
+    protected @Nullable SoundEvent clickSound;
 
     protected int currentIndex;
 
@@ -49,7 +49,7 @@ public class CycleButton<T> extends Button {
         this.spritesMap = spritesMap;
         this.onCycle = onCycle;
 
-        this.currentIndex = Math.max(values.indexOf(startingValue), 0);
+        setCurrentIndex(Math.max(values.indexOf(startingValue), 0));
     }
 
     public CycleButton(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
@@ -64,21 +64,24 @@ public class CycleButton<T> extends Button {
 
     public CycleButton<T> setDefaultTooltip(Tooltip tooltip) {
         this.defaultTooltip = tooltip;
+        updateVisuals();
         return this;
     }
 
     public CycleButton<T> setTooltips(Map<T, Tooltip> tooltips) {
         this.tooltips = tooltips;
+        updateVisuals();
         return this;
     }
 
     public CycleButton<T> setTooltips(Function<T, Component> tooltipFunc) {
         this.tooltips = Tooltips.createMap(values, tooltipFunc);
+        updateVisuals();
         return this;
     }
 
     public CycleButton<T> setClickSound(SoundEvent soundEvent) {
-        this.soundEvent = soundEvent;
+        this.clickSound = soundEvent;
         return this;
     }
 
@@ -87,11 +90,11 @@ public class CycleButton<T> extends Button {
     }
 
     public void setCurrentValue(T value) {
-        setCurrentIndex(values.indexOf(value));
+        setCurrentIndex(Mth.clamp(values.indexOf(value), 0, values.size() - 1));
     }
 
     public void setCurrentIndex(int index) {
-        this.currentIndex = Mth.clamp(currentIndex, 0, values.size() - 1);
+        this.currentIndex = index;
         updateVisuals();
     }
 
@@ -115,7 +118,10 @@ public class CycleButton<T> extends Button {
     }
 
     private void updateVisuals() {
-        setTooltip(tooltips.getOrDefault(getCurrentValue(), defaultTooltip));
+        @Nullable Tooltip tooltip = tooltips.getOrDefault(getCurrentValue(), defaultTooltip);
+        if (tooltip != null) {
+            setTooltip(tooltip);
+        }
     }
 
     @Override
@@ -156,8 +162,8 @@ public class CycleButton<T> extends Button {
 
     @Override
     public void playDownSound(SoundManager handler) {
-        if (soundEvent != null) {
-            handler.play(SimpleSoundInstance.forUI(soundEvent, 1.0F));
+        if (clickSound != null) {
+            handler.play(SimpleSoundInstance.forUI(clickSound, 1.0F));
         }
         else {
             handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));

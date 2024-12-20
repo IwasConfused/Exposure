@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
@@ -122,7 +122,7 @@ public class Viewfinder {
             return true;
         }
 
-        if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
+        if (!(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
             if (ExposureClient.getCameraControlsKey().matches(key, scanCode)) {
                 openControlsScreen();
                 return false; // false not handle and keep moving/sneaking

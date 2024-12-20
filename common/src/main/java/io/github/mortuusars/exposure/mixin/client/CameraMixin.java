@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.mixin.client;
 
-import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import net.minecraft.client.Camera;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

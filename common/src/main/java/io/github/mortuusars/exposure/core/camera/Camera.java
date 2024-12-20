@@ -1,10 +1,11 @@
 package io.github.mortuusars.exposure.core.camera;
 
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
-import java.util.Stack;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -43,6 +44,11 @@ public abstract class Camera {
 
     public boolean isShutterOpen() {
         return map((item, stack) -> item.getShutter().isOpen(stack), false);
+    }
+
+    public void release() {
+        ifPresent((item, stack) -> item.release(photographer.asEntity().level(), photographer, getItemStack()),
+                () -> Exposure.LOGGER.error("Cannot take a shot: camera is not active. Photographer: {}", photographer.asEntity()));
     }
 
     // --
@@ -95,5 +101,9 @@ public abstract class Camera {
             return map.apply(item, stack);
         }
         return orElse;
+    }
+
+    public <T> T getSettingOrElse(Setting<T> setting, T orElse) {
+        return setting.getOrDefault(getItemStack(), orElse);
     }
 }

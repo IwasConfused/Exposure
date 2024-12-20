@@ -53,6 +53,7 @@ public class ViewfinderOverlay {
         this.viewfinder = viewfinder;
         this.backgroundColor = Config.Client.getBackgroundColor();
         this.opening = new Rect2f(0, 0, 0, 0);
+        recalculateOpening();
 
         this.scaleAnimation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
         this.initialScale = 0.5f;
@@ -64,30 +65,44 @@ public class ViewfinderOverlay {
         this.yRot0 = yRot;
     }
 
+    public Rect2f getOpening() {
+        return opening;
+    }
+
     public float getScale() {
         return scale;
     }
 
-    public void render() {
+    public void recalculateOpening() {
         final int width = Minecrft.get().getWindow().getGuiScaledWidth();
         final int height = Minecrft.get().getWindow().getGuiScaledHeight();
-
-        float partialTicks = Minecrft.get().getTimer().getGameTimeDeltaTicks();
-        scale = Mth.lerp((float)scaleAnimation.getValue(), initialScale, 1f);
-        float openingSize = Math.min(width, height);
+        final float openingSize = Math.min(width, height);
 
         opening.x = (width - openingSize) / 2f;
         opening.y = (height - openingSize) / 2f;
         opening.width = openingSize;
         opening.height = openingSize;
+    }
+
+    public void render() {
+        recalculateOpening();
+        scale = Mth.lerp((float)scaleAnimation.getValue(), initialScale, 1f);
+
+        // opening and scale is updated even if overlay is not rendered - other classes may depend on them.
 
         if (!viewfinder.isLookingThrough() || Minecrft.options().hideGui || camera.isEmpty()) return;
+
+        final int width = Minecrft.get().getWindow().getGuiScaledWidth();
+        final int height = Minecrft.get().getWindow().getGuiScaledHeight();
+        float partialTicks = Minecrft.get().getTimer().getGameTimeDeltaTicks();
 
         RenderSystem.enableBlend();
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+
+        //TODO: refactor
 
         float delta = Math.min(0.7f * partialTicks, 0.8f);
         xRot0 = Mth.lerp(delta, xRot0, xRot);

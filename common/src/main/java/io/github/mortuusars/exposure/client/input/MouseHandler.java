@@ -1,10 +1,7 @@
 package io.github.mortuusars.exposure.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.client.CameraClient;
-import net.minecraft.client.Minecraft;
-import net.minecraft.util.Mth;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 
 public class MouseHandler {
     private static final boolean[] heldMouseButtons = new boolean[12];

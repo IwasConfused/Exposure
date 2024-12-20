@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client.render;
 
-import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;

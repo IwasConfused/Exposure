@@ -49,14 +49,13 @@ public record Attachment<T extends Item>(ResourceLocation id,
         return itemPredicate.test(stack);
     }
 
-    public boolean isPresent(ItemStack stack) {
-        StoredItemStack storedItemStack = get(stack);
-        return itemType.isInstance(storedItemStack.getItem());
-    }
-
     public boolean isEmpty(ItemStack stack) {
         StoredItemStack storedItemStack = get(stack);
         return storedItemStack.isEmpty() || !itemType.isInstance(storedItemStack.getItem());
+    }
+
+    public boolean isPresent(ItemStack stack) {
+        return !isEmpty(stack);
     }
 
     /**

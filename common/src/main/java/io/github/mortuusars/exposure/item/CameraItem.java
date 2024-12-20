@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.block.FlashBlock;
-import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
@@ -383,7 +383,7 @@ public class CameraItem extends Item {
     }
 
     public @NotNull InteractionResultHolder<ItemStack> release(Level level, PhotographerEntity photographer, ItemStack stack) {
-        photographer.playCameraSoundSided(getReleaseButtonSound(), 0.3f, 1f, 0.1f);
+        photographer.playCameraSound(getReleaseButtonSound(), 0.3f, 1f, 0.1f);
 
         if (getShutter().isOpen(stack) || Attachment.FILM.isEmpty(stack)) {
             return InteractionResultHolder.consume(stack);

@@ -8,6 +8,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -17,13 +18,13 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 public class FrameCounterButton extends ImageButton {
-    private final int secondaryFontColor;
-    private final int mainFontColor;
+    protected final int secondaryFontColor;
+    protected final int mainFontColor;
 
     public FrameCounterButton(int x, int y, int width, int height, WidgetSprites sprites) {
         super(x, y, width, height, sprites, button -> {});
-        secondaryFontColor = Config.Client.getSecondaryFontColor();
         mainFontColor = Config.Client.getMainFontColor();
+        secondaryFontColor = Config.Client.getSecondaryFontColor();
     }
 
     @Override
@@ -34,6 +35,7 @@ public class FrameCounterButton extends ImageButton {
                     .append(Component.translatable("gui.exposure.camera_controls.film_frame_counter.tooltip.no_film")
                             .withStyle(Style.EMPTY.withColor(0xdd6357)));
         }
+        setTooltip(Tooltip.create(tooltipComponent));
 
         super.renderWidget(guiGraphics, mouseX, mouseY, pPartialTick);
 
@@ -61,6 +63,8 @@ public class FrameCounterButton extends ImageButton {
     }
 
     protected boolean cameraHasFilmRoll() {
-        return Minecrft.player().getActiveExposureCamera().map(camera -> Attachment.FILM.isPresent(camera.getItemStack())).orElse(false);
+        return Minecrft.player().getActiveExposureCamera()
+                .map(camera -> Attachment.FILM.isPresent(camera.getItemStack()))
+                .orElse(false);
     }
 }

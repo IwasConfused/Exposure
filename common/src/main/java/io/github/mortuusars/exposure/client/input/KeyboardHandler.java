@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client.input;
 
-import io.github.mortuusars.exposure.client.CameraClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 
 public class KeyboardHandler {

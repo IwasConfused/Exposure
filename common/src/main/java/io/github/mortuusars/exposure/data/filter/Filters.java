@@ -55,7 +55,7 @@ public class Filters {
             for (var entry : content.entrySet()) {
                 ResourceLocation key = entry.getKey();
 
-                // Lenses should be in data/exposure/filters folder.
+                // Filters should be in assets/exposure/filters folder.
                 // Excluding other namespaces because it potentially can cause conflicts,
                 // if some other mod adds their own type of 'filter'.
                 if (!key.getNamespace().equals(Exposure.ID)) {

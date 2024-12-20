@@ -38,18 +38,14 @@ public record CameraSetSettingC2SP(Setting<?> setting, byte[] encodedValue) impl
     public boolean handle(PacketFlow direction, Player player) {
         Preconditions.checkState(player != null, "Cannot handle packet {}: Player was null", ID);
 
-        //TODO: redo this
+        player.getActiveExposureCamera().ifPresentOrElse(camera -> {
+            ByteBuf buf = Unpooled.buffer();
+            buf.writeBytes(encodedValue);
+            RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
+            setting.set(camera.getItemStack(), buffer);
+            buffer.clear();
+        }, () -> Exposure.LOGGER.error("Cannot set camera setting '{}': player '{}' does not have active camera.", setting, player));
 
-//        MinecraftServer server = ((ServerPlayer) player).server;
-//        server.tell(new TickTask(server.getTickCount(), () -> {
-            player.getActiveExposureCamera().ifPresentOrElse(camera -> {
-                ByteBuf buf = Unpooled.buffer();
-                buf.writeBytes(encodedValue);
-                RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(buf, player.level().registryAccess());
-                setting.set(camera.getItemStack(), buffer);
-                buffer.clear();
-            }, () -> Exposure.LOGGER.error("Cannot set camera setting '{}': player '{}' does not have active camera.", setting, player));
-//        }));
         return true;
     }
 }
