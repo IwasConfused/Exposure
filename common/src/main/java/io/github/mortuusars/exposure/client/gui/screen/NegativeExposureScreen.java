@@ -93,13 +93,12 @@ public class NegativeExposureScreen extends ZoomableScreen {
         ExposureIdentifier exposureIdentifier = photographs.get(pager.getCurrentPage()).getItemStack()
                 .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY).identifier();
 
-        @Nullable ExposureType type = exposureIdentifier.map(
+        ExposureType type = exposureIdentifier.map(
                 id -> ExposureClient.exposureCache().getOrQuery(exposureIdentifier).map(ExposureData::getType)
-                        .orElse(ExposureType.BLACK_AND_WHITE),
-                texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath()
-                        .endsWith("_bw")) ? ExposureType.COLOR : ExposureType.BLACK_AND_WHITE);
-        if (type == null)
-            type = ExposureType.BLACK_AND_WHITE;
+                        .orElse(ExposureType.COLOR),
+                texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath().endsWith("_bw"))
+                        ? ExposureType.BLACK_AND_WHITE
+                        : ExposureType.COLOR);
 
         RenderableImage image = ExposureClient.createExposureImage(exposureIdentifier).processWith(PixelModifier.NEGATIVE_FILM);
 

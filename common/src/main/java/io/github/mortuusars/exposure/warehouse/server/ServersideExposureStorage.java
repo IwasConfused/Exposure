@@ -5,7 +5,7 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.client.ExposureChangedS2CP;
+import io.github.mortuusars.exposure.network.packet.client.ExposureDataChangedS2CP;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
@@ -61,7 +61,8 @@ public class ServersideExposureStorage {
     }
 
     public ExposureData get(ExposureIdentifier identifier) {
-        Preconditions.checkArgument(identifier.isId(), "Identifier: '%s' is cannot be used to get an exposure data. Only ID is supported.");
+        Preconditions.checkArgument(identifier.isId(),
+                "Identifier: '%s' cannot be used to get an exposure data. Only ID is supported.");
 
         DimensionDataStorage dataStorage = levelStorageSupplier.get();
         @Nullable ExposureData exposureData = dataStorage.get(ExposureData.factory(), getSaveId(identifier));
@@ -79,15 +80,6 @@ public class ServersideExposureStorage {
             DimensionDataStorage dataStorage = levelStorageSupplier.get();
             dataStorage.set(getSaveId(identifier), data);
             data.setDirty();
-
-            //TODO: Serverside frame history
-//            if (server.isDedicatedServer()) {
-//                ExposureFrame frame = ExposureFrame.EMPTY
-//                        .toMutable()
-//                        .setIdentifier(new ExposureIdentifier(exposureId))
-//                        .toImmutable();
-//                CapturedFramesHistory.add(frame);
-//            }
         }
     }
 
@@ -96,7 +88,7 @@ public class ServersideExposureStorage {
      * Otherwise, due to caching, client wouldn't know about the change.
      */
     public void sendExposureChanged(ExposureIdentifier identifier) {
-        Packets.sendToAllClients(new ExposureChangedS2CP(identifier));
+        Packets.sendToAllClients(new ExposureDataChangedS2CP(identifier));
     }
 
     protected String getSaveId(ExposureIdentifier identifier) {

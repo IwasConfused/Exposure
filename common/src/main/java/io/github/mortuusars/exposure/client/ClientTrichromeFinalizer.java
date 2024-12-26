@@ -63,7 +63,7 @@ public class ClientTrichromeFinalizer {
 
         public void tick() {
             for (int i = 0; i < 3; i++) {
-                if (images.get(i).equals(Image.EMPTY)) {
+                if (images.get(i).isEmpty()) {
                     images.set(i, ExposureClient.createExposureImage(layers.get(i)));
                 }
             }
@@ -76,7 +76,7 @@ public class ClientTrichromeFinalizer {
         }
 
         public boolean hasAllImages() {
-            return images.stream().noneMatch(image -> image.equals(Image.EMPTY));
+            return images.stream().noneMatch(Image::isEmpty);
         }
 
         public List<ExposureIdentifier> getLayers() {

@@ -9,6 +9,10 @@ public interface Image extends AutoCloseable {
     int getPixelARGB(int x, int y);
     default void close() {}
 
+    default boolean isEmpty() {
+        return getWidth() <= 1 && getHeight() <= 1 && getPixelARGB(0, 0) == 0x00000000;
+    }
+
     default Image copy() {
         return PixelImage.copyFrom(this);
     }

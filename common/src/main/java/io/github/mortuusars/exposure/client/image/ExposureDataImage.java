@@ -1,7 +1,5 @@
 package io.github.mortuusars.exposure.client.image;
 
-import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 
 public record ExposureDataImage(ExposureData exposureData) implements Image {
@@ -17,7 +15,8 @@ public record ExposureDataImage(ExposureData exposureData) implements Image {
         return exposureData.getPalette().byIndex(exposureData.getPixel(x, y)).getRGB();
     }
 
-    public static ExposureDataImage getOrQuery(ExposureIdentifier identifier) {
-        return new ExposureDataImage(ExposureClient.getOrQuery(identifier));
+    @Override
+    public boolean isEmpty() {
+        return exposureData.equals(ExposureData.EMPTY) || Image.super.isEmpty();
     }
 }

@@ -5,7 +5,6 @@ import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
@@ -13,13 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record ExposureChangedS2CP(ExposureIdentifier identifier) implements IPacket {
-    public static final ResourceLocation ID = Exposure.resource("exposure_changed");
-    public static final CustomPacketPayload.Type<ExposureChangedS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
+public record ExposureDataChangedS2CP(ExposureIdentifier identifier) implements IPacket {
+    public static final ResourceLocation ID = Exposure.resource("exposure_data_changed");
+    public static final CustomPacketPayload.Type<ExposureDataChangedS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
-    public static final StreamCodec<FriendlyByteBuf, ExposureChangedS2CP> STREAM_CODEC = StreamCodec.composite(
-            ExposureIdentifier.STREAM_CODEC, ExposureChangedS2CP::identifier,
-            ExposureChangedS2CP::new
+    public static final StreamCodec<FriendlyByteBuf, ExposureDataChangedS2CP> STREAM_CODEC = StreamCodec.composite(
+            ExposureIdentifier.STREAM_CODEC, ExposureDataChangedS2CP::identifier,
+            ExposureDataChangedS2CP::new
     );
 
     @Override
@@ -29,7 +28,7 @@ public record ExposureChangedS2CP(ExposureIdentifier identifier) implements IPac
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        ClientPacketsHandler.onExposureChanged(this);
+        ClientPacketsHandler.exposureDataChanged(this);
         return true;
     }
 }

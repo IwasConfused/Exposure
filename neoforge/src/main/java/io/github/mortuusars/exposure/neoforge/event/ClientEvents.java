@@ -87,6 +87,7 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
+            ExposureClient.exposureStore().clear();
             ExposureClient.exposureCache().clear();
             ExposureClient.exposureReceiver().clear();
         }

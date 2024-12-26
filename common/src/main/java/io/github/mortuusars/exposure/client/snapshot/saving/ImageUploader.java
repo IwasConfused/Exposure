@@ -1,8 +1,9 @@
 package io.github.mortuusars.exposure.client.snapshot.saving;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.network.Packets;
+import io.github.mortuusars.exposure.network.packet.server.ExposureClientDataC2SP;
 import io.github.mortuusars.exposure.warehouse.ExposureClientData;
 import io.github.mortuusars.exposure.client.image.PalettizedImage;
 import net.minecraft.nbt.CompoundTag;
@@ -17,9 +18,14 @@ public class ImageUploader {
     }
 
     public void upload(PalettizedImage image) {
+        //TODO: from file
         ExposureClientData exposureClientData = new ExposureClientData(image.getWidth(), image.getHeight(),
                 image.pixels(), image.palette(), false, new CompoundTag());
+
         LOGGER.debug("Sending exposure '{}' to server...", identifier);
-        ExposureClient.exposureUploader().uploadToServer(identifier, exposureClientData);
+
+        Packets.sendToServer(new ExposureClientDataC2SP(identifier, exposureClientData));
+
+//        ExposureClient.exposureUploader().uploadToServer(identifier, exposureClientData);
     }
 }

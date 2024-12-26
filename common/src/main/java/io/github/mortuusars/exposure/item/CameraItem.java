@@ -395,6 +395,11 @@ public class CameraItem extends Item {
             return InteractionResultHolder.consume(stack);
 
         if (level instanceof ServerLevel serverLevel) {
+            if (!(photographer.getExecutingPlayer() instanceof ServerPlayer serverPlayer)) {
+                Exposure.LOGGER.error("Cannot start capture: photographer '{}' does not have valid executing player.", photographer);
+                return InteractionResultHolder.consume(stack);
+            }
+
             Entity entity = photographer.asEntity();
 
             int lightLevel = LevelUtil.getLightLevelAt(level, entity.blockPosition());
@@ -414,7 +419,8 @@ public class CameraItem extends Item {
 
             ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
-            CaptureData captureData = new CaptureData(exposureIdentifier,
+            CaptureData captureData = new CaptureData(
+                    exposureIdentifier,
                     photographer,
                     cameraID,
                     Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT),
@@ -431,14 +437,11 @@ public class CameraItem extends Item {
 
             //TODO: use Photographer instead of creator string
             //TODO: accept CaptureData in awaitExposure
-            ExposureServer.awaitExposure(exposureIdentifier, captureData.filmType(), photographer.getExecutingPlayer().getScoreboardName());
+//            ExposureServer.awaitExposure(exposureIdentifier, captureData.filmType(), photographer.getExecutingPlayer().getScoreboardName());
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
 
-            if (photographer.getExecutingPlayer() instanceof ServerPlayer serverPlayer) {
-                Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
-            } else {
-                Exposure.LOGGER.error("Cannot start capture: photographer '{}' does not have valid executing player.", photographer);
-            }
+            ExposureServer.vault().expect(serverPlayer, captureData);
+            Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
         }
 
         return InteractionResultHolder.consume(stack);
@@ -759,7 +762,7 @@ public class CameraItem extends Item {
     }
 
     public void onFrameAdded(PhotographerEntity photographer, ServerLevel level, ItemStack stack, ExposureFrame frame) {
-        ExposureServer.exposureFrameHistory().add(photographer.asEntity(), frame);
+        ExposureServer.frameHistory().add(photographer.asEntity(), frame);
 
         if (photographer.getOwnerPlayer() instanceof ServerPlayer serverPlayer) {
             serverPlayer.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);

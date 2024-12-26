@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.network.handler;
 
-import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
@@ -55,8 +54,12 @@ public class ClientPacketsHandler {
         });
     }
 
+    //TODO: Use CaptureData
     public static void exposeScreenshot(ExposureIdentifier identifier, int size, float brightnessStops) {
-        Preconditions.checkState(size > 0 && size <= 2048, size + " size is invalid. Should be larger than 0.");
+        if (size <= 0 || size > 2048) {
+            LOGGER.error("Cannot expose a screenshot: size '{}' is invalid. Should be larger than 0.", size);
+            return;
+        }
 
         executeOnMainThread(() -> {
             SnapShot.enqueue(Capture.of(Capture.screenshot(),
@@ -79,9 +82,12 @@ public class ClientPacketsHandler {
     }
 
     public static void loadExposure(ExposureIdentifier identifier, String filePath, int size, boolean dither) {
-        @Nullable LocalPlayer player = Minecraft.getInstance().player;
-        Preconditions.checkState(player != null, "Cannot load exposure: player is null.");
-        Preconditions.checkArgument(!StringUtil.isNullOrEmpty(filePath), "Cannot load exposure: filePath is null or empty.");
+        LocalPlayer player = Minecrft.player();
+
+        if (StringUtil.isNullOrEmpty(filePath)) {
+            LOGGER.error("Cannot load exposure: filePath is null or empty.");
+            return;
+        }
 
         executeOnMainThread(() -> {
             SnapShot.enqueue(Capture.of(Capture.file(filePath))
@@ -137,18 +143,25 @@ public class ClientPacketsHandler {
         executeOnMainThread(() -> ExposureClient.exposureCache().putOnWaitingList(packet.identifier()));
     }
 
-    public static void onExposureChanged(ExposureChangedS2CP packet) {
+    public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
         executeOnMainThread(() -> {
+            ExposureClient.exposureStore().refresh(packet.identifier());
             ExposureClient.exposureCache().remove(packet.identifier());
             ExposureClient.imageRenderer().clearCacheOf(identifier -> identifier.matches(packet.identifier()));
         });
     }
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
-        Preconditions.checkState(!packet.identifier().isEmpty(),
-                "Cannot create chromatic exposure: identifier is empty.");
-        Preconditions.checkState(packet.layers().size() == 3,
-                "Cannot create chromatic exposure: 3 layers is required. %s is provided", packet.layers().size());
+        if (packet.identifier().isEmpty()) {
+            LOGGER.error("Cannot create chromatic exposure: identifier is empty.");
+            return;
+        }
+
+        if (packet.layers().size() != 3) {
+            LOGGER.error("Cannot create chromatic exposure: 3 layers required. Provided: '{}'.", packet.layers().size());
+            return;
+        }
+
         executeOnMainThread(() -> ClientTrichromeFinalizer.finalizeTrichrome(packet.identifier(), packet.layers()));
     }
 
@@ -165,7 +178,7 @@ public class ClientPacketsHandler {
                 CaptureClientData clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
-                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data);
+                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.identifier(), data);
                 SnapShot.enqueue(captureTask);
             }, () -> LOGGER.error("Cannot start capture: no active camera."));
         });

@@ -809,7 +809,7 @@ public class OldCameraItem extends Item {
 
         addFrameToFilm(cameraStack, exposureFrame);
 
-        ExposureServer.exposureFrameHistory().add(player, exposureFrame);
+        ExposureServer.frameHistory().add(player, exposureFrame);
 
         onFrameAdded(player, cameraStack, exposureFrame);
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);

@@ -7,6 +7,7 @@ import io.github.mortuusars.exposure.client.image.*;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.foundation.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader;
@@ -24,6 +25,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Function;
 
 public class ExposureClient {
+    private static final ExposureStore EXPOSURE_STORE = new ExposureStore();
+
     private static final ImageRenderer imageRenderer = new ImageRenderer();
     private static final PhotographRenderer photographRenderer = new PhotographRenderer();
 
@@ -42,6 +45,10 @@ public class ExposureClient {
 
     public static boolean isIrisOrOculusInstalled() {
         return isIrisOrOculusInstalled;
+    }
+
+    public static ExposureStore exposureStore() {
+        return EXPOSURE_STORE;
     }
 
     public static ImageRenderer imageRenderer() {

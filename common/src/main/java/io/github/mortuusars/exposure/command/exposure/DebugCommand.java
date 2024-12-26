@@ -48,7 +48,8 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
-        List<ExposureFrame> frames = ExposureServer.exposureFrameHistory().getFramesOf(player);
+        List<ExposureFrame> frames = ExposureServer.frameHistory().getFramesOf(player).stream()
+                .filter(frame -> !frame.isChromatic()).toList();
 
         if (frames.size() < 3) {
             stack.sendFailure(Component.literal("Not enough frames captured. 3 is required."));
@@ -67,13 +68,13 @@ public class DebugCommand {
             @Nullable ExposureFrame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
             Preconditions.checkState(frame != null, "Frame data cannot be empty after combining.");
 
-            ExposureServer.exposureFrameHistory().add(player, frame);
+            ExposureServer.frameHistory().add(player, frame);
 
             Supplier<Component> msg = () -> Component.literal("Created chromatic exposure: ")
                     .append(Component.literal(frame.identifier().toString())
                             .withStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/exposure show id " + frame.identifier()))
+                                            "/exposure show id " + frame.identifier().id().orElse("")))
                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
                                     .withUnderlined(true)));
 

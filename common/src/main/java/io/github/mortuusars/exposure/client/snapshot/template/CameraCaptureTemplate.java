@@ -9,6 +9,7 @@ import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.snapshot.processing.Process;
 import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
@@ -26,7 +27,7 @@ import java.util.function.Consumer;
 
 public class CameraCaptureTemplate implements CaptureTemplate {
     @Override
-    public Task<?> createTask(LocalPlayer localPlayer, CaptureData data) {
+    public Task<?> createTask(LocalPlayer localPlayer, ExposureIdentifier identifier, CaptureData data) {
         Preconditions.checkNotNull(Minecraft.getInstance().level, "Minecraft.getInstance().level");
 
         Entity cameraHolder = data.photographer().asEntity();
@@ -78,7 +79,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
         }
 
         return captureTask
-                .acceptAsync(new ImageUploader(data.identifier())::upload)
+                .acceptAsync(new ImageUploader(identifier)::upload)
                 .onError(printCasualErrorInChat());
     }
 

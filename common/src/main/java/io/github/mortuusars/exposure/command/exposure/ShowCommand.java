@@ -50,7 +50,7 @@ public class ShowCommand {
     }
 
     private static int latest(CommandSourceStack stack, @NotNull ServerPlayer player, boolean negative) {
-        List<ExposureFrame> frames = ExposureServer.exposureFrameHistory().getFramesOf(player);
+        List<ExposureFrame> frames = ExposureServer.frameHistory().getFramesOf(player);
 
         if (frames.isEmpty()) {
             stack.sendFailure(Component.literal(player.getScoreboardName() + " has not taken any photos yet."));
