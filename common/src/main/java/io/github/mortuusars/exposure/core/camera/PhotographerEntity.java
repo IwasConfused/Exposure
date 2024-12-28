@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -45,8 +46,8 @@ public interface PhotographerEntity {
     /**
      * Player that captures the image (renders it).
      */
-    default Player getExecutingPlayer() {
-        return null;
+    default @NotNull Player getExecutingPlayer() {
+        throw new IllegalStateException("This method must be overriden, and should return a player that will render the image.");
     }
 
     /**

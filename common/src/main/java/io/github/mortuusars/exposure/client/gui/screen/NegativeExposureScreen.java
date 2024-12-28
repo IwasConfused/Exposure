@@ -93,7 +93,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
                 .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY).identifier();
 
         ExposureType type = exposureIdentifier.map(
-                id -> ExposureClient.exposureStore().getOrRequest(exposureIdentifier).orElse(PalettedExposure.EMPTY).getTag().type(),
+                id -> ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY).getTag().type(),
                 texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath().endsWith("_bw"))
                         ? ExposureType.BLACK_AND_WHITE
                         : ExposureType.COLOR);

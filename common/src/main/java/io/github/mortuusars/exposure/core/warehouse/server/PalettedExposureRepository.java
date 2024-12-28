@@ -7,12 +7,13 @@ import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataChangedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataResponseS2CP;
-import io.github.mortuusars.exposure.core.warehouse.CapturedExposure;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.storage.DimensionDataStorage;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -31,7 +32,7 @@ public class PalettedExposureRepository {
     protected final Path worldFolderPath;
     protected final Path exposuresFolderPath;
 
-    protected final Map<ServerPlayer, ExpectedExposures> expectedExposures = new HashMap<>();
+    protected final Map<ServerPlayer, Set<String>> expectedExposures = new HashMap<>();
 
 //    protected final Map<ServerPlayer, RateLimiter> rateLimiters = new ConcurrentHashMap<>();
 
@@ -65,47 +66,46 @@ public class PalettedExposureRepository {
         return ids;
     }
 
-    public RequestedPalettedExposure loadExposure(ExposureIdentifier identifier) {
-        Preconditions.checkArgument(!identifier.isEmpty(),
-                "Empty Identifier cannot be used to get an exposure data.");
-        Preconditions.checkArgument(identifier.isId(),
-                "Identifier: '%s' cannot be used to get an exposure data. Only ID is supported.");
+    public RequestedPalettedExposure loadExposure(@NotNull String id) {
+        Preconditions.checkNotNull(id, "id");
+        Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot load exposure: id is empty.");
 
-        @Nullable PalettedExposure palettedExposure = dataStorage.get(PalettedExposure.factory(), EXPOSURES_DIRECTORY_NAME + "/" + identifier.id().orElseThrow());
+        String name = EXPOSURES_DIRECTORY_NAME + "/" + id;
+        @Nullable PalettedExposure palettedExposure = dataStorage.get(PalettedExposure.factory(), name);
 
         if (palettedExposure == null) {
-            File filepath = exposuresFolderPath.resolve(identifier.id().orElseThrow() + ".dat").toFile();
+            File filepath = exposuresFolderPath.resolve(id + ".dat").toFile();
             if (!filepath.exists()) {
-                LOGGER.error("Exposure '{}' was not loaded. File '{}' does not exist.", identifier.getId(), filepath);
+                LOGGER.error("Exposure '{}' was not loaded. File '{}' does not exist.", id, filepath);
                 return RequestedPalettedExposure.NOT_FOUND;
             }
 
-            LOGGER.error("Exposure '{}' was not loaded. Check above messages for errors.", identifier.getId());
+            LOGGER.error("Exposure '{}' was not loaded. Check above messages for errors.", id);
             return RequestedPalettedExposure.CANNOT_LOAD;
         }
 
         return RequestedPalettedExposure.success(palettedExposure);
     }
 
-    public void saveExposure(ExposureIdentifier identifier, PalettedExposure data) {
-        Preconditions.checkArgument(!identifier.isEmpty(), "Empty Identifier cannot be used to save exposure.");
-        Preconditions.checkArgument(identifier.isId(),
-                "Identifier: '%s' cannot be used to save exposure. Only ID is supported.");
+    public void saveExposure(@NotNull String id, PalettedExposure data) {
+        Preconditions.checkNotNull(id, "id");
+        Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot save exposure: id is empty.");
 
         if (ensureExposuresDirectoryExists()) {
-            String saveDataName = EXPOSURES_DIRECTORY_NAME + "/" + identifier.id().orElseThrow();
+            String saveDataName = EXPOSURES_DIRECTORY_NAME + "/" + id;
             dataStorage.set(saveDataName, data);
             data.setDirty();
-            Packets.sendToAllClients(new ExposureDataChangedS2CP(identifier));
+            Packets.sendToAllClients(new ExposureDataChangedS2CP(id));
         }
     }
 
-    public void expect(ServerPlayer player, ExposureIdentifier identifier, PalettedExposure.Tag exposureMetadata) {
-        ExpectedExposures expected = expectedExposures.computeIfAbsent(player, pl -> new ExpectedExposures());
-        expected.add(identifier, exposureMetadata);
+    public void expect(ServerPlayer player, String id) {
+        Preconditions.checkArgument(!StringUtil.isBlank(id), "id cannot be null or empty.");
+        Set<String> exposures = expectedExposures.computeIfAbsent(player, pl -> new HashSet<>());
+        exposures.add(id);
     }
 
-    public void handleClientRequest(ServerPlayer player, ExposureIdentifier identifier) {
+    public void handleClientRequest(ServerPlayer player, String id) {
         if (isOverRequestLimit(player)) {
             LOGGER.error("Disconnecting player '{}': too many exposures requested. Max 200/second.",
                     player.getScoreboardName());
@@ -115,61 +115,34 @@ public class PalettedExposureRepository {
 
         RequestedPalettedExposure result;
 
-        if (identifier.isEmpty()) {
-            LOGGER.error("Empty Identifier cannot be used to get an exposure data. Player: '{}'",
-                    player.getScoreboardName());
-            result = RequestedPalettedExposure.INVALID_IDENTIFIER;
-        } else if (!identifier.isId()) {
-            LOGGER.error("Identifier: '{}' cannot be used to get an exposure data. Only ID is supported. Player: '{}'",
-                    identifier, player.getScoreboardName());
-            result = RequestedPalettedExposure.INVALID_IDENTIFIER;
+        if (StringUtil.isBlank(id)) {
+            LOGGER.error("Null or empty id cannot be used to get an exposure data. Player: '{}'", player.getScoreboardName());
+            result = RequestedPalettedExposure.INVALID_ID;
         } else {
-            result = loadExposure(identifier);
+            result = loadExposure(id);
         }
 
-        Packets.sendToClient(new ExposureDataResponseS2CP(identifier, result), player);
+        Packets.sendToClient(new ExposureDataResponseS2CP(id, result), player);
     }
 
-    public void handleClientUpload(ServerPlayer player, ExposureIdentifier identifier, CapturedExposure clientExposureData) {
-        if (identifier.isEmpty()) {
-            LOGGER.error("Empty Identifier cannot be used to save clientExposureData. Player: '{}'", player.getScoreboardName());
+    public void handleClientUpload(ServerPlayer player, String id, PalettedExposure exposure) {
+        if (StringUtil.isBlank(id)) {
+            LOGGER.error("Null or empty id cannot be used to save captured exposure. Player: '{}'", player.getScoreboardName());
             return;
         }
 
-        if (!identifier.isId()) {
-            LOGGER.error("Identifier: '{}' cannot be used to save clientExposureData. Only ID is supported. Player: '{}'",
-                    identifier, player.getScoreboardName());
+        if (!isExposureExpected(player, id)) {
+            LOGGER.error("Unexpected upload from player '{}' with ID '{}'. Discarding.", player.getScoreboardName(), id);
             return;
         }
 
-        @Nullable ExpectedExposures expectedExposures = this.expectedExposures.get(player);
-        if (expectedExposures == null || !expectedExposures.contains(identifier)) {
-            LOGGER.error("Unexpected upload from player '{}' with ID '{}'. Discarding.",
-                    player.getScoreboardName(), identifier);
-            return;
-        }
-
-        if (!validateClientData(clientExposureData)) {
-            LOGGER.error("Uploaded client data '{}' from player '{}' with ID '{}' is not valid. Discarding.",
-                    clientExposureData, player.getScoreboardName(), identifier);
-            return;
-        }
-
-        PalettedExposure exposure = new PalettedExposure(
-                clientExposureData.width(),
-                clientExposureData.height(),
-                clientExposureData.pixels(),
-                clientExposureData.palette(),
-                expectedExposures.get(identifier).withFromFileSetTo(clientExposureData.isFromFile()));
-
-        saveExposure(identifier, exposure);
-        expectedExposures.remove(identifier);
-        LOGGER.debug("Saved exposure '{}' uploaded by '{}'.", identifier, player.getScoreboardName());
+        saveExposure(id, exposure);
+        expectedExposures.get(player).remove(id);
+        LOGGER.debug("Saved exposure '{}' uploaded by '{}'.", id, player.getScoreboardName());
     }
 
-    protected boolean validateClientData(CapturedExposure capturedExposure) {
-        return capturedExposure.width() > 0 && capturedExposure.height() > 0
-                && capturedExposure.pixels().length == capturedExposure.width() * capturedExposure.height();
+    protected boolean isExposureExpected(ServerPlayer player, String id) {
+        return expectedExposures.containsKey(player) && expectedExposures.get(player).contains(id);
     }
 
     protected boolean isOverRequestLimit(ServerPlayer player) {

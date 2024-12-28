@@ -32,6 +32,10 @@ public record ImageIdentifier(String id, List<String> variantParts) {
         return String.join("_", variantParts);
     }
 
+    public boolean matches(String id) {
+        return this.id.equals(id);
+    }
+
     public boolean matches(ExposureIdentifier exposureIdentifier) {
         if (exposureIdentifier.isId()) {
             return id.equals(exposureIdentifier.getId());

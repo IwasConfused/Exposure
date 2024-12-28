@@ -10,14 +10,15 @@ import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.capture.processing.Process;
 import io.github.mortuusars.exposure.client.capture.processing.Processor;
-import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
+import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
 import io.github.mortuusars.exposure.core.CaptureDataFromClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
+import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
-import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
@@ -25,6 +26,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.*;
 import io.github.mortuusars.exposure.network.packet.server.ActiveCameraAddFrameC2SP;
 import io.github.mortuusars.exposure.util.ItemAndStack;
+import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.util.task.Task;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -83,7 +85,7 @@ public class ClientPacketsHandler {
 //        });
     }
 
-    public static void loadExposure(ExposureIdentifier identifier, String filePath, int size, boolean dither) {
+    public static void loadExposure(String id, String filePath, int size, boolean dither) {
         LocalPlayer player = Minecrft.player();
 
         if (StringUtil.isNullOrEmpty(filePath)) {
@@ -97,16 +99,12 @@ public class ClientPacketsHandler {
                     .thenAsync(Process.with(
                             Processor.Crop.SQUARE,
                             Processor.Resize.to(size)))
-                    .thenAsync(image -> {
-                        PalettedImage palettedImage = (dither
-                                ? ImagePalettizer.DITHERED_MAP_COLORS
-                                : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
-                        image.close();
-                        return palettedImage;
-                    })
-                    .acceptAsync(new ImageUploader(identifier, true)::upload)
-                    .acceptAsync(v -> player.displayClientMessage(
-                            Component.translatable("command.exposure.load_from_file.success", identifier)
+                    .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
+                    .then(image -> image.toExposure(new PalettedExposure.Tag(ExposureType.COLOR,
+                            player.getScoreboardName(), UnixTimestamp.Seconds.now(), true, false)))
+                    .accept(image -> PalettedExposureUploader.upload(id, image))
+                    .accept(v -> player.displayClientMessage(
+                            Component.translatable("command.exposure.load_from_file.success", id)
                                     .withStyle(ChatFormatting.GREEN), false)));
         });
     }
@@ -141,20 +139,15 @@ public class ClientPacketsHandler {
         executeOnMainThread(() -> Lenses.reload(packet.lenses()));
     }
 
-    public static void waitForExposureChange(WaitForExposureChangeS2CP packet) {
-//        executeOnMainThread(() -> ExposureClient.exposureCache().putOnWaitingList(packet.identifier()));
-    }
-
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
         executeOnMainThread(() -> {
-            ExposureClient.exposureStore().refresh(packet.identifier());
-//            ExposureClient.exposureCache().remove(packet.identifier());
-            ExposureClient.imageRenderer().clearCacheOf(identifier -> identifier.matches(packet.identifier()));
+            ExposureClient.exposureStore().refresh(packet.id());
+            ExposureClient.imageRenderer().clearCacheOf(identifier -> identifier.matches(packet.id()));
         });
     }
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
-        if (packet.identifier().isEmpty()) {
+        if (packet.id().isEmpty()) {
             LOGGER.error("Cannot create chromatic exposure: identifier is empty.");
             return;
         }
@@ -164,7 +157,7 @@ public class ClientPacketsHandler {
             return;
         }
 
-        executeOnMainThread(() -> ClientTrichromeFinalizer.finalizeTrichrome(packet.identifier(), packet.layers()));
+        executeOnMainThread(() -> ClientTrichromeFinalizer.finalizeTrichrome(packet.id(), packet.layers()));
     }
 
     private static void executeOnMainThread(Runnable runnable) {
@@ -180,7 +173,7 @@ public class ClientPacketsHandler {
                 CaptureDataFromClient clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
-                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.identifier(), data);
+                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.id(), data);
                 Cycles.enqueue(captureTask);
             }, () -> LOGGER.error("Cannot start capture: no active camera."));
         });

@@ -6,12 +6,10 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.core.ChromaChannel;
-import io.github.mortuusars.exposure.util.UnixTimestamp;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -87,21 +85,14 @@ public class ChromaticSheetItem extends Item {
     public ItemStack combineIntoPhotograph(@NotNull ServerPlayer player, ItemStack stack) {
         Preconditions.checkState(canCombine(stack), "Combining Chromatic Sheet requires 3 layers. " + stack);
 
-        ExposureIdentifier identifier = ExposureIdentifier.create(player, "chromatic");
+        ExposureIdentifier identifier = ExposureIdentifier.createId(player, "chromatic");
         List<ExposureFrame> layers = getLayers(stack);
         List<ExposureIdentifier> layersIdentifiers = layers.stream().map(ExposureFrame::identifier).toList();
 
         ItemStack photographStack = createPhotographStack(identifier, layers);
 
-        PalettedExposure.Tag exposureTag = new PalettedExposure.Tag(
-                ExposureType.COLOR,
-                player.getScoreboardName(),
-                UnixTimestamp.Seconds.now(),
-                false,
-                false);
-
-        ExposureServer.exposureRepository().expect(player, identifier, exposureTag);
-        Packets.sendToClient(new CreateChromaticExposureS2CP(identifier, layersIdentifiers), player);
+        ExposureServer.exposureRepository().expect(player, identifier.id().orElseThrow());
+        Packets.sendToClient(new CreateChromaticExposureS2CP(identifier.id().orElseThrow(), layersIdentifiers), player);
 
         return photographStack;
     }

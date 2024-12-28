@@ -66,10 +66,9 @@ public class PhotographScreen extends Screen {
 
     protected void queryAllPhotographs(List<ItemAndStack<PhotographItem>> photographs) {
         for (ItemAndStack<PhotographItem> photograph : photographs) {
-            ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
-            if (frame.identifier().isId()) {
-                ExposureClient.exposureStore().getOrRequest(frame.identifier());
-            }
+            photograph.getItem().getFrame(photograph.getItemStack())
+                    .identifier()
+                    .ifId(id -> ExposureClient.exposureStore().getOrRequest(id));
         }
     }
 
@@ -251,16 +250,16 @@ public class PhotographScreen extends Screen {
             return;
         }
 
-        if (frame.identifier().isId()) {
+        frame.identifier().ifId(id -> {
             PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
             PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
 
-            String filename = getFilename(frame, photographType);
+            String filename = getFilename(id, photographType);
 
             if (savedExposures.contains(filename))
                 return;
 
-            PalettedExposure palettedExposure = ExposureClient.exposureStore().getOrRequest(frame.identifier()).orElse(PalettedExposure.EMPTY);
+            PalettedExposure palettedExposure = ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY);
             if (!palettedExposure.equals(PalettedExposure.EMPTY)) {
                 savedExposures.add(filename);
 
@@ -273,14 +272,14 @@ public class PhotographScreen extends Screen {
 //                        .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
 //                        .export(palettedExposure));
             }
-        }
+        });
     }
 
-    private @NotNull String getFilename(ExposureFrame frame, PhotographType photographType) {
-        String filename = frame.identifier().id().orElse("");
+    private @NotNull String getFilename(String id, PhotographType photographType) {
         String suffix = photographType.getFileSuffix();
-        if (!StringUtil.isNullOrEmpty(suffix))
-            filename += "_" + suffix;
-        return filename;
+        if (!StringUtil.isNullOrEmpty(suffix)) {
+            return id + "_" + suffix;
+        }
+        return id;
     }
 }

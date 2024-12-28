@@ -8,7 +8,7 @@ public enum RequestedExposureStatus {
     NOT_REQUESTED,
     AWAITED,
     TIMED_OUT,
-    INVALID_IDENTIFIER,
+    INVALID_ID,
     NOT_FOUND,
     CANNOT_LOAD,
     SUCCESS,

@@ -12,11 +12,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-public class ResourceImage extends SimpleTexture implements Image {
+public class TextureImage extends SimpleTexture implements Image {
     @Nullable
     protected NativeImage image;
 
-    public ResourceImage(ResourceLocation location) {
+    public TextureImage(ResourceLocation location) {
         super(location);
     }
 
@@ -43,11 +43,11 @@ public class ResourceImage extends SimpleTexture implements Image {
 
         @Nullable AbstractTexture existingTexture = textureManager.byPath.get(location);
         if (existingTexture != null) {
-            return existingTexture instanceof ResourceImage exposureTexture ? exposureTexture : Image.MISSING;
+            return existingTexture instanceof io.github.mortuusars.exposure.client.image.TextureImage exposureTexture ? exposureTexture : Image.MISSING;
         }
 
         try {
-            ResourceImage texture = new ResourceImage(location);
+            io.github.mortuusars.exposure.client.image.TextureImage texture = new io.github.mortuusars.exposure.client.image.TextureImage(location);
             textureManager.register(location, texture);
             return texture;
         }

@@ -490,7 +490,7 @@ public class OldCameraItem extends Item {
 //                    1f, 1f, shutterSpeed.getDurationTicks());
 //        }
 
-        ExposureIdentifier exposureIdentifier = ExposureIdentifier.create(player);
+        ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(player);
 
         //TODO: create persistent serverside camera object and reference it from id stored in item
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {

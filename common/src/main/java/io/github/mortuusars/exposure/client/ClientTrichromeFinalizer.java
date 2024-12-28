@@ -5,11 +5,16 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.TrichromeImage;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
-import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
+import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.util.UnixTimestamp;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,8 +26,8 @@ public class ClientTrichromeFinalizer {
 
     //TODO: use SnapShot tasks
 
-    public static void finalizeTrichrome(ExposureIdentifier identifier, List<ExposureIdentifier> layers) {
-        processingQueue.add(new TrichromeExposureImagesGetter(identifier, layers, MAX_ATTEMPTS));
+    public static void finalizeTrichrome(String id, List<ExposureIdentifier> layers) {
+        processingQueue.add(new TrichromeExposureImagesGetter(id, layers, MAX_ATTEMPTS));
     }
 
     public static void clientTick() {
@@ -35,13 +40,14 @@ public class ClientTrichromeFinalizer {
             if (item.hasAllImages()) {
                 List<Image> images = item.getImages();
                 TrichromeImage trichromeImage = new TrichromeImage(images.get(0), images.get(1), images.get(2));
-                PalettedImage palettedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(trichromeImage, ColorPalette.MAP_COLORS);
-                trichromeImage.close();
-                new ImageUploader(item.getIdentifier(), false).upload(palettedImage);
+                PalettedImage palettedImage = ImagePalettizer.palettizeAndClose(trichromeImage, ColorPalette.MAP_COLORS, true);
+                PalettedExposure exposure = palettedImage.toExposure(new PalettedExposure.Tag(ExposureType.COLOR,
+                        Minecrft.player().getScoreboardName(), UnixTimestamp.Seconds.now(), false, false));
+                PalettedExposureUploader.upload(item.getId(), exposure);
                 palettedImage.close();
             } else {
                 Exposure.LOGGER.error("Cannot create chromatic image with id {}. Couldn't get all images data in time. {}",
-                        item.getIdentifier(), String.join(", ", item.getLayers().stream().map(ExposureIdentifier::toString).toList()));
+                        item.getId(), String.join(", ", item.getLayers().stream().map(ExposureIdentifier::toString).toList()));
             }
 
             processingQueue.remove();
@@ -49,14 +55,14 @@ public class ClientTrichromeFinalizer {
     }
 
     private static class TrichromeExposureImagesGetter {
-        private final ExposureIdentifier identifier;
+        private final String id;
         private final List<ExposureIdentifier> layers;
         private final List<Image> images = NonNullList.withSize(3, Image.EMPTY);
         private int attemptsRemaining;
 
-        public TrichromeExposureImagesGetter(ExposureIdentifier identifier, List<ExposureIdentifier> layers, int attempts) {
+        public TrichromeExposureImagesGetter(String id, List<ExposureIdentifier> layers, int attempts) {
             Preconditions.checkState(layers.size() == 3);
-            this.identifier = identifier;
+            this.id = id;
             this.layers = layers;
             this.attemptsRemaining = attempts;
         }
@@ -87,8 +93,8 @@ public class ClientTrichromeFinalizer {
             return images;
         }
 
-        public ExposureIdentifier getIdentifier() {
-            return identifier;
+        public String getId() {
+            return id;
         }
     }
 }

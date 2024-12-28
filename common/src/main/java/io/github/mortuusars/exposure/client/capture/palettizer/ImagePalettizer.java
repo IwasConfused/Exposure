@@ -9,4 +9,11 @@ public interface ImagePalettizer {
     ImagePalettizer DITHERED_MAP_COLORS = new DitheredPalettizer();
 
     PalettedImage palettize(Image image, ColorPalette palette);
+
+    static PalettedImage palettizeAndClose(Image image, ColorPalette palette, boolean dither) {
+        ImagePalettizer palettizer = dither ? ImagePalettizer.DITHERED_MAP_COLORS : ImagePalettizer.NEAREST_MAP_COLORS;
+        PalettedImage palettedImage = palettizer.palettize(image, palette);
+        image.close();
+        return palettedImage;
+    }
 }

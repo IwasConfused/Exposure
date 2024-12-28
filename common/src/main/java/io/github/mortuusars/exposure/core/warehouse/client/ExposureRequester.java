@@ -11,29 +11,29 @@ import java.util.*;
 public class ExposureRequester {
     public static final int TIMEOUT = 200; // 200 ticks == 10 seconds
 
-    protected final Map<ExposureIdentifier, Long> requestedExposures = new HashMap<>();
+    protected final Map<String, Long> requestedExposures = new HashMap<>();
     protected final int timeout;
 
     public ExposureRequester(int timeoutTicks) {
         this.timeout = timeoutTicks;
     }
 
-    public Status request(ExposureIdentifier identifier) {
-        long time = requestExposure(identifier);
-        requestedExposures.put(identifier, time);
+    public Status request(String id) {
+        long time = requestExposure(id);
+        requestedExposures.put(id, time);
         return Status.AWAITING;
     }
 
-    public void requestFulfilled(ExposureIdentifier identifier) {
-        requestedExposures.remove(identifier);
+    public void requestFulfilled(String id) {
+        requestedExposures.remove(id);
     }
 
-    public void refresh(ExposureIdentifier identifier) {
-        requestedExposures.remove(identifier);
+    public void refresh(String id) {
+        requestedExposures.remove(id);
     }
 
-//    public RequestStatus getStatus(ExposureIdentifier identifier) {
-//        @Nullable Long requestedAt = requestedExposures.get(identifier);
+//    public RequestStatus getStatus(String id) {
+//        @Nullable Long requestedAt = requestedExposures.get(id);
 //
 //        if (requestedAt == null) {
 //            return RequestStatus.NOT_REQUESTED;
@@ -42,8 +42,8 @@ public class ExposureRequester {
 //        return isTimedOut(requestedAt) ? RequestStatus.TIMED_OUT : RequestStatus.AWAITING;
 //    }
 
-    public boolean isTimedOut(ExposureIdentifier identifier) {
-        @Nullable Long requestedAt = requestedExposures.get(identifier);
+    public boolean isTimedOut(String id) {
+        @Nullable Long requestedAt = requestedExposures.get(id);
         return requestedAt != null && isTimedOut(requestedAt);
     }
 
@@ -55,8 +55,8 @@ public class ExposureRequester {
         return getGameTime() - time > TIMEOUT;
     }
 
-    private long requestExposure(ExposureIdentifier identifier) {
-        Packets.sendToServer(new ExposureRequestC2SP(identifier));
+    private long requestExposure(String id) {
+        Packets.sendToServer(new ExposureRequestC2SP(id));
         return getGameTime();
     }
 

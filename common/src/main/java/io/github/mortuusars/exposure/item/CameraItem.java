@@ -17,7 +17,6 @@ import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.core.frame.FileProjectingInfo;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -418,10 +417,10 @@ public class CameraItem extends Item {
                         1f, 1f, shutterSpeed.getDurationTicks());
             }
 
-            ExposureIdentifier exposureIdentifier = ExposureIdentifier.create(photographer.getExecutingPlayer());
+            ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
             CaptureData captureData = new CaptureData(
-                    exposureIdentifier,
+                    exposureIdentifier.id().orElseThrow(),
                     photographer,
                     cameraID,
                     Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT),
@@ -437,14 +436,7 @@ public class CameraItem extends Item {
                     new CompoundTag());
 
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
-
-            PalettedExposure.Tag expectedExposureMetadata = new PalettedExposure.Tag(captureData.filmType(),
-                    serverPlayer.getScoreboardName(),
-                    UnixTimestamp.Seconds.now(),
-                    captureData.fileProjectingInfo().isPresent(),
-                    false);
-
-            ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier, expectedExposureMetadata);
+            ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier.id().orElseThrow());
             Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
         }
 
@@ -753,7 +745,7 @@ public class CameraItem extends Item {
         //TODO: modifyFrameData event
         //PlatformHelper.fireModifyFrameDataEvent(player, stack, frame, entities);
 
-        return new ExposureFrame(captureData.identifier(), captureData.filmType(),
+        return new ExposureFrame(ExposureIdentifier.id(captureData.id()), captureData.filmType(),
                 new Photographer(photographerEntity), entitiesInFrame, CustomData.of(tag));
     }
 

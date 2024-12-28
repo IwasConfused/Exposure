@@ -16,7 +16,7 @@ public class RequestedPalettedExposure {
     public static final RequestedPalettedExposure AWAITING = status(RequestedExposureStatus.AWAITED);
     public static final RequestedPalettedExposure TIMED_OUT = status(RequestedExposureStatus.TIMED_OUT);
 
-    public static final RequestedPalettedExposure INVALID_IDENTIFIER = status(RequestedExposureStatus.INVALID_IDENTIFIER);
+    public static final RequestedPalettedExposure INVALID_ID = status(RequestedExposureStatus.INVALID_ID);
     public static final RequestedPalettedExposure NOT_FOUND = status(RequestedExposureStatus.NOT_FOUND);
     public static final RequestedPalettedExposure CANNOT_LOAD = status(RequestedExposureStatus.CANNOT_LOAD);
 

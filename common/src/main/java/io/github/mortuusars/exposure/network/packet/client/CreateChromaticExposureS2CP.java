@@ -15,13 +15,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record CreateChromaticExposureS2CP(ExposureIdentifier identifier,
-                                          List<ExposureIdentifier> layers) implements IPacket {
+public record CreateChromaticExposureS2CP(String id, List<ExposureIdentifier> layers) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("create_chromatic_exposure");
     public static final CustomPacketPayload.Type<CreateChromaticExposureS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, CreateChromaticExposureS2CP> STREAM_CODEC = StreamCodec.composite(
-            ExposureIdentifier.STREAM_CODEC, CreateChromaticExposureS2CP::identifier,
+            ByteBufCodecs.STRING_UTF8, CreateChromaticExposureS2CP::id,
             ExposureIdentifier.STREAM_CODEC.apply(ByteBufCodecs.list()), CreateChromaticExposureS2CP::layers,
             CreateChromaticExposureS2CP::new
     );

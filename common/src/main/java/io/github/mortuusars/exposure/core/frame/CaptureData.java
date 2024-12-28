@@ -1,23 +1,20 @@
 package io.github.mortuusars.exposure.core.frame;
 
 import io.github.mortuusars.exposure.core.ChromaChannel;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public record CaptureData(ExposureIdentifier identifier,
+public record CaptureData(String id,
                           PhotographerEntity photographer,
                           CameraID cameraID,
                           ShutterSpeed shutterSpeed,
@@ -34,7 +31,7 @@ public record CaptureData(ExposureIdentifier identifier,
     public static final StreamCodec<RegistryFriendlyByteBuf, CaptureData> STREAM_CODEC = new StreamCodec<>() {
         public @NotNull CaptureData decode(RegistryFriendlyByteBuf buffer) {
             return new CaptureData(
-                    ExposureIdentifier.STREAM_CODEC.decode(buffer),
+                    ByteBufCodecs.STRING_UTF8.decode(buffer),
                     PhotographerEntity.STREAM_CODEC.decode(buffer),
                     CameraID.STREAM_CODEC.decode(buffer),
                     ShutterSpeed.STREAM_CODEC.decode(buffer),
@@ -51,7 +48,7 @@ public record CaptureData(ExposureIdentifier identifier,
         }
 
         public void encode(RegistryFriendlyByteBuf buffer, CaptureData data) {
-            ExposureIdentifier.STREAM_CODEC.encode(buffer, data.identifier());
+            ByteBufCodecs.STRING_UTF8.encode(buffer, data.id());
             PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
             CameraID.STREAM_CODEC.encode(buffer, data.cameraID());
             ShutterSpeed.STREAM_CODEC.encode(buffer, data.shutterSpeed());

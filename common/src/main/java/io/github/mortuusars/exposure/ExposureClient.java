@@ -53,28 +53,14 @@ public class ExposureClient {
     }
 
     public static Image createExposureImage(ExposureIdentifier identifier) {
-        if (identifier.isTexture()) {
-            return ResourceImage.getOrCreate(identifier.getTexture());
-        }
-
-        return new PalettedImage(ExposureClient.exposureStore().getOrRequest(identifier).orElse(PalettedExposure.EMPTY));
+        return identifier.map(
+                id -> new PalettedImage(ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY)),
+                TextureImage::getOrCreate);
     }
 
     public static RenderableImage createRenderableExposureImage(ExposureIdentifier identifier) {
         Image image = createExposureImage(identifier);
         return new RenderableImage(image, image.isEmpty() ? ImageIdentifier.EMPTY : ImageIdentifier.of(identifier));
-
-//        if (identifier.isTexture()) {
-//            return new RenderableImage(ResourceImage.getOrCreate(identifier.getTexture()), ImageIdentifier.of(identifier));
-//        }
-//
-//        PalettedExposure exposure = getOrQuery(identifier);
-//        ImageIdentifier imageIdentifier = exposure.equals(PalettedExposure.EMPTY)
-//                ? ImageIdentifier.EMPTY
-//                : ImageIdentifier.of(identifier);
-//
-//        PalettedImage image = new PalettedImage(exposure);
-//        return new RenderableImage(image, imageIdentifier);
     }
 
     // --

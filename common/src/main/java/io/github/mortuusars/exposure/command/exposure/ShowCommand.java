@@ -70,16 +70,14 @@ public class ShowCommand {
             return 1;
         }
 
-        ExposureIdentifier identifier = ExposureIdentifier.id(id);
-
-        RequestedPalettedExposure palettedExposure = ExposureServer.exposureRepository().loadExposure(identifier);
+        RequestedPalettedExposure palettedExposure = ExposureServer.exposureRepository().loadExposure(id);
         if (palettedExposure.getData().isEmpty()) {
             stack.sendFailure(Component.translatable("command.exposure.show.error.not_found", id));
             return 0;
         }
 
-        Packets.sendToClient(new ExposureDataResponseS2CP(identifier, palettedExposure), player);
-        Packets.sendToClient(ShowExposureCommandS2CP.identifier(identifier, negative), player);
+        Packets.sendToClient(new ExposureDataResponseS2CP(id, palettedExposure), player);
+        Packets.sendToClient(ShowExposureCommandS2CP.identifier(ExposureIdentifier.id(id), negative), player);
 
         return 0;
     }

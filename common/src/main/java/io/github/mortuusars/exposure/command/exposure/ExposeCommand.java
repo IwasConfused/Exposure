@@ -28,7 +28,7 @@ public class ExposeCommand {
 
     private static int expose(CommandSourceStack stack, int size, float brightnessStops) throws CommandSyntaxException {
         ServerPlayer player = stack.getPlayerOrException();
-        ExposureIdentifier identifier = ExposureIdentifier.create(player);
+        ExposureIdentifier identifier = ExposureIdentifier.createId(player);
         Packets.sendToClient(new ExposeCommandS2CP(identifier, size, brightnessStops), player);
         stack.sendSuccess(() -> Component.translatable("command.exposure.expose.started", identifier), true);
         return 0;

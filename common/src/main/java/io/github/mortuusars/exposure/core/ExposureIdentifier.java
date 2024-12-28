@@ -140,15 +140,15 @@ public class ExposureIdentifier {
 
     // --
 
-    public static ExposureIdentifier create(Entity entity, String... middleParts) {
+    public static ExposureIdentifier createId(Entity entity, String... middleParts) {
         List<String> parts = new ArrayList<>();
         parts.add(entity.getScoreboardName());
         parts.addAll(Arrays.asList(middleParts));
         parts.add(Long.toString(entity.level().getGameTime()));
-        return create(parts.toArray(String[]::new));
+        return createId(parts.toArray(String[]::new));
     }
 
-    public static ExposureIdentifier create(String... parts) {
+    public static ExposureIdentifier createId(String... parts) {
         Preconditions.checkArgument(parts.length > 0, "Cannot compose ID with 0 parts.");
         List<String> sanitizedParts = Arrays.stream(parts)
                 .filter(s -> !StringUtil.isNullOrEmpty(s))
