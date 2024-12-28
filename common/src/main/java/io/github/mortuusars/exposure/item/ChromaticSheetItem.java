@@ -91,8 +91,8 @@ public class ChromaticSheetItem extends Item {
 
         ItemStack photographStack = createPhotographStack(identifier, layers);
 
-        ExposureServer.exposureRepository().expect(player, identifier.id().orElseThrow());
-        Packets.sendToClient(new CreateChromaticExposureS2CP(identifier.id().orElseThrow(), layersIdentifiers), player);
+        ExposureServer.exposureRepository().expect(player, identifier.getId().orElseThrow());
+        Packets.sendToClient(new CreateChromaticExposureS2CP(identifier.getId().orElseThrow(), layersIdentifiers), player);
 
         return photographStack;
     }

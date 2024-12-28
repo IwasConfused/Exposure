@@ -10,7 +10,6 @@ import net.minecraft.util.StringUtil;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -38,7 +37,7 @@ public record ImageIdentifier(String id, List<String> variantParts) {
 
     public boolean matches(ExposureIdentifier exposureIdentifier) {
         if (exposureIdentifier.isId()) {
-            return id.equals(exposureIdentifier.getId());
+            return id.equals(exposureIdentifier.id());
         }
         if (exposureIdentifier.isTexture()) {
             return id.equals(of(exposureIdentifier).id());

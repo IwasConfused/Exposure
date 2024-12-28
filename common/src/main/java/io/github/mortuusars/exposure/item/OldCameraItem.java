@@ -494,7 +494,7 @@ public class OldCameraItem extends Item {
 
         //TODO: create persistent serverside camera object and reference it from id stored in item
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
-            tag.putString(ID_OF_LAST_SHOT, exposureIdentifier.getId());
+            tag.putString(ID_OF_LAST_SHOT, exposureIdentifier.id());
             tag.putBoolean(FLASH_HAS_FIRED_ON_LAST_SHOT, flashHasFired);
             tag.putInt(LIGHT_LEVEL_ON_LAST_SHOT, lightLevel);
         });

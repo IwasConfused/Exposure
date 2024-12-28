@@ -74,7 +74,7 @@ public class DebugCommand {
                     .append(Component.literal(frame.identifier().toString())
                             .withStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/exposure show id " + frame.identifier().id().orElse("")))
+                                            "/exposure show id " + frame.identifier().getId().orElse("")))
                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
                                     .withUnderlined(true)));
 

@@ -420,7 +420,7 @@ public class CameraItem extends Item {
             ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
             CaptureData captureData = new CaptureData(
-                    exposureIdentifier.id().orElseThrow(),
+                    exposureIdentifier.getId().orElseThrow(),
                     photographer,
                     cameraID,
                     Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT),
@@ -436,7 +436,7 @@ public class CameraItem extends Item {
                     new CompoundTag());
 
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
-            ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier.id().orElseThrow());
+            ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier.getId().orElseThrow());
             Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
         }
 
