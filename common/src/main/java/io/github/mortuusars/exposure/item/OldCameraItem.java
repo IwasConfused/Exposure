@@ -5,16 +5,13 @@ import com.google.common.collect.ImmutableList;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.client.capture.Capture;
-import io.github.mortuusars.exposure.client.cycles.Cycles;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.capture.processing.Process;
 import io.github.mortuusars.exposure.client.capture.processing.Processor;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
-import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
-import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
 import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.core.frame.Photographer;
@@ -34,7 +31,7 @@ import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.task.Task;
-import io.github.mortuusars.exposure.client.image.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettedImage;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -363,9 +360,9 @@ public class OldCameraItem extends Item {
         if (!inHand) {
             deactivate(player, stack);
 
-            if (level.isClientSide() && OldViewfinder.isOpen()) {
-                OldViewfinder.close();
-            }
+//            if (level.isClientSide() && OldViewfinder.isOpen()) {
+//                OldViewfinder.close();
+//            }
         }
     }
 
@@ -493,7 +490,7 @@ public class OldCameraItem extends Item {
 //                    1f, 1f, shutterSpeed.getDurationTicks());
 //        }
 
-        ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(player);
+        ExposureIdentifier exposureIdentifier = ExposureIdentifier.create(player);
 
         //TODO: create persistent serverside camera object and reference it from id stored in item
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
@@ -589,7 +586,7 @@ public class OldCameraItem extends Item {
 
         Processor colorProcessor = chooseColorProcessor(stack, filmStack.getForReading(), filterStack.getForReading());
 
-        Task<PalettizedImage> captureTask = Capture.of(Capture.screenshot(),
+        Task<PalettedImage> captureTask = Capture.of(Capture.screenshot(),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
                         CaptureActions.disablePostEffect(),
@@ -603,9 +600,9 @@ public class OldCameraItem extends Item {
                         Processor.brightness(brightnessStops),
                         colorProcessor))
                 .thenAsync(image -> {
-                    PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
+                    PalettedImage palettedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
                     image.close();
-                    return palettizedImage;
+                    return palettedImage;
                 });
 
         if (filterStack.getItem() instanceof InterplanarProjectorItem projector && projector.isAllowed()) {
@@ -627,17 +624,17 @@ public class OldCameraItem extends Item {
                             Processor.brightness(brightnessStops),
                             colorProcessor))
                     .thenAsync(image -> {
-                        PalettizedImage palettizedImage = (dither
+                        PalettedImage palettedImage = (dither
                                 ? ImagePalettizer.DITHERED_MAP_COLORS
                                 : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
                         image.close();
-                        return palettizedImage;
+                        return palettedImage;
                     }));
         }
 
-        Cycles.enqueue(captureTask
-                .acceptAsync(new ImageUploader(identifier)::upload)
-                .onError(printCasualErrorInChat(player)));
+//        Cycles.enqueue(captureTask
+//                .acceptAsync(new ImageUploader(identifier)::upload)
+//                .onError(printCasualErrorInChat(player)));
     }
 
     protected void onProjectingSuccess(Player player) {
@@ -668,7 +665,7 @@ public class OldCameraItem extends Item {
                 .orElse(Processor.blackAndWhite());
     }
 
-    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack stack, CaptureClientData dataFromClient) {
+    public ExposureFrame createExposureFrame(ServerPlayer player, ItemStack stack, CaptureDataFromClient dataFromClient) {
         CompoundTag cameraCustomData = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
 
         String id = cameraCustomData.getString(ID_OF_LAST_SHOT);

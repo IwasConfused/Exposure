@@ -17,6 +17,7 @@ import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.core.frame.FileProjectingInfo;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.component.EntityInFrame;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -417,7 +418,7 @@ public class CameraItem extends Item {
                         1f, 1f, shutterSpeed.getDurationTicks());
             }
 
-            ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
+            ExposureIdentifier exposureIdentifier = ExposureIdentifier.create(photographer.getExecutingPlayer());
 
             CaptureData captureData = new CaptureData(
                     exposureIdentifier,
@@ -435,12 +436,15 @@ public class CameraItem extends Item {
                     getChromaChannel(stack),
                     new CompoundTag());
 
-            //TODO: use Photographer instead of creator string
-            //TODO: accept CaptureData in awaitExposure
-//            ExposureServer.awaitExposure(exposureIdentifier, captureData.filmType(), photographer.getExecutingPlayer().getScoreboardName());
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
 
-            ExposureServer.vault().expect(serverPlayer, captureData);
+            PalettedExposure.Tag expectedExposureMetadata = new PalettedExposure.Tag(captureData.filmType(),
+                    serverPlayer.getScoreboardName(),
+                    UnixTimestamp.Seconds.now(),
+                    captureData.fileProjectingInfo().isPresent(),
+                    false);
+
+            ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier, expectedExposureMetadata);
             Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
         }
 
@@ -480,7 +484,7 @@ public class CameraItem extends Item {
                 .orElse(Optional.empty());
     }
 
-    public CaptureClientData getClientSideFrameData(PhotographerEntity photographer, ItemStack stack) {
+    public CaptureDataFromClient getClientSideFrameData(PhotographerEntity photographer, ItemStack stack) {
         Preconditions.checkState(photographer.asEntity().level().isClientSide(), "Should be called only on client.");
 
 
@@ -497,7 +501,7 @@ public class CameraItem extends Item {
         CompoundTag extraData = new CompoundTag();
         //TODO: getAdditionalData event
 
-        return new CaptureClientData(fov, entitiesInFrame, extraData);
+        return new CaptureDataFromClient(fov, entitiesInFrame, extraData);
     }
 
     public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack) {
@@ -641,7 +645,7 @@ public class CameraItem extends Item {
     }
 
 
-    public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureClientData dataFromClient) {
+    public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
         ExposureFrame frame = createFrame(photographer, level, stack, dataFromClient);
 
         //TODO: modifyEntityInFrameData event
@@ -654,7 +658,7 @@ public class CameraItem extends Item {
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
     }
 
-    public ExposureFrame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureClientData dataFromClient) {
+    public ExposureFrame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
         Entity photographerEntity = photographer.asEntity();
 
         @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
@@ -774,7 +778,7 @@ public class CameraItem extends Item {
     /**
      * Returns an intersection of entities on both sides, i.e. if entity is captured on client but not on server - discard it.
      */
-    public List<Entity> intersectCapturedEntities(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureClientData dataFromClient) {
+    public List<Entity> intersectCapturedEntities(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
         List<Entity> entitiesOnClient = dataFromClient.getCapturedEntities(level)
                 .stream()
                 .limit(Exposure.MAX_ENTITIES_IN_FRAME)

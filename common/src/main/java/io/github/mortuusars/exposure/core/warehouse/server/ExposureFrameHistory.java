@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.foundation.warehouse.server;
+package io.github.mortuusars.exposure.core.warehouse.server;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;

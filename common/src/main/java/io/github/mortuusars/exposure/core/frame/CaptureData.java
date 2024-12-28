@@ -67,10 +67,4 @@ public record CaptureData(ExposureIdentifier identifier,
             ByteBufCodecs.COMPOUND_TAG.encode(buffer, data.extraData());
         }
     };
-
-    public static CaptureData chromatic(ExposureIdentifier identifier, @NotNull ServerPlayer player, int frameSize) {
-        return new CaptureData(identifier, player, new CameraID(Util.NIL_UUID), ShutterSpeed.DEFAULT,
-                Optional.empty(), ExposureType.COLOR, frameSize, 1f, ColorPalette.MAP_COLORS,
-                false, 0, Optional.empty(), Optional.empty(), new CompoundTag());
-    }
 }

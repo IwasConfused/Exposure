@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.client.gui;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
-import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.recipe.FilmDevelopingRecipe;
 import io.github.mortuusars.exposure.recipe.PhotographCopyingRecipe;

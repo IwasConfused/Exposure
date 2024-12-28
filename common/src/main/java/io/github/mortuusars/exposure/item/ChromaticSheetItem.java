@@ -6,11 +6,12 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.frame.CaptureData;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.core.ChromaChannel;
+import io.github.mortuusars.exposure.util.UnixTimestamp;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -83,39 +84,23 @@ public class ChromaticSheetItem extends Item {
         }
     }
 
-//    @Override
-//    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-//        ItemStack stack = player.getItemInHand(usedHand);
-//
-//        if (level instanceof ServerLevel serverLevel) {
-//            if (getLayers(stack).size() < 3) {
-//                player.displayClientMessage(Component.translatable("item.exposure.chromatic_sheet.not_enough_layers"), true);
-//                return InteractionResultHolder.fail(stack);
-//            }
-//
-//            @Nullable ServerPlayer finalizingPlayer = player instanceof ServerPlayer serverPlayer ? serverPlayer : null;
-//            ItemStack result = finalize(serverLevel, finalizingPlayer, stack, player.getScoreboardName());
-//
-//            //TODO: TEST
-////            player.setItemInHand(usedHand, result);
-//            return InteractionResultHolder.success(result);
-//        }
-//
-//        return InteractionResultHolder.consume(stack);
-//    }
-
     public ItemStack combineIntoPhotograph(@NotNull ServerPlayer player, ItemStack stack) {
         Preconditions.checkState(canCombine(stack), "Combining Chromatic Sheet requires 3 layers. " + stack);
 
-        ExposureIdentifier identifier = ExposureIdentifier.createId(player, "chromatic");
+        ExposureIdentifier identifier = ExposureIdentifier.create(player, "chromatic");
         List<ExposureFrame> layers = getLayers(stack);
         List<ExposureIdentifier> layersIdentifiers = layers.stream().map(ExposureFrame::identifier).toList();
 
         ItemStack photographStack = createPhotographStack(identifier, layers);
 
-        ExposureServer.vault().expect(player, CaptureData.chromatic(identifier, player, layers.stream().mapToInt()));
+        PalettedExposure.Tag exposureTag = new PalettedExposure.Tag(
+                ExposureType.COLOR,
+                player.getScoreboardName(),
+                UnixTimestamp.Seconds.now(),
+                false,
+                false);
 
-//        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
+        ExposureServer.exposureRepository().expect(player, identifier, exposureTag);
         Packets.sendToClient(new CreateChromaticExposureS2CP(identifier, layersIdentifiers), player);
 
         return photographStack;
@@ -134,45 +119,4 @@ public class ChromaticSheetItem extends Item {
         photographStack.set(Exposure.DataComponents.PHOTOGRAPH_TYPE, ExposureType.COLOR);
         return photographStack;
     }
-
-//    protected void finalizeServerside(ItemStack chromaticSheetStack, ItemStack photographStack, ServerLevel level,
-//                                      String chromaticExposureId, String creator,
-//                                      ExposureFrame redFrame, ExposureFrame greenFrame, ExposureFrame blueFrame) {
-//        ExposureDataImage red = getFrameImage(redFrame);
-//        ExposureDataImage green = getFrameImage(greenFrame);
-//        ExposureDataImage blue = getFrameImage(blueFrame);
-//
-//        // This tells clients not to query the exposure right away, but to wait for it
-//        Packets.sendToAllClients(new WaitForExposureChangeS2CP(chromaticExposureId));
-//
-//        new Thread(() -> createAndSaveTrichrome(chromaticExposureId, creator, red, green, blue)).start();
-//    }
-
-//    protected ExposureDataImage getFrameImage(ExposureFrame frame) {
-//        return frame.identifier().mapId(exposureId -> {
-//            ExposureData exposureData = ExposureServer.exposureStorage().get(exposureId);
-//            return new ExposureDataImage(exposureId, exposureData);
-//        }).orElseGet(() -> {
-//            Exposure.LOGGER.error("Cannot get an image from a frame: uuid is not specified '{}'", frame);
-//            return new ExposureDataImage("empty", ExposureData.EMPTY);
-//        });
-//    }
-//
-//    protected void createAndSaveTrichrome(String chromaticExposureId, String creator,
-//                                          ExposureDataImage red, ExposureDataImage green, ExposureDataImage blue) {
-//        try {
-//            PalettedImage trichromeImageData = TrichromeCombiner.create(red, green, blue);
-//
-//            ExposureData exposureData = new ExposureData(trichromeImageData.width(), trichromeImageData.height(), trichromeImageData.pixels(),
-//                    ExposureType.COLOR, creator, UnixTimestamp.Seconds.now(), false, new CompoundTag(), false);
-//
-//            ExposureServer.exposureStorage().put(chromaticExposureId, exposureData);
-//
-//            // Because we save exposure off-thread, and item was already created before chromatic processing has even begun -
-//            // we need to update clients, otherwise, client wouldn't know that and will think that the exposure is missing.
-//            ExposureServer.exposureStorage().sendExposureChanged(chromaticExposureId);
-//        } catch (Exception e) {
-//            Exposure.LOGGER.error("Cannot process and save Chromatic Photograph: {}", e.toString());
-//        }
-//    }
 }

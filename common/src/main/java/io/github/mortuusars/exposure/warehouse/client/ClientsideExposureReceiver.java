@@ -1,14 +1,5 @@
 package io.github.mortuusars.exposure.warehouse.client;
 
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class ClientsideExposureReceiver {
 //    protected final Map<ExposureIdentifier, ArrayList<byte[]>> receivedParts = new HashMap<>();
 //    protected final ClientsideExposureCache exposureCache;

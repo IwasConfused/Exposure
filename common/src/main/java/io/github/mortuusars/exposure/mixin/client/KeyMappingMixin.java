@@ -1,12 +1,8 @@
 package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.client.camera.CameraClient;
-import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
-import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
-import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;

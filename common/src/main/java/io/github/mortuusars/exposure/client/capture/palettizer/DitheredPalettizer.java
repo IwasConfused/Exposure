@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.capture.palettizer;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.client.image.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettedImage;
 
 /**
  * Floyd-Steinberg dithering algorithm.
@@ -12,11 +12,11 @@ import io.github.mortuusars.exposure.client.image.PalettizedImage;
  */
 public class DitheredPalettizer implements ImagePalettizer {
     @Override
-    public PalettizedImage palettize(Image image, ColorPalette palette) {
+    public PalettedImage palettize(Image image, ColorPalette palette) {
         return palettize(getPixels(image), palette);
     }
 
-    public PalettizedImage palettize(Color[][] pixels, ColorPalette palette) {
+    public PalettedImage palettize(Color[][] pixels, ColorPalette palette) {
         int width = pixels[0].length;
         int height = pixels.length;
 
@@ -51,7 +51,7 @@ public class DitheredPalettizer implements ImagePalettizer {
             }
         }
 
-        return new PalettizedImage(width, height, indexedPixels, palette);
+        return new PalettedImage(width, height, indexedPixels, palette);
     }
 
     private Color applyError(Color color, Color.Unbounded error, double scalar) {

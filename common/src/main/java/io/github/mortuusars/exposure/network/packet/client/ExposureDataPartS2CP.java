@@ -18,12 +18,12 @@ public record ExposureDataPartS2CP(ExposureIdentifier identifier, byte[] partByt
     public static final ResourceLocation ID = Exposure.resource("exposure_data_part_to_client");
     public static final Type<ExposureDataPartS2CP> TYPE = new Type<>(ID);
 
-    public static final StreamCodec<FriendlyByteBuf, ExposureDataPartS2CP> STREAM_CODEC = StreamCodec.composite(
-            ExposureIdentifier.STREAM_CODEC, ExposureDataPartS2CP::identifier,
-            ByteBufCodecs.byteArray(ServersideExposureSender.TO_CLIENT_PACKET_SPLIT_THRESHOLD), ExposureDataPartS2CP::partBytes,
-            ByteBufCodecs.BOOL, ExposureDataPartS2CP::isLast,
-            ExposureDataPartS2CP::new
-    );
+//    public static final StreamCodec<FriendlyByteBuf, ExposureDataPartS2CP> STREAM_CODEC = StreamCodec.composite(
+//            ExposureIdentifier.STREAM_CODEC, ExposureDataPartS2CP::identifier,
+//            ByteBufCodecs.byteArray(ServersideExposureSender.TO_CLIENT_PACKET_SPLIT_THRESHOLD), ExposureDataPartS2CP::partBytes,
+//            ByteBufCodecs.BOOL, ExposureDataPartS2CP::isLast,
+//            ExposureDataPartS2CP::new
+//    );
 
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
@@ -32,7 +32,7 @@ public record ExposureDataPartS2CP(ExposureIdentifier identifier, byte[] partByt
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        ExposureClient.exposureReceiver().receivePart(identifier, partBytes, isLast);
+//        ExposureClient.exposureReceiver().receivePart(identifier, partBytes, isLast);
         return true;
     }
 }

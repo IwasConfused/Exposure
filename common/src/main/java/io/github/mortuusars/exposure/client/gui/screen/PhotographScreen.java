@@ -11,7 +11,7 @@ import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
@@ -67,7 +67,9 @@ public class PhotographScreen extends Screen {
     protected void queryAllPhotographs(List<ItemAndStack<PhotographItem>> photographs) {
         for (ItemAndStack<PhotographItem> photograph : photographs) {
             ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
-            frame.identifier().ifId(id -> ExposureClient.getOrQuery(frame.identifier()));
+            if (frame.identifier().isId()) {
+                ExposureClient.exposureStore().getOrRequest(frame.identifier());
+            }
         }
     }
 
@@ -258,16 +260,18 @@ public class PhotographScreen extends Screen {
             if (savedExposures.contains(filename))
                 return;
 
-            ExposureData exposureData = ExposureClient.getOrQuery(frame.identifier());
-            if (!exposureData.equals(ExposureData.EMPTY)) {
+            PalettedExposure palettedExposure = ExposureClient.exposureStore().getOrRequest(frame.identifier()).orElse(PalettedExposure.EMPTY);
+            if (!palettedExposure.equals(PalettedExposure.EMPTY)) {
                 savedExposures.add(filename);
 
-                CompletableFuture.runAsync(() -> new ClientsideExposureExporter(filename)
-                        .withDefaultFolder()
-                        .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), LevelNameGetter::getWorldName)
-                        .withModifier(photographFeatures.pixelModifier())
-                        .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
-                        .export(exposureData));
+                Exposure.LOGGER.error("Saving not implemented yet!");
+
+//                CompletableFuture.runAsync(() -> new ClientsideExposureExporter(filename)
+//                        .withDefaultFolder()
+//                        .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), LevelNameGetter::getWorldName)
+//                        .withModifier(photographFeatures.pixelModifier())
+//                        .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
+//                        .export(palettedExposure));
             }
         }
     }

@@ -14,7 +14,7 @@ import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
@@ -93,13 +93,12 @@ public class NegativeExposureScreen extends ZoomableScreen {
                 .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY).identifier();
 
         ExposureType type = exposureIdentifier.map(
-                id -> ExposureClient.exposureCache().getOrQuery(exposureIdentifier).map(ExposureData::getType)
-                        .orElse(ExposureType.COLOR),
+                id -> ExposureClient.exposureStore().getOrRequest(exposureIdentifier).orElse(PalettedExposure.EMPTY).getTag().type(),
                 texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath().endsWith("_bw"))
                         ? ExposureType.BLACK_AND_WHITE
                         : ExposureType.COLOR);
 
-        RenderableImage image = ExposureClient.createExposureImage(exposureIdentifier).processWith(PixelModifier.NEGATIVE_FILM);
+        RenderableImage image = ExposureClient.createRenderableExposureImage(exposureIdentifier).processWith(PixelModifier.NEGATIVE_FILM);
 
         int width = image.getWidth();
         int height = image.getHeight();

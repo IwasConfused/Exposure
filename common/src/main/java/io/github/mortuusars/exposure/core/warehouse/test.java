@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.foundation.warehouse;
+package io.github.mortuusars.exposure.core.warehouse;
 
 import io.github.mortuusars.exposure.client.image.Image;
 

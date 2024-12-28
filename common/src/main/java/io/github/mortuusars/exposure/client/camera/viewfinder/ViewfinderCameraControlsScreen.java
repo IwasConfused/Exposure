@@ -1,11 +1,10 @@
-package io.github.mortuusars.exposure.client.gui.screen.camera;
+package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
-import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.FocalLengthButton;

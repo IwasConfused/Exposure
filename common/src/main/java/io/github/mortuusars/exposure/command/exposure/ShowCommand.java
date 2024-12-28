@@ -6,9 +6,11 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.command.suggestion.ExposureIdSuggestionProvider;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.network.Packets;
+import io.github.mortuusars.exposure.network.packet.client.ExposureDataResponseS2CP;
 import io.github.mortuusars.exposure.network.packet.client.ShowExposureCommandS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -70,14 +72,13 @@ public class ShowCommand {
 
         ExposureIdentifier identifier = ExposureIdentifier.id(id);
 
-        ExposureData exposureData = ExposureServer.exposureStorage().get(identifier);
-        if (exposureData.equals(ExposureData.EMPTY)) {
+        RequestedPalettedExposure palettedExposure = ExposureServer.exposureRepository().loadExposure(identifier);
+        if (palettedExposure.getData().isEmpty()) {
             stack.sendFailure(Component.translatable("command.exposure.show.error.not_found", id));
             return 0;
         }
 
-        ExposureServer.exposureSender().sendTo(identifier, exposureData, player);
-
+        Packets.sendToClient(new ExposureDataResponseS2CP(identifier, palettedExposure), player);
         Packets.sendToClient(ShowExposureCommandS2CP.identifier(identifier, negative), player);
 
         return 0;

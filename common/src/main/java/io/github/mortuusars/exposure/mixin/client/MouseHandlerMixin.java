@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.mixin.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

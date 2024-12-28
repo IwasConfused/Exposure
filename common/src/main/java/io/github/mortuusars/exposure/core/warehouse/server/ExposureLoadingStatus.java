@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.foundation.warehouse.server;
+package io.github.mortuusars.exposure.core.warehouse.server;
 
 public enum ExposureLoadingStatus {
     NOT_FOUND,

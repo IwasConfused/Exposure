@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.client.image.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettedImage;
 import net.minecraft.core.NonNullList;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,10 +35,10 @@ public class ClientTrichromeFinalizer {
             if (item.hasAllImages()) {
                 List<Image> images = item.getImages();
                 TrichromeImage trichromeImage = new TrichromeImage(images.get(0), images.get(1), images.get(2));
-                PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(trichromeImage, ColorPalette.MAP_COLORS);
+                PalettedImage palettedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(trichromeImage, ColorPalette.MAP_COLORS);
                 trichromeImage.close();
-                new ImageUploader(item.getIdentifier()).upload(palettizedImage);
-                palettizedImage.close();
+                new ImageUploader(item.getIdentifier(), false).upload(palettedImage);
+                palettedImage.close();
             } else {
                 Exposure.LOGGER.error("Cannot create chromatic image with id {}. Couldn't get all images data in time. {}",
                         item.getIdentifier(), String.join(", ", item.getLayers().stream().map(ExposureIdentifier::toString).toList()));

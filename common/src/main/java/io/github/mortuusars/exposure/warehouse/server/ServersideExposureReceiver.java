@@ -1,23 +1,5 @@
 package io.github.mortuusars.exposure.warehouse.server;
 
-import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureClientData;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
-import io.github.mortuusars.exposure.util.UnixTimestamp;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class ServersideExposureReceiver {
 //    private static final Logger LOGGER = LogUtils.getLogger();
 //

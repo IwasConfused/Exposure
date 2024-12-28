@@ -2,14 +2,11 @@ package io.github.mortuusars.exposure.core;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
-import io.github.mortuusars.exposure.client.image.ImageIdentifier;
-import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -119,6 +116,10 @@ public class ExposureIdentifier {
         return isTexture() ? Optional.of(mappingFunc.apply(texture)) : Optional.empty();
     }
 
+    public String toValueString() {
+        return map(Function.identity(), ResourceLocation::toString);
+    }
+
     @Override
     public String toString() {
         return map(id -> "Id: " + id, texture -> "Texture: " + texture);
@@ -139,15 +140,15 @@ public class ExposureIdentifier {
 
     // --
 
-    public static ExposureIdentifier createId(Entity entity, String... middleParts) {
+    public static ExposureIdentifier create(Entity entity, String... middleParts) {
         List<String> parts = new ArrayList<>();
         parts.add(entity.getScoreboardName());
         parts.addAll(Arrays.asList(middleParts));
         parts.add(Long.toString(entity.level().getGameTime()));
-        return composeId(parts.toArray(String[]::new));
+        return create(parts.toArray(String[]::new));
     }
 
-    private static ExposureIdentifier composeId(String... parts) {
+    public static ExposureIdentifier create(String... parts) {
         Preconditions.checkArgument(parts.length > 0, "Cannot compose ID with 0 parts.");
         List<String> sanitizedParts = Arrays.stream(parts)
                 .filter(s -> !StringUtil.isNullOrEmpty(s))

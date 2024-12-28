@@ -6,8 +6,6 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
-import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.client.CameraType;
@@ -93,7 +91,7 @@ public class Viewfinder {
 
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
                 && Minecrft.options().keyAttack.matches(key, scanCode)
-                && !(Minecrft.get().screen instanceof CameraControlsScreen)) {
+                && !(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
             return true;
         }
 
@@ -160,7 +158,7 @@ public class Viewfinder {
     }
 
     public boolean mouseScrolled(double amount) {
-        return isLookingThrough() && !(Minecrft.get().screen instanceof CameraControlsScreen) && zoom.mouseScrolled(amount);
+        return isLookingThrough() && !(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) && zoom.mouseScrolled(amount);
     }
 
     public double modifyMouseSensitivity(double original) {

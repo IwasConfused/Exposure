@@ -29,7 +29,7 @@ public record ExposureRequestC2SP(ExposureIdentifier identifier) implements IPac
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        ExposureServer.vault().handleClientRequest((ServerPlayer) player, identifier);
+        ExposureServer.exposureRepository().handleClientRequest((ServerPlayer) player, identifier);
         return true;
     }
 }

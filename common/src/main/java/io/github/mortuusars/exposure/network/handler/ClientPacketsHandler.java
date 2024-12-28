@@ -7,18 +7,17 @@ import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.cycles.Cycles;
 import io.github.mortuusars.exposure.client.capture.Capture;
-import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.capture.processing.Process;
 import io.github.mortuusars.exposure.client.capture.processing.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
-import io.github.mortuusars.exposure.core.CaptureClientData;
+import io.github.mortuusars.exposure.core.CaptureDataFromClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
-import io.github.mortuusars.exposure.client.image.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
@@ -34,6 +33,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
+import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -56,29 +56,31 @@ public class ClientPacketsHandler {
 
     //TODO: Use CaptureData
     public static void exposeScreenshot(ExposureIdentifier identifier, int size, float brightnessStops) {
-        if (size <= 0 || size > 2048) {
-            LOGGER.error("Cannot expose a screenshot: size '{}' is invalid. Should be larger than 0.", size);
-            return;
-        }
+        throw new NotImplementedException();
 
-        executeOnMainThread(() -> {
-            Cycles.enqueue(Capture.of(Capture.screenshot(),
-                            CaptureActions.hideGui(),
-                            CaptureActions.forceRegularOrSelfieCamera(),
-                            CaptureActions.disablePostEffect(),
-                            CaptureActions.modifyGamma(brightnessStops))
-                    .handleErrorAndGetResult()
-                    .thenAsync(Process.with(
-                            Processor.Crop.SQUARE,
-                            Processor.Resize.to(size),
-                            Processor.brightness(brightnessStops)))
-                    .thenAsync(image -> {
-                        PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
-                        image.close();
-                        return palettizedImage;
-                    })
-                    .acceptAsync(new ImageUploader(identifier)::upload));
-        });
+//        if (size <= 0 || size > 2048) {
+//            LOGGER.error("Cannot expose a screenshot: size '{}' is invalid. Should be larger than 0.", size);
+//            return;
+//        }
+
+//        executeOnMainThread(() -> {
+//            Cycles.enqueue(Capture.of(Capture.screenshot(),
+//                            CaptureActions.hideGui(),
+//                            CaptureActions.forceRegularOrSelfieCamera(),
+//                            CaptureActions.disablePostEffect(),
+//                            CaptureActions.modifyGamma(brightnessStops))
+//                    .handleErrorAndGetResult()
+//                    .thenAsync(Process.with(
+//                            Processor.Crop.SQUARE,
+//                            Processor.Resize.to(size),
+//                            Processor.brightness(brightnessStops)))
+//                    .thenAsync(image -> {
+//                        PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
+//                        image.close();
+//                        return palettizedImage;
+//                    })
+//                    .acceptAsync(new ImageUploader(identifier)::upload));
+//        });
     }
 
     public static void loadExposure(ExposureIdentifier identifier, String filePath, int size, boolean dither) {
@@ -96,13 +98,13 @@ public class ClientPacketsHandler {
                             Processor.Crop.SQUARE,
                             Processor.Resize.to(size)))
                     .thenAsync(image -> {
-                        PalettizedImage palettizedImage = (dither
+                        PalettedImage palettedImage = (dither
                                 ? ImagePalettizer.DITHERED_MAP_COLORS
                                 : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
                         image.close();
-                        return palettizedImage;
+                        return palettedImage;
                     })
-                    .acceptAsync(new ImageUploader(identifier)::upload)
+                    .acceptAsync(new ImageUploader(identifier, true)::upload)
                     .acceptAsync(v -> player.displayClientMessage(
                             Component.translatable("command.exposure.load_from_file.success", identifier)
                                     .withStyle(ChatFormatting.GREEN), false)));
@@ -175,7 +177,7 @@ public class ClientPacketsHandler {
 
         executeOnMainThread(() -> {
             player.ifActiveExposureCameraPresent((item, stack) -> {
-                CaptureClientData clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
+                CaptureDataFromClient clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
                 Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.identifier(), data);

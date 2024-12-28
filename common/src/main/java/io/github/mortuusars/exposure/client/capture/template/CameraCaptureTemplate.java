@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
-import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.image.PalettizedImage;
+import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
@@ -19,7 +18,6 @@ import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.task.Task;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.NotNull;
@@ -29,14 +27,12 @@ import java.util.function.Consumer;
 public class CameraCaptureTemplate implements CaptureTemplate {
     @Override
     public Task<?> createTask(LocalPlayer localPlayer, ExposureIdentifier identifier, CaptureData data) {
-        Preconditions.checkNotNull(Minecraft.getInstance().level, "Minecraft.getInstance().level");
-
         Entity cameraHolder = data.photographer().asEntity();
 
         int frameSize = data.frameSize();
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
-        Task<PalettizedImage> captureTask = Capture.of(Capture.screenshot(),
+        Task<PalettedImage> captureTask = Capture.of(Capture.screenshot(),
                         CaptureAction.optional(!data.photographer().getExecutingPlayer().equals(cameraHolder),
                                 () -> CaptureActions.setCameraEntity(cameraHolder)),
                         CaptureActions.hideGui(),
@@ -52,9 +48,13 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
                 .thenAsync(image -> {
-                    PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
+                    PalettedImage palettedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
                     image.close();
-                    return palettizedImage;
+                    return palettedImage;
+                })
+                .thenAsync(image -> {
+                    new ImageUploader(identifier, true).upload(image);
+                    return image;
                 });
 
         if (data.fileProjectingInfo().isPresent()) {
@@ -71,17 +71,19 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(data)))
                     .thenAsync(image -> {
-                        PalettizedImage palettizedImage = (dither
+                        PalettedImage palettedImage = (dither
                                 ? ImagePalettizer.DITHERED_MAP_COLORS
                                 : ImagePalettizer.NEAREST_MAP_COLORS).palettize(image, ColorPalette.MAP_COLORS);
                         image.close();
-                        return palettizedImage;
+                        return palettedImage;
+                    })
+                    .thenAsync(image -> {
+                        new ImageUploader(identifier, true).upload(image);
+                        return image;
                     }));
         }
 
-        return captureTask
-                .acceptAsync(new ImageUploader(identifier)::upload)
-                .onError(printCasualErrorInChat());
+        return captureTask.onError(printCasualErrorInChat());
     }
 
     protected Processor chooseColorProcessor(CaptureData data) {

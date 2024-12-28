@@ -13,15 +13,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-public record CaptureClientData(double fov,
-                                List<UUID> capturedEntities,
-                                CompoundTag extraData) {
+public record CaptureDataFromClient(double fov,
+                                    List<UUID> capturedEntities,
+                                    CompoundTag extraData) {
 
-    public static final StreamCodec<ByteBuf, CaptureClientData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.DOUBLE, CaptureClientData::fov,
-            UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list(16)), CaptureClientData::capturedEntities,
-            ByteBufCodecs.COMPOUND_TAG, CaptureClientData::extraData,
-            CaptureClientData::new
+    public static final StreamCodec<ByteBuf, CaptureDataFromClient> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.DOUBLE, CaptureDataFromClient::fov,
+            UUIDUtil.STREAM_CODEC.apply(ByteBufCodecs.list(16)), CaptureDataFromClient::capturedEntities,
+            ByteBufCodecs.COMPOUND_TAG, CaptureDataFromClient::extraData,
+            CaptureDataFromClient::new
     );
 
     public List<Entity> getCapturedEntities(ServerLevel level) {

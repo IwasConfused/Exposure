@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.foundation.warehouse.client;
+package io.github.mortuusars.exposure.core.warehouse;
 
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

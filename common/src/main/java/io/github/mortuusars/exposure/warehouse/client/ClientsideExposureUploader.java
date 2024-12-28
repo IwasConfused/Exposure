@@ -1,13 +1,5 @@
 package io.github.mortuusars.exposure.warehouse.client;
 
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.util.ByteArrayUtils;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureClientData;
-import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.server.ExposureDataPartC2SP;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 public class ClientsideExposureUploader {
 //    public static final int TO_SERVER_PACKET_SPLIT_THRESHOLD = 256_000;
 //

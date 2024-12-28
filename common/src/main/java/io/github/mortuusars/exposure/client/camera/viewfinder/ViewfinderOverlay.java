@@ -8,7 +8,6 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.item.FilmRollItem;
@@ -162,7 +161,7 @@ public class ViewfinderOverlay {
         RenderSystem.setShaderTexture(0, Setting.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack(), CompositionGuides.NONE).overlayTextureLocation());
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, -1f, 0f, 1f, 0f, 1f);
 
-        if (!(Minecrft.get().screen instanceof CameraControlsScreen)) {
+        if (!(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
             //TODO: don't move with opening. render fixed in place
             renderStatusIcons(poseStack, camera.getItemStack());
         }

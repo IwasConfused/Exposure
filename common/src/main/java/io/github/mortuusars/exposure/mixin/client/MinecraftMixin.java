@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.client.camera.CameraClient;
-import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
+import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderCameraControlsScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;

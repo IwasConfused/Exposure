@@ -4,7 +4,6 @@ import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;

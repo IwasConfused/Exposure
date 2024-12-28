@@ -1,27 +1,18 @@
 package io.github.mortuusars.exposure;
 
-import com.google.common.base.Preconditions;
-import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.image.*;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.foundation.warehouse.client.ExposureStore;
+import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
-import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader;
-import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureReceiver;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.*;
-import net.minecraft.client.KeyMapping;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Function;
 
 public class ExposureClient {
     private static final ExposureStore EXPOSURE_STORE = new ExposureStore();
@@ -36,10 +27,6 @@ public class ExposureClient {
         isIrisOrOculusInstalled = PlatformHelper.isModLoaded("iris") || PlatformHelper.isModLoaded("oculus");
     }
 
-    public static boolean isIrisOrOculusInstalled() {
-        return isIrisOrOculusInstalled;
-    }
-
     public static ExposureStore exposureStore() {
         return EXPOSURE_STORE;
     }
@@ -52,22 +39,45 @@ public class ExposureClient {
         return PHOTOGRAPH_RENDERER;
     }
 
-    public static RenderableImage createExposureImage(ExposureFrame frame) {
-        RenderableImage image = createExposureImage(frame.identifier());
-        return Censor.isAllowedToRender(frame) ? image : image.wrapIn(CensoredImage::new);
+    // --
+
+    public static boolean isIrisOrOculusInstalled() {
+        return isIrisOrOculusInstalled;
     }
 
-    public static RenderableImage createExposureImage(ExposureIdentifier identifier) {
+    // --
+
+    public static RenderableImage createRenderableExposureImage(ExposureFrame frame) {
+        RenderableImage renderableImage = createRenderableExposureImage(frame.identifier());
+        return Censor.isAllowedToRender(frame) ? renderableImage : renderableImage.wrapIn(CensoredImage::new);
+    }
+
+    public static Image createExposureImage(ExposureIdentifier identifier) {
         if (identifier.isTexture()) {
-            return new RenderableImage(ResourceImage.getOrCreate(identifier.getTexture()), ImageIdentifier.of(identifier));
+            return ResourceImage.getOrCreate(identifier.getTexture());
         }
 
-        ExposureData exposureData = getOrQuery(identifier);
-        ImageIdentifier imageIdentifier = exposureData.equals(ExposureData.EMPTY)
-                ? ImageIdentifier.EMPTY
-                : ImageIdentifier.of(identifier);
-        return new RenderableImage(new ExposureDataImage(exposureData), imageIdentifier);
+        return new PalettedImage(ExposureClient.exposureStore().getOrRequest(identifier).orElse(PalettedExposure.EMPTY));
     }
+
+    public static RenderableImage createRenderableExposureImage(ExposureIdentifier identifier) {
+        Image image = createExposureImage(identifier);
+        return new RenderableImage(image, image.isEmpty() ? ImageIdentifier.EMPTY : ImageIdentifier.of(identifier));
+
+//        if (identifier.isTexture()) {
+//            return new RenderableImage(ResourceImage.getOrCreate(identifier.getTexture()), ImageIdentifier.of(identifier));
+//        }
+//
+//        PalettedExposure exposure = getOrQuery(identifier);
+//        ImageIdentifier imageIdentifier = exposure.equals(PalettedExposure.EMPTY)
+//                ? ImageIdentifier.EMPTY
+//                : ImageIdentifier.of(identifier);
+//
+//        PalettedImage image = new PalettedImage(exposure);
+//        return new RenderableImage(image, imageIdentifier);
+    }
+
+    // --
 
     private static void registerItemModelProperties() {
         ItemProperties.register(Exposure.Items.CAMERA.get(), Exposure.resource("camera_state"), CameraItemClientExtensions::itemPropertyFunction);

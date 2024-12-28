@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.foundation.warehouse.client;
+package io.github.mortuusars.exposure.core.warehouse.client;
 
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;

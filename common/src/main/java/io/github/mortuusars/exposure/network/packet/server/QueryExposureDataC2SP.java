@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
@@ -32,8 +32,8 @@ public record QueryExposureDataC2SP(ExposureIdentifier identifier) implements IP
     @Override
     public boolean handle(PacketFlow flow, Player player) {
         Preconditions.checkArgument(player instanceof ServerPlayer, "Cannot handle packet: Player was is not available.");
-        ExposureData exposureData = ExposureServer.getExposure(identifier);
-        ExposureServer.exposureSender().sendTo(identifier, exposureData, ((ServerPlayer) player));
+//        PalettedExposure palettedExposure = ExposureServer.getExposure(identifier);
+//        ExposureServer.exposureSender().sendTo(identifier, palettedExposure, ((ServerPlayer) player));
         return true;
     }
 }

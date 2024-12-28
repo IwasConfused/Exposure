@@ -6,8 +6,7 @@
   "plugin": "io.github.mortuusars.exposure.fabric.ExposureMixinPlugin",
   "client": [
     "HumanoidModelMixin",
-    "ItemFrameRendererFabricMixin",
-    "MouseHandlerFabricMixin"
+    "ItemFrameRendererFabricMixin"
   ],
   "mixins": [
     "AlbumItemFabricMixin"

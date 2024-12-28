@@ -1,15 +1,5 @@
 package io.github.mortuusars.exposure.warehouse.server;
 
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.util.ByteArrayUtils;
-import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
-import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.client.ExposureDataPartS2CP;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import net.minecraft.server.level.ServerPlayer;
-import org.jetbrains.annotations.NotNull;
-
 public class ServersideExposureSender {
 //    // Packet size limit from server to client is 8mb, but, from my limited testing, it causes problems sometimes.
 //    // So we split if >512kb, it should be more than enough for regular-sized exposures.
