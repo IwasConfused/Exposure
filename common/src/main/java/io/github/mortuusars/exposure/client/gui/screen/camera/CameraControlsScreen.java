@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.*;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinderOverlay;
+import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.*;
@@ -193,7 +193,7 @@ public class CameraControlsScreen extends Screen {
             }
         };
 
-        update.accept(ExposureClient.getCameraControlsKey());
+        update.accept(KeyboardHandler.getCameraControlsKey());
         Options opt = Minecraft.getInstance().options;
         update.accept(opt.keyUp);
         update.accept(opt.keyDown);
@@ -251,7 +251,7 @@ public class CameraControlsScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (ExposureClient.getCameraControlsKey().matchesMouse(button)
+        if (KeyboardHandler.getCameraControlsKey().matchesMouse(button)
                 || (Config.Client.VIEWFINDER_MIDDLE_CLICK_CONTROLS.get() && button == InputConstants.MOUSE_BUTTON_MIDDLE)) {
             if (level.getGameTime() - openedAtTimestamp >= 5)
                 this.onClose();
@@ -264,7 +264,7 @@ public class CameraControlsScreen extends Screen {
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (ExposureClient.getCameraControlsKey().matches(keyCode, scanCode)) {
+        if (KeyboardHandler.getCameraControlsKey().matches(keyCode, scanCode)) {
             if (level.getGameTime() - openedAtTimestamp >= 5)
                 this.onClose();
 

@@ -3,8 +3,8 @@ package io.github.mortuusars.exposure.client.gui.screen.camera;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
+import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.data.filter.Filter;
@@ -210,7 +210,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
             guiGraphics.renderTooltip(font, font.split(
                     Component.translatable("gui.exposure.camera_attachments.flash.tooltip"), 230), x, y);
         } else if (isMouseOver(viewfinder, x, y)) {
-            Component key = Component.literal(ExposureClient.getCameraControlsKey().getTranslatedKeyMessage().getString())
+            Component key = Component.literal(KeyboardHandler.getCameraControlsKey().getTranslatedKeyMessage().getString())
                     .withStyle(ChatFormatting.GRAY);
             Component middleClick = Config.Client.VIEWFINDER_MIDDLE_CLICK_CONTROLS.get()
                     ? Component.translatable("gui.exposure.camera_attachments.viewfinder.tooltip.or_middle_click")

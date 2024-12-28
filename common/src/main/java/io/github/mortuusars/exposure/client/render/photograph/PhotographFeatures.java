@@ -2,15 +2,11 @@ package io.github.mortuusars.exposure.client.render.photograph;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
 import io.github.mortuusars.exposure.client.image.RenderableImage;
-import io.github.mortuusars.exposure.client.snapshot.processing.Process;
-import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;

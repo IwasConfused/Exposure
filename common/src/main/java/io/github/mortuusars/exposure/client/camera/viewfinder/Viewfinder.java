@@ -3,8 +3,8 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
+import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraControlsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.ViewfinderCameraControlsScreen;
@@ -123,7 +123,7 @@ public class Viewfinder {
         }
 
         if (!(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
-            if (ExposureClient.getCameraControlsKey().matches(key, scanCode)) {
+            if (KeyboardHandler.getCameraControlsKey().matches(key, scanCode)) {
                 openControlsScreen();
                 return false; // false not handle and keep moving/sneaking
             }
@@ -146,7 +146,7 @@ public class Viewfinder {
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && Minecrft.options().keyAttack.matchesMouse(button))
             return true; // Block attacks
 
-        if (ExposureClient.getCameraControlsKey().matchesMouse(button)) {
+        if (KeyboardHandler.getCameraControlsKey().matchesMouse(button)) {
             openControlsScreen();
             return false; // Do not cancel the event to keep sneaking
         }

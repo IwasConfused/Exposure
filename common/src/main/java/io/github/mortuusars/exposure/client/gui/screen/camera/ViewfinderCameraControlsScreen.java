@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.gui.Widgets;
@@ -12,6 +11,7 @@ import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.FocalLengthButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.FrameCounterButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.ShutterSpeedButton;
+import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.camera.Camera;
@@ -210,7 +210,7 @@ public class ViewfinderCameraControlsScreen extends Screen {
             }
         };
 
-        update.accept(ExposureClient.getCameraControlsKey());
+        update.accept(KeyboardHandler.getCameraControlsKey());
         Options opt = Minecrft.options();
         update.accept(opt.keyUp);
         update.accept(opt.keyDown);
@@ -267,7 +267,7 @@ public class ViewfinderCameraControlsScreen extends Screen {
 
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
-        if (ExposureClient.getCameraControlsKey().matchesMouse(button)
+        if (KeyboardHandler.getCameraControlsKey().matchesMouse(button)
                 || (Config.Client.VIEWFINDER_MIDDLE_CLICK_CONTROLS.get() && button == InputConstants.MOUSE_BUTTON_MIDDLE)) {
             if (isToggleTimeReached())
                 this.onClose();
@@ -280,7 +280,7 @@ public class ViewfinderCameraControlsScreen extends Screen {
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        if (ExposureClient.getCameraControlsKey().matches(keyCode, scanCode)) {
+        if (KeyboardHandler.getCameraControlsKey().matches(keyCode, scanCode)) {
             if (isToggleTimeReached())
                 this.onClose();
 

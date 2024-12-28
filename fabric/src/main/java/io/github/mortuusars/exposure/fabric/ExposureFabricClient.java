@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.fabric;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
+import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.fabric.resources.ExposureFabricClientReloadListener;
 import io.github.mortuusars.exposure.fabric.resources.FabricFiltersLoader;
 import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
@@ -29,7 +30,7 @@ public class ExposureFabricClient implements ClientModInitializer {
     public void onInitializeClient() {
         ExposureClient.init();
 
-        ExposureClient.registerKeymappings(KeyBindingHelper::registerKeyBinding);
+        KeyboardHandler.registerKeymappings(KeyBindingHelper::registerKeyBinding);
 
         MenuScreens.register(Exposure.MenuTypes.CAMERA.get(), CameraAttachmentsScreen::new);
         MenuScreens.register(Exposure.MenuTypes.ALBUM.get(), AlbumScreen::new);

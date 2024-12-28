@@ -4,15 +4,15 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
+import io.github.mortuusars.exposure.client.capture.Capture;
+import io.github.mortuusars.exposure.client.cycles.Cycles;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureActions;
-import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
-import io.github.mortuusars.exposure.client.snapshot.processing.Process;
-import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
-import io.github.mortuusars.exposure.client.snapshot.*;
-import io.github.mortuusars.exposure.client.snapshot.capture.Capture;
-import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureAction;
-import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
+import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
+import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
+import io.github.mortuusars.exposure.client.capture.processing.Process;
+import io.github.mortuusars.exposure.client.capture.processing.Processor;
+import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
+import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.core.EntitiesInFrame;
@@ -502,7 +502,7 @@ public class OldCameraItem extends Item {
             tag.putInt(LIGHT_LEVEL_ON_LAST_SHOT, lightLevel);
         });
 
-        ExposureServer.awaitExposure(exposureIdentifier, filmItem.getType(), player.getScoreboardName());
+//        ExposureServer.awaitExposure(exposureIdentifier, filmItem.getType(), player.getScoreboardName());
 
 //        Packets.sendToClient(new StartExposureS2CP(exposureIdentifier, cameraAccessor, flashHasFired), serverPlayer);
 
@@ -635,7 +635,7 @@ public class OldCameraItem extends Item {
                     }));
         }
 
-        SnapShot.enqueue(captureTask
+        Cycles.enqueue(captureTask
                 .acceptAsync(new ImageUploader(identifier)::upload)
                 .onError(printCasualErrorInChat(player)));
     }

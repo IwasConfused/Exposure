@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client.image;
 
-import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
 
 public record ExposureDataImage(ExposureData exposureData) implements Image {
     public int getWidth() {

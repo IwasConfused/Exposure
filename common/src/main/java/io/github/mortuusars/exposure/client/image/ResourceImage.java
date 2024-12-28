@@ -73,7 +73,7 @@ public class ResourceImage extends SimpleTexture implements Image {
 
     @Override
     public void reset(@NotNull TextureManager pTextureManager, @NotNull ResourceManager pResourceManager, @NotNull ResourceLocation pPath, @NotNull Executor pExecutor) {
-        super.reset(pTextureManager, pResourceManager, pPath, pExecutor);
+        super.reset(pTextureManager, pResourceManager, pPath, pExecutor); // TODO: move after closing?
         if (image != null) {
             image.close();
             image = null;

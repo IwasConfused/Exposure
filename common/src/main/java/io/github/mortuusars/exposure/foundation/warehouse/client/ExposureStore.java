@@ -56,12 +56,6 @@ public class ExposureStore {
         requester.refresh(identifier);
     }
 
-//    public void refreshAll() {
-//        exposures.replaceAll((identifier, exposure) ->
-//                exposure.is(SUCCESS) ? RequestedExposureData.needsRefresh(exposure) : exposure);
-//        requester.clear();
-//    }
-
     public void clear() {
         exposures.clear();
         requester.clear();

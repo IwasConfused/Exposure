@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.core;
 
 import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
+import io.github.mortuusars.exposure.client.image.ImageIdentifier;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

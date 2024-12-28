@@ -11,7 +11,7 @@ import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;

@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.foundation.warehouse.client.ExposureRequester;
 import io.github.mortuusars.exposure.foundation.warehouse.client.RequestedExposureStatus;
-import io.github.mortuusars.exposure.warehouse.ExposureData;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;

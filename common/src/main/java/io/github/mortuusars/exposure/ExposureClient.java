@@ -9,9 +9,8 @@ import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.foundation.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureUploader;
-import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureCache;
 import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureReceiver;
 import io.github.mortuusars.exposure.item.*;
 import net.minecraft.client.KeyMapping;
@@ -27,15 +26,9 @@ import java.util.function.Function;
 public class ExposureClient {
     private static final ExposureStore EXPOSURE_STORE = new ExposureStore();
 
-    private static final ImageRenderer imageRenderer = new ImageRenderer();
-    private static final PhotographRenderer photographRenderer = new PhotographRenderer();
+    private static final ImageRenderer IMAGE_RENDERER = new ImageRenderer();
+    private static final PhotographRenderer PHOTOGRAPH_RENDERER = new PhotographRenderer();
 
-    private static final ClientsideExposureCache exposureCache = new ClientsideExposureCache();
-    private static final ClientsideExposureUploader exposureUploader = new ClientsideExposureUploader();
-    private static final ClientsideExposureReceiver exposureReceiver = new ClientsideExposureReceiver(exposureCache);
-
-    @Nullable
-    private static KeyMapping openCameraControlsKey = null;
     private static boolean isIrisOrOculusInstalled;
 
     public static void init() {
@@ -52,27 +45,11 @@ public class ExposureClient {
     }
 
     public static ImageRenderer imageRenderer() {
-        return imageRenderer;
+        return IMAGE_RENDERER;
     }
 
     public static PhotographRenderer photographRenderer() {
-        return photographRenderer;
-    }
-
-    public static ClientsideExposureCache exposureCache() {
-        return exposureCache;
-    }
-
-    public static ClientsideExposureUploader exposureUploader() {
-        return exposureUploader;
-    }
-
-    public static ClientsideExposureReceiver exposureReceiver() {
-        return exposureReceiver;
-    }
-
-    public static ExposureData getOrQuery(ExposureIdentifier identifier) {
-        return exposureCache().getOrQueryAndEmpty(identifier);
+        return PHOTOGRAPH_RENDERER;
     }
 
     public static RenderableImage createExposureImage(ExposureFrame frame) {
@@ -92,13 +69,6 @@ public class ExposureClient {
         return new RenderableImage(new ExposureDataImage(exposureData), imageIdentifier);
     }
 
-    public static void registerKeymappings(Function<KeyMapping, KeyMapping> registerFunction) {
-        KeyMapping keyMapping = new KeyMapping("key.exposure.camera_controls",
-                InputConstants.UNKNOWN.getValue(), "category.exposure");
-
-        openCameraControlsKey = registerFunction.apply(keyMapping);
-    }
-
     private static void registerItemModelProperties() {
         ItemProperties.register(Exposure.Items.CAMERA.get(), Exposure.resource("camera_state"), CameraItemClientExtensions::itemPropertyFunction);
         ItemProperties.register(Exposure.Items.CHROMATIC_SHEET.get(), Exposure.resource("channels"), (stack, clientLevel, livingEntity, seed) ->
@@ -113,13 +83,6 @@ public class ExposureClient {
                         stack.getItem() instanceof AlbumItem albumItem ? albumItem.getPhotographsCount(stack) / 100f : 0f);
         ItemProperties.register(Exposure.Items.INTERPLANAR_PROJECTOR.get(), Exposure.resource("projector_active"),
                 (stack, clientLevel, livingEntity, seed) -> stack.has(DataComponents.CUSTOM_NAME) ? 1f : 0f);
-    }
-
-    public static KeyMapping getCameraControlsKey() {
-        Preconditions.checkState(openCameraControlsKey != null,
-                "Viewfinder Controls key mapping was not registered");
-
-        return openCameraControlsKey.isUnbound() ? Minecraft.getInstance().options.keyShift : openCameraControlsKey;
     }
 
     public static class Models {

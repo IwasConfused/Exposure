@@ -5,8 +5,6 @@ import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 
 public record PalettizedImage(int width, int height, byte[] pixels, ColorPalette palette) implements Image {
-//    public static final PalettedImage EMPTY = new PalettedImage(1, 1, new byte[]{0}, ColorPalette.MAP_COLORS);
-
     public PalettizedImage {
         Preconditions.checkArgument(width >= 0, "Width cannot be negative. %s", this);
         Preconditions.checkArgument(height >= 0, "Height cannot be negative. %s ", this);

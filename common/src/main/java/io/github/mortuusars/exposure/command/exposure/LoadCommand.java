@@ -12,6 +12,7 @@ import io.github.mortuusars.exposure.network.packet.client.LoadExposureFromFileC
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
+import org.apache.commons.lang3.NotImplementedException;
 
 public class LoadCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> get() {
@@ -34,12 +35,14 @@ public class LoadCommand {
     }
 
     //TODO: use default id if not specified
+    //TODO: use CaptureData
 
     private static int loadExposureFromFile(CommandSourceStack stack, String exposureId, String path, int size, boolean dither) throws CommandSyntaxException {
-        ServerPlayer player = stack.getPlayerOrException();
-        ExposureIdentifier identifier = ExposureIdentifier.id(exposureId);
-        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
-        Packets.sendToClient(new LoadExposureFromFileCommandS2CP(identifier, path, size, dither), player);
-        return 0;
+        throw new NotImplementedException();
+//        ServerPlayer player = stack.getPlayerOrException();
+//        ExposureIdentifier identifier = ExposureIdentifier.id(exposureId);
+//        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
+//        Packets.sendToClient(new LoadExposureFromFileCommandS2CP(identifier, path, size, dither), player);
+//        return 0;
     }
 }

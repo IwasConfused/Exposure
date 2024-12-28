@@ -33,47 +33,51 @@ public abstract class ZoomableScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        boolean handled = super.keyPressed(keyCode, scanCode, modifiers);
-        if (handled)
+        if (super.keyPressed(keyCode, scanCode, modifiers)) {
             return true;
+        }
 
-        if (minecraft.options.keyInventory.matches(keyCode, scanCode))
+        if (minecraft.options.keyInventory.matches(keyCode, scanCode)) {
             this.onClose();
-        else if (keyCode == InputConstants.KEY_ADD || keyCode == InputConstants.KEY_EQUALS)
+        } else if (keyCode == InputConstants.KEY_ADD || keyCode == InputConstants.KEY_EQUALS) {
             zoom.change(ZoomDirection.IN);
-        else if (keyCode == 333 /*KEY_SUBTRACT*/ || keyCode == InputConstants.KEY_MINUS)
+        } else if (keyCode == 333 /*KEY_SUBTRACT*/ || keyCode == InputConstants.KEY_MINUS) {
             zoom.change(ZoomDirection.OUT);
-        else
-            return false;
+        }
 
-        return true;
+        return false;
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        boolean handled = super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        if (super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) {
+            return true;
+        }
 
-        if (!handled) {
+        if (scrollY != 0) {
             zoom.change(scrollY >= 0.0 ? ZoomDirection.IN : ZoomDirection.OUT);
             return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
-        boolean handled = super.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+        if (super.mouseDragged(mouseX, mouseY, button, dragX, dragY)) {
+            return true;
+        }
 
-        if (!handled && button == 0) { // Left Click
+        if (button == 0) { // Left Click
             float centerX = width / 2f;
             float centerY = height / 2f;
 
             x = (float) Mth.clamp(x + dragX, -centerX, centerX);
             y = (float) Mth.clamp(y + dragY, -centerY, centerY);
-            handled = true;
+
+            return true;
         }
 
-        return handled;
+        return false;
     }
 }

@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.camera.viewfinder.OldViewfinder;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
+import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
@@ -71,7 +72,7 @@ public class ClientEvents {
 
         @SubscribeEvent
         public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
-            ExposureClient.registerKeymappings(key -> {
+            KeyboardHandler.registerKeymappings(key -> {
                 event.register(key);
                 return key;
             });
@@ -88,8 +89,6 @@ public class ClientEvents {
         @SubscribeEvent
         public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
             ExposureClient.exposureStore().clear();
-            ExposureClient.exposureCache().clear();
-            ExposureClient.exposureReceiver().clear();
         }
 
 //        @SubscribeEvent

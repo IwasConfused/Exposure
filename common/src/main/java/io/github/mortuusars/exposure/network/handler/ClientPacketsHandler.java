@@ -4,14 +4,14 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.client.snapshot.template.CaptureTemplates;
-import io.github.mortuusars.exposure.client.snapshot.SnapShot;
-import io.github.mortuusars.exposure.client.snapshot.capture.Capture;
-import io.github.mortuusars.exposure.client.snapshot.capture.action.CaptureActions;
-import io.github.mortuusars.exposure.client.snapshot.palettizer.ImagePalettizer;
-import io.github.mortuusars.exposure.client.snapshot.processing.Process;
-import io.github.mortuusars.exposure.client.snapshot.processing.Processor;
-import io.github.mortuusars.exposure.client.snapshot.saving.ImageUploader;
+import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
+import io.github.mortuusars.exposure.client.cycles.Cycles;
+import io.github.mortuusars.exposure.client.capture.Capture;
+import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
+import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
+import io.github.mortuusars.exposure.client.capture.processing.Process;
+import io.github.mortuusars.exposure.client.capture.processing.Processor;
+import io.github.mortuusars.exposure.client.capture.saving.ImageUploader;
 import io.github.mortuusars.exposure.core.CaptureClientData;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
@@ -62,7 +62,7 @@ public class ClientPacketsHandler {
         }
 
         executeOnMainThread(() -> {
-            SnapShot.enqueue(Capture.of(Capture.screenshot(),
+            Cycles.enqueue(Capture.of(Capture.screenshot(),
                             CaptureActions.hideGui(),
                             CaptureActions.forceRegularOrSelfieCamera(),
                             CaptureActions.disablePostEffect(),
@@ -90,7 +90,7 @@ public class ClientPacketsHandler {
         }
 
         executeOnMainThread(() -> {
-            SnapShot.enqueue(Capture.of(Capture.file(filePath))
+            Cycles.enqueue(Capture.of(Capture.file(filePath))
                     .handleErrorAndGetResult()
                     .thenAsync(Process.with(
                             Processor.Crop.SQUARE,
@@ -140,13 +140,13 @@ public class ClientPacketsHandler {
     }
 
     public static void waitForExposureChange(WaitForExposureChangeS2CP packet) {
-        executeOnMainThread(() -> ExposureClient.exposureCache().putOnWaitingList(packet.identifier()));
+//        executeOnMainThread(() -> ExposureClient.exposureCache().putOnWaitingList(packet.identifier()));
     }
 
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
         executeOnMainThread(() -> {
             ExposureClient.exposureStore().refresh(packet.identifier());
-            ExposureClient.exposureCache().remove(packet.identifier());
+//            ExposureClient.exposureCache().remove(packet.identifier());
             ExposureClient.imageRenderer().clearCacheOf(identifier -> identifier.matches(packet.identifier()));
         });
     }
@@ -179,7 +179,7 @@ public class ClientPacketsHandler {
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
                 Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.identifier(), data);
-                SnapShot.enqueue(captureTask);
+                Cycles.enqueue(captureTask);
             }, () -> LOGGER.error("Cannot start capture: no active camera."));
         });
     }

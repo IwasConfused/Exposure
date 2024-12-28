@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.warehouse.ExposureData;
+import io.github.mortuusars.exposure.foundation.warehouse.ExposureData;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;

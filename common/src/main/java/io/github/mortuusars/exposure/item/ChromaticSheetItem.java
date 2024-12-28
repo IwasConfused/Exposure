@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.frame.CaptureData;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
@@ -112,7 +113,9 @@ public class ChromaticSheetItem extends Item {
 
         ItemStack photographStack = createPhotographStack(identifier, layers);
 
-        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
+        ExposureServer.vault().expect(player, CaptureData.chromatic(identifier, player, layers.stream().mapToInt()));
+
+//        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
         Packets.sendToClient(new CreateChromaticExposureS2CP(identifier, layersIdentifiers), player);
 
         return photographStack;

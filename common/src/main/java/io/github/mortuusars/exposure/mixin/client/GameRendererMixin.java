@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.render.FovModifier;
-import io.github.mortuusars.exposure.client.snapshot.SnapShot;
+import io.github.mortuusars.exposure.client.cycles.Cycles;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
@@ -25,7 +25,7 @@ public abstract class GameRendererMixin {
             CameraClient.viewfinder().shader().process();
         }
 
-        SnapShot.tick();
+        Cycles.tick();
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getProfiler()Lnet/minecraft/util/profiling/ProfilerFiller;", ordinal = 1))

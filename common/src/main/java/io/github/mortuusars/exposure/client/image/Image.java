@@ -10,7 +10,7 @@ public interface Image extends AutoCloseable {
     default void close() {}
 
     default boolean isEmpty() {
-        return getWidth() <= 1 && getHeight() <= 1 && getPixelARGB(0, 0) == 0x00000000;
+        return this.equals(EMPTY) || (getWidth() <= 1 && getHeight() <= 1 && getPixelARGB(0, 0) == 0x00000000);
     }
 
     default Image copy() {

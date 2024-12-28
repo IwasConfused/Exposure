@@ -7,10 +7,12 @@ import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -65,4 +67,10 @@ public record CaptureData(ExposureIdentifier identifier,
             ByteBufCodecs.COMPOUND_TAG.encode(buffer, data.extraData());
         }
     };
+
+    public static CaptureData chromatic(ExposureIdentifier identifier, @NotNull ServerPlayer player, int frameSize) {
+        return new CaptureData(identifier, player, new CameraID(Util.NIL_UUID), ShutterSpeed.DEFAULT,
+                Optional.empty(), ExposureType.COLOR, frameSize, 1f, ColorPalette.MAP_COLORS,
+                false, 0, Optional.empty(), Optional.empty(), new CompoundTag());
+    }
 }
