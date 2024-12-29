@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.image.ImageIdentifier;
 import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.Util;
@@ -50,7 +49,7 @@ public class RenderedImageInstance implements AutoCloseable {
     RenderedImageInstance(RenderableImage image) {
         this.image = image;
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
-        this.textureLocation = image.getIdentifier().toResourceLocation();
+        this.textureLocation = Exposure.resource((Util.sanitizeName(image.getIdentifier(), ResourceLocation::validPathChar)));
         Minecraft.getInstance().getTextureManager().register(textureLocation, this.texture);
 
         int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
@@ -105,10 +104,6 @@ public class RenderedImageInstance implements AutoCloseable {
 
     public void draw(PoseStack poseStack, MultiBufferSource bufferSource, float minX, float minY, float maxX, float maxY,
                      float minU, float minV, float maxU, float maxV, int packedLight, int r, int g, int b, int a) {
-        if (image.getIdentifier().equals(ImageIdentifier.EMPTY)) {
-            return;
-        }
-
         if (this.requiresUpload) {
             this.updateTexture();
             this.requiresUpload = false;

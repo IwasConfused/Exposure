@@ -14,23 +14,23 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public record CaptureData(String id,
-                          PhotographerEntity photographer,
-                          CameraID cameraID,
-                          ShutterSpeed shutterSpeed,
-                          Optional<Integer> focalLengthOverride,
-                          ExposureType filmType,
-                          int frameSize,
-                          float cropFactor,
-                          ColorPalette colorPalette,
-                          boolean flashHasFired,
-                          int lightLevel,
-                          Optional<FileProjectingInfo> fileProjectingInfo,
-                          Optional<ChromaChannel> chromaChannel,
-                          CompoundTag extraData) {
-    public static final StreamCodec<RegistryFriendlyByteBuf, CaptureData> STREAM_CODEC = new StreamCodec<>() {
-        public @NotNull CaptureData decode(RegistryFriendlyByteBuf buffer) {
-            return new CaptureData(
+public record CaptureProperties(String id,
+                                PhotographerEntity photographer,
+                                CameraID cameraID,
+                                ShutterSpeed shutterSpeed,
+                                Optional<Integer> focalLengthOverride,
+                                ExposureType filmType,
+                                int frameSize,
+                                float cropFactor,
+                                ColorPalette colorPalette,
+                                boolean flashHasFired,
+                                int lightLevel,
+                                Optional<FileProjectingInfo> fileProjectingInfo,
+                                Optional<ChromaChannel> chromaChannel,
+                                CompoundTag extraData) {
+    public static final StreamCodec<RegistryFriendlyByteBuf, CaptureProperties> STREAM_CODEC = new StreamCodec<>() {
+        public @NotNull CaptureProperties decode(RegistryFriendlyByteBuf buffer) {
+            return new CaptureProperties(
                     ByteBufCodecs.STRING_UTF8.decode(buffer),
                     PhotographerEntity.STREAM_CODEC.decode(buffer),
                     CameraID.STREAM_CODEC.decode(buffer),
@@ -47,7 +47,7 @@ public record CaptureData(String id,
                     ByteBufCodecs.COMPOUND_TAG.decode(buffer));
         }
 
-        public void encode(RegistryFriendlyByteBuf buffer, CaptureData data) {
+        public void encode(RegistryFriendlyByteBuf buffer, CaptureProperties data) {
             ByteBufCodecs.STRING_UTF8.encode(buffer, data.id());
             PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
             CameraID.STREAM_CODEC.encode(buffer, data.cameraID());

@@ -13,7 +13,7 @@ import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.core.frame.CaptureData;
+import io.github.mortuusars.exposure.core.frame.CaptureProperties;
 import io.github.mortuusars.exposure.core.frame.FileProjectingInfo;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
@@ -218,13 +218,13 @@ public class CameraItem extends Item {
         @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
 
         if (cameraInstance != null && cameraInstance.getCurrentCaptureData().isPresent()) {
-            CaptureData captureData = cameraInstance.getCurrentCaptureData().get();
+            CaptureProperties captureProperties = cameraInstance.getCurrentCaptureData().get();
 
-            if (captureData.fileProjectingInfo().isPresent()) {
+            if (captureProperties.fileProjectingInfo().isPresent()) {
                 return PROJECT_COOLDOWN;
             }
 
-            if (captureData.flashHasFired()) {
+            if (captureProperties.flashHasFired()) {
                 return FLASH_COOLDOWN;
             }
         }
@@ -419,7 +419,7 @@ public class CameraItem extends Item {
 
             ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
-            CaptureData captureData = new CaptureData(
+            CaptureProperties captureProperties = new CaptureProperties(
                     exposureIdentifier.getId().orElseThrow(),
                     photographer,
                     cameraID,
@@ -435,9 +435,9 @@ public class CameraItem extends Item {
                     getChromaChannel(stack),
                     new CompoundTag());
 
-            CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureData));
+            CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureProperties));
             ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier.getId().orElseThrow());
-            Packets.sendToClient(new StartCaptureS2CP(captureData), serverPlayer);
+            Packets.sendToClient(new StartCaptureS2CP(captureProperties), serverPlayer);
         }
 
         return InteractionResultHolder.consume(stack);
@@ -659,25 +659,25 @@ public class CameraItem extends Item {
             return ExposureFrame.EMPTY;
         }
 
-        Optional<CaptureData> currentCaptureData = cameraInstance.getCurrentCaptureData();
+        Optional<CaptureProperties> currentCaptureData = cameraInstance.getCurrentCaptureData();
         if (currentCaptureData.isEmpty()) {
             Exposure.LOGGER.error("Cannot create an exposure frame: Camera Instance does not have capture data.");
             return ExposureFrame.EMPTY;
         }
-        CaptureData captureData = currentCaptureData.get();
+        CaptureProperties captureProperties = currentCaptureData.get();
 
         ExposureFrameTag tag = new ExposureFrameTag();
 
-        if (captureData.flashHasFired()) {
+        if (captureProperties.flashHasFired()) {
             tag.putBoolean(ExposureFrameTag.FLASH, true);
         }
 
-        tag.putInt(ExposureFrameTag.LIGHT_LEVEL, captureData.lightLevel());
+        tag.putInt(ExposureFrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
 
-        captureData.chromaChannel().ifPresent(channel ->
+        captureProperties.chromaChannel().ifPresent(channel ->
                 tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
-        captureData.fileProjectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(ExposureFrameTag.FROM_FILE, true));
+        captureProperties.fileProjectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(ExposureFrameTag.FROM_FILE, true));
 
         // Position
         ListTag pos = new ListTag();
@@ -717,7 +717,7 @@ public class CameraItem extends Item {
 
         List<EntityInFrame> entitiesInFrame;
 
-        if (captureData.fileProjectingInfo().isPresent()) {
+        if (captureProperties.fileProjectingInfo().isPresent()) {
             entitiesInFrame = Collections.emptyList();
         } else {
             if (photographerEntity instanceof ServerPlayer player) {
@@ -745,7 +745,7 @@ public class CameraItem extends Item {
         //TODO: modifyFrameData event
         //PlatformHelper.fireModifyFrameDataEvent(player, stack, frame, entities);
 
-        return new ExposureFrame(ExposureIdentifier.id(captureData.id()), captureData.filmType(),
+        return new ExposureFrame(ExposureIdentifier.id(captureProperties.id()), captureProperties.filmType(),
                 new Photographer(photographerEntity), entitiesInFrame, CustomData.of(tag));
     }
 

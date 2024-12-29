@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.client.render.image;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.mortuusars.exposure.client.image.ImageIdentifier;
 import io.github.mortuusars.exposure.client.image.RenderableImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.client.renderer.LightTexture;
@@ -12,7 +11,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 public class ImageRenderer implements AutoCloseable {
-    private final Map<ImageIdentifier, RenderedImageInstance> cache = new HashMap<>();
+    private final Map<String, RenderedImageInstance> cache = new HashMap<>();
 
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, RenderableImage image) {
         this.render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, LightTexture.FULL_BRIGHT, Color.WHITE);
@@ -62,7 +61,7 @@ public class ImageRenderer implements AutoCloseable {
         cache.clear();
     }
 
-    public void clearCacheOf(Predicate<ImageIdentifier> predicate) {
+    public void clearCacheOf(Predicate<String> predicate) {
         cache.entrySet().removeIf(entry -> {
             boolean shouldRemove = predicate.test(entry.getKey());
             if (shouldRemove) {

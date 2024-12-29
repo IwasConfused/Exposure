@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.core.CaptureDataFromClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.frame.CaptureData;
+import io.github.mortuusars.exposure.core.frame.CaptureProperties;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
@@ -100,8 +100,9 @@ public class ClientPacketsHandler {
                             Processor.Crop.SQUARE,
                             Processor.Resize.to(size)))
                     .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
-                    .then(image -> image.toExposure(new PalettedExposure.Tag(ExposureType.COLOR,
-                            player.getScoreboardName(), UnixTimestamp.Seconds.now(), true, false)))
+                    .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(), image.getPixels(), image.getPalette(),
+                            new PalettedExposure.Tag(ExposureType.COLOR, player.getScoreboardName(),
+                                    UnixTimestamp.Seconds.now(), true, false)))
                     .accept(image -> PalettedExposureUploader.upload(id, image))
                     .accept(v -> player.displayClientMessage(
                             Component.translatable("command.exposure.load_from_file.success", id)
@@ -166,7 +167,7 @@ public class ClientPacketsHandler {
 
     public static void startCapture(StartCaptureS2CP packet) {
         LocalPlayer player = Minecrft.player();
-        CaptureData data = packet.captureData();
+        CaptureProperties data = packet.captureProperties();
 
         executeOnMainThread(() -> {
             player.ifActiveExposureCameraPresent((item, stack) -> {

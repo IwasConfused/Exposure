@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.server;
 
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
-import io.github.mortuusars.exposure.core.frame.CaptureData;
+import io.github.mortuusars.exposure.core.frame.CaptureProperties;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.world.item.ItemStack;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public class CameraInstance {
     @Nullable
-    private CaptureData currentCaptureData = null;
+    private CaptureProperties currentCaptureProperties = null;
 
     private long captureStartTick = -1;
     private boolean waitingForProjectionResult = false;
@@ -32,15 +32,15 @@ public class CameraInstance {
         }
     }
 
-    public Optional<CaptureData> getCurrentCaptureData() {
-        return Optional.ofNullable(currentCaptureData);
+    public Optional<CaptureProperties> getCurrentCaptureData() {
+        return Optional.ofNullable(currentCaptureProperties);
     }
 
-    public void setCurrentCaptureData(Level level, CaptureData captureData) {
-        this.currentCaptureData = captureData;
+    public void setCurrentCaptureData(Level level, CaptureProperties captureProperties) {
+        this.currentCaptureProperties = captureProperties;
         captureStartTick = level.getGameTime();
 
-        if (captureData.fileProjectingInfo().isPresent()) {
+        if (captureProperties.fileProjectingInfo().isPresent()) {
             waitForInterplanarProjectionResult(25);
         }
     }

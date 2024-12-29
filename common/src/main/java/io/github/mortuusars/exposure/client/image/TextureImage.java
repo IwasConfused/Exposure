@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-public class TextureImage extends SimpleTexture implements Image {
+public class TextureImage extends SimpleTexture implements RenderableImage {
     @Nullable
     protected NativeImage image;
 
@@ -38,7 +38,7 @@ public class TextureImage extends SimpleTexture implements Image {
         return image != null ? image.getPixelRGBA(x, y) : 0x00000000;
     }
 
-    public static @NotNull Image getOrCreate(ResourceLocation location) {
+    public static @NotNull RenderableImage getOrCreate(ResourceLocation location) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
         @Nullable AbstractTexture existingTexture = textureManager.byPath.get(location);
@@ -88,5 +88,10 @@ public class TextureImage extends SimpleTexture implements Image {
             image.close();
             image = null;
         }
+    }
+
+    @Override
+    public String getIdentifier() {
+        return location.toString().replace(':', '/');
     }
 }

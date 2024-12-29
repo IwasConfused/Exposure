@@ -36,22 +36,22 @@ public class ClientTrichromeFinalizer {
 
         item.tick();
 
-        if (item.isDone()) {
-            if (item.hasAllImages()) {
-                List<Image> images = item.getImages();
-                TrichromeImage trichromeImage = new TrichromeImage(images.get(0), images.get(1), images.get(2));
-                PalettedImage palettedImage = ImagePalettizer.palettizeAndClose(trichromeImage, ColorPalette.MAP_COLORS, true);
-                PalettedExposure exposure = palettedImage.toExposure(new PalettedExposure.Tag(ExposureType.COLOR,
-                        Minecrft.player().getScoreboardName(), UnixTimestamp.Seconds.now(), false, false));
-                PalettedExposureUploader.upload(item.getId(), exposure);
-                palettedImage.close();
-            } else {
-                Exposure.LOGGER.error("Cannot create chromatic image with id {}. Couldn't get all images data in time. {}",
-                        item.getId(), String.join(", ", item.getLayers().stream().map(ExposureIdentifier::toString).toList()));
-            }
-
-            processingQueue.remove();
-        }
+//        if (item.isDone()) {
+//            if (item.hasAllImages()) {
+//                List<Image> images = item.getImages();
+//                TrichromeImage trichromeImage = new TrichromeImage(images.get(0), images.get(1), images.get(2));
+//                PalettedImage palettedImage = ImagePalettizer.palettizeAndClose(trichromeImage, ColorPalette.MAP_COLORS, true);
+//                PalettedExposure exposure = palettedImage.toExposure(new PalettedExposure.Tag(ExposureType.COLOR,
+//                        Minecrft.player().getScoreboardName(), UnixTimestamp.Seconds.now(), false, false));
+//                PalettedExposureUploader.upload(item.getId(), exposure);
+//                palettedImage.close();
+//            } else {
+//                Exposure.LOGGER.error("Cannot create chromatic image with id {}. Couldn't get all images data in time. {}",
+//                        item.getId(), String.join(", ", item.getLayers().stream().map(ExposureIdentifier::toString).toList()));
+//            }
+//
+//            processingQueue.remove();
+//        }
     }
 
     private static class TrichromeExposureImagesGetter {
@@ -69,21 +69,21 @@ public class ClientTrichromeFinalizer {
 
         public void tick() {
             for (int i = 0; i < 3; i++) {
-                if (images.get(i).isEmpty()) {
-                    images.set(i, ExposureClient.createExposureImage(layers.get(i)));
-                }
+//                if (images.get(i).isEmpty()) {
+//                    images.set(i, ExposureClient.createExposureImage(layers.get(i)));
+//                }
             }
 
             attemptsRemaining--;
         }
 
-        public boolean isDone() {
-            return attemptsRemaining <= 0 || hasAllImages();
-        }
+//        public boolean isDone() {
+//            return attemptsRemaining <= 0 || hasAllImages();
+//        }
 
-        public boolean hasAllImages() {
-            return images.stream().noneMatch(Image::isEmpty);
-        }
+//        public boolean hasAllImages() {
+//            return images.stream().noneMatch(Image::isEmpty);
+//        }
 
         public List<ExposureIdentifier> getLayers() {
             return layers;

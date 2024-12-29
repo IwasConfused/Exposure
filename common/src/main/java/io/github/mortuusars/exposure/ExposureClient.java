@@ -5,6 +5,7 @@ import io.github.mortuusars.exposure.client.image.*;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
@@ -49,18 +50,16 @@ public class ExposureClient {
 
     public static RenderableImage createRenderableExposureImage(ExposureFrame frame) {
         RenderableImage renderableImage = createRenderableExposureImage(frame.identifier());
-        return Censor.isAllowedToRender(frame) ? renderableImage : renderableImage.wrapIn(CensoredImage::new);
-    }
-
-    public static Image createExposureImage(ExposureIdentifier identifier) {
-        return identifier.map(
-                id -> new PalettedImage(ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY)),
-                TextureImage::getOrCreate);
+        return Censor.isAllowedToRender(frame) ? renderableImage : new CensoredImage(renderableImage);
     }
 
     public static RenderableImage createRenderableExposureImage(ExposureIdentifier identifier) {
-        Image image = createExposureImage(identifier);
-        return new RenderableImage(image, image.isEmpty() ? ImageIdentifier.EMPTY : ImageIdentifier.of(identifier));
+        return identifier.map(
+                id -> {
+                    RequestedPalettedExposure exposure = ExposureClient.exposureStore().getOrRequest(id);
+                    return exposure.getData().map(data -> (RenderableImage) new PalettedExposureImage(id, data)).orElse(Image.EMPTY);
+                },
+                TextureImage::getOrCreate);
     }
 
     // --
