@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.render.photograph;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.image.RenderableImage;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import net.minecraft.resources.ResourceLocation;
@@ -56,6 +56,6 @@ public record PhotographFeatures(String name,
     }
 
     public RenderableImage process(RenderableImage image) {
-        return pixelModifier != null ? image.processWith(pixelModifier) : image;
+        return pixelModifier != null ? image.modify(pixelModifier) : image;
     }
 }

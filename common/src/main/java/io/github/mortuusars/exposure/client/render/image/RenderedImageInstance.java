@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.image.RenderableImage;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -49,7 +49,7 @@ public class RenderedImageInstance implements AutoCloseable {
     RenderedImageInstance(RenderableImage image) {
         this.image = image;
         this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
-        this.textureLocation = Exposure.resource((Util.sanitizeName(image.getIdentifier(), ResourceLocation::validPathChar)));
+        this.textureLocation = image.getIdentifier().toResourceLocation();
         Minecraft.getInstance().getTextureManager().register(textureLocation, this.texture);
 
         int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();

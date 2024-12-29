@@ -3,8 +3,8 @@ package io.github.mortuusars.exposure.client.image;
 import com.google.common.base.Preconditions;
 
 public interface Image extends AutoCloseable {
-    RenderableImage EMPTY = new EmptyImage();
-    RenderableImage MISSING = new MissingImage();
+    Image EMPTY = new EmptyImage();
+    Image MISSING = new MissingImage();
 
     int getWidth();
     int getHeight();
@@ -19,15 +19,35 @@ public interface Image extends AutoCloseable {
                         "Count should be '%s'.", pixelCount, width, height, width * height);
     }
 
-//    default boolean isEmpty() {
-//        return this.equals(EMPTY) || (getWidth() <= 1 && getHeight() <= 1 && getPixelARGB(0, 0) == 0x00000000);
-//    }
+    abstract class Wrapped implements Image {
+        private final Image image;
 
-//    default Image copy() {
-//        return PixelImage.copyFrom(this);
-//    }
-//
-//    default RenderableImage toRenderable(ImageIdentifier identifier) {
-//        return new RenderableImage(this, identifier);
-//    }
+        public Wrapped(Image image) {
+            this.image = image;
+        }
+
+        public Image getImage() {
+            return image;
+        }
+
+        @Override
+        public int getWidth() {
+            return image.getWidth();
+        }
+
+        @Override
+        public int getHeight() {
+            return image.getHeight();
+        }
+
+        @Override
+        public int getPixelARGB(int x, int y) {
+            return image.getPixelARGB(x, y);
+        }
+
+        @Override
+        public void close() {
+            image.close();
+        }
+    }
 }

@@ -3,11 +3,11 @@ package io.github.mortuusars.exposure.client.image;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class CensoredImage implements RenderableImage {
-    private final RenderableImage image;
+public class CensoredImage implements Image {
+    private final Image image;
     private final Integer[][] cache;
 
-    public CensoredImage(RenderableImage image) {
+    public CensoredImage(Image image) {
         this.image = image;
         float blockSize = getBlockSize();
         this.cache = new Integer[Mth.ceil(getWidth() / blockSize)][Mth.ceil(getHeight() / blockSize)];
@@ -31,11 +31,6 @@ public class CensoredImage implements RenderableImage {
     @Override
     public void close() {
         image.close();
-    }
-
-    @Override
-    public String getIdentifier() {
-        return image.getIdentifier() + "_censored";
     }
 
     @Override

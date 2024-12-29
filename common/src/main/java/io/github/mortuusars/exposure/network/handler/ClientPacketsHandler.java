@@ -143,7 +143,7 @@ public class ClientPacketsHandler {
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
         executeOnMainThread(() -> {
             ExposureClient.exposureStore().refresh(packet.id());
-            ExposureClient.imageRenderer().clearCacheOf(identifier -> identifier.matches(packet.id()));
+            ExposureClient.imageRenderer().clearCacheOf(packet.id());
         });
     }
 

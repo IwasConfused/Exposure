@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.image;
 
 import java.util.function.Function;
 
-public class ProcessedImage extends WrappedImage {
+public class ProcessedImage extends Image.Wrapped {
     protected final Function<Integer, Integer> modifier;
 
     public ProcessedImage(Image image, Function<Integer, Integer> modifier) {

@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.render.photograph;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.image.RenderableImage;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.client.render.texture.TextureRenderer;
 import io.github.mortuusars.exposure.core.PhotographType;
@@ -74,10 +74,10 @@ public class PhotographRenderer {
             float offset = 0.0625f;
             poseStack.translate(offset, offset, 0.001);
             poseStack.scale(0.875f, 0.875f, 0.875f);
-            ExposureClient.imageRenderer().render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
+            ExposureClient.imageRenderer().render(image, poseStack, bufferSource, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
             poseStack.popPose();
         } else {
-            ExposureClient.imageRenderer().render(poseStack, bufferSource, image, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
+            ExposureClient.imageRenderer().render(image, poseStack, bufferSource, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
         }
 
         if (renderPaper && photographFeatures.hasOverlayTexture()) {

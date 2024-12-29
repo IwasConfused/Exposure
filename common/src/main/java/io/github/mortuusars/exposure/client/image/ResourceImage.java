@@ -2,6 +2,8 @@ package io.github.mortuusars.exposure.client.image;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImageIdentifier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.resources.ResourceLocation;
@@ -12,52 +14,52 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.util.concurrent.Executor;
 
-public class TextureImage extends SimpleTexture implements RenderableImage {
+public class ResourceImage extends SimpleTexture implements RenderableImage {
     @Nullable
     protected NativeImage image;
 
-    public TextureImage(ResourceLocation location) {
+    public ResourceImage(ResourceLocation location) {
         super(location);
-    }
-
-    @Override
-    public int getWidth() {
-        @Nullable NativeImage image = getImage();
-        return image != null ? image.getWidth() : 1;
-    }
-
-    @Override
-    public int getHeight() {
-        @Nullable NativeImage image = getImage();
-        return image != null ? image.getHeight() : 1;
-    }
-
-    @Override
-    public int getPixelARGB(int x, int y) {
-        @Nullable NativeImage image = getImage();
-        return image != null ? image.getPixelRGBA(x, y) : 0x00000000;
     }
 
     public static @NotNull RenderableImage getOrCreate(ResourceLocation location) {
         TextureManager textureManager = Minecraft.getInstance().getTextureManager();
 
         @Nullable AbstractTexture existingTexture = textureManager.byPath.get(location);
-        if (existingTexture != null) {
-            return existingTexture instanceof io.github.mortuusars.exposure.client.image.TextureImage exposureTexture ? exposureTexture : Image.MISSING;
+        if (existingTexture instanceof ResourceImage resourceImage) {
+            return resourceImage;
         }
 
         try {
-            io.github.mortuusars.exposure.client.image.TextureImage texture = new io.github.mortuusars.exposure.client.image.TextureImage(location);
+            ResourceImage texture = new ResourceImage(location);
             textureManager.register(location, texture);
             return texture;
         }
         catch (Exception e) {
             Exposure.LOGGER.error("Cannot load texture [{}]. {}", location, e);
-            return Image.MISSING;
+            return RenderableImage.MISSING;
         }
     }
 
-    public @Nullable NativeImage getImage() {
+    @Override
+    public int getWidth() {
+        @Nullable NativeImage image = getNativeImage();
+        return image != null ? image.getWidth() : 1;
+    }
+
+    @Override
+    public int getHeight() {
+        @Nullable NativeImage image = getNativeImage();
+        return image != null ? image.getHeight() : 1;
+    }
+
+    @Override
+    public int getPixelARGB(int x, int y) {
+        @Nullable NativeImage image = getNativeImage();
+        return image != null ? image.getPixelRGBA(x, y) : 0x00000000;
+    }
+
+    public @Nullable NativeImage getNativeImage() {
         if (this.image != null)
             return image;
 
@@ -72,8 +74,9 @@ public class TextureImage extends SimpleTexture implements RenderableImage {
     }
 
     @Override
-    public void reset(@NotNull TextureManager pTextureManager, @NotNull ResourceManager pResourceManager, @NotNull ResourceLocation pPath, @NotNull Executor pExecutor) {
-        super.reset(pTextureManager, pResourceManager, pPath, pExecutor); // TODO: move after closing?
+    public void reset(@NotNull TextureManager textureManager, @NotNull ResourceManager resourceManager,
+                      @NotNull ResourceLocation path, @NotNull Executor executor) {
+        super.reset(textureManager, resourceManager, path, executor); // TODO: move after closing?
         if (image != null) {
             image.close();
             image = null;
@@ -91,7 +94,12 @@ public class TextureImage extends SimpleTexture implements RenderableImage {
     }
 
     @Override
-    public String getIdentifier() {
-        return location.toString().replace(':', '/');
+    public Image getImage() {
+        return this;
+    }
+
+    @Override
+    public RenderableImageIdentifier getIdentifier() {
+        return new RenderableImageIdentifier(location.toString());
     }
 }

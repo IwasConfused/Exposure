@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.core.warehouse;
 
+import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureRequester;
@@ -71,6 +72,10 @@ public class RequestedPalettedExposure {
 
     public Optional<PalettedExposure> getData() {
         return Optional.ofNullable(data);
+    }
+
+    public <T> T map(Function<PalettedExposure, T> ifPresent, T orElse) {
+        return data != null ? ifPresent.apply(data) : orElse;
     }
 
     public PalettedExposure orElse(PalettedExposure orElse) {

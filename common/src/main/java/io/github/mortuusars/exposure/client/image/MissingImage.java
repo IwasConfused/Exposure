@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client.image;
 
-public class MissingImage implements RenderableImage {
+public class MissingImage implements Image {
     @Override
     public int getWidth() {
         return 2;
@@ -14,10 +14,5 @@ public class MissingImage implements RenderableImage {
     @Override
     public int getPixelARGB(int x, int y) {
         return (x + y % 2) % 2 == 0 ? 0xFF000000 : 0xFFFF01ED; // black/pink checkerboard
-    }
-
-    @Override
-    public String getIdentifier() {
-        return "missing";
     }
 }

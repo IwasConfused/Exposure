@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.image.RenderableImage;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
@@ -98,7 +98,8 @@ public class NegativeExposureScreen extends ZoomableScreen {
                         ? ExposureType.BLACK_AND_WHITE
                         : ExposureType.COLOR);
 
-        RenderableImage image = ExposureClient.createRenderableExposureImage(exposureIdentifier).processWith(PixelModifier.NEGATIVE_FILM);
+        RenderableImage image = ExposureClient.createRawRenderableExposureImage(exposureIdentifier)
+                .modify(PixelModifier.NEGATIVE_FILM);
 
         int width = image.getWidth();
         int height = image.getHeight();
@@ -131,7 +132,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
 
-        ExposureClient.imageRenderer().render(guiGraphics.pose(), bufferSource, image, new RenderCoordinates(width, height), type.getImageColor());
+        ExposureClient.imageRenderer().render(image, guiGraphics.pose(), bufferSource, new RenderCoordinates(width, height), type.getImageColor());
 
         bufferSource.endBatch();
 

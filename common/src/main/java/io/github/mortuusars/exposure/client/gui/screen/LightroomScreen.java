@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.block.entity.Lightroom;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
-import io.github.mortuusars.exposure.client.image.RenderableImage;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
@@ -321,10 +321,11 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
 
     public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
                             float x, float y, float size, float alpha, ExposureType exposureType) {
-        RenderableImage image = ExposureClient.createRenderableExposureImage(frame).processWith(PixelModifier.NEGATIVE_FILM);
+        RenderableImage image = ExposureClient.createRenderableExposureImage(frame)
+                .modify(PixelModifier.NEGATIVE_FILM);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-        ExposureClient.imageRenderer().render(poseStack, bufferSource, image, new RenderCoordinates(x, y, size, size),
+        ExposureClient.imageRenderer().render(image, poseStack, bufferSource, new RenderCoordinates(x, y, size, size),
                 exposureType.getImageColor().withAlpha((int) (alpha * 255)));
         bufferSource.endBatch();
     }

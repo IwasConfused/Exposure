@@ -2,13 +2,14 @@ package io.github.mortuusars.exposure;
 
 import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.image.*;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.*;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -49,17 +50,18 @@ public class ExposureClient {
     // --
 
     public static RenderableImage createRenderableExposureImage(ExposureFrame frame) {
-        RenderableImage renderableImage = createRenderableExposureImage(frame.identifier());
-        return Censor.isAllowedToRender(frame) ? renderableImage : new CensoredImage(renderableImage);
+        RenderableImage renderableImage = createRawRenderableExposureImage(frame.identifier());
+        return Censor.isAllowedToRender(frame)
+                ? renderableImage
+                : renderableImage.modify(CensoredImage::new, "censored");
     }
 
-    public static RenderableImage createRenderableExposureImage(ExposureIdentifier identifier) {
+    public static RenderableImage createRawRenderableExposureImage(ExposureIdentifier identifier) {
         return identifier.map(
-                id -> {
-                    RequestedPalettedExposure exposure = ExposureClient.exposureStore().getOrRequest(id);
-                    return exposure.getData().map(data -> (RenderableImage) new PalettedExposureImage(id, data)).orElse(Image.EMPTY);
-                },
-                TextureImage::getOrCreate);
+                id -> ExposureClient.exposureStore().getOrRequest(id).map(
+                        exposure -> RenderableImage.fromExposure(exposure, id),
+                        RenderableImage.EMPTY),
+                ResourceImage::getOrCreate);
     }
 
     // --
