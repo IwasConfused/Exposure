@@ -1,15 +1,26 @@
-package io.github.mortuusars.exposure.client.image.pixel_modifiers;
+package io.github.mortuusars.exposure.client.image.processor;
 
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.ProcessedImage;
 import net.minecraft.util.FastColor;
 
-public class MultiplyPixelModifier implements PixelModifier {
-    public final int multiplyColor;
+public class MultiplyProcessor implements Processor {
+    protected final int multiplyColor;
 
-    public MultiplyPixelModifier(int multiplyColor) {
+    public MultiplyProcessor(int multiplyColor) {
         this.multiplyColor = multiplyColor;
     }
 
     @Override
+    public Image process(Image image) {
+        return new ProcessedImage(image, this::modifyPixel);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return multiplyColor != 0 ? "tint-" + Integer.toHexString(multiplyColor) : "";
+    }
+
     public int modifyPixel(int ARGB) {
         if (multiplyColor == 0)
             return ARGB;
@@ -30,10 +41,5 @@ public class MultiplyPixelModifier implements PixelModifier {
         red = Math.min(255, (red * tintRed) / 255);
 
         return FastColor.ABGR32.color(alpha, blue, green, red);
-    }
-
-    @Override
-    public String getIdentifier() {
-        return multiplyColor != 0 ? "_tint" + Integer.toHexString(multiplyColor) : "";
     }
 }

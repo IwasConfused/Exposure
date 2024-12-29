@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.capture.processing;
+package io.github.mortuusars.exposure.client.image.processor;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.client.image.Image;
@@ -7,7 +7,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 public class BlackAndWhiteProcessor implements Processor {
-    private final float contrast;
+    protected final float contrast;
 
     /**
      * @param contrast 1 means no change.
@@ -17,9 +17,18 @@ public class BlackAndWhiteProcessor implements Processor {
         this.contrast = contrast;
     }
 
+    public BlackAndWhiteProcessor() {
+        this(1f);
+    }
+
     @Override
-    public Image apply(Image image) {
+    public Image process(Image image) {
         return new ProcessedImage(image, this::modifyPixel);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "bw-" + contrast;
     }
 
     public int modifyPixel(int colorABGR) {
@@ -41,6 +50,6 @@ public class BlackAndWhiteProcessor implements Processor {
 
     @Override
     public String toString() {
-        return "BlackAndWhiteProcessor{}";
+        return contrast == 1f ? "BlackAndWhiteProcessor{}" : "BlackAndWhiteProcessor{contrast=" + contrast + "}";
     }
 }

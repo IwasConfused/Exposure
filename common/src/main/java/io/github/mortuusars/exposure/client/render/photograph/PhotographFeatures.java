@@ -2,9 +2,9 @@ package io.github.mortuusars.exposure.client.render.photograph;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.core.PhotographType;
-import io.github.mortuusars.exposure.client.image.pixel_modifiers.PixelModifier;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,13 +16,13 @@ public record PhotographFeatures(String name,
                                  ResourceLocation overlayTexture,
                                  ResourceLocation albumPaperTexture,
                                  ResourceLocation albumOverlayTexture,
-                                 PixelModifier pixelModifier) {
+                                 Processor processor) {
     public static final PhotographFeatures REGULAR = new PhotographFeatures("",
             ExposureClient.Textures.Photograph.REGULAR_PAPER,
             ExposureClient.Textures.EMPTY,
             ExposureClient.Textures.Photograph.REGULAR_ALBUM_PAPER,
             ExposureClient.Textures.EMPTY,
-            PixelModifier.EMPTY);
+            Processor.EMPTY);
 
     private static final Map<PhotographType, PhotographFeatures> REGISTERED_FEATURES = new HashMap<>();
 
@@ -34,7 +34,7 @@ public record PhotographFeatures(String name,
                 ExposureClient.Textures.Photograph.AGED_OVERLAY,
                 ExposureClient.Textures.Photograph.AGED_ALBUM_PAPER,
                 ExposureClient.Textures.Photograph.AGED_ALBUM_OVERLAY,
-                PixelModifier.AGED));
+                Processor.AGED));
     }
 
     public static void register(PhotographType photographType, PhotographFeatures features) {
@@ -56,6 +56,6 @@ public record PhotographFeatures(String name,
     }
 
     public RenderableImage process(RenderableImage image) {
-        return pixelModifier != null ? image.modify(pixelModifier) : image;
+        return !processor.equals(Processor.EMPTY) ? image.processWith(processor) : image;
     }
 }

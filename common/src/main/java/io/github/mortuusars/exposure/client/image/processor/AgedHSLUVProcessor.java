@@ -1,11 +1,14 @@
-package io.github.mortuusars.exposure.client.image.pixel_modifiers;
+package io.github.mortuusars.exposure.client.image.processor;
 
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.ProcessedImage;
 import io.github.mortuusars.exposure.core.image.color.converter.HUSLColorConverter;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.StringUtils;
 
-public class AgedHSLUVPixelModifier implements PixelModifier {
+// HSB is faster while giving only slightly worse result. HSLUV is slower and creates noticeable freezes when exposure is loaded.
+public class AgedHSLUVProcessor implements Processor {
     public final int tintColor;
     public final double[] tintColorHsluv;
     public final float tintOpacity;
@@ -18,7 +21,7 @@ public class AgedHSLUVPixelModifier implements PixelModifier {
      * @param blackPoint Like in a Levels adjustment. 0-255.
      * @param whitePoint Like in a Levels adjustment. 0-255.
      */
-    public AgedHSLUVPixelModifier(int tintColor, float tintOpacity, int blackPoint, int whitePoint) {
+    public AgedHSLUVProcessor(int tintColor, float tintOpacity, int blackPoint, int whitePoint) {
         this.tintColor = tintColor;
         String hexStr = StringUtils.leftPad(Integer.toHexString(tintColor & 0xFFFFFF), 6, "0");
         this.tintColorHsluv = HUSLColorConverter.hexToHsluv("#" + hexStr);
@@ -28,11 +31,15 @@ public class AgedHSLUVPixelModifier implements PixelModifier {
     }
 
     @Override
+    public Image process(Image image) {
+        return new ProcessedImage(image, this::modifyPixel);
+    }
+
+    @Override
     public String getIdentifier() {
         return "aged";
     }
 
-    @Override
     public int modifyPixel(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);

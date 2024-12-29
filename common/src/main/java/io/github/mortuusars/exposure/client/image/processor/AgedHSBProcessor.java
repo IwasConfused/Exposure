@@ -1,10 +1,12 @@
-package io.github.mortuusars.exposure.client.image.pixel_modifiers;
+package io.github.mortuusars.exposure.client.image.processor;
 
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.ProcessedImage;
 import io.github.mortuusars.exposure.core.image.color.Color;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class AgedHSBPixelModifier implements PixelModifier {
+public class AgedHSBProcessor implements Processor {
     private final int tintColor;
     private final float tintOpacity;
     private final int blackPoint;
@@ -16,7 +18,7 @@ public class AgedHSBPixelModifier implements PixelModifier {
      * @param blackPoint Like in a Levels adjustment. 0-255.
      * @param whitePoint Like in a Levels adjustment. 0-255.
      */
-    public AgedHSBPixelModifier(int tintColor, float tintOpacity, int blackPoint, int whitePoint) {
+    public AgedHSBProcessor(int tintColor, float tintOpacity, int blackPoint, int whitePoint) {
         this.tintColor = tintColor;
         this.tintOpacity = tintOpacity;
         this.blackPoint = blackPoint & 0xFF; // 0-255
@@ -24,11 +26,15 @@ public class AgedHSBPixelModifier implements PixelModifier {
     }
 
     @Override
+    public Image process(Image image) {
+        return new ProcessedImage(image, this::modifyPixel);
+    }
+
+    @Override
     public String getIdentifier() {
         return "aged";
     }
 
-    @Override
     public int modifyPixel(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);

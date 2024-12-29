@@ -8,8 +8,8 @@ import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
 import io.github.mortuusars.exposure.core.cycles.Cycles;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
-import io.github.mortuusars.exposure.client.capture.processing.Process;
-import io.github.mortuusars.exposure.client.capture.processing.Processor;
+import io.github.mortuusars.exposure.client.image.processor.Process;
+import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
 import io.github.mortuusars.exposure.core.CaptureDataFromClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
@@ -97,7 +97,7 @@ public class ClientPacketsHandler {
             Cycles.enqueue(Capture.of(Capture.file(filePath))
                     .handleErrorAndGetResult()
                     .thenAsync(Process.with(
-                            Processor.Crop.SQUARE,
+                            Processor.Crop.SQUARE_CENTER,
                             Processor.Resize.to(size)))
                     .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
                     .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(), image.getPixels(), image.getPalette(),

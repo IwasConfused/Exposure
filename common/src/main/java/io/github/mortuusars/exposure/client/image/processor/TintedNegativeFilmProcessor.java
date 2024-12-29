@@ -1,22 +1,28 @@
-package io.github.mortuusars.exposure.client.image.pixel_modifiers;
+package io.github.mortuusars.exposure.client.image.processor;
 
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.ProcessedImage;
 import io.github.mortuusars.exposure.core.FilmColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class TintedNegativeFilmPixelModifier implements PixelModifier {
-    private final FilmColor filmColor;
+public class TintedNegativeFilmProcessor implements Processor {
+    private final FilmColor tintColor;
 
-    public TintedNegativeFilmPixelModifier(FilmColor tintColor) {
-        this.filmColor = tintColor;
+    public TintedNegativeFilmProcessor(FilmColor tintColor) {
+        this.tintColor = tintColor;
+    }
+
+    @Override
+    public Image process(Image image) {
+        return new ProcessedImage(image, this::modifyPixel);
     }
 
     @Override
     public String getIdentifier() {
-        return "tinted_negative_film";
+        return "tinted-negative-film";
     }
 
-    @Override
     public int modifyPixel(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);
@@ -34,9 +40,9 @@ public class TintedNegativeFilmPixelModifier implements PixelModifier {
         blue = 255 - blue;
 
         // Tint
-        red = (int) (red * filmColor.r() / 255);
-        green = (int) (green * filmColor.g() / 255);
-        blue = (int) (blue * filmColor.b() / 255);
+        red = (int) (red * tintColor.r() / 255);
+        green = (int) (green * tintColor.g() / 255);
+        blue = (int) (blue * tintColor.b() / 255);
 
         return FastColor.ARGB32.color(alpha, red, green, blue);
     }

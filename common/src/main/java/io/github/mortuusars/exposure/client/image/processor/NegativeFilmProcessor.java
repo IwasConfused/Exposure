@@ -1,15 +1,21 @@
-package io.github.mortuusars.exposure.client.image.pixel_modifiers;
+package io.github.mortuusars.exposure.client.image.processor;
 
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.ProcessedImage;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class NegativeFilmPixelModifier implements PixelModifier {
+public class NegativeFilmProcessor implements Processor {
     @Override
-    public String getIdentifier() {
-        return "negative_film";
+    public Image process(Image image) {
+        return new ProcessedImage(image, this::modifyPixel);
     }
 
     @Override
+    public String getIdentifier() {
+        return "negative-film";
+    }
+
     public int modifyPixel(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);

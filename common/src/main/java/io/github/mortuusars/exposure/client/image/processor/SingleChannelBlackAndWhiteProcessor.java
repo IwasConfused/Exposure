@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.capture.processing;
+package io.github.mortuusars.exposure.client.image.processor;
 
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ProcessedImage;
@@ -13,8 +13,13 @@ public class SingleChannelBlackAndWhiteProcessor implements Processor {
     }
 
     @Override
-    public Image apply(Image image) {
+    public Image process(Image image) {
         return new ProcessedImage(image, this::modifyPixel);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "bw-" + channel.getSerializedName();
     }
 
     public int modifyPixel(int colorARGB) {
@@ -29,8 +34,6 @@ public class SingleChannelBlackAndWhiteProcessor implements Processor {
 
     @Override
     public String toString() {
-        return "SingleChannelBlackAndWhiteProcessor{" +
-                "channel=" + channel +
-                '}';
+        return "SingleChannelBlackAndWhiteProcessor{channel=" + channel + '}';
     }
 }

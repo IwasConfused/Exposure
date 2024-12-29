@@ -2,12 +2,11 @@ package io.github.mortuusars.exposure;
 
 import io.github.mortuusars.exposure.client.Censor;
 import io.github.mortuusars.exposure.client.image.*;
+import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
-import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import io.github.mortuusars.exposure.item.*;
@@ -50,10 +49,10 @@ public class ExposureClient {
     // --
 
     public static RenderableImage createRenderableExposureImage(ExposureFrame frame) {
-        RenderableImage renderableImage = createRawRenderableExposureImage(frame.identifier());
+        RenderableImage image = createRawRenderableExposureImage(frame.identifier());
         return Censor.isAllowedToRender(frame)
-                ? renderableImage
-                : renderableImage.modify(CensoredImage::new, "censored");
+                ? image
+                : image.processWith(Processor.CENSORED);
     }
 
     public static RenderableImage createRawRenderableExposureImage(ExposureIdentifier identifier) {

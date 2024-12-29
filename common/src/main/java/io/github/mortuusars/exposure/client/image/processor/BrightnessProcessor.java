@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.capture.processing;
+package io.github.mortuusars.exposure.client.image.processor;
 
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ProcessedImage;
@@ -9,15 +9,20 @@ public class BrightnessProcessor implements Processor {
     public float brightenPerStop = 0.3f;
     public float darkenPerStop = 0.3f;
 
-    private final float brightnessStops;
+    protected final float brightnessStops;
 
     public BrightnessProcessor(float brightnessStops) {
         this.brightnessStops = brightnessStops;
     }
 
     @Override
-    public Image apply(Image image) {
+    public Image process(Image image) {
         return new ProcessedImage(image, this::modifyPixel);
+    }
+
+    @Override
+    public String getIdentifier() {
+        return "brightness-" + brightnessStops;
     }
 
     public int modifyPixel(int colorABGR) {
@@ -50,7 +55,7 @@ public class BrightnessProcessor implements Processor {
         // Excess is redistributed to other channels. As a result - color gets less saturated, which gives more natural color.
         int[] rdst = redistribute(r, g, b);
 
-        // BUT, it does not look perfect (idk, maybe because of dithering), so we blend them together.
+        // BUT it does not look perfect (IDK, maybe because of dithering), so we blend them together.
         // This makes transitions smoother, subtler. Which looks good imo.
         return FastColor.ABGR32.color(alpha,
                 Mth.clamp((int) ((b + rdst[2]) / 2), 0, 255),

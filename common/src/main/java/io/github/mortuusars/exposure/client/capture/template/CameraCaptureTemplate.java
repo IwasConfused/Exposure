@@ -4,8 +4,8 @@ import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
-import io.github.mortuusars.exposure.client.capture.processing.Process;
-import io.github.mortuusars.exposure.client.capture.processing.Processor;
+import io.github.mortuusars.exposure.client.image.processor.Process;
+import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureType;
@@ -41,14 +41,14 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         CaptureAction.optional(data.flashHasFired(), () -> CaptureActions.flash(cameraHolder)))
                 .handleErrorAndGetResult(printCasualErrorInChat())
                 .then(Process.with(
-                        Processor.Crop.SQUARE,
+                        Processor.Crop.SQUARE_CENTER,
                         Processor.Crop.factor(data.cropFactor()),
                         Processor.Resize.to(data.frameSize()),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, true))
                 .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                        image.getPixels(), image.getPalette(), createPalettedExposureTag(data, false)));
+                        image.getPixels(), image.getPalette(), createExposureTag(data, false)));
 
         if (data.fileProjectingInfo().isPresent()) {
             FileProjectingInfo fileLoadingData = data.fileProjectingInfo().get();
@@ -59,13 +59,13 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             CaptureActions.interplanarProjection(data.photographer(), data.cameraID()))
                     .handleErrorAndGetResult(printCasualErrorInChat())
                     .then(Process.with(
-                            Processor.Crop.SQUARE,
+                            Processor.Crop.SQUARE_CENTER,
                             Processor.Resize.to(data.frameSize()),
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(data)))
                     .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
                     .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                            image.getPixels(), image.getPalette(), createPalettedExposureTag(data, true))));
+                            image.getPixels(), image.getPalette(), createExposureTag(data, true))));
         }
 
         return captureTask
@@ -73,14 +73,14 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                 .onError(printCasualErrorInChat());
     }
 
-    private static PalettedExposure.@NotNull Tag createPalettedExposureTag(CaptureProperties data, boolean isFromFile) {
+    private static PalettedExposure.Tag createExposureTag(CaptureProperties data, boolean isFromFile) {
         return new PalettedExposure.Tag(data.filmType(), data.photographer().getExecutingPlayer().getScoreboardName(),
                 UnixTimestamp.Seconds.now(), isFromFile, false);
     }
 
     protected Processor chooseColorProcessor(CaptureProperties data) {
         return data.filmType() == ExposureType.BLACK_AND_WHITE
-                ? data.chromaChannel().map(Processor::singleChannelBlackAndWhite).orElse(Processor.blackAndWhite())
+                ? data.chromaChannel().map(Processor::singleChannelBlackAndWhite).orElse(Processor.blackAndWhite(1.15f))
                 : Processor.EMPTY;
     }
 
