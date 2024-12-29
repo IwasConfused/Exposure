@@ -11,7 +11,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class NativeImageFileLoader implements ImageFileLoader {
+public class NativeImagePngFileLoader implements ImageFileLoader {
     @Override
     public Result<Image> load(File file) {
         try (FileInputStream inputStream = new FileInputStream(file)) {

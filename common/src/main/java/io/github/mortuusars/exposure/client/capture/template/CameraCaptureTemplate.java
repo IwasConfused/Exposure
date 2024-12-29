@@ -31,7 +31,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
 
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
-        Task<Void> captureTask = Capture.of(Capture.screenshot(),
+        Task<PalettedExposure> captureTask = Capture.of(Capture.screenshot(),
                         CaptureAction.optional(!data.photographer().getExecutingPlayer().equals(cameraHolder),
                                 () -> CaptureActions.setCameraEntity(cameraHolder)),
                         CaptureActions.hideGui(),
@@ -48,9 +48,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         chooseColorProcessor(data)))
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, true))
                 .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                        image.getPixels(), image.getPalette(), createPalettedExposureTag(data, false)))
-                .accept(image -> PalettedExposureUploader.upload(data.id(), image))
-                .onError(printCasualErrorInChat());
+                        image.getPixels(), image.getPalette(), createPalettedExposureTag(data, false)));
 
         if (data.fileProjectingInfo().isPresent()) {
             FileProjectingInfo fileLoadingData = data.fileProjectingInfo().get();
@@ -67,12 +65,12 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             chooseColorProcessor(data)))
                     .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
                     .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                            image.getPixels(), image.getPalette(), createPalettedExposureTag(data, true)))
-                    .accept(image -> PalettedExposureUploader.upload(data.id(), image))
-                    .onError(printCasualErrorInChat()));
+                            image.getPixels(), image.getPalette(), createPalettedExposureTag(data, true))));
         }
 
-        return captureTask;
+        return captureTask
+                .accept(image -> PalettedExposureUploader.upload(data.id(), image))
+                .onError(printCasualErrorInChat());
     }
 
     private static PalettedExposure.@NotNull Tag createPalettedExposureTag(CaptureProperties data, boolean isFromFile) {
