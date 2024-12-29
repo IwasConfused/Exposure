@@ -1,7 +1,6 @@
-package io.github.mortuusars.exposure.warehouse.server;
+package io.github.mortuusars.exposure.core.warehouse.server;
 
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.warehouse.server.ExposureFrameHistory;
 import io.github.mortuusars.exposure.item.component.ExposureFrame;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;

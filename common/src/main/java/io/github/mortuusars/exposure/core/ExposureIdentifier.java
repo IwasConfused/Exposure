@@ -1,7 +1,11 @@
 package io.github.mortuusars.exposure.core;
 
 import com.google.common.base.Preconditions;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
@@ -17,9 +21,36 @@ import java.util.function.Function;
 public class ExposureIdentifier {
     public static final ExposureIdentifier EMPTY = new ExposureIdentifier("", null);
 
-    public static final Codec<ExposureIdentifier> CODEC = Codec.withAlternative(
-            Codec.STRING.xmap(ExposureIdentifier::id, ExposureIdentifier::id),
-            ResourceLocation.CODEC.xmap(ExposureIdentifier::texture, ExposureIdentifier::texture));
+    public static final Codec<ExposureIdentifier> CODEC = new Codec<>() {
+        @Override
+        public <T> DataResult<T> encode(ExposureIdentifier input, DynamicOps<T> ops, T prefix) {
+            if (input.isEmpty()) return DataResult.success(ops.createString(""));
+            return input.map(id -> SIMPLE_ID_CODEC, texture -> FULL_CODEC).encode(input, ops, prefix);
+        }
+
+        @Override
+        public <T> DataResult<Pair<ExposureIdentifier, T>> decode(DynamicOps<T> ops, T input) {
+            DataResult<Pair<ExposureIdentifier, T>> simpleResult = SIMPLE_ID_CODEC.decode(ops, input);
+            if (simpleResult.error().isPresent()) {
+                return FULL_CODEC.decode(ops, input);
+            }
+            return simpleResult;
+        }
+    };
+
+    public static final Codec<ExposureIdentifier> SIMPLE_ID_CODEC = Codec.STRING.flatComapMap(
+            ExposureIdentifier::id,
+            identifier -> identifier.id != null
+                    ? DataResult.success(identifier.id)
+                    : DataResult.error(() -> "Cannot serialize to string: id is null."));
+
+    public static final Codec<ExposureIdentifier> FULL_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.STRING.optionalFieldOf("id").forGetter(ei -> Optional.ofNullable(ei.id)),
+            ResourceLocation.CODEC.optionalFieldOf("texture").forGetter(ei -> Optional.ofNullable(ei.texture))
+    ).apply(instance, (idOpt, textureOpt) -> new ExposureIdentifier(
+            idOpt.orElse(null),
+            textureOpt.orElse(null)
+    )));
 
     public static final StreamCodec<FriendlyByteBuf, ExposureIdentifier> STREAM_CODEC = new StreamCodec<>() {
         @Override
@@ -43,9 +74,11 @@ public class ExposureIdentifier {
     @Nullable
     private final ResourceLocation texture;
 
-    private ExposureIdentifier(@Nullable String id, @Nullable ResourceLocation textureLocation) {
+    private ExposureIdentifier(@Nullable String id, @Nullable ResourceLocation texture) {
+        Preconditions.checkArgument(id == null || texture == null,
+                "Cannot have both id and texture defined at once. Only one of them should be present.");
         this.id = id;
-        this.texture = textureLocation;
+        this.texture = texture;
     }
 
     public static ExposureIdentifier id(@NotNull String id) {
@@ -116,7 +149,7 @@ public class ExposureIdentifier {
 
     @Override
     public String toString() {
-        return map(id -> "Id: " + id, texture -> "Texture: " + texture);
+        return isEmpty() ? "" : map(id -> "Id: " + id, texture -> "Texture: " + texture);
     }
 
     @Override

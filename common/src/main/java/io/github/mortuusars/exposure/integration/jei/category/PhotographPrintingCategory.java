@@ -119,6 +119,7 @@ public class PhotographPrintingCategory implements IRecipeCategory<PhotographPri
         return title;
     }
 
+    @SuppressWarnings("removal")
     @Override
     public @NotNull IDrawable getBackground() {
         return background;
