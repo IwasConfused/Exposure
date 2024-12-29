@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.capture.task.file;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.image.WrappedBufferedImage;
 import io.github.mortuusars.exposure.client.capture.task.FileCaptureTask;
-import io.github.mortuusars.exposure.util.task.Result;
+import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.client.image.Image;
 
 import javax.imageio.ImageIO;

@@ -1,7 +1,7 @@
-package io.github.mortuusars.exposure.client.cycles;
+package io.github.mortuusars.exposure.core.cycles;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.util.task.Task;
+import io.github.mortuusars.exposure.core.cycles.task.Task;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedList;

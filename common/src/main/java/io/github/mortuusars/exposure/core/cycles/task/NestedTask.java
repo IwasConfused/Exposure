@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.util.task;
+package io.github.mortuusars.exposure.core.cycles.task;
 
 public abstract class NestedTask<T> extends Task<T> {
     private final Task<T> task;

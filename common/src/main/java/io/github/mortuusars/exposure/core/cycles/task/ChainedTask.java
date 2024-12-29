@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.util.task;
+package io.github.mortuusars.exposure.core.cycles.task;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;

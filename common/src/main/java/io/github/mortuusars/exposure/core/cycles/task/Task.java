@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.util.task;
+package io.github.mortuusars.exposure.core.cycles.task;
 
 import io.github.mortuusars.exposure.util.TranslatableError;
 

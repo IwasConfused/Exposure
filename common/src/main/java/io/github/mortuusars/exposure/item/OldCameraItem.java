@@ -30,7 +30,7 @@ import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.util.Fov;
 import io.github.mortuusars.exposure.util.LevelUtil;
 import io.github.mortuusars.exposure.util.TranslatableError;
-import io.github.mortuusars.exposure.util.task.Task;
+import io.github.mortuusars.exposure.core.cycles.task.Task;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;

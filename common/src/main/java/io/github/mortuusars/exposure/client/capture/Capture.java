@@ -6,8 +6,9 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.action.CompositeAction;
 import io.github.mortuusars.exposure.client.capture.task.*;
 import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.core.cycles.task.Result;
+import io.github.mortuusars.exposure.core.cycles.task.Task;
 import io.github.mortuusars.exposure.util.TranslatableError;
-import io.github.mortuusars.exposure.util.task.*;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
 import net.minecraft.client.Minecraft;
 

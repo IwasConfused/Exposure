@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.util.task;
+package io.github.mortuusars.exposure.core.cycles.task;
 
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.util.TranslatableError;

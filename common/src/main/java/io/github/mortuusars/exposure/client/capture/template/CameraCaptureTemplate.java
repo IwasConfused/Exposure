@@ -16,7 +16,7 @@ import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
-import io.github.mortuusars.exposure.util.task.Task;
+import io.github.mortuusars.exposure.core.cycles.task.Task;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.Entity;
