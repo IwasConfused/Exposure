@@ -48,7 +48,13 @@
   "entity.exposure.photograph_frame": "Photograph Frame",
 
   "gui.exposure.error_message.generic.technical": "Some error occurred. See logs for details.",
-  "gui.exposure.error_message.generic.casual": "Something is not right...",
+  "gui.exposure.error_message.generic.casual": "Something is not right... Maybe logs will tell more?",
+
+  "gui.exposure.error_message.exposure_retrieve.timeout.technical": "Could not retrieve exposures in time.",
+  "gui.exposure.error_message.exposure_retrieve.timeout.casual": "Exposures are not in a hurry to be available.",
+
+  "gui.exposure.error_message.exposure_retrieve.failed.technical": "Could not retrieve exposures: one or more requests failed.",
+  "gui.exposure.error_message.exposure_retrieve.failed.casual": "Some of exposures were not available in the end.",
 
   "gui.exposure.capture.error.failed.technical": "Capturing failed. See logs for details.",
   "gui.exposure.capture.error.failed.casual": "Camera made a strange noise. It looks like exposure didn't work.",

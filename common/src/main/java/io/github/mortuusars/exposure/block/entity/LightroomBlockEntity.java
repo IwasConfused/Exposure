@@ -467,7 +467,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     protected void onFramePrinted(Frame frame, PrintingProcess process) {
         if (process.isRegular()) { // Chromatics create new exposure. Marking is not needed.
             frame.exposureIdentifier().ifId(id ->
-                    ExposureServer.exposureRepository().loadExposure(id).getData()
+                    ExposureServer.exposureRepository().loadExposure(id).getExposure()
                             .ifPresent(exposure -> exposure.updateTag(PalettedExposure.Tag::setPrinted))
             );
         }

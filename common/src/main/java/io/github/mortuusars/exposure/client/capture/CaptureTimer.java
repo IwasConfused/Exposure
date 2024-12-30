@@ -1,9 +1,8 @@
 package io.github.mortuusars.exposure.client.capture;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.client.Minecraft;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class CaptureTimer {
@@ -82,7 +81,6 @@ public class CaptureTimer {
     }
 
     private long getCurrentGameTick() {
-        return Objects.requireNonNull(Minecraft.getInstance().level,
-                "Snapshot system can only be used when level is loaded.").getGameTime();
+        return Minecrft.level().getGameTime();
     }
 }

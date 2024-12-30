@@ -3,7 +3,6 @@ package io.github.mortuusars.exposure.neoforge.event;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.data.filter.Filters;
@@ -127,11 +126,6 @@ public class ClientEvents {
             if (rendered) {
                 event.setCanceled(true);
             }
-        }
-
-        @SubscribeEvent
-        public static void onClientTick(ClientTickEvent.Post event) {
-            ClientTrichromeFinalizer.clientTick();
         }
     }
 }

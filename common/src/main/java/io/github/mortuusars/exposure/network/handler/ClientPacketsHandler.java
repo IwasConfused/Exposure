@@ -3,6 +3,8 @@ package io.github.mortuusars.exposure.network.handler;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.ExposureRetrieveTask;
+import io.github.mortuusars.exposure.client.image.TrichromeImage;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.capture.Capture;
@@ -12,9 +14,9 @@ import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
 import io.github.mortuusars.exposure.core.CaptureDataFromClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.CaptureProperties;
+import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
@@ -157,7 +159,14 @@ public class ClientPacketsHandler {
             return;
         }
 
-        executeOnMainThread(() -> ClientTrichromeFinalizer.finalizeTrichrome(packet.id(), packet.layers()));
+        ExposureClient.cycles().addParallelTask(new ExposureRetrieveTask(packet.layers(), 20_000)
+                .then(Result::unwrap)
+                .then(layers -> new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
+                .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, ColorPalette.MAP_COLORS, true))
+                .then(img -> new PalettedExposure(img.getWidth(), img.getHeight(), img.getPixels(), img.getPalette(),
+                        new PalettedExposure.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
+                                UnixTimestamp.Seconds.now(), false, false)))
+                .accept(exposure -> PalettedExposureUploader.upload(packet.id(), exposure)));
     }
 
     private static void executeOnMainThread(Runnable runnable) {

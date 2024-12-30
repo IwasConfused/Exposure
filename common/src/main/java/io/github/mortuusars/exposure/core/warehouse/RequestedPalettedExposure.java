@@ -22,7 +22,7 @@ public class RequestedPalettedExposure {
     public static final RequestedPalettedExposure CANNOT_LOAD = status(RequestedExposureStatus.CANNOT_LOAD);
 
     public static final StreamCodec<FriendlyByteBuf, RequestedPalettedExposure> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.optional(PalettedExposure.STREAM_CODEC), RequestedPalettedExposure::getData,
+            ByteBufCodecs.optional(PalettedExposure.STREAM_CODEC), RequestedPalettedExposure::getExposure,
             RequestedExposureStatus.STREAM_CODEC, RequestedPalettedExposure::getStatus,
             RequestedPalettedExposure::fromOptional
     );
@@ -30,11 +30,11 @@ public class RequestedPalettedExposure {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     @Nullable
-    protected final PalettedExposure data;
+    protected final PalettedExposure exposure;
     protected final RequestedExposureStatus status;
 
-    protected RequestedPalettedExposure(@Nullable PalettedExposure data, RequestedExposureStatus status) {
-        this.data = data;
+    protected RequestedPalettedExposure(@Nullable PalettedExposure exposure, RequestedExposureStatus status) {
+        this.exposure = exposure;
         this.status = status;
     }
 
@@ -58,7 +58,7 @@ public class RequestedPalettedExposure {
 
     public static RequestedPalettedExposure needsRefresh(RequestedPalettedExposure result) {
         Preconditions.checkArgument(result.is(RequestedExposureStatus.SUCCESS));
-        return new RequestedPalettedExposure(result.data, RequestedExposureStatus.NEEDS_REFRESH);
+        return new RequestedPalettedExposure(result.exposure, RequestedExposureStatus.NEEDS_REFRESH);
     }
 
     public static RequestedPalettedExposure fromRequestStatus(ExposureRequester.Status status) {
@@ -70,16 +70,16 @@ public class RequestedPalettedExposure {
         };
     }
 
-    public Optional<PalettedExposure> getData() {
-        return Optional.ofNullable(data);
+    public Optional<PalettedExposure> getExposure() {
+        return Optional.ofNullable(exposure);
     }
 
     public <T> T map(Function<PalettedExposure, T> ifPresent, T orElse) {
-        return data != null ? ifPresent.apply(data) : orElse;
+        return exposure != null ? ifPresent.apply(exposure) : orElse;
     }
 
     public PalettedExposure orElse(PalettedExposure orElse) {
-        return data != null ? data : orElse;
+        return exposure != null ? exposure : orElse;
     }
 
     public RequestedExposureStatus getStatus() {
@@ -88,5 +88,12 @@ public class RequestedPalettedExposure {
 
     public boolean is(RequestedExposureStatus status) {
         return this.status.equals(status);
+    }
+
+    public boolean isError() {
+        return status != RequestedExposureStatus.SUCCESS
+                && status != RequestedExposureStatus.NEEDS_REFRESH
+                && status != RequestedExposureStatus.AWAITED
+                && status != RequestedExposureStatus.NOT_REQUESTED;
     }
 }

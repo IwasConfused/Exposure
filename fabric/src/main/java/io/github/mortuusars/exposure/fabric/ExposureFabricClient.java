@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.fabric;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.fabric.resources.ExposureFabricClientReloadListener;
 import io.github.mortuusars.exposure.fabric.resources.FabricFiltersLoader;
@@ -55,7 +54,6 @@ public class ExposureFabricClient implements ClientModInitializer {
 
         TooltipComponentCallback.EVENT.register(data -> data instanceof PhotographTooltip photographTooltip
                 ? new PhotographClientTooltip(photographTooltip) : null);
-        ClientTickEvents.END_CLIENT_TICK.register(client -> ClientTrichromeFinalizer.clientTick());
 
         FabricS2CPackets.registerS2CPackets();
     }
