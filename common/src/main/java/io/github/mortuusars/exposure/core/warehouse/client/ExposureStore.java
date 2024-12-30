@@ -57,8 +57,12 @@ public class ExposureStore {
     }
 
     public void refresh(String id) {
-        exposures.computeIfPresent(id, (identifier, exposure) ->
-                exposure.is(SUCCESS) ? RequestedPalettedExposure.needsRefresh(exposure) : exposure);
+        exposures.compute(id, (identifier, exposure) -> {
+            if (exposure != null && exposure.is(SUCCESS)) {
+                return RequestedPalettedExposure.needsRefresh(exposure);
+            }
+            return null;
+        });
         requester.refresh(id);
     }
 
