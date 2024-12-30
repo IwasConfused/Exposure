@@ -4,38 +4,62 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 
 public class Cycles {
-    private static final Queue<Task<?>> snapshotQueue = new LinkedList<>();
-    @Nullable
-    private static Task<?> currentTask;
+    private final Queue<Task<?>> queuedTasks = new LinkedList<>();
+    private final List<Task<?>> parallelTasks = new ArrayList<>();
 
-    public static void enqueue(Task<?> snapshot) {
-        Preconditions.checkState(!isQueued(snapshot), "This snapshot is already in queue.");
-        snapshotQueue.add(snapshot);
+    public void enqueueTask(Task<?> task) {
+        Preconditions.checkState(!isInQueue(task), "This task is already in queue.");
+        queuedTasks.add(task);
     }
 
-    public static boolean isQueued(Task<?> snapshot) {
-        return currentTask == snapshot || snapshotQueue.contains(snapshot);
+    public void addParallelTask(Task<?> task) {
+        Preconditions.checkState(!isInParallelTaskList(task), "This task is already added.");
+        parallelTasks.add(task);
     }
 
-    public static void tick() {
-        if (currentTask == null) {
-            currentTask = snapshotQueue.poll();
-            if (currentTask == null) {
-                return;
+    public boolean isInQueue(Task<?> task) {
+        return queuedTasks.contains(task);
+    }
+
+    public boolean isInParallelTaskList(Task<?> task) {
+        return parallelTasks.contains(task);
+    }
+
+    public void tick() {
+        tickQueuedTasks();
+        tickParallelTasks();
+    }
+
+    private void tickQueuedTasks() {
+        @Nullable Task<?> task = queuedTasks.peek();
+        if (task == null) return;
+
+        if (!task.isStarted()) {
+            task.execute();
+        }
+
+        task.tick();
+
+        if (task.isDone()) {
+            queuedTasks.remove(task);
+        }
+    }
+
+    private void tickParallelTasks() {
+        parallelTasks.removeIf(task -> {
+            if (!task.isStarted()) {
+                task.execute();
             }
 
-            currentTask.execute();
-        }
+            task.tick();
 
-        if (currentTask.isDone()) {
-            currentTask = null;
-        }
-        else if (currentTask.isStarted()) {
-            currentTask.tick();
-        }
+            return task.isDone();
+        });
     }
 }

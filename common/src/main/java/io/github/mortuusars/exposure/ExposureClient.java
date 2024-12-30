@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.cycles.Cycles;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.*;
@@ -17,6 +18,8 @@ import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
 
 public class ExposureClient {
+    private static final Cycles CYCLES = new Cycles();
+
     private static final ExposureStore EXPOSURE_STORE = new ExposureStore();
 
     private static final ImageRenderer IMAGE_RENDERER = new ImageRenderer();
@@ -27,6 +30,10 @@ public class ExposureClient {
     public static void init() {
         registerItemModelProperties();
         isIrisOrOculusInstalled = PlatformHelper.isModLoaded("iris") || PlatformHelper.isModLoaded("oculus");
+    }
+
+    public static Cycles cycles() {
+        return CYCLES;
     }
 
     public static ExposureStore exposureStore() {

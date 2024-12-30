@@ -32,7 +32,7 @@ public record Frame(ExposureIdentifier exposureIdentifier,
                     ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(Frame::type),
                     Photographer.CODEC.optionalFieldOf("photographer", Photographer.EMPTY).forGetter(Frame::photographer),
                     EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("captured_entities", Collections.emptyList()).forGetter(Frame::entitiesInFrame),
-                    FrameTag.CODEC.optionalFieldOf("additional_data", FrameTag.EMPTY).forGetter(Frame::tag))
+                    FrameTag.CODEC.optionalFieldOf("tag", FrameTag.EMPTY).forGetter(Frame::tag))
             .apply(instance, Frame::new));
 
     public static final StreamCodec<FriendlyByteBuf, Frame> STREAM_CODEC = new StreamCodec<>() {

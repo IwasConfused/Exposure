@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.component.CustomData;
 
+import java.util.Objects;
+
 public class FrameTag {
     public static final String FROM_FILE = "from_file";
     public static final String CHROMATIC = "chromatic";
@@ -48,5 +50,18 @@ public class FrameTag {
 
     public CustomData getData() {
         return data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FrameTag frameTag = (FrameTag) o;
+        return Objects.equals(data, frameTag.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(data);
     }
 }

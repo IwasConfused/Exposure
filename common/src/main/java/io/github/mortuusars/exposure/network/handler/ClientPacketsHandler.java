@@ -5,7 +5,6 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
-import io.github.mortuusars.exposure.core.cycles.Cycles;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.image.processor.Process;
@@ -94,7 +93,7 @@ public class ClientPacketsHandler {
         }
 
         executeOnMainThread(() -> {
-            Cycles.enqueue(Capture.of(Capture.file(filePath))
+            ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
                     .handleErrorAndGetResult()
                     .thenAsync(Process.with(
                             Processor.Crop.SQUARE_CENTER,
@@ -175,7 +174,7 @@ public class ClientPacketsHandler {
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
                 Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.id(), data);
-                Cycles.enqueue(captureTask);
+                ExposureClient.cycles().enqueueTask(captureTask);
             }, () -> LOGGER.error("Cannot start capture: no active camera."));
         });
     }
