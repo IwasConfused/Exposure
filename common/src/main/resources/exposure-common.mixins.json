@@ -15,10 +15,10 @@
     "client.KeyMappingMixin",
     "client.LocalPlayerMixin",
     "client.MinecraftMixin",
-    "client.MoreDebugKeyboardHandlerMixin",
-    "client.MoreDebugScreenOverlayMixin",
-    "client.MoreDebugScreenRenderLinesInvoker",
-    "client.MultiPlayerGameModeMixin",
+    "client.BuggerKeyboardHandlerMixin",
+    "client.BuggerScreenOverlayMixin",
+    "client.BuggerScreenRenderLinesInvoker",
+    "client.MultiPlayerGameModeMixin"
   ],
   "mixins": [
     "BookPageCountMixin",

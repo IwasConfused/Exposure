@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 import java.util.List;
 
 @Mixin(DebugScreenOverlay.class)
-public interface MoreDebugScreenRenderLinesInvoker {
+public interface BuggerScreenRenderLinesInvoker {
     @Invoker("renderLines")
     void drawLines(GuiGraphics guiGraphics, List<String> lines, boolean leftSide);
 }

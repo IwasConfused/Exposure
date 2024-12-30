@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.PlatformHelper;
-import io.github.mortuusars.exposure.util.MoreDebug;
+import io.github.mortuusars.exposure.client.util.bugger.Bugger;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.DebugScreenOverlay;
@@ -11,14 +11,22 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DebugScreenOverlay.class)
-public class MoreDebugScreenOverlayMixin {
+public class BuggerScreenOverlayMixin {
+    @SuppressWarnings("deprecation")
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRender(GuiGraphics guiGraphics, CallbackInfo ci) {
         if (!PlatformHelper.isInDevEnv()) return;
 
-        if (MoreDebug.isOnMoreDebugPage) {
-            Minecraft.getInstance().getProfiler().push("more_debug");
-            guiGraphics.drawManaged(() -> MoreDebug.render(guiGraphics));
+        if (Bugger.page == 0) {
+            Minecraft.getInstance().getProfiler().push("bugger_main");
+            guiGraphics.drawManaged(() -> Bugger.renderMainPage(guiGraphics));
+            Minecraft.getInstance().getProfiler().pop();
+            ci.cancel();
+        }
+
+        if (Bugger.page == 1) {
+            Minecraft.getInstance().getProfiler().push("bugger_tag");
+            guiGraphics.drawManaged(() -> Bugger.renderTagPage(guiGraphics));
             Minecraft.getInstance().getProfiler().pop();
             ci.cancel();
         }
