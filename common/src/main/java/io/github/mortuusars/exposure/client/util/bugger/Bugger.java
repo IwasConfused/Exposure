@@ -11,14 +11,20 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.EntityHitResult;
+import net.minecraft.world.phys.HitResult;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class Bugger {
     public static int page = -1;
@@ -110,16 +116,12 @@ public class Bugger {
     }
 
     public static void renderTagPage(GuiGraphics guiGraphics) {
-        ItemStack itemInHand = getItemInHand();
+        List<String> tagLines = getTagPageLines();
 
-        JsonElement json = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, itemInHand).result().orElse(new JsonObject());
-        String jsonString = new GsonBuilder().setPrettyPrinting().create().toJson(json);
+        int maxScroll = Math.max(tagLines.size() - 8, 0);
+        scroll = Mth.clamp(scroll, 0, maxScroll);
 
-        jsonString = JsonSyntaxHighlighter.highlight(jsonString);
-
-        List<String> lines = new ArrayList<>(Arrays.stream(jsonString.split("\n")).skip(scroll).toList());
-        lines.addFirst("");
-        lines.addFirst(itemInHand.getHoverName().getString());
+        List<String> lines = tagLines.stream().skip(scroll).toList();
 
         float scale = (zoom + 100) / 100f;
 
@@ -127,5 +129,58 @@ public class Bugger {
         guiGraphics.pose().scale(scale, scale, scale);
         ((BuggerScreenRenderLinesInvoker) Minecrft.get().getDebugOverlay()).drawLines(guiGraphics, lines, true);
         guiGraphics.pose().popPose();
+    }
+
+    private static @NotNull List<String> getTagPageLines() {
+        @Nullable HitResult hitResult = Minecrft.get().hitResult;
+        if (hitResult == null || hitResult.getType() == HitResult.Type.MISS) {
+            ItemStack itemInHand = getItemInHand();
+
+            JsonElement json = ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, itemInHand).result().orElse(new JsonObject());
+            String jsonString = new GsonBuilder().setPrettyPrinting().create().toJson(json);
+
+            jsonString = JsonSyntaxHighlighter.highlight(jsonString);
+
+            List<String> lines = new ArrayList<>(Arrays.stream(jsonString.split("\n")).toList());
+            lines.addFirst("");
+            lines.addFirst(itemInHand.getHoverName().getString());
+            return lines;
+        } else if (hitResult instanceof BlockHitResult blockHitResult) {
+            BlockPos blockPos = blockHitResult.getBlockPos();
+            @Nullable BlockEntity blockEntity = Minecrft.level().getBlockEntity(blockPos);
+            if (blockEntity != null) {
+                CompoundTag beTag = blockEntity.saveWithFullMetadata(Minecrft.level().registryAccess());
+                JsonElement json = CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, beTag).result().orElse(new JsonObject());
+
+                String jsonString = new GsonBuilder().setPrettyPrinting().create().toJson(json);
+
+                jsonString = JsonSyntaxHighlighter.highlight(jsonString);
+
+                List<String> lines = new ArrayList<>(Arrays.stream(jsonString.split("\n")).toList());
+                lines.addFirst("");
+                lines.addFirst(blockEntity.getBlockState().getBlock().getName().getString());
+                return lines;
+            } else {
+                return List.of(Minecrft.level().getBlockState(blockPos).getBlock().getName().getString());
+            }
+        } else if (hitResult instanceof EntityHitResult entityHitResult) {
+            Entity entity = entityHitResult.getEntity();
+
+            CompoundTag entityTag = new CompoundTag();
+            entity.save(entityTag);
+
+            JsonElement json = CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, entityTag).result().orElse(new JsonObject());
+
+            String jsonString = new GsonBuilder().setPrettyPrinting().create().toJson(json);
+
+            jsonString = JsonSyntaxHighlighter.highlight(jsonString);
+
+            List<String> lines = new ArrayList<>(Arrays.stream(jsonString.split("\n")).toList());
+            lines.addFirst("");
+            lines.addFirst(entity.getName().getString());
+            return lines;
+        }
+
+        return Collections.emptyList();
     }
 }
