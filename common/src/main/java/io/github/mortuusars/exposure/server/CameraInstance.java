@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.server;
 
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
-import io.github.mortuusars.exposure.core.frame.CaptureProperties;
+import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.world.item.ItemStack;

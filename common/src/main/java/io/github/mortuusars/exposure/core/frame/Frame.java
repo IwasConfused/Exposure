@@ -1,82 +1,76 @@
-package io.github.mortuusars.exposure.item.component;
+package io.github.mortuusars.exposure.core.frame;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.core.ExposureFrameTag;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.core.ChromaChannel;
+import io.github.mortuusars.exposure.core.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public record ExposureFrame(ExposureIdentifier identifier,
-                            ExposureType type,
-                            Photographer photographer,
-                            List<EntityInFrame> entitiesInFrame,
-                            CustomData additionalData) {
-    public static final ExposureFrame EMPTY = new ExposureFrame(
+public record Frame(ExposureIdentifier exposureIdentifier,
+                    ExposureType type,
+                    Photographer photographer,
+                    List<EntityInFrame> entitiesInFrame,
+                    FrameTag tag) {
+    public static final Frame EMPTY = new Frame(
             ExposureIdentifier.EMPTY,
             ExposureType.COLOR,
             Photographer.EMPTY,
             Collections.emptyList(),
-            CustomData.EMPTY);
+            FrameTag.EMPTY);
 
-    public static final Codec<ExposureFrame> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    ExposureIdentifier.CODEC.fieldOf("id").forGetter(ExposureFrame::identifier),
-                    ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(ExposureFrame::type),
-                    Photographer.CODEC.optionalFieldOf("photographer", Photographer.EMPTY).forGetter(ExposureFrame::photographer),
-                    EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("captured_entities", Collections.emptyList()).forGetter(ExposureFrame::entitiesInFrame),
-                    CustomData.CODEC.optionalFieldOf("additional_data", CustomData.EMPTY).forGetter(ExposureFrame::additionalData))
-            .apply(instance, ExposureFrame::new));
+    public static final Codec<Frame> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+                    ExposureIdentifier.CODEC.fieldOf("exposure").forGetter(Frame::exposureIdentifier),
+                    ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(Frame::type),
+                    Photographer.CODEC.optionalFieldOf("photographer", Photographer.EMPTY).forGetter(Frame::photographer),
+                    EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("captured_entities", Collections.emptyList()).forGetter(Frame::entitiesInFrame),
+                    FrameTag.CODEC.optionalFieldOf("additional_data", FrameTag.EMPTY).forGetter(Frame::tag))
+            .apply(instance, Frame::new));
 
-    @SuppressWarnings("deprecation")
-    public static final StreamCodec<FriendlyByteBuf, ExposureFrame> STREAM_CODEC = new StreamCodec<>() {
-        public @NotNull ExposureFrame decode(FriendlyByteBuf buffer) {
-            return new ExposureFrame(
+    public static final StreamCodec<FriendlyByteBuf, Frame> STREAM_CODEC = new StreamCodec<>() {
+        public @NotNull Frame decode(FriendlyByteBuf buffer) {
+            return new Frame(
                     ExposureIdentifier.STREAM_CODEC.decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
                     Photographer.STREAM_CODEC.decode(buffer),
                     EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).decode(buffer),
-                    CustomData.STREAM_CODEC.decode(buffer));
+                    FrameTag.STREAM_CODEC.decode(buffer));
         }
 
-        public void encode(FriendlyByteBuf buffer, ExposureFrame frame) {
-            ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.identifier());
+        public void encode(FriendlyByteBuf buffer, Frame frame) {
+            ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.exposureIdentifier());
             ExposureType.STREAM_CODEC.encode(buffer, frame.type());
             Photographer.STREAM_CODEC.encode(buffer, frame.photographer);
             EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).encode(buffer, frame.entitiesInFrame());
-            CustomData.STREAM_CODEC.encode(buffer, frame.additionalData());
+            FrameTag.STREAM_CODEC.encode(buffer, frame.tag());
         }
     };
 
     /**
-     * Creates an object that has data common to all objects in a provided list.
+     * Creates a frame that has data common to all frames in a provided list.
      * If value is not common to all objects - default value will be used.
      * Currently used in Chromatic Sheets to create a common data object from 3 layers.
      */
-    public static ExposureFrame intersect(ExposureIdentifier identifier, List<ExposureFrame> objects) {
+    public static Frame intersect(ExposureIdentifier identifier, List<Frame> frames) {
         Mutable result = EMPTY.toMutable().setIdentifier(identifier);
 
-        if (objects.isEmpty()) {
+        if (frames.isEmpty()) {
             return result.toImmutable();
         }
 
-        result.setType(getCommonValueOrDefault(objects, ExposureFrame::type));
-        result.setPhotographer(getCommonValueOrDefault(objects, ExposureFrame::photographer));
+        result.setType(getCommonValueOrDefault(frames, Frame::type));
+        result.setPhotographer(getCommonValueOrDefault(frames, Frame::photographer));
 
-        List<EntityInFrame> commonEntitiesInFrame = objects.stream()
-                .map(ExposureFrame::entitiesInFrame)
+        List<EntityInFrame> commonEntitiesInFrame = frames.stream()
+                .map(Frame::entitiesInFrame)
                 .map(HashSet::new)
                 .reduce((set1, set2) -> {
                     set1.retainAll(set2);
@@ -86,15 +80,15 @@ public record ExposureFrame(ExposureIdentifier identifier,
                 .orElse(new ArrayList<>());
         result.setEntitiesInFrame(commonEntitiesInFrame);
 
-        CompoundTag mergedTag = objects.stream()
-                .map(f -> f.additionalData.copyTag())
+        CompoundTag mergedTag = frames.stream()
+                .map(f -> f.tag.getData().copyTag())
                 .reduce(new CompoundTag(), CompoundTag::merge);
-        result.setAdditionalDataTag(mergedTag);
+        result.setTag(mergedTag);
 
         return result.toImmutable();
     }
 
-    private static <V> V getCommonValueOrDefault(List<ExposureFrame> objects, Function<ExposureFrame, V> propertyGetter) {
+    private static <V> V getCommonValueOrDefault(List<Frame> objects, Function<Frame, V> propertyGetter) {
         V referenceValue = propertyGetter.apply(objects.getFirst());
         return objects.stream().allMatch(data -> propertyGetter.apply(data) == referenceValue) ? referenceValue : propertyGetter.apply(EMPTY);
     }
@@ -113,19 +107,19 @@ public record ExposureFrame(ExposureIdentifier identifier,
      */
     public CompoundTag getAdditionalDataTagForReading() {
         //noinspection deprecation
-        return additionalData().getUnsafe();
+        return tag().getData().getUnsafe();
     }
 
     public boolean isFromFile() {
-        return getAdditionalDataTagForReading().getBoolean(ExposureFrameTag.FROM_FILE);
+        return getAdditionalDataTagForReading().getBoolean(FrameTag.FROM_FILE);
     }
 
     public boolean isChromatic() {
-        return getAdditionalDataTagForReading().getBoolean(ExposureFrameTag.CHROMATIC);
+        return getAdditionalDataTagForReading().getBoolean(FrameTag.CHROMATIC);
     }
 
     public Optional<ChromaChannel> getChromaticChannel() {
-        return ChromaChannel.fromString(getAdditionalDataTagForReading().getString(ExposureFrameTag.CHROMATIC_CHANNEL));
+        return ChromaChannel.fromString(getAdditionalDataTagForReading().getString(FrameTag.CHROMATIC_CHANNEL));
     }
 
     public boolean wasTakenWithChromaticFilter() {
@@ -141,14 +135,14 @@ public record ExposureFrame(ExposureIdentifier identifier,
         private ExposureType type;
         private Photographer photographer;
         private List<EntityInFrame> entitiesInFrame;
-        private CompoundTag additionalData;
+        private CompoundTag tag;
 
-        public Mutable(ExposureFrame photographData) {
-            this.identifier = photographData.identifier();
+        public Mutable(Frame photographData) {
+            this.identifier = photographData.exposureIdentifier();
             this.type = photographData.type();
             this.photographer = photographData.photographer();
             this.entitiesInFrame = new ArrayList<>(photographData.entitiesInFrame());
-            this.additionalData = photographData.additionalData().copyTag();
+            this.tag = photographData.tag().getData().copyTag();
         }
 
         public ExposureIdentifier getIdentifier() {
@@ -178,11 +172,6 @@ public record ExposureFrame(ExposureIdentifier identifier,
             return this;
         }
 
-        public Mutable setPhotographer(LivingEntity entity) {
-            this.photographer = new Photographer(entity);
-            return this;
-        }
-
         public List<EntityInFrame> getEntitiesInFrame() {
             return entitiesInFrame;
         }
@@ -192,31 +181,31 @@ public record ExposureFrame(ExposureIdentifier identifier,
             return this;
         }
 
-        public CompoundTag getAdditionalDataTag() {
-            return additionalData;
+        public CompoundTag getTag() {
+            return tag;
         }
 
-        public Mutable setAdditionalDataTag(CompoundTag additionalData) {
-            this.additionalData = additionalData;
+        public Mutable setTag(CompoundTag tag) {
+            this.tag = tag;
             return this;
         }
 
-        public Mutable updateAdditionalData(Consumer<CompoundTag> updater) {
-            updater.accept(additionalData);
+        public Mutable updateTag(Consumer<CompoundTag> updater) {
+            updater.accept(tag);
             return this;
         }
 
         public Mutable setChromatic(boolean chromatic) {
-            return updateAdditionalData(tag -> tag.putBoolean(ExposureFrameTag.CHROMATIC, chromatic));
+            return updateTag(tag -> tag.putBoolean(FrameTag.CHROMATIC, chromatic));
         }
 
-        public ExposureFrame toImmutable() {
-            return new ExposureFrame(
+        public Frame toImmutable() {
+            return new Frame(
                     this.identifier,
                     this.type,
                     this.photographer,
                     this.entitiesInFrame,
-                    CustomData.of(this.additionalData));
+                    FrameTag.of(this.tag));
         }
     }
 }

@@ -7,8 +7,7 @@ import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.command.suggestion.ExposureIdSuggestionProvider;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataResponseS2CP;
 import io.github.mortuusars.exposure.network.packet.client.ShowExposureCommandS2CP;
@@ -52,7 +51,7 @@ public class ShowCommand {
     }
 
     private static int latest(CommandSourceStack stack, @NotNull ServerPlayer player, boolean negative) {
-        List<ExposureFrame> frames = ExposureServer.frameHistory().getFramesOf(player);
+        List<Frame> frames = ExposureServer.frameHistory().getFramesOf(player);
 
         if (frames.isEmpty()) {
             stack.sendFailure(Component.literal(player.getScoreboardName() + " has not taken any photos yet."));

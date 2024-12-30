@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.IFilmItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -36,7 +36,7 @@ public class LightroomMenu extends AbstractContainerMenu {
     private final LightroomBlockEntity lightroomBlockEntity;
     private final ContainerData data;
 
-    private List<ExposureFrame> frames = Collections.emptyList();
+    private List<Frame> frames = Collections.emptyList();
 
     public LightroomMenu(int containerId, final Inventory playerInventory, final LightroomBlockEntity blockEntity, ContainerData containerData) {
         super(Exposure.MenuTypes.LIGHTROOM.get(), containerId);
@@ -142,11 +142,11 @@ public class LightroomMenu extends AbstractContainerMenu {
         return data;
     }
 
-    public List<ExposureFrame> getExposedFrames() {
+    public List<Frame> getExposedFrames() {
         return frames;
     }
 
-    public @Nullable ExposureFrame getFrameIdByIndex(int index) {
+    public @Nullable Frame getFrameIdByIndex(int index) {
         return index >= 0 && index < getExposedFrames().size() ? getExposedFrames().get(index) : null;
     }
 

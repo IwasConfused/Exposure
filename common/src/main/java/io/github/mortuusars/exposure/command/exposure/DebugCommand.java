@@ -10,7 +10,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.item.ChromaticSheetItem;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
 import net.minecraft.commands.CommandSourceStack;
@@ -48,7 +48,7 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
-        List<ExposureFrame> frames = ExposureServer.frameHistory().getFramesOf(player).stream()
+        List<Frame> frames = ExposureServer.frameHistory().getFramesOf(player).stream()
                 .filter(frame -> !frame.isChromatic()).toList();
 
         if (frames.size() < 3) {
@@ -65,16 +65,16 @@ public class DebugCommand {
             item.addLayer(itemStack, frames.getLast()); // Blue
 
             ItemStack photographStack = item.combineIntoPhotograph(player, itemStack);
-            @Nullable ExposureFrame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
+            @Nullable Frame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
             Preconditions.checkState(frame != null, "Frame data cannot be empty after combining.");
 
             ExposureServer.frameHistory().add(player, frame);
 
             Supplier<Component> msg = () -> Component.literal("Created chromatic exposure: ")
-                    .append(Component.literal(frame.identifier().toString())
+                    .append(Component.literal(frame.exposureIdentifier().toString())
                             .withStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/exposure show id " + frame.identifier().getId().orElse("")))
+                                            "/exposure show id " + frame.exposureIdentifier().getId().orElse("")))
                                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
                                     .withUnderlined(true)));
 

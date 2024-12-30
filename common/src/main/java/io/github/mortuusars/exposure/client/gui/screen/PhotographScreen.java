@@ -10,12 +10,10 @@ import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
-import io.github.mortuusars.exposure.warehouse.client.ClientsideExposureExporter;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.client.util.LevelNameGetter;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
@@ -35,7 +33,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class PhotographScreen extends Screen {
     protected final ZoomAnimationController zoom = new ZoomAnimationController();
@@ -67,7 +64,7 @@ public class PhotographScreen extends Screen {
     protected void queryAllPhotographs(List<ItemAndStack<PhotographItem>> photographs) {
         for (ItemAndStack<PhotographItem> photograph : photographs) {
             photograph.getItem().getFrame(photograph.getItemStack())
-                    .identifier()
+                    .exposureIdentifier()
                     .ifId(id -> ExposureClient.exposureStore().getOrRequest(id));
         }
     }
@@ -154,21 +151,21 @@ public class PhotographScreen extends Screen {
             return;
         }
 
-        ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
-        if (frame == ExposureFrame.EMPTY) {
+        Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
+        if (frame == Frame.EMPTY) {
             return;
         }
 
         guiGraphics.drawString(font, "?", width - font.width("?") - 10, 10, 0xFFFFFFFF);
 
         if (mouseX > width - 20 && mouseX < width && mouseY < 20) {
-            String exposureName = frame.identifier().map(id -> id, ResourceLocation::toString);
+            String exposureName = frame.exposureIdentifier().map(id -> id, ResourceLocation::toString);
 
             List<Component> lines = List.of(
                     Component.literal(exposureName),
                     Component.translatable("gui.exposure.photograph_screen.drop_as_item_tooltip", Component.literal("CTRL + I")),
                     Component.translatable("gui.exposure.photograph_screen.copy_" +
-                            frame.identifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
+                            frame.exposureIdentifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
 
             guiGraphics.renderTooltip(font, lines, Optional.empty(), mouseX, mouseY + 20);
         }
@@ -179,7 +176,7 @@ public class PhotographScreen extends Screen {
         LocalPlayer player = Minecraft.getInstance().player;
         ItemAndStack<PhotographItem> photograph = photographs.get(pager.getCurrentPage());
 
-        ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
+        Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
 
         if (Minecraft.getInstance().options.keyInventory.matches(keyCode, scanCode)) {
             this.onClose();
@@ -190,9 +187,9 @@ public class PhotographScreen extends Screen {
         } else if (keyCode == 333 /*KEY_SUBTRACT*/ || keyCode == InputConstants.KEY_MINUS) {
             zoom.change(ZoomDirection.OUT);
             return true;
-        } else if (Screen.hasControlDown() && player != null && player.isCreative() && frame != ExposureFrame.EMPTY) {
+        } else if (Screen.hasControlDown() && player != null && player.isCreative() && frame != Frame.EMPTY) {
             if (keyCode == InputConstants.KEY_C) {
-                String text = frame.identifier().map(id -> id, ResourceLocation::toString);
+                String text = frame.exposureIdentifier().map(id -> id, ResourceLocation::toString);
                 Minecraft.getInstance().keyboardHandler.setClipboard(text);
                 player.displayClientMessage(Component.translatable("gui.exposure.photograph_screen.copied_message", text), false);
                 return true;
@@ -244,13 +241,13 @@ public class PhotographScreen extends Screen {
 
     private void trySaveToFile(ItemAndStack<PhotographItem> photograph) {
         LocalPlayer player = Minecraft.getInstance().player;
-        ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
+        Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
 
-        if (player == null || frame == ExposureFrame.EMPTY || !frame.isTakenBy(player)) {
+        if (player == null || frame == Frame.EMPTY || !frame.isTakenBy(player)) {
             return;
         }
 
-        frame.identifier().ifId(id -> {
+        frame.exposureIdentifier().ifId(id -> {
             PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
             PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
 

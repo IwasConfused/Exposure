@@ -57,6 +57,13 @@ public interface PhotographerEntity {
         return null;
     }
 
+    /**
+     * Used to add photographer data to frame.
+     */
+    default Entity getOwnerEntity() {
+        throw new IllegalStateException("This method must be overriden, and should return an entity that will show up as an author of a frame.");
+    }
+
     default Entity asEntity() {
         return ((Entity) this);
     }

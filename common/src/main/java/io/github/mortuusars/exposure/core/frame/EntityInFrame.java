@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.item.component;
+package io.github.mortuusars.exposure.core.frame;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -10,7 +10,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.component.CustomData;
 
 import java.util.function.Consumer;

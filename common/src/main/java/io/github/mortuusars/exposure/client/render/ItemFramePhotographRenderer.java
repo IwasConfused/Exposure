@@ -3,9 +3,8 @@ package io.github.mortuusars.exposure.client.render;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,7 +15,7 @@ import net.minecraft.world.item.ItemStack;
 public class ItemFramePhotographRenderer {
     public static boolean render(ItemFrame itemFrameEntity, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
         ItemStack itemStack = itemFrameEntity.getItem();
-        if (!(itemStack.getItem() instanceof PhotographItem photographItem) || photographItem.getFrame(itemStack) == ExposureFrame.EMPTY)
+        if (!(itemStack.getItem() instanceof PhotographItem photographItem) || photographItem.getFrame(itemStack) == Frame.EMPTY)
             return false;
 
         if (itemFrameEntity.getType() == EntityType.GLOW_ITEM_FRAME)

@@ -1,7 +1,5 @@
-package io.github.mortuusars.exposure.core.frame;
+package io.github.mortuusars.exposure.core;
 
-import io.github.mortuusars.exposure.core.ChromaChannel;
-import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;

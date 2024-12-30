@@ -10,8 +10,8 @@ import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploa
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.core.frame.CaptureProperties;
-import io.github.mortuusars.exposure.core.frame.FileProjectingInfo;
+import io.github.mortuusars.exposure.core.CaptureProperties;
+import io.github.mortuusars.exposure.core.FileProjectingInfo;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.util.TranslatableError;

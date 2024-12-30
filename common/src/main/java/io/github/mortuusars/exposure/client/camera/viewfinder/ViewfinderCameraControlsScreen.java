@@ -162,8 +162,7 @@ public class ViewfinderCameraControlsScreen extends Screen {
     protected @NotNull Button createCompositionGuideButton() {
         List<CompositionGuide> guides = CompositionGuides.getGuides();
         CompositionGuide currentGuide = camera.getSettingOrElse(Setting.COMPOSITION_GUIDE, CompositionGuides.NONE);
-        Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(
-                Exposure.resource("camera_controls/composition_guide/" + guide.name()));
+        Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(guide.buttonSpriteLocation());
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
                 currentGuide, spritesFunc, (b, guide) -> CameraClient.setSetting(Setting.COMPOSITION_GUIDE, guide))

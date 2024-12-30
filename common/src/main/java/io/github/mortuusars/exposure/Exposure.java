@@ -15,11 +15,11 @@ import io.github.mortuusars.exposure.command.argument.ExposureSizeArgument;
 import io.github.mortuusars.exposure.command.argument.ShaderLocationArgument;
 import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.InterplanarProjectorMode;
+import io.github.mortuusars.exposure.core.ProjectionMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.item.*;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.item.component.album.AlbumContent;
 import io.github.mortuusars.exposure.item.component.album.SignedAlbumContent;
@@ -232,24 +232,24 @@ public class Exposure {
         public static final DataComponentType<Integer> FILM_FRAME_SIZE = Register.dataComponentType("film_frame_size",
                 arg -> arg.persistent(ExtraCodecs.intRange(1, 2048)).networkSynchronized(ByteBufCodecs.VAR_INT));
 
-        public static final DataComponentType<List<ExposureFrame>> FILM_FRAMES =
+        public static final DataComponentType<List<Frame>> FILM_FRAMES =
                 Register.dataComponentType("film_frames",
-                        arg -> arg.persistent(ExposureFrame.CODEC.listOf())
-                                .networkSynchronized(ExposureFrame.STREAM_CODEC.apply(ByteBufCodecs.list())));
+                        arg -> arg.persistent(Frame.CODEC.listOf())
+                                .networkSynchronized(Frame.STREAM_CODEC.apply(ByteBufCodecs.list())));
 
-        public static final DataComponentType<InterplanarProjectorMode> INTERPLANAR_PROJECTOR_MODE =
+        public static final DataComponentType<ProjectionMode> INTERPLANAR_PROJECTOR_MODE =
                 Register.dataComponentType("interplanar_projector_mode",
-                        arg -> arg.persistent(InterplanarProjectorMode.CODEC)
-                                .networkSynchronized(InterplanarProjectorMode.STREAM_CODEC));
+                        arg -> arg.persistent(ProjectionMode.CODEC)
+                                .networkSynchronized(ProjectionMode.STREAM_CODEC));
 
-        public static final DataComponentType<List<ExposureFrame>> CHROMATIC_SHEET_LAYERS =
+        public static final DataComponentType<List<Frame>> CHROMATIC_SHEET_LAYERS =
                 Register.dataComponentType("chromatic_sheet_layers",
-                        arg -> arg.persistent(ExposureFrame.CODEC.listOf(0, 3))
-                                .networkSynchronized(ExposureFrame.STREAM_CODEC.apply(ByteBufCodecs.list())));
+                        arg -> arg.persistent(Frame.CODEC.listOf(0, 3))
+                                .networkSynchronized(Frame.STREAM_CODEC.apply(ByteBufCodecs.list())));
 
         // Photograph
-        public static final DataComponentType<ExposureFrame> PHOTOGRAPH_FRAME = Register.dataComponentType("photograph_frame",
-                arg -> arg.persistent(ExposureFrame.CODEC).networkSynchronized(ExposureFrame.STREAM_CODEC));
+        public static final DataComponentType<Frame> PHOTOGRAPH_FRAME = Register.dataComponentType("photograph_frame",
+                arg -> arg.persistent(Frame.CODEC).networkSynchronized(Frame.STREAM_CODEC));
 
         public static final DataComponentType<ExposureType> PHOTOGRAPH_TYPE = Register.dataComponentType("photograph_type",
                 arg -> arg.persistent(ExposureType.CODEC).networkSynchronized(ExposureType.STREAM_CODEC));

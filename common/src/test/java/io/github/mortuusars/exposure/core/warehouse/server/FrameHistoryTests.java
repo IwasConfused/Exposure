@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.core.warehouse.server;
 
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -15,13 +15,13 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ExposureFrameHistoryTests {
+public class FrameHistoryTests {
     @Test
     void encoding() {
         UUID randomUUID = UUID.randomUUID();
 
         ExposureFrameHistory history = new ExposureFrameHistory(new HashMap<>());
-        history.add(randomUUID, ExposureFrame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id("test")).toImmutable());
+        history.add(randomUUID, Frame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id("test")).toImmutable());
 
         CompoundTag tag = history.save(new CompoundTag(), HolderLookup.Provider.create(Stream.of()));
 
@@ -33,17 +33,17 @@ public class ExposureFrameHistoryTests {
     void decoding() {
         UUID randomUUID = UUID.randomUUID();
 
-        ExposureFrame frame = ExposureFrame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id("test")).toImmutable();
+        Frame frame = Frame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id("test")).toImmutable();
 
         CompoundTag tag = new CompoundTag();
         ListTag listTag = new ListTag();
-        listTag.add(ExposureFrame.CODEC.encode(frame, NbtOps.INSTANCE, new CompoundTag()).getOrThrow());
+        listTag.add(Frame.CODEC.encode(frame, NbtOps.INSTANCE, new CompoundTag()).getOrThrow());
         tag.put(randomUUID.toString(), listTag);
 
         ExposureFrameHistory decodedHistory = ExposureFrameHistory.load(tag, HolderLookup.Provider.create(Stream.of()));
-        List<ExposureFrame> frames = decodedHistory.getFramesOf(randomUUID);
+        List<Frame> frames = decodedHistory.getFramesOf(randomUUID);
 
-        assertEquals("test", frames.getFirst().identifier().id());
+        assertEquals("test", frames.getFirst().exposureIdentifier().id());
     }
 
     @Test
@@ -53,7 +53,7 @@ public class ExposureFrameHistoryTests {
         UUID uuid = UUID.randomUUID();
 
         for (int i = 0; i < ExposureFrameHistory.LIMIT + 4; i++) {
-            ExposureFrame frame = ExposureFrame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id("test-" + i)).toImmutable();
+            Frame frame = Frame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id("test-" + i)).toImmutable();
             history.add(uuid, frame);
         }
 

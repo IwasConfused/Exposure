@@ -6,9 +6,10 @@ import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.*;
 import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
@@ -48,8 +49,8 @@ public class ExposureClient {
 
     // --
 
-    public static RenderableImage createRenderableExposureImage(ExposureFrame frame) {
-        RenderableImage image = createRawRenderableExposureImage(frame.identifier());
+    public static RenderableImage createRenderableExposureImage(Frame frame) {
+        RenderableImage image = createRawRenderableExposureImage(frame.exposureIdentifier());
         return Censor.isAllowedToRender(frame)
                 ? image
                 : image.processWith(Processor.CENSORED);
@@ -66,7 +67,18 @@ public class ExposureClient {
     // --
 
     private static void registerItemModelProperties() {
-        ItemProperties.register(Exposure.Items.CAMERA.get(), Exposure.resource("camera_state"), CameraItemClientExtensions::itemPropertyFunction);
+        ItemProperties.register(Exposure.Items.CAMERA.get(), Exposure.resource("camera_state"), (stack, level, entity, seed) -> {
+            if (!(stack.getItem() instanceof CameraItem cameraItem) || !cameraItem.isActive(stack)) {
+                return 0f;
+            }
+
+            if (cameraItem.isInSelfieMode(stack)) {
+                // Longer selfie stick for current player (to not obscure the view) and regular for everyone else
+                return entity == Minecrft.player() ? 0.2f : 0.3f;
+            }
+
+            return 0.1f;
+        });
         ItemProperties.register(Exposure.Items.CHROMATIC_SHEET.get(), Exposure.resource("channels"), (stack, clientLevel, livingEntity, seed) ->
                 stack.getItem() instanceof ChromaticSheetItem chromaticSheet ?
                         chromaticSheet.getLayers(stack).size() / 10f : 0f);

@@ -16,7 +16,7 @@ import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.ChatFormatting;
@@ -182,7 +182,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
             guiGraphics.blit(MAIN_TEXTURE, leftPos + 116, topPos + 91, 176, 0, width, 17);
         }
 
-        List<ExposureFrame> frames = getMenu().getExposedFrames();
+        List<Frame> frames = getMenu().getExposedFrames();
         if (frames.isEmpty()) {
             guiGraphics.blit(FILM_OVERLAYS_TEXTURE, leftPos + 4, topPos + 15, 0, 136, 168, 68);
             return;
@@ -196,9 +196,9 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         FilmColor filmColor = exposureType.getFilmColor();
 
         int selectedFrame = getMenu().getSelectedFrame();
-        @Nullable ExposureFrame leftFrame = getMenu().getFrameIdByIndex(selectedFrame - 1);
-        @Nullable ExposureFrame centerFrame = getMenu().getFrameIdByIndex(selectedFrame);
-        @Nullable ExposureFrame rightFrame = getMenu().getFrameIdByIndex(selectedFrame + 1);
+        @Nullable Frame leftFrame = getMenu().getFrameIdByIndex(selectedFrame - 1);
+        @Nullable Frame centerFrame = getMenu().getFrameIdByIndex(selectedFrame);
+        @Nullable Frame rightFrame = getMenu().getFrameIdByIndex(selectedFrame + 1);
 
         RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
 
@@ -283,14 +283,14 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     private void addFrameInfoTooltipLines(List<Component> tooltipLines, int frameIndex, boolean isAdvancedTooltips) {
-        @Nullable ExposureFrame frame = getMenu().getFrameIdByIndex(frameIndex);
+        @Nullable Frame frame = getMenu().getFrameIdByIndex(frameIndex);
         if (frame != null) {
             frame.getChromaticChannel().ifPresent(c ->
                     tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
                         .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
 
             if (isAdvancedTooltips) {
-                Component component = frame.identifier().map(
+                Component component = frame.exposureIdentifier().map(
                                 id -> !id.isEmpty() ? Component.translatable("gui.exposure.frame.id",
                                         Component.literal(id).withStyle(ChatFormatting.GRAY)) : Component.empty(),
                                 texture -> Component.translatable("gui.exposure.frame.texture",
@@ -302,24 +302,24 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     private boolean isOverLeftFrame(int mouseX, int mouseY) {
-        List<ExposureFrame> frames = getMenu().getExposedFrames();
+        List<Frame> frames = getMenu().getExposedFrames();
         int selectedFrame = getMenu().getSelectedFrame();
         return selectedFrame - 1 >= 0 && selectedFrame - 1 < frames.size() && isHovering(6, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
     private boolean isOverCenterFrame(int mouseX, int mouseY) {
-        List<ExposureFrame> frames = getMenu().getExposedFrames();
+        List<Frame> frames = getMenu().getExposedFrames();
         int selectedFrame = getMenu().getSelectedFrame();
         return selectedFrame >= 0 && selectedFrame < frames.size() && isHovering(61, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
     private boolean isOverRightFrame(int mouseX, int mouseY) {
-        List<ExposureFrame> frames = getMenu().getExposedFrames();
+        List<Frame> frames = getMenu().getExposedFrames();
         int selectedFrame = getMenu().getSelectedFrame();
         return selectedFrame + 1 >= 0 && selectedFrame + 1 < frames.size() && isHovering(116, 22, FRAME_SIZE, FRAME_SIZE, mouseX, mouseY);
     }
 
-    public void renderFrame(@NotNull ExposureFrame frame, PoseStack poseStack,
+    public void renderFrame(@NotNull Frame frame, PoseStack poseStack,
                             float x, float y, float size, float alpha, ExposureType exposureType) {
         RenderableImage image = ExposureClient.createRenderableExposureImage(frame)
                 .processWith(Processor.NEGATIVE_FILM);

@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
 import io.github.mortuusars.exposure.core.PhotographType;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.ChatFormatting;
@@ -37,13 +37,13 @@ public class PhotographItem extends Item {
         return PhotographType.REGULAR;
     }
 
-    public ExposureFrame getFrame(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY);
+    public Frame getFrame(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, Frame.EMPTY);
     }
 
     @Override
     public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack) {
-        ExposureIdentifier identifier = getFrame(stack).identifier();
+        ExposureIdentifier identifier = getFrame(stack).exposureIdentifier();
         return !identifier.isEmpty() ? Optional.of(new PhotographTooltip(List.of(new ItemAndStack<>(stack)))) : Optional.empty();
     }
 
@@ -56,7 +56,7 @@ public class PhotographItem extends Item {
                         .withStyle(ChatFormatting.GRAY));
         }
 
-        @Nullable ExposureFrame frame = stack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
+        @Nullable Frame frame = stack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
         if (frame == null) {
             return;
         }
@@ -76,7 +76,7 @@ public class PhotographItem extends Item {
         }
 
         if (tooltipFlag.isAdvanced()) {
-            String identifier = frame.identifier().map(
+            String identifier = frame.exposureIdentifier().map(
                     id -> "Exposure Id: " + id,
                     texture -> "Texture: " + texture);
             tooltipComponents.add(Component.literal(identifier).withStyle(ChatFormatting.DARK_GRAY));
@@ -87,8 +87,8 @@ public class PhotographItem extends Item {
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, Player player, @NotNull InteractionHand hand) {
         ItemStack itemInHand = player.getItemInHand(hand);
 
-        ExposureFrame frame = getFrame(itemInHand);
-        if (frame == ExposureFrame.EMPTY || frame.identifier().isEmpty()) {
+        Frame frame = getFrame(itemInHand);
+        if (frame == Frame.EMPTY || frame.exposureIdentifier().isEmpty()) {
             return InteractionResultHolder.pass(itemInHand);
         }
 

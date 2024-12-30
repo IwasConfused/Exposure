@@ -2,16 +2,21 @@ package io.github.mortuusars.exposure.core.frame;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
 
+import java.util.Objects;
 import java.util.UUID;
 
-public record Photographer(String name, UUID uuid) {
+public final class Photographer {
     public static final Photographer EMPTY = new Photographer("", Util.NIL_UUID);
 
     public static final Codec<Photographer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
@@ -25,16 +30,64 @@ public record Photographer(String name, UUID uuid) {
             Photographer::new
     );
 
-    //TODO: use Player player here and create other constructor for mob (without UUID) (potentially add 3rd param for original name, ie: Bob (Skeleton))
-    public Photographer(Entity entity) {
-        this(entity.getScoreboardName(), entity.getUUID());
+    private final String name;
+    private final UUID uuid;
+
+    private Photographer(String name, UUID uuid) {
+        this.name = name;
+        this.uuid = uuid;
+    }
+
+    public Photographer(PhotographerEntity photographerEntity) {
+        Entity owner = photographerEntity.getOwnerEntity();
+        this.name = owner instanceof Player ? owner.getScoreboardName() : EntityType.getKey(owner.getType()).toString();
+        // UUID of non-player entities are not recorded because they are usually short-lived.
+        this.uuid = owner instanceof Player ? owner.getUUID() : Util.NIL_UUID;
     }
 
     public boolean matches(Entity entity) {
         return uuid.equals(entity.getUUID());
     }
 
+    public boolean isPlayer() {
+        return !StringUtil.isBlank(name) && !uuid.equals(Util.NIL_UUID);
+    }
+
+    public boolean isNPC() {
+        return !StringUtil.isBlank(name) && uuid.equals(Util.NIL_UUID);
+    }
+
     public boolean isEmpty() {
         return this.equals(EMPTY);
     }
+
+    public String name() {
+        return name;
+    }
+
+    public UUID uuid() {
+        return uuid;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Photographer) obj;
+        return Objects.equals(this.name, that.name) &&
+                Objects.equals(this.uuid, that.uuid);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, uuid);
+    }
+
+    @Override
+    public String toString() {
+        return "Photographer[" +
+                "name=" + name + ", " +
+                "uuid=" + uuid + ']';
+    }
+
 }

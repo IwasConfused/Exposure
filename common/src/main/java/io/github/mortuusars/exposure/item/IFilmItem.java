@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.item;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
@@ -28,7 +28,7 @@ public interface IFilmItem {
         return stack.getOrDefault(Exposure.DataComponents.FILM_FRAME_SIZE, getDefaultFrameSize(stack));
     }
 
-    default List<ExposureFrame> getStoredFrames(ItemStack stack) {
+    default List<Frame> getStoredFrames(ItemStack stack) {
         return stack.getOrDefault(Exposure.DataComponents.FILM_FRAMES, Collections.emptyList());
     }
 

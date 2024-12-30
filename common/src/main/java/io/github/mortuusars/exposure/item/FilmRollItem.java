@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.menu.ItemRenameMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -54,11 +54,11 @@ public class FilmRollItem extends Item implements IFilmItem {
         return barColor;
     }
 
-    public void addFrame(ItemStack stack, ExposureFrame frame) {
+    public void addFrame(ItemStack stack, Frame frame) {
         Preconditions.checkState(getStoredFramesCount(stack) < getMaxFrameCount(stack),
                 "Cannot add more frames than film could fit. Size: " + getMaxFrameCount(stack));
 
-        List<ExposureFrame> frames = new ArrayList<>(stack.getOrDefault(Exposure.DataComponents.FILM_FRAMES, Collections.emptyList()));
+        List<Frame> frames = new ArrayList<>(stack.getOrDefault(Exposure.DataComponents.FILM_FRAMES, Collections.emptyList()));
         frames.add(frame);
 
         stack.set(Exposure.DataComponents.FILM_FRAMES, frames);

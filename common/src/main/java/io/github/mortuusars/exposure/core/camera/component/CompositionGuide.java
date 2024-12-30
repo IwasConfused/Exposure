@@ -26,14 +26,6 @@ public record CompositionGuide(String name) {
     }
 
     public ResourceLocation buttonSpriteLocation() {
-        return Exposure.resource("camera/composition_guide/button/" + name);
-    }
-
-    public ResourceLocation buttonDisabledSpriteLocation() {
-        return Exposure.resource("camera/composition_guide/button/" + name + "_disabled");
-    }
-
-    public ResourceLocation buttonHighlightedSpriteLocation() {
-        return Exposure.resource("camera/composition_guide/button/" + name + "_highlighted");
+        return Exposure.resource("camera_controls/composition_guide/" + name);
     }
 }

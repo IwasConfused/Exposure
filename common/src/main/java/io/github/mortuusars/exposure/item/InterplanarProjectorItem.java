@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.item;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.InterplanarProjectorMode;
-import io.github.mortuusars.exposure.core.frame.FileProjectingInfo;
+import io.github.mortuusars.exposure.core.ProjectionMode;
+import io.github.mortuusars.exposure.core.FileProjectingInfo;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -24,11 +24,11 @@ public class InterplanarProjectorItem extends Item {
         super(properties);
     }
 
-    public InterplanarProjectorMode getMode(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.INTERPLANAR_PROJECTOR_MODE, InterplanarProjectorMode.DITHERED);
+    public ProjectionMode getMode(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.INTERPLANAR_PROJECTOR_MODE, ProjectionMode.DITHERED);
     }
 
-    public void setMode(ItemStack stack, InterplanarProjectorMode mode) {
+    public void setMode(ItemStack stack, ProjectionMode mode) {
         stack.set(Exposure.DataComponents.INTERPLANAR_PROJECTOR_MODE, mode);
     }
 
@@ -43,7 +43,7 @@ public class InterplanarProjectorItem extends Item {
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> components, TooltipFlag tooltipFlag) {
         if (!isAllowed()) {
-            components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.restricted"));
+            components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.disabled"));
         }
 
         components.add(getMode(stack).translate());
@@ -79,6 +79,6 @@ public class InterplanarProjectorItem extends Item {
     }
 
     public Optional<FileProjectingInfo> getFileLoadingData(ItemStack stack) {
-        return getFilepath(stack).map(filepath -> new FileProjectingInfo(filepath, getMode(stack) == InterplanarProjectorMode.DITHERED));
+        return getFilepath(stack).map(filepath -> new FileProjectingInfo(filepath, getMode(stack) == ProjectionMode.DITHERED));
     }
 }

@@ -11,6 +11,7 @@ public class ItemAndStack<T extends Item> {
 
     public ItemAndStack(ItemStack stack) {
         this.stack = stack;
+        //noinspection unchecked
         this.item = (T) stack.getItem();
     }
 

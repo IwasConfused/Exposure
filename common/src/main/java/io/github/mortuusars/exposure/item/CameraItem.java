@@ -13,12 +13,13 @@ import io.github.mortuusars.exposure.core.camera.*;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.core.frame.CaptureProperties;
-import io.github.mortuusars.exposure.core.frame.FileProjectingInfo;
+import io.github.mortuusars.exposure.core.CaptureProperties;
+import io.github.mortuusars.exposure.core.FileProjectingInfo;
+import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
-import io.github.mortuusars.exposure.item.component.EntityInFrame;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.EntityInFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.Setting;
@@ -65,7 +66,6 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -638,7 +638,7 @@ public class CameraItem extends Item {
 
 
     public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
-        ExposureFrame frame = createFrame(photographer, level, stack, dataFromClient);
+        Frame frame = createFrame(photographer, level, stack, dataFromClient);
 
         //TODO: modifyEntityInFrameData event
 //        PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frame, entities);
@@ -650,34 +650,44 @@ public class CameraItem extends Item {
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
     }
 
-    public ExposureFrame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
+    public Frame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
         Entity photographerEntity = photographer.asEntity();
 
         @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
         if (cameraInstance == null) {
             Exposure.LOGGER.error("Cannot create an exposure frame: Camera Instance with id '{}' does not exists.", getOrCreateID(stack));
-            return ExposureFrame.EMPTY;
+            return Frame.EMPTY;
         }
 
         Optional<CaptureProperties> currentCaptureData = cameraInstance.getCurrentCaptureData();
         if (currentCaptureData.isEmpty()) {
             Exposure.LOGGER.error("Cannot create an exposure frame: Camera Instance does not have capture data.");
-            return ExposureFrame.EMPTY;
+            return Frame.EMPTY;
         }
         CaptureProperties captureProperties = currentCaptureData.get();
 
-        ExposureFrameTag tag = new ExposureFrameTag();
+        CompoundTag tag = new CompoundTag();
 
-        if (captureProperties.flashHasFired()) {
-            tag.putBoolean(ExposureFrameTag.FLASH, true);
+        if (isInSelfieMode(stack)) {
+            tag.putBoolean(FrameTag.SELFIE, true);
         }
 
-        tag.putInt(ExposureFrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
+        if (captureProperties.flashHasFired()) {
+            tag.putBoolean(FrameTag.FLASH, true);
+        }
+
+        double zoom = Setting.ZOOM.getOrDefault(stack, 0.0);
+        int focalLength = (int)getFocalRange(stack).focalLengthFromZoom(zoom);
+        tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
+
+        tag.putFloat(FrameTag.SHUTTER_SPEED_MS, Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT).getDurationMilliseconds());
+
+        tag.putInt(FrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
 
         captureProperties.chromaChannel().ifPresent(channel ->
-                tag.putString(ExposureFrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
+                tag.putString(FrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
-        captureProperties.fileProjectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(ExposureFrameTag.FROM_FILE, true));
+        captureProperties.fileProjectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(FrameTag.FROM_FILE, true));
 
         // Position
         ListTag pos = new ListTag();
@@ -685,32 +695,32 @@ public class CameraItem extends Item {
                 DoubleTag.valueOf(photographerEntity.position().x()),
                 DoubleTag.valueOf(photographerEntity.position().y()),
                 DoubleTag.valueOf(photographerEntity.position().z())));
-        tag.put(ExposureFrameTag.POSITION, pos);
-        tag.put(ExposureFrameTag.PITCH, FloatTag.valueOf(photographerEntity.getXRot()));
-        tag.put(ExposureFrameTag.YAW, FloatTag.valueOf(photographerEntity.getYRot()));
+        tag.put(FrameTag.POSITION, pos);
+        tag.put(FrameTag.PITCH, FloatTag.valueOf(photographerEntity.getXRot()));
+        tag.put(FrameTag.YAW, FloatTag.valueOf(photographerEntity.getYRot()));
 
-        // Situation
-        tag.put(ExposureFrameTag.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
-        tag.putInt(ExposureFrameTag.DAY_TIME, (int) level.getDayTime());
-        tag.putString(ExposureFrameTag.DIMENSION, level.dimension().location().toString());
+        // Environment
+        tag.put(FrameTag.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
+        tag.putInt(FrameTag.DAY_TIME, (int) level.getDayTime());
+        tag.putString(FrameTag.DIMENSION, level.dimension().location().toString());
         BlockPos blockPos = photographerEntity.blockPosition();
         level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
-                .ifPresent(biome -> tag.putString(ExposureFrameTag.BIOME, biome.toString()));
-        int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE_WG, photographerEntity.getBlockX(), photographerEntity.getBlockZ());
+                .ifPresent(biome -> tag.putString(FrameTag.BIOME, biome.toString()));
+        int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, photographerEntity.getBlockX(), photographerEntity.getBlockZ());
         level.updateSkyBrightness();
         int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
         if (photographerEntity.isUnderWater())
-            tag.putBoolean(ExposureFrameTag.UNDERWATER, true);
+            tag.putBoolean(FrameTag.UNDERWATER, true);
         if (photographerEntity.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0)
-            tag.putBoolean(ExposureFrameTag.IN_CAVE, true);
+            tag.putBoolean(FrameTag.IN_CAVE, true);
         else if (!photographerEntity.isUnderWater()) {
             Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
             if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
-                tag.putString(ExposureFrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
+                tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
             else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
-                tag.putString(ExposureFrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
+                tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
             else
-                tag.putString(ExposureFrameTag.WEATHER, "Clear");
+                tag.putString(FrameTag.WEATHER, "Clear");
         }
 
         addStructuresInfo(level, blockPos, tag);
@@ -745,11 +755,11 @@ public class CameraItem extends Item {
         //TODO: modifyFrameData event
         //PlatformHelper.fireModifyFrameDataEvent(player, stack, frame, entities);
 
-        return new ExposureFrame(ExposureIdentifier.id(captureProperties.id()), captureProperties.filmType(),
-                new Photographer(photographerEntity), entitiesInFrame, CustomData.of(tag));
+        return new Frame(ExposureIdentifier.id(captureProperties.id()), captureProperties.filmType(),
+                new Photographer(photographer), entitiesInFrame, FrameTag.of(tag));
     }
 
-    public void addFrameToFilm(ItemStack stack, ExposureFrame frame) {
+    public void addFrameToFilm(ItemStack stack, Frame frame) {
         Attachment.FILM.ifPresentOrElse(stack, (filmItem, filmStack) -> {
             ItemStack updatedFilmStack = filmStack.copy();
             filmItem.addFrame(updatedFilmStack, frame);
@@ -757,7 +767,7 @@ public class CameraItem extends Item {
         }, () -> Exposure.LOGGER.error("Cannot add frame: no film attachment is present."));
     }
 
-    public void onFrameAdded(PhotographerEntity photographer, ServerLevel level, ItemStack stack, ExposureFrame frame) {
+    public void onFrameAdded(PhotographerEntity photographer, ServerLevel level, ItemStack stack, Frame frame) {
         ExposureServer.frameHistory().add(photographer.asEntity(), frame);
 
         if (photographer.getOwnerPlayer() instanceof ServerPlayer serverPlayer) {

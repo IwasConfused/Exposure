@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.core.print.PrintingProcess;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.item.*;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.Util;
@@ -92,7 +92,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     protected boolean advanceFrame;
     protected PrintingMode printingMode = PrintingMode.REGULAR;
 
-    protected @Nullable ExposureFrame selectedFrame;
+    protected @Nullable Frame selectedFrame;
 
     public LightroomBlockEntity(BlockPos pos, BlockState blockState) {
         super(Exposure.BlockEntityTypes.LIGHTROOM.get(), pos, blockState);
@@ -118,7 +118,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
             return;
         }
 
-        @Nullable ExposureFrame frame = getSelectedFrame();
+        @Nullable Frame frame = getSelectedFrame();
         Preconditions.checkState(frame != null,
                 "Frame cannot be null here because of 'canPrint' check. If it is - something went wrong.");
 
@@ -213,12 +213,12 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     @Nullable
-    public ExposureFrame getSelectedFrame() {
+    public Frame getSelectedFrame() {
         return selectedFrame;
     }
 
     public boolean isSelectedFrameChromatic() {
-        @Nullable ExposureFrame frame = getSelectedFrame();
+        @Nullable Frame frame = getSelectedFrame();
         return frame != null && frame.wasTakenWithChromaticFilter();
     }
 
@@ -240,7 +240,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         if (!canPrint())
             return;
 
-        @Nullable ExposureFrame frame = getSelectedFrame();
+        @Nullable Frame frame = getSelectedFrame();
         Preconditions.checkState(frame != null,
                 "Frame cannot be null here because of 'canPrint' check. If it is - something went wrong.");
 
@@ -278,7 +278,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     public boolean canPrint() {
-        @Nullable ExposureFrame frame = getSelectedFrame();
+        @Nullable Frame frame = getSelectedFrame();
         if (frame == null) {
             return false;
         }
@@ -296,7 +296,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     public boolean canPrintInCreativeMode() {
-        @Nullable ExposureFrame frame = getSelectedFrame();
+        @Nullable Frame frame = getSelectedFrame();
         if (frame == null) {
             return false;
         }
@@ -306,7 +306,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return canOutputToResultSlot(frame, process);
     }
 
-    protected PrintingProcess getPrintingProcess(@NotNull ExposureFrame frame) {
+    protected PrintingProcess getPrintingProcess(@NotNull Frame frame) {
         PrintingMode printingMode = getPrintingMode();
 
         if (printingMode == PrintingMode.REGULAR || !canPrintChromatic()) {
@@ -317,7 +317,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return PrintingProcess.fromChromaticStep(getChromaticStep(paperStack));
     }
 
-    protected boolean isPaperValidForPrint(ExposureFrame frame, PrintingProcess process) {
+    protected boolean isPaperValidForPrint(Frame frame, PrintingProcess process) {
         ItemStack paperStack = getItem(Lightroom.PAPER_SLOT);
 
         if (paperStack.isEmpty()) {
@@ -331,7 +331,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return paperStack.is(Exposure.Tags.Items.PHOTO_PAPERS);
     }
 
-    protected boolean hasDyesForPrint(ExposureFrame frame, PrintingProcess process) {
+    protected boolean hasDyesForPrint(Frame frame, PrintingProcess process) {
         for (DyeColor requiredDye : process.getRequiredDyes()) {
             int slotIndex = DYE_SLOTS.get(requiredDye);
             if (getItem(slotIndex).isEmpty()) {
@@ -342,7 +342,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return true;
     }
 
-    public boolean canOutputToResultSlot(ExposureFrame frame, PrintingProcess process) {
+    public boolean canOutputToResultSlot(Frame frame, PrintingProcess process) {
         ItemStack resultStack = getItem(Lightroom.RESULT_SLOT);
 
         if (process.isChromatic()) {
@@ -361,7 +361,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return chromaticFragment.getLayers(paper).size();
     }
 
-    protected void printFrame(ExposureFrame frame, PrintingProcess process, boolean consumeIngredients) {
+    protected void printFrame(Frame frame, PrintingProcess process, boolean consumeIngredients) {
         ItemStack printResult = createPrintResult(frame, process);
         putPrintResultInOutputSlot(printResult);
 
@@ -374,7 +374,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     public void printFrameInCreative() {
-        @Nullable ExposureFrame frame = getSelectedFrame();
+        @Nullable Frame frame = getSelectedFrame();
         if (frame == null) {
             Exposure.LOGGER.error("Cannot creatively print a frame: No frame is selected.");
             return;
@@ -390,7 +390,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         }
     }
 
-    protected ItemStack createPrintResult(ExposureFrame frame, PrintingProcess process) {
+    protected ItemStack createPrintResult(Frame frame, PrintingProcess process) {
         if (process.isChromatic()) {
             ItemStack paperStack = getItem(Lightroom.PAPER_SLOT);
             ItemStack chromaticStack = paperStack.getItem() instanceof ChromaticSheetItem
@@ -448,13 +448,13 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         setItem(Lightroom.RESULT_SLOT, resultStack);
     }
 
-    protected void consumePrintIngredients(ExposureFrame frame, PrintingProcess process) {
+    protected void consumePrintIngredients(Frame frame, PrintingProcess process) {
         getItem(Lightroom.PAPER_SLOT).shrink(1);
         process.getRequiredDyes().forEach(dye -> getItem(DYE_SLOTS.get(dye)).shrink(1));
         setChanged();
     }
 
-    protected void awardExperienceForPrint(ExposureFrame frame, PrintingProcess process, ItemStack result) {
+    protected void awardExperienceForPrint(Frame frame, PrintingProcess process, ItemStack result) {
         int xp = process.getExperiencePerPrint();
 
         if (xp > 0) {
@@ -464,9 +464,9 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         }
     }
 
-    protected void onFramePrinted(ExposureFrame frame, PrintingProcess process) {
+    protected void onFramePrinted(Frame frame, PrintingProcess process) {
         if (process.isRegular()) { // Chromatics create new exposure. Marking is not needed.
-            frame.identifier().ifId(id ->
+            frame.exposureIdentifier().ifId(id ->
                     ExposureServer.exposureRepository().loadExposure(id).getData()
                             .ifPresent(exposure -> exposure.updateTag(PalettedExposure.Tag::setPrinted))
             );

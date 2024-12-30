@@ -1,9 +1,7 @@
 package io.github.mortuusars.exposure;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -64,12 +62,12 @@ public class PlatformHelper {
     }
 
     @ExpectPlatform
-    public static void fireModifyFrameDataEvent(ServerPlayer player, ItemStack cameraStack, ExposureFrame.Mutable frame, List<Entity> entitiesInFrame) {
+    public static void fireModifyFrameDataEvent(ServerPlayer player, ItemStack cameraStack, Frame.Mutable frame, List<Entity> entitiesInFrame) {
         throw new AssertionError();
     }
 
     @ExpectPlatform
-    public static void fireFrameAddedEvent(ServerPlayer player, ItemStack cameraStack, ExposureFrame frame) {
+    public static void fireFrameAddedEvent(ServerPlayer player, ItemStack cameraStack, Frame frame) {
         throw new AssertionError();
     }
 }

@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.core.warehouse.server;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.*;
@@ -15,35 +15,35 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class ExposureFrameHistory extends SavedData {
-    public static final Codec<ExposureFrameHistory> CODEC = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.list(ExposureFrame.CODEC)).stable()
+    public static final Codec<ExposureFrameHistory> CODEC = Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.list(Frame.CODEC)).stable()
             .xmap(ExposureFrameHistory::new, ExposureFrameHistory::getFrames);
 
     public static final int LIMIT = 32;
 
-    private final Map<UUID, List<ExposureFrame>> frames;
+    private final Map<UUID, List<Frame>> frames;
 
-    public ExposureFrameHistory(Map<UUID, List<ExposureFrame>> frames) {
+    public ExposureFrameHistory(Map<UUID, List<Frame>> frames) {
         this.frames = new HashMap<>(frames);
     }
 
-    public Map<UUID, List<ExposureFrame>> getFrames() {
+    public Map<UUID, List<Frame>> getFrames() {
         return frames;
     }
 
-    public List<ExposureFrame> getFramesOf(Entity entity) {
+    public List<Frame> getFramesOf(Entity entity) {
         return getFramesOf(entity.getUUID());
     }
 
-    public List<ExposureFrame> getFramesOf(UUID uuid) {
+    public List<Frame> getFramesOf(UUID uuid) {
         return frames.getOrDefault(uuid, Collections.emptyList());
     }
 
-    public void add(Entity entity, ExposureFrame frame) {
+    public void add(Entity entity, Frame frame) {
         add(entity.getUUID(), frame);
     }
 
-    public void add(UUID uuid, ExposureFrame frame) {
-        List<ExposureFrame> list = frames.compute(uuid, (id, framesList) ->
+    public void add(UUID uuid, Frame frame) {
+        List<Frame> list = frames.compute(uuid, (id, framesList) ->
                 framesList == null ? new ArrayList<>() : new ArrayList<>(framesList));
         while (list.size() >= LIMIT) {
             list.removeFirst();

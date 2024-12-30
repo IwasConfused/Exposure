@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core.frame;
+package io.github.mortuusars.exposure.core;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

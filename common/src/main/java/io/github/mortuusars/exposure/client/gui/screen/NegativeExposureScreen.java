@@ -12,7 +12,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
@@ -90,7 +90,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
         super.render(guiGraphics, mouseX, mouseY, partialTick);
 
         ExposureIdentifier exposureIdentifier = photographs.get(pager.getCurrentPage()).getItemStack()
-                .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, ExposureFrame.EMPTY).identifier();
+                .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, Frame.EMPTY).exposureIdentifier();
 
         ExposureType type = exposureIdentifier.map(
                 id -> ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY).getTag().type(),

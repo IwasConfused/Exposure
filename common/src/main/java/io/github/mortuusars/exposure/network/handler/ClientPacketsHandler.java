@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.core.CaptureDataFromClient;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.client.ClientTrichromeFinalizer;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.frame.CaptureProperties;
+import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.image.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.data.lenses.Lenses;

@@ -11,18 +11,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.IntFunction;
 
-public enum InterplanarProjectorMode implements StringRepresentable {
+public enum ProjectionMode implements StringRepresentable {
     DITHERED("dithered"),
     CLEAN("clean");
 
-    private static final IntFunction<InterplanarProjectorMode> BY_ID =
-            ByIdMap.continuous(InterplanarProjectorMode::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
-    public static final Codec<InterplanarProjectorMode> CODEC = StringRepresentable.fromEnum(InterplanarProjectorMode::values);
-    public static final StreamCodec<ByteBuf, InterplanarProjectorMode> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, InterplanarProjectorMode::ordinal);
+    private static final IntFunction<ProjectionMode> BY_ID =
+            ByIdMap.continuous(ProjectionMode::ordinal, values(), ByIdMap.OutOfBoundsStrategy.ZERO);
+    public static final Codec<ProjectionMode> CODEC = StringRepresentable.fromEnum(ProjectionMode::values);
+    public static final StreamCodec<ByteBuf, ProjectionMode> STREAM_CODEC = ByteBufCodecs.idMapper(BY_ID, ProjectionMode::ordinal);
 
     private final String name;
 
-    InterplanarProjectorMode(String name) {
+    ProjectionMode(String name) {
         this.name = name;
     }
 
@@ -35,7 +35,7 @@ public enum InterplanarProjectorMode implements StringRepresentable {
         return Component.translatable("item.exposure.interplanar_projector.mode." + getSerializedName());
     }
 
-    public InterplanarProjectorMode cycle() {
+    public ProjectionMode cycle() {
         return BY_ID.apply(ordinal() + 1);
     }
 }

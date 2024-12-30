@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.client.render.texture.TextureRenderer;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
@@ -37,11 +37,11 @@ public class PhotographRenderer {
         PhotographType photographType = photographItem.getType(photographStack);
         PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
 
-        ExposureFrame frame = photographItem.getFrame(photographStack);
+        Frame frame = photographItem.getFrame(photographStack);
 
         RenderableImage image = photographFeatures.process(ExposureClient.createRenderableExposureImage(frame));
 
-        int paperRotation = frame.identifier().hashCode() % 4 * 90;
+        int paperRotation = frame.exposureIdentifier().hashCode() % 4 * 90;
 
         if (renderPaper && photographFeatures.paperTexture() != ExposureClient.Textures.EMPTY) {
             poseStack.pushPose();
@@ -123,10 +123,10 @@ public class PhotographRenderer {
             }
 
             PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
-            ExposureFrame frame = photograph.getItem().getFrame(photograph.getItemStack());
+            Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
             PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
 
-            int rotation = frame.identifier().hashCode() % 4 * 90;
+            int rotation = frame.exposureIdentifier().hashCode() % 4 * 90;
 
             // Photographs below (only paper)
             float posOffset = getStackedPhotographOffset() * i;

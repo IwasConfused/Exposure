@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.core.FilmColor;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
@@ -122,7 +122,7 @@ public class FilmFrameInspectScreen extends ZoomableScreen {
         guiGraphics.pose().translate(12, 12, 0);
 
         int currentFrame = getLightroomMenu().getSelectedFrame();
-        @Nullable ExposureFrame frame = getLightroomMenu().getFrameIdByIndex(currentFrame);
+        @Nullable Frame frame = getLightroomMenu().getFrameIdByIndex(currentFrame);
         if (frame != null)
             lightroomScreen.renderFrame(frame, guiGraphics.pose(), 0, 0, FRAME_SIZE, 1f, exposureType);
 

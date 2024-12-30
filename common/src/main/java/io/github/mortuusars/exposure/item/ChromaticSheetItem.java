@@ -3,10 +3,10 @@ package io.github.mortuusars.exposure.item;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
-import io.github.mortuusars.exposure.core.ExposureFrameTag;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.item.component.ExposureFrame;
+import io.github.mortuusars.exposure.core.frame.FrameTag;
+import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.core.ChromaChannel;
@@ -31,12 +31,12 @@ public class ChromaticSheetItem extends Item {
         super(properties);
     }
 
-    public List<ExposureFrame> getLayers(ItemStack stack) {
+    public List<Frame> getLayers(ItemStack stack) {
         return stack.getOrDefault(Exposure.DataComponents.CHROMATIC_SHEET_LAYERS, Collections.emptyList());
     }
 
-    public void addLayer(ItemStack stack, ExposureFrame frame) {
-        List<ExposureFrame> layers = new ArrayList<>(getLayers(stack));
+    public void addLayer(ItemStack stack, Frame frame) {
+        List<Frame> layers = new ArrayList<>(getLayers(stack));
         Preconditions.checkState(layers.size() < 3, "Cannot add layer. Chromatic Sheet already has 3 layers.");
         layers.add(frame);
         stack.set(Exposure.DataComponents.CHROMATIC_SHEET_LAYERS, layers);
@@ -48,7 +48,7 @@ public class ChromaticSheetItem extends Item {
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        List<ExposureFrame> layers = getLayers(stack);
+        List<Frame> layers = getLayers(stack);
 
         if (!layers.isEmpty()) {
             MutableComponent component = Component.translatable("gui.exposure.channel.red")
@@ -86,8 +86,8 @@ public class ChromaticSheetItem extends Item {
         Preconditions.checkState(canCombine(stack), "Combining Chromatic Sheet requires 3 layers. " + stack);
 
         ExposureIdentifier identifier = ExposureIdentifier.createId(player, "chromatic");
-        List<ExposureFrame> layers = getLayers(stack);
-        List<ExposureIdentifier> layersIdentifiers = layers.stream().map(ExposureFrame::identifier).toList();
+        List<Frame> layers = getLayers(stack);
+        List<ExposureIdentifier> layersIdentifiers = layers.stream().map(Frame::exposureIdentifier).toList();
 
         ItemStack photographStack = createPhotographStack(identifier, layers);
 
@@ -97,11 +97,11 @@ public class ChromaticSheetItem extends Item {
         return photographStack;
     }
 
-    protected ItemStack createPhotographStack(ExposureIdentifier identifier, List<ExposureFrame> layers) {
-        ExposureFrame frameData = ExposureFrame.intersect(identifier, layers);
+    protected ItemStack createPhotographStack(ExposureIdentifier identifier, List<Frame> layers) {
+        Frame frameData = Frame.intersect(identifier, layers);
         frameData = frameData.toMutable()
                 .setType(ExposureType.COLOR)
-                .updateAdditionalData(tag -> tag.putBoolean(ExposureFrameTag.CHROMATIC, true))
+                .updateTag(tag -> tag.putBoolean(FrameTag.CHROMATIC, true))
                 .setChromatic(true)
                 .toImmutable();
 
