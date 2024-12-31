@@ -17,7 +17,7 @@ import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
-import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
@@ -182,7 +182,7 @@ public class ClientPacketsHandler {
                 CaptureDataFromClient clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
                 Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
 
-                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.id(), data);
+                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.exposureId(), data);
                 ExposureClient.cycles().enqueueTask(captureTask);
             }, () -> LOGGER.error("Cannot start capture: no active camera."));
         });

@@ -7,7 +7,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.util.ByteArrayUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.HolderLookup;

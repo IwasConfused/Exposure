@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core.image.color;
+package io.github.mortuusars.exposure.core.color;
 
 import net.minecraft.util.Mth;
 

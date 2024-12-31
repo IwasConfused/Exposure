@@ -17,7 +17,7 @@ import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.FileProjectingInfo;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.EntityInFrame;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
@@ -755,7 +755,7 @@ public class CameraItem extends Item {
         //TODO: modifyFrameData event
         //PlatformHelper.fireModifyFrameDataEvent(player, stack, frame, entities);
 
-        return new Frame(ExposureIdentifier.id(captureProperties.id()), captureProperties.filmType(),
+        return new Frame(ExposureIdentifier.id(captureProperties.exposureId()), captureProperties.filmType(),
                 new Photographer(photographer), entitiesInFrame, FrameTag.of(tag));
     }
 

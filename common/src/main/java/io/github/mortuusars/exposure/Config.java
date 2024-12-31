@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.core.color.Color;
 import net.neoforged.neoforge.common.ModConfigSpec;
 
 //TODO: Restructure

@@ -12,7 +12,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.FileProjectingInfo;
-import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
@@ -69,7 +69,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
         }
 
         return captureTask
-                .accept(image -> PalettedExposureUploader.upload(data.id(), image))
+                .accept(image -> PalettedExposureUploader.upload(data.exposureId(), image))
                 .onError(printCasualErrorInChat());
     }
 

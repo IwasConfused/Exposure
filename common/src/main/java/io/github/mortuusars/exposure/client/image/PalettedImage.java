@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.image;
 
-import io.github.mortuusars.exposure.core.image.color.Color;
-import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.color.Color;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 
 public class PalettedImage implements Image {

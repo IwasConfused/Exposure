@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.image;
 
 import com.mojang.blaze3d.platform.NativeImage;
-import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.core.color.Color;
 
 public class WrappedNativeImage implements Image {
     private final NativeImage nativeImage;

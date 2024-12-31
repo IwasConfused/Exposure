@@ -2,9 +2,7 @@ package io.github.mortuusars.exposure.data.export;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.image.color.Color;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
-import net.minecraft.world.level.material.MapColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

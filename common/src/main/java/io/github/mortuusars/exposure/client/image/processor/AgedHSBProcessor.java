@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.image.processor;
 
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ProcessedImage;
-import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.core.color.Color;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 

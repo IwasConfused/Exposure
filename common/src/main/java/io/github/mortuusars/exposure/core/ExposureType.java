@@ -1,14 +1,12 @@
 package io.github.mortuusars.exposure.core;
 
 import com.mojang.serialization.Codec;
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.core.color.Color;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.ByIdMap;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

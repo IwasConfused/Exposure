@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.core.image.color.converter;
+package io.github.mortuusars.exposure.core.color.converter;
 
 import java.util.ArrayList;
 import java.util.List;

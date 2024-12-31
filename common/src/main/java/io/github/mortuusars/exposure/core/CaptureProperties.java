@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.core;
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.core.image.color.ColorPalette;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public record CaptureProperties(String id,
+public record CaptureProperties(String exposureId,
                                 PhotographerEntity photographer,
                                 CameraID cameraID,
                                 ShutterSpeed shutterSpeed,
@@ -46,7 +46,7 @@ public record CaptureProperties(String id,
         }
 
         public void encode(RegistryFriendlyByteBuf buffer, CaptureProperties data) {
-            ByteBufCodecs.STRING_UTF8.encode(buffer, data.id());
+            ByteBufCodecs.STRING_UTF8.encode(buffer, data.exposureId());
             PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
             CameraID.STREAM_CODEC.encode(buffer, data.cameraID());
             ShutterSpeed.STREAM_CODEC.encode(buffer, data.shutterSpeed());

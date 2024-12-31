@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.data.filter;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.image.color.Color;
+import io.github.mortuusars.exposure.core.color.Color;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
