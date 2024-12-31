@@ -676,7 +676,7 @@ public class CameraItem extends Item {
             tag.putBoolean(FrameTag.FLASH, true);
         }
 
-        double zoom = Setting.ZOOM.getOrDefault(stack, 0.0);
+        double zoom = Setting.ZOOM.getOrDefault(stack, 0.0f);
         int focalLength = (int)getFocalRange(stack).focalLengthFromZoom(zoom);
         tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
 

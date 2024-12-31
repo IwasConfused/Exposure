@@ -63,6 +63,11 @@ public final class FocalRange implements StringRepresentable {
         return Fov.focalLengthToFov(focalLengthFromZoom(zoom));
     }
 
+    public double zoomFromFov(double fov) {
+        double focalLength = Fov.fovToFocalLength(fov);
+        return Mth.map(focalLength, min(), max(), 0.0, 1.0);
+    }
+
     public double clampFocalLength(double focalLength) {
         return Mth.clamp(focalLength, min, max);
     }

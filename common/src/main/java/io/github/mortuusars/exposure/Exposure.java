@@ -190,7 +190,7 @@ public class Exposure {
         public static final DataComponentType<CameraID> CAMERA_ID = Register.dataComponentType("camera_id",
                 arg -> arg.persistent(CameraID.CODEC).networkSynchronized(CameraID.STREAM_CODEC));
 
-        public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_viewfinder_open",
+        public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_active",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 
         public static final DataComponentType<Boolean> SELFIE_MODE = Register.dataComponentType("camera_selfie_mode",
@@ -206,23 +206,23 @@ public class Exposure {
         public static final DataComponentType<CompositionGuide> COMPOSITION_GUIDE = Register.dataComponentType("camera_composition_guide",
                 arg -> arg.persistent(CompositionGuide.CODEC).networkSynchronized(CompositionGuide.STREAM_CODEC));
 
-        public static final DataComponentType<Double> ZOOM = Register.dataComponentType("camera_zoom",
-                arg -> arg.persistent(Codec.DOUBLE).networkSynchronized(ByteBufCodecs.DOUBLE));
+        public static final DataComponentType<Float> ZOOM = Register.dataComponentType("camera_zoom",
+                arg -> arg.persistent(Codec.FLOAT).networkSynchronized(ByteBufCodecs.FLOAT));
 
         public static final DataComponentType<FlashMode> FLASH_MODE = Register.dataComponentType("camera_flash_mode",
                 arg -> arg.persistent(FlashMode.CODEC).networkSynchronized(FlashMode.STREAM_CODEC));
 
         // Camera Attachments
-        public static final DataComponentType<StoredItemStack> FILM = Register.dataComponentType("camera_film_attachment",
+        public static final DataComponentType<StoredItemStack> FILM = Register.dataComponentType("camera_film",
                 arg -> arg.persistent(StoredItemStack.CODEC).networkSynchronized(StoredItemStack.STREAM_CODEC));
 
-        public static final DataComponentType<StoredItemStack> FLASH = Register.dataComponentType("camera_flash_attachment",
+        public static final DataComponentType<StoredItemStack> FLASH = Register.dataComponentType("camera_flash",
                 arg -> arg.persistent(StoredItemStack.CODEC).networkSynchronized(StoredItemStack.STREAM_CODEC));
 
-        public static final DataComponentType<StoredItemStack> LENS = Register.dataComponentType("camera_lens_attachment",
+        public static final DataComponentType<StoredItemStack> LENS = Register.dataComponentType("camera_lens",
                 arg -> arg.persistent(StoredItemStack.CODEC).networkSynchronized(StoredItemStack.STREAM_CODEC));
 
-        public static final DataComponentType<StoredItemStack> FILTER = Register.dataComponentType("camera_filter_attachment",
+        public static final DataComponentType<StoredItemStack> FILTER = Register.dataComponentType("camera_filter",
                 arg -> arg.persistent(StoredItemStack.CODEC).networkSynchronized(StoredItemStack.STREAM_CODEC));
 
         // Film
@@ -243,7 +243,7 @@ public class Exposure {
                                 .networkSynchronized(ProjectionMode.STREAM_CODEC));
 
         public static final DataComponentType<List<Frame>> CHROMATIC_SHEET_LAYERS =
-                Register.dataComponentType("chromatic_sheet_layers",
+                Register.dataComponentType("chromatic_layers",
                         arg -> arg.persistent(Frame.CODEC.listOf(0, 3))
                                 .networkSynchronized(Frame.STREAM_CODEC.apply(ByteBufCodecs.list())));
 

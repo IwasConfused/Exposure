@@ -11,7 +11,6 @@ import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.part.Setting;
-import io.github.mortuusars.exposure.util.Fov;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 
@@ -36,7 +35,7 @@ public class ViewfinderZoom {
         animation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
         double defaultFov = Minecrft.options().fov().get();
         currentFov = defaultFov;
-        targetFov = camera.map(stack -> Setting.ZOOM.getOrDefault(stack, defaultFov))
+        targetFov = camera.map(stack -> Setting.ZOOM.getOrDefault(stack, 0f))
                 .map(focalRange::fovFromZoom)
                 .orElse(defaultFov);
     }
@@ -65,9 +64,7 @@ public class ViewfinderZoom {
             targetFov = fov;
             animation.resetProgress();
 
-            double focalLength = Fov.fovToFocalLength(fov);
-            double zoom = Mth.map(focalLength, focalRange.min(), focalRange.max(), 0.0, 1.0);
-            CameraClient.setSetting(Setting.ZOOM, zoom);
+            CameraClient.setSetting(Setting.ZOOM, (float)focalRange.zoomFromFov(fov));
         }
     }
 
