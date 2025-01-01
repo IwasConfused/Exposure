@@ -13,8 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EntitiesInFrame {
-    public static List<Entity> get(Entity photographer, double fov, int limit, boolean inSelfieMode) {
-        double currentFov = fov / Exposure.CROP_FACTOR;
+    public static List<LivingEntity> get(Entity photographer, double fov, int limit, boolean inSelfieMode) {
+        double currentFov = fov * Exposure.CROP_FACTOR;
         double currentFocalLength = Fov.fovToFocalLength(currentFov);
 
         Vec3 cameraPos = photographer.position().add(0, photographer.getEyeHeight(), 0);
@@ -31,11 +31,14 @@ public class EntitiesInFrame {
             return dist1 > dist2 ? 1 : -1;
         });
 
-        List<Entity> entitiesInFrame = new ArrayList<>();
+        List<LivingEntity> entitiesInFrame = new ArrayList<>();
 
         for (Entity entity : entities) {
             if (entitiesInFrame.size() >= limit)
                 break;
+
+            if (!(entity instanceof LivingEntity))
+                continue;
 
             if (!isInFOV(cameraPos, cameraLookAngle, currentFov, entity))
                 continue; // Not in frame
@@ -46,11 +49,12 @@ public class EntitiesInFrame {
             if (!hasLineOfSight(photographer, entity))
                 continue; // Not visible
 
-            entitiesInFrame.add(entity);
+            entitiesInFrame.add(((LivingEntity) entity));
         }
 
+        //TODO: Move camera pos properly to capture what's behind a player
         if (inSelfieMode)
-            entitiesInFrame.addFirst(photographer);
+            entitiesInFrame.addFirst(((LivingEntity) photographer));
 
         return entitiesInFrame;
     }
@@ -85,7 +89,7 @@ public class EntitiesInFrame {
             size = 0.1;
 
         double sizeModifier = (size - 1.0) * 0.6 + 1.0;
-        return (distanceInBlocks / sizeModifier) / Exposure.CROP_FACTOR;
+        return (distanceInBlocks / sizeModifier) * Exposure.CROP_FACTOR;
     }
 
     public static boolean isInFOV(Vec3 cameraPos, Vec3 cameraLookAngle, double fov, Entity target) {

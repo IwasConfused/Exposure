@@ -169,7 +169,7 @@ public class ExposureIdentifier {
 
     // --
 
-    public static ExposureIdentifier createId(Entity entity, String... middleParts) {
+    public static String createId(Entity entity, String... middleParts) {
         List<String> parts = new ArrayList<>();
         parts.add(entity.getScoreboardName());
         parts.addAll(Arrays.asList(middleParts));
@@ -177,13 +177,12 @@ public class ExposureIdentifier {
         return createId(parts.toArray(String[]::new));
     }
 
-    public static ExposureIdentifier createId(String... parts) {
+    public static String createId(String... parts) {
         Preconditions.checkArgument(parts.length > 0, "Cannot compose ID with 0 parts.");
         List<String> sanitizedParts = Arrays.stream(parts)
                 .filter(s -> !StringUtil.isNullOrEmpty(s))
                 .map(s -> s.replace('_', '-'))
                 .toList();
-        String id = String.join("_", sanitizedParts);
-        return ExposureIdentifier.id(id);
+        return String.join("_", sanitizedParts);
     }
 }

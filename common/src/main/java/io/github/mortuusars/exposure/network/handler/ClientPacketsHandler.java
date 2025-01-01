@@ -12,8 +12,6 @@ import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.image.processor.Process;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
-import io.github.mortuusars.exposure.core.CaptureDataFromClient;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
@@ -23,9 +21,7 @@ import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.*;
-import io.github.mortuusars.exposure.network.packet.server.ActiveCameraAddFrameC2SP;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
@@ -58,7 +54,7 @@ public class ClientPacketsHandler {
     }
 
     //TODO: Use CaptureData
-    public static void exposeScreenshot(ExposureIdentifier identifier, int size, float brightnessStops) {
+    public static void exposeScreenshot(String exposureId, int size, float brightnessStops) {
         throw new NotImplementedException();
 
 //        if (size <= 0 || size > 2048) {
@@ -174,17 +170,11 @@ public class ClientPacketsHandler {
     }
 
     public static void startCapture(StartCaptureS2CP packet) {
-        LocalPlayer player = Minecrft.player();
         CaptureProperties data = packet.captureProperties();
 
         executeOnMainThread(() -> {
-            player.ifActiveExposureCameraPresent((item, stack) -> {
-                CaptureDataFromClient clientSideFrameData = item.getClientSideFrameData(data.photographer(), stack);
-                Packets.sendToServer(new ActiveCameraAddFrameC2SP(data.photographer(), clientSideFrameData));
-
-                Task<?> captureTask = CaptureTemplates.getOrThrow(item).createTask(player, data.exposureId(), data);
-                ExposureClient.cycles().enqueueTask(captureTask);
-            }, () -> LOGGER.error("Cannot start capture: no active camera."));
+            Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId()).createTask(data);
+            ExposureClient.cycles().enqueueTask(captureTask);
         });
     }
 }

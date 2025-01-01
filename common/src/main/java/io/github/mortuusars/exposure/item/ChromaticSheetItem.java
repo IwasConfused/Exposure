@@ -85,14 +85,14 @@ public class ChromaticSheetItem extends Item {
     public ItemStack combineIntoPhotograph(@NotNull ServerPlayer player, ItemStack stack) {
         Preconditions.checkState(canCombine(stack), "Combining Chromatic Sheet requires 3 layers. " + stack);
 
-        ExposureIdentifier identifier = ExposureIdentifier.createId(player, "chromatic");
+        String exposureId = ExposureIdentifier.createId(player, "chromatic");
         List<Frame> layers = getLayers(stack);
         List<ExposureIdentifier> layersIdentifiers = layers.stream().map(Frame::exposureIdentifier).toList();
 
-        ItemStack photographStack = createPhotographStack(identifier, layers);
+        ItemStack photographStack = createPhotographStack(ExposureIdentifier.id(exposureId), layers);
 
-        ExposureServer.exposureRepository().expect(player, identifier.getId().orElseThrow());
-        Packets.sendToClient(new CreateChromaticExposureS2CP(identifier.getId().orElseThrow(), layersIdentifiers), player);
+        ExposureServer.exposureRepository().expect(player, exposureId);
+        Packets.sendToClient(new CreateChromaticExposureS2CP(exposureId, layersIdentifiers), player);
 
         return photographStack;
     }

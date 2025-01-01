@@ -14,14 +14,14 @@ import java.util.Optional;
 
 public record CaptureProperties(String exposureId,
                                 PhotographerEntity photographer,
-                                CameraID cameraID,
+                                Optional<CameraID> cameraID,
                                 ShutterSpeed shutterSpeed,
                                 Optional<Integer> focalLengthOverride,
                                 ExposureType filmType,
                                 int frameSize,
                                 float cropFactor,
                                 ColorPalette colorPalette,
-                                boolean flashHasFired,
+                                boolean flash,
                                 int lightLevel,
                                 Optional<FileProjectingInfo> fileProjectingInfo,
                                 Optional<ChromaChannel> chromaChannel,
@@ -31,7 +31,7 @@ public record CaptureProperties(String exposureId,
             return new CaptureProperties(
                     ByteBufCodecs.STRING_UTF8.decode(buffer),
                     PhotographerEntity.STREAM_CODEC.decode(buffer),
-                    CameraID.STREAM_CODEC.decode(buffer),
+                    ByteBufCodecs.optional(CameraID.STREAM_CODEC).decode(buffer),
                     ShutterSpeed.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
@@ -48,14 +48,14 @@ public record CaptureProperties(String exposureId,
         public void encode(RegistryFriendlyByteBuf buffer, CaptureProperties data) {
             ByteBufCodecs.STRING_UTF8.encode(buffer, data.exposureId());
             PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
-            CameraID.STREAM_CODEC.encode(buffer, data.cameraID());
+            ByteBufCodecs.optional(CameraID.STREAM_CODEC).encode(buffer, data.cameraID());
             ShutterSpeed.STREAM_CODEC.encode(buffer, data.shutterSpeed());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.focalLengthOverride());
             ExposureType.STREAM_CODEC.encode(buffer, data.filmType());
             ByteBufCodecs.VAR_INT.encode(buffer, data.frameSize());
             ByteBufCodecs.FLOAT.encode(buffer, data.cropFactor());
             ColorPalette.STREAM_CODEC.encode(buffer, data.colorPalette());
-            ByteBufCodecs.BOOL.encode(buffer, data.flashHasFired());
+            ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.VAR_INT.encode(buffer, data.lightLevel());
             ByteBufCodecs.optional(FileProjectingInfo.STREAM_CODEC).encode(buffer, data.fileProjectingInfo());
             ByteBufCodecs.optional(ChromaChannel.STREAM_CODEC).encode(buffer, data.chromaChannel());

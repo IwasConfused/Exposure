@@ -6,7 +6,10 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.core.CaptureProperties;
+import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.item.CameraItem;
 import io.github.mortuusars.exposure.item.ChromaticSheetItem;
 import io.github.mortuusars.exposure.item.DevelopedFilmItem;
 import io.github.mortuusars.exposure.item.FilmRollItem;
@@ -21,6 +24,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -29,18 +33,39 @@ public class DebugCommand {
         return Commands.literal("debug")
                 .then(Commands.literal("clear_rendering_cache")
                         .executes(DebugCommand::clearRenderingCache))
+                .then(Commands.literal("expose_rgb")
+                        .executes(DebugCommand::exposeRGB))
                 .then(Commands.literal("chromatic_from_last_three_exposures")
                         .executes(DebugCommand::chromaticFromLastThreeExposures))
                 .then(Commands.literal("develop_film_in_hand")
-                        .executes(DebugCommand::developFilmInHand)
+                        .executes(context -> developFilmInHand(context, true))
                         .then(Commands.literal("keep_original")
-                                .executes(DebugCommand::developFilmInHandNoReplace)));
+                                .executes(context -> developFilmInHand(context, false))));
     }
 
     private static int clearRenderingCache(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
         Packets.sendToClient(ClearRenderingCacheS2CP.INSTANCE, player);
+        return 0;
+    }
+
+    private static int exposeRGB(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        CommandSourceStack stack = context.getSource();
+        ServerPlayer player = stack.getPlayerOrException();
+
+        List<CaptureProperties> properties = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+//            properties.add(new CaptureProperties(
+////                    ExposureIdentifier.createId(player),
+////                    player,
+//
+//            ));
+
+        }
+
+
         return 0;
     }
 
@@ -107,20 +132,12 @@ public class DebugCommand {
                 }
 
                 stack.sendSuccess(() -> Component.translatable("command.exposure.debug.develop.success",
-                                itemInHand.getDisplayName()), true);
+                        itemInHand.getDisplayName()), true);
                 return 0;
             }
         }
 
         stack.sendFailure(Component.translatable("command.exposure.debug.develop.fail.wrong_item"));
         return 1;
-    }
-
-    private static int developFilmInHand(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return developFilmInHand(context, true);
-    }
-
-    private static int developFilmInHandNoReplace(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-        return developFilmInHand(context, false);
     }
 }

@@ -6,7 +6,6 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.PlatformHelper;
 import io.github.mortuusars.exposure.block.FlashBlock;
-import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
@@ -54,6 +53,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
@@ -224,7 +225,7 @@ public class CameraItem extends Item {
                 return PROJECT_COOLDOWN;
             }
 
-            if (captureProperties.flashHasFired()) {
+            if (captureProperties.flash()) {
                 return FLASH_COOLDOWN;
             }
         }
@@ -349,6 +350,14 @@ public class CameraItem extends Item {
         if (level instanceof ServerLevel serverLevel) {
             getShutter().tick(player, serverLevel, stack);
 
+            // Tests entities in frame
+            // if (isActive(stack)) {
+            //     List<LivingEntity> entitiesInFrame = getEntitiesInFrame(player, serverLevel, stack);
+            //     entitiesInFrame.forEach(e -> {
+            //         e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 2));
+            //     });
+            // }
+
             CameraInstances.ifPresent(stack, instance -> instance.tick(player, stack));
 
             boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
@@ -417,12 +426,12 @@ public class CameraItem extends Item {
                         1f, 1f, shutterSpeed.getDurationTicks());
             }
 
-            ExposureIdentifier exposureIdentifier = ExposureIdentifier.createId(photographer.getExecutingPlayer());
+            String exposureId = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
             CaptureProperties captureProperties = new CaptureProperties(
-                    exposureIdentifier.getId().orElseThrow(),
+                    exposureId,
                     photographer,
-                    cameraID,
+                    Optional.of(cameraID),
                     Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT),
                     Optional.empty(),
                     film.getItem().getType(),
@@ -436,11 +445,20 @@ public class CameraItem extends Item {
                     new CompoundTag());
 
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureProperties));
-            ExposureServer.exposureRepository().expect(serverPlayer, exposureIdentifier.getId().orElseThrow());
-            Packets.sendToClient(new StartCaptureS2CP(captureProperties), serverPlayer);
+            ExposureServer.exposureRepository().expect(serverPlayer, exposureId);
+
+            //TODO: since we get entities in frame only server-side, it may potentially differ from what player sees on client
+            // Needs testing. If it is a problem: maybe sending packet to server with updated player pitch/yaw is a solution?
+            addNewFrame(photographer, serverLevel, stack);
+
+            Packets.sendToClient(new StartCaptureS2CP(getCaptureTemplateId(stack), captureProperties), serverPlayer);
         }
 
         return InteractionResultHolder.consume(stack);
+    }
+
+    public ResourceLocation getCaptureTemplateId(ItemStack stack) {
+        return Exposure.resource("camera");
     }
 
     protected void onShutterOpen(PhotographerEntity photographer, ServerLevel serverLevel, ItemStack stack) {
@@ -474,26 +492,6 @@ public class CameraItem extends Item {
                                 ? projectorItem.getFileLoadingData(filterStack)
                                 : Optional.<FileProjectingInfo>empty())
                 .orElse(Optional.empty());
-    }
-
-    public CaptureDataFromClient getClientSideFrameData(PhotographerEntity photographer, ItemStack stack) {
-        Preconditions.checkState(photographer.asEntity().level().isClientSide(), "Should be called only on client.");
-
-
-        double fov = CameraClient.viewfinder() != null
-                ? CameraClient.viewfinder().zoom().getCurrentFov()
-                : Minecrft.options().fov().get();
-        fov = getFocalRange(stack).clampFov(fov);
-
-        List<UUID> entitiesInFrame = EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack))
-                .stream()
-                .map(Entity::getUUID)
-                .toList();
-
-        CompoundTag extraData = new CompoundTag();
-        //TODO: getAdditionalData event
-
-        return new CaptureDataFromClient(fov, entitiesInFrame, extraData);
     }
 
     public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack) {
@@ -637,8 +635,8 @@ public class CameraItem extends Item {
     }
 
 
-    public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
-        Frame frame = createFrame(photographer, level, stack, dataFromClient);
+    public void addNewFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
+        Frame frame = createFrame(photographer, level, stack);
 
         //TODO: modifyEntityInFrameData event
 //        PlatformHelper.fireModifyFrameDataEvent(player, cameraStack, frame, entities);
@@ -650,7 +648,7 @@ public class CameraItem extends Item {
 //        PlatformHelper.fireFrameAddedEvent(player, cameraStack, exposureFrame);
     }
 
-    public Frame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
+    public Frame createFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
         Entity photographerEntity = photographer.asEntity();
 
         @Nullable CameraInstance cameraInstance = CameraInstances.get(getOrCreateID(stack));
@@ -672,12 +670,12 @@ public class CameraItem extends Item {
             tag.putBoolean(FrameTag.SELFIE, true);
         }
 
-        if (captureProperties.flashHasFired()) {
+        if (captureProperties.flash()) {
             tag.putBoolean(FrameTag.FLASH, true);
         }
 
         double zoom = Setting.ZOOM.getOrDefault(stack, 0.0f);
-        int focalLength = (int)getFocalRange(stack).focalLengthFromZoom(zoom);
+        int focalLength = (int) getFocalRange(stack).focalLengthFromZoom(zoom);
         tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
 
         tag.putFloat(FrameTag.SHUTTER_SPEED_MS, Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT).getDurationMilliseconds());
@@ -742,15 +740,13 @@ public class CameraItem extends Item {
                 }
             }
 
-            List<Entity> capturedEntities = intersectCapturedEntities(photographer, level, stack, dataFromClient);
+            List<LivingEntity> capturedEntities = getEntitiesInFrame(photographer, level, stack);
             entitiesInFrame = capturedEntities.stream()
                     .map(entity -> EntityInFrame.of(photographerEntity, entity, customDataTag -> {
                         //TODO: modifyEntityInFrameData event
                     }))
                     .toList();
         }
-
-        tag.merge(dataFromClient.extraData());
 
         //TODO: modifyFrameData event
         //PlatformHelper.fireModifyFrameDataEvent(player, stack, frame, entities);
@@ -777,26 +773,11 @@ public class CameraItem extends Item {
         }
     }
 
-    /**
-     * Returns an intersection of entities on both sides, i.e. if entity is captured on client but not on server - discard it.
-     */
-    public List<Entity> intersectCapturedEntities(PhotographerEntity photographer, ServerLevel level, ItemStack stack, CaptureDataFromClient dataFromClient) {
-        List<Entity> entitiesOnClient = dataFromClient.getCapturedEntities(level)
-                .stream()
-                .limit(Exposure.MAX_ENTITIES_IN_FRAME)
-                .toList();
+    public List<LivingEntity> getEntitiesInFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
+        float zoom = Setting.ZOOM.getOrDefault(stack, 0f);
+        double fov = getFocalRange(stack).fovFromZoom(zoom);
 
-        if (entitiesOnClient.isEmpty()) {
-            return entitiesOnClient;
-        }
-
-        double fov = getFocalRange(stack).clampFov(dataFromClient.fov());
-
-        List<Entity> entitiesOnServer = EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
-
-        ArrayList<Entity> entities = new ArrayList<>(entitiesOnClient);
-        entities.retainAll(entitiesOnServer);
-        return entities;
+        return EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
     }
 
     protected void addStructuresInfo(ServerLevel level, BlockPos pos, CompoundTag frame) {

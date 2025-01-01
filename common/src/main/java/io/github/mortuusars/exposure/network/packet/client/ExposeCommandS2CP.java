@@ -13,12 +13,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record ExposeCommandS2CP(ExposureIdentifier identifier, int size, float brightnessStops) implements IPacket {
+public record ExposeCommandS2CP(String exposureId, int size, float brightnessStops) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("expose_command");
     public static final CustomPacketPayload.Type<ExposeCommandS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, ExposeCommandS2CP> STREAM_CODEC = StreamCodec.composite(
-            ExposureIdentifier.STREAM_CODEC, ExposeCommandS2CP::identifier,
+            ByteBufCodecs.STRING_UTF8, ExposeCommandS2CP::exposureId,
             ByteBufCodecs.VAR_INT, ExposeCommandS2CP::size,
             ByteBufCodecs.FLOAT, ExposeCommandS2CP::brightnessStops,
             ExposeCommandS2CP::new
@@ -31,7 +31,7 @@ public record ExposeCommandS2CP(ExposureIdentifier identifier, int size, float b
 
     @Override
     public boolean handle(PacketFlow direction, Player player) {
-        ClientPacketsHandler.exposeScreenshot(identifier, size, brightnessStops);
+        ClientPacketsHandler.exposeScreenshot(exposureId, size, brightnessStops);
         return true;
     }
 }

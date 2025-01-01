@@ -19,14 +19,6 @@ public class FileProjectingInfo {
         this.dither = dither;
     }
 
-    public static FileProjectingInfo clean(String filepath) {
-        return new FileProjectingInfo(filepath, false);
-    }
-
-    public static FileProjectingInfo dither(String filepath) {
-        return new FileProjectingInfo(filepath, true);
-    }
-
     public String getFilepath() {
         return filepath;
     }

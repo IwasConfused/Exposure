@@ -115,7 +115,6 @@ public class Capture<T> extends Task<Result<T>> {
                     return Result.error(ERROR_FAILED_GENERIC);
                 })
                 .thenApply(result -> {
-                    setDone();
                     // Execution of components and stuff should be on the RenderThread
                     // because it may need to access something in the game that may throw if executed from other threads.
                     Minecraft.getInstance().execute(() -> {
@@ -128,7 +127,10 @@ public class Capture<T> extends Task<Result<T>> {
                     });
                     return result;
                 })
-                .thenAccept(completableFuture::complete);
+                .thenAccept(result -> {
+                    setDone();
+                    completableFuture.complete(result);
+                });
     }
 
     public Task<T> handleErrorAndGetResult() {
