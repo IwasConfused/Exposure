@@ -16,8 +16,6 @@ import org.spongepowered.asm.mixin.Unique;
 @Mixin(Player.class)
 @SuppressWarnings("AddedMixinMembersNamePattern")
 public abstract class PlayerMixin extends LivingEntity implements PhotographerEntity {
-    @Shadow public abstract void resetAttackStrengthTicker();
-
     @Unique
     private Camera activeExposureCamera;
 

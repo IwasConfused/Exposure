@@ -4,12 +4,10 @@ import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.command.ExposureCommand;
-import io.github.mortuusars.exposure.command.ShaderCommand;
-import io.github.mortuusars.exposure.data.lenses.Lenses;
+import io.github.mortuusars.exposure.event_hub.CommonEvents;
+import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.fabric.resources.FabricLensesDataLoader;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
-import io.github.mortuusars.exposure.network.fabric.PacketsImpl;
 import io.github.mortuusars.exposure.network.fabric.FabricC2SPackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
@@ -30,6 +28,8 @@ import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.NestedLootTable;
 import net.neoforged.fml.config.ModConfig;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.stream.Stream;
 
 public class ExposureFabric implements ModInitializer {
     // Server field to access when no other objects are available to get it from.
@@ -53,11 +53,31 @@ public class ExposureFabric implements ModInitializer {
         NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.COMMON, Config.Common.SPEC);
         NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.CLIENT, Config.Client.SPEC);
 
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
-            ExposureCommand.register(dispatcher);
-            ShaderCommand.register(dispatcher);
+        CommandRegistrationCallback.EVENT.register(CommonEvents::registerCommands);
+
+        addToCreativeTabs();
+
+        Exposure.Stats.register();
+
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricLensesDataLoader());
+
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            ServerEvents.serverStarted(server);
+            ExposureFabric.server = server;
+        });
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
+            ServerEvents.serverStopped(server);
+            ExposureFabric.server = null;
         });
 
+        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> ServerEvents.syncDatapack(Stream.of(player)));
+
+        LootTableEvents.MODIFY.register(ExposureFabric::modifyLoot);
+
+        FabricC2SPackets.register();
+    }
+
+    private static void addToCreativeTabs() {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(content -> {
             content.accept(Exposure.Items.CAMERA.get());
             content.accept(Exposure.Items.BLACK_AND_WHITE_FILM.get());
@@ -75,22 +95,6 @@ public class ExposureFabric implements ModInitializer {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(content -> {
             content.accept(Exposure.Items.LIGHTROOM.get());
         });
-
-        Exposure.Stats.register();
-
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricLensesDataLoader());
-
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
-            Exposure.initServer(server);
-            ExposureFabric.server = server;
-        });
-        ServerLifecycleEvents.SERVER_STOPPED.register(server -> ExposureFabric.server = null);
-
-        ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register((player, joined) -> Lenses.onDatapackSync(player));
-
-        LootTableEvents.MODIFY.register(ExposureFabric::modifyLoot);
-
-        FabricC2SPackets.register();
     }
 
     private static void modifyLoot(ResourceKey<LootTable> tableKey, LootTable.Builder builder,

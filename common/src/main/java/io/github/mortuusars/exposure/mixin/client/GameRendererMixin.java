@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.mixin.client;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.render.FovModifier;
+import io.github.mortuusars.exposure.event_hub.ClientEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;
@@ -44,5 +45,10 @@ public abstract class GameRendererMixin {
         if (useFOVSetting) {
             cir.setReturnValue(FovModifier.modify(cir.getReturnValue()));
         }
+    }
+
+    @Inject(method = "resetData", at = @At(value = "RETURN"))
+    void onResetData(CallbackInfo ci) {
+        ClientEvents.resetRenderData();
     }
 }

@@ -1,10 +1,9 @@
 package io.github.mortuusars.exposure.neoforge.event;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.command.ExposureCommand;
-import io.github.mortuusars.exposure.command.ShaderCommand;
-import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.lenses.LensesDataLoader;
+import io.github.mortuusars.exposure.event_hub.CommonEvents;
+import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
 import io.github.mortuusars.exposure.network.packet.C2SPackets;
 import io.github.mortuusars.exposure.network.packet.CommonPackets;
@@ -23,12 +22,12 @@ import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
+import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
 @SuppressWarnings("unused")
-public class CommonEvents {
+public class NeoForgeCommonEvents {
     @EventBusSubscriber(modid = Exposure.ID, bus = EventBusSubscriber.Bus.MOD)
     public static class ModBus {
         @SubscribeEvent
@@ -96,24 +95,25 @@ public class CommonEvents {
     @EventBusSubscriber(modid = Exposure.ID, bus = EventBusSubscriber.Bus.GAME)
     public static class GameBus {
         @SubscribeEvent
-        public static void serverStarting(ServerStartingEvent event) {
-            Exposure.initServer(event.getServer());
-        }
-
-        @SubscribeEvent
-        public static void addReloadListeners(AddReloadListenerEvent event) {
-            event.addListener(new LensesDataLoader());
+        public static void serverStarted(ServerStartedEvent event) {
+            ServerEvents.serverStarted(event.getServer());
         }
 
         @SubscribeEvent
         public static void onDatapackSync(OnDatapackSyncEvent event) {
-            Lenses.onDatapackSync(event.getPlayer());
+            ServerEvents.syncDatapack(event.getRelevantPlayers());
         }
 
         @SubscribeEvent
         public static void registerCommands(RegisterCommandsEvent event) {
-            ExposureCommand.register(event.getDispatcher());
-            ShaderCommand.register(event.getDispatcher());
+            CommonEvents.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
+        }
+
+        // --
+
+        @SubscribeEvent
+        public static void addReloadListeners(AddReloadListenerEvent event) {
+            event.addListener(new LensesDataLoader());
         }
     }
 }

@@ -88,8 +88,7 @@ public class PalettedExposureRepository {
     }
 
     public void saveExposure(@NotNull String id, PalettedExposure data) {
-        Preconditions.checkNotNull(id, "id");
-        Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot save exposure: id is empty.");
+        Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot save exposure: id is null or empty.");
 
         if (ensureExposuresDirectoryExists()) {
             String saveDataName = EXPOSURES_DIRECTORY_NAME + "/" + id;

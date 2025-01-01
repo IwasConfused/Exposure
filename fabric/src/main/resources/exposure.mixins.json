@@ -5,8 +5,7 @@
   "minVersion": "0.8",
   "plugin": "io.github.mortuusars.exposure.fabric.ExposureMixinPlugin",
   "client": [
-    "HumanoidModelMixin",
-    "ItemFrameRendererFabricMixin"
+    "HumanoidModelMixin"
   ],
   "mixins": [
     "AlbumItemFabricMixin"

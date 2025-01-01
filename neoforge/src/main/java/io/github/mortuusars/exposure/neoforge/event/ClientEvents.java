@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.neoforge.event;
 
-import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
@@ -12,7 +11,6 @@ import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.LightroomScreen;
-import io.github.mortuusars.exposure.client.render.ItemFramePhotographRenderer;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
 import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
 import net.neoforged.api.distmarker.Dist;
@@ -20,7 +18,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.*;
-import net.neoforged.neoforge.event.level.LevelEvent;
 
 @SuppressWarnings("unused")
 public class ClientEvents {
@@ -76,56 +73,8 @@ public class ClientEvents {
         }
     }
 
-    @EventBusSubscriber(modid = Exposure.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-    public static class GameBus {
-        @SubscribeEvent
-        public static void onLevelClear(LevelEvent.Unload event) {
-            ExposureClient.imageRenderer().clearCache();
-        }
-
-        @SubscribeEvent
-        public static void loggingOut(ClientPlayerNetworkEvent.LoggingOut event) {
-            ExposureClient.exposureStore().clear();
-        }
-
-//        @SubscribeEvent
-//        public static void renderOverlay(RenderGuiEvent.Pre event) {
-//            if (OldViewfinder.isLookingThrough())
-//                event.setCanceled(true);
-//        }
-
-//        @SubscribeEvent
-//        public static void mouseScroll(InputEvent.MouseScrollingEvent event) {
-//            if (OldViewfinder.handleMouseScroll(event.getScrollDeltaY())) {
-//                event.setCanceled(true);
-//            }
-//        }
+//    @EventBusSubscriber(modid = Exposure.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
+//    public static class GameBus {
 //
-//        @SubscribeEvent
-//        public static void computeFOV(ViewportEvent.ComputeFov event) {
-//            if (!event.usedConfiguredFov())
-//                return;
-//
-//            double prevFov = event.getFOV();
-//            double modifiedFov = OldViewfinder.modifyFov(prevFov);
-//            if (prevFov != modifiedFov)
-//                event.setFOV(modifiedFov);
-//        }
-//
-//        @SubscribeEvent
-//        public static void onMouseButtonPre(InputEvent.MouseButton.Pre event) {
-//            if (MouseHandler.buttonPressed(event.getButton(), event.getAction(), event.getModifiers()))
-//                event.setCanceled(true);
-//        }
-
-        @SubscribeEvent
-        public static void renderItemFrameItem(RenderItemInFrameEvent event) {
-            boolean rendered = Config.Client.PHOTOGRAPH_RENDERS_IN_ITEM_FRAME.get()
-                    && ItemFramePhotographRenderer.render(event.getItemFrameEntity(), event.getPoseStack(),
-                        event.getMultiBufferSource(), event.getPackedLight());
-            if (rendered) {
-                event.setCanceled(true);
-            }
-        }
-    }
+//    }
 }

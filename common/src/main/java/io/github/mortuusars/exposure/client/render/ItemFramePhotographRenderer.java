@@ -13,23 +13,20 @@ import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 
 public class ItemFramePhotographRenderer {
-    public static boolean render(ItemFrame itemFrameEntity, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight) {
-        ItemStack itemStack = itemFrameEntity.getItem();
-        if (!(itemStack.getItem() instanceof PhotographItem photographItem) || photographItem.getFrame(itemStack) == Frame.EMPTY)
-            return false;
-
-        if (itemFrameEntity.getType() == EntityType.GLOW_ITEM_FRAME)
+    public static void render(ItemFrame itemFrame, PoseStack poseStack, MultiBufferSource bufferSource,
+                                 int packedLight, PhotographItem item, ItemStack stack) {
+        if (itemFrame.getType() == EntityType.GLOW_ITEM_FRAME)
             packedLight = LightTexture.FULL_BRIGHT;
 
         poseStack.pushPose();
 
-        String entityName = BuiltInRegistries.ENTITY_TYPE.getKey(itemFrameEntity.getType()).toString();
+        String entityName = BuiltInRegistries.ENTITY_TYPE.getKey(itemFrame.getType()).toString();
         if (entityName.equals("quark:glass_frame")) {
             poseStack.translate(0, 0, 0.475f);
         }
 
         // Snap to 90 degrees like a map.
-        poseStack.mulPose(Axis.ZP.rotationDegrees(45 * itemFrameEntity.getRotation()));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(45 * itemFrame.getRotation()));
 
         float pixelSize = 0.0625f;
         float scale = 1f - pixelSize * 6; // 3px from each side
@@ -38,11 +35,9 @@ public class ItemFramePhotographRenderer {
         poseStack.scale(scale, scale, scale);
         poseStack.translate(-0.5, -0.5, 10);
 
-        ExposureClient.photographRenderer().renderPhotograph(poseStack, bufferSource, photographItem, itemStack, false, false,
-                packedLight, 255, 255, 255, 255);
+        ExposureClient.photographRenderer().renderPhotograph(poseStack, bufferSource, item, stack,
+                false, false, packedLight, 255, 255, 255, 255);
 
         poseStack.popPose();
-
-        return true;
     }
 }
