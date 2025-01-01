@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.client.capture.action;
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import net.minecraft.client.CameraType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 
 import java.util.Optional;
@@ -25,6 +26,10 @@ public interface CaptureActions {
 
     static CaptureAction disablePostEffect() {
         return new DisablePostEffectAction();
+    }
+
+    static CaptureAction setPostEffect(ResourceLocation postEffect) {
+        return new SetPostEffectAction(postEffect);
     }
 
     static CaptureAction modifyGamma(float brightnessStops) {

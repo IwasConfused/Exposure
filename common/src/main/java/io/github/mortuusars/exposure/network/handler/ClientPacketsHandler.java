@@ -4,6 +4,7 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.ExposureRetrieveTask;
+import io.github.mortuusars.exposure.client.capture.template.CaptureTemplate;
 import io.github.mortuusars.exposure.client.image.TrichromeImage;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
@@ -175,6 +176,19 @@ public class ClientPacketsHandler {
         executeOnMainThread(() -> {
             Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId()).createTask(data);
             ExposureClient.cycles().enqueueTask(captureTask);
+        });
+    }
+
+    public static void startDebugRGBCapture(StartDebugRGBCaptureS2CP packet) {
+        List<CaptureProperties> properties = packet.captureProperties();
+
+        executeOnMainThread(() -> {
+            CaptureTemplate template = CaptureTemplates.getOrThrow(packet.templateId());
+
+            for (CaptureProperties captureProperties : properties) {
+                Task<?> captureTask = template.createTask(captureProperties);
+                ExposureClient.cycles().enqueueTask(captureTask);
+            }
         });
     }
 }

@@ -7,17 +7,25 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.CaptureProperties;
+import io.github.mortuusars.exposure.core.ChromaChannel;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.item.ChromaticSheetItem;
-import io.github.mortuusars.exposure.item.DevelopedFilmItem;
-import io.github.mortuusars.exposure.item.FilmRollItem;
+import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.core.camera.CameraInHand;
+import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.core.frame.FrameTag;
+import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.item.part.Attachment;
+import io.github.mortuusars.exposure.item.part.Setting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
+import io.github.mortuusars.exposure.network.packet.client.StartDebugRGBCaptureS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -25,7 +33,9 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DebugCommand {
@@ -54,17 +64,47 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
+        Optional<Camera> camera = Optional.empty();
+
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack itemInHand = player.getItemInHand(hand);
+            if (itemInHand.getItem() instanceof CameraItem cameraItem) {
+                camera = Optional.of(new CameraInHand(player, cameraItem.getOrCreateID(itemInHand), hand));
+            }
+        }
+
         List<CaptureProperties> properties = new ArrayList<>();
 
         for (int i = 0; i < 3; i++) {
-//            properties.add(new CaptureProperties(
-////                    ExposureIdentifier.createId(player),
-////                    player,
-//
-//            ));
+            ChromaChannel channel = ChromaChannel.values()[i];
+            String exposureId = ExposureIdentifier.createId(player, channel.getSerializedName());
 
+            properties.add(new CaptureProperties(
+                    exposureId,
+                    player,
+                    camera.map(Camera::getCameraID),
+                    camera.flatMap(c -> c.map(s -> Setting.SHUTTER_SPEED.getOrDefault(s, ShutterSpeed.DEFAULT))).orElse(ShutterSpeed.DEFAULT),
+                    Optional.empty(),
+                    ExposureType.BLACK_AND_WHITE,
+                    camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, IFilmItem::getFrameSize, () -> 320))).orElse(320),
+                    camera.flatMap(c -> c.map((cItem, cStack) -> cItem.getCropFactor())).orElse(Exposure.CROP_FACTOR),
+                    ColorPalette.MAP_COLORS,
+                    false,
+                    0,
+                    Optional.empty(),
+                    Optional.of(channel),
+                    new CompoundTag()
+            ));
+
+            ExposureServer.exposureRepository().expect(player, exposureId);
+
+            ExposureServer.frameHistory().add(player, new Frame(ExposureIdentifier.id(exposureId),
+                    ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), FrameTag.EMPTY));
         }
 
+        Packets.sendToClient(new StartDebugRGBCaptureS2CP(Exposure.resource("debug_rgb"), properties), player);
+
+        context.getSource().sendSuccess(() -> Component.literal("Capturing RGB channels. "), true);
 
         return 0;
     }

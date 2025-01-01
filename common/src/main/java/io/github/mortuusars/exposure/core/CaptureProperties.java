@@ -16,14 +16,14 @@ public record CaptureProperties(String exposureId,
                                 PhotographerEntity photographer,
                                 Optional<CameraID> cameraID,
                                 ShutterSpeed shutterSpeed,
-                                Optional<Integer> focalLengthOverride,
+                                Optional<Float> fovOverride,
                                 ExposureType filmType,
                                 int frameSize,
                                 float cropFactor,
                                 ColorPalette colorPalette,
                                 boolean flash,
                                 int lightLevel,
-                                Optional<FileProjectingInfo> fileProjectingInfo,
+                                Optional<FileLoadingInfo> fileLoadingInfo,
                                 Optional<ChromaChannel> chromaChannel,
                                 CompoundTag extraData) {
     public static final StreamCodec<RegistryFriendlyByteBuf, CaptureProperties> STREAM_CODEC = new StreamCodec<>() {
@@ -33,14 +33,14 @@ public record CaptureProperties(String exposureId,
                     PhotographerEntity.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.optional(CameraID.STREAM_CODEC).decode(buffer),
                     ShutterSpeed.STREAM_CODEC.decode(buffer),
-                    ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
+                    ByteBufCodecs.optional(ByteBufCodecs.FLOAT).decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer),
                     ByteBufCodecs.FLOAT.decode(buffer),
                     ColorPalette.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.BOOL.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer),
-                    ByteBufCodecs.optional(FileProjectingInfo.STREAM_CODEC).decode(buffer),
+                    ByteBufCodecs.optional(FileLoadingInfo.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ChromaChannel.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.COMPOUND_TAG.decode(buffer));
         }
@@ -50,14 +50,14 @@ public record CaptureProperties(String exposureId,
             PhotographerEntity.STREAM_CODEC.encode(buffer, data.photographer());
             ByteBufCodecs.optional(CameraID.STREAM_CODEC).encode(buffer, data.cameraID());
             ShutterSpeed.STREAM_CODEC.encode(buffer, data.shutterSpeed());
-            ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.focalLengthOverride());
+            ByteBufCodecs.optional(ByteBufCodecs.FLOAT).encode(buffer, data.fovOverride());
             ExposureType.STREAM_CODEC.encode(buffer, data.filmType());
             ByteBufCodecs.VAR_INT.encode(buffer, data.frameSize());
             ByteBufCodecs.FLOAT.encode(buffer, data.cropFactor());
             ColorPalette.STREAM_CODEC.encode(buffer, data.colorPalette());
             ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.VAR_INT.encode(buffer, data.lightLevel());
-            ByteBufCodecs.optional(FileProjectingInfo.STREAM_CODEC).encode(buffer, data.fileProjectingInfo());
+            ByteBufCodecs.optional(FileLoadingInfo.STREAM_CODEC).encode(buffer, data.fileLoadingInfo());
             ByteBufCodecs.optional(ChromaChannel.STREAM_CODEC).encode(buffer, data.chromaChannel());
             ByteBufCodecs.COMPOUND_TAG.encode(buffer, data.extraData());
         }

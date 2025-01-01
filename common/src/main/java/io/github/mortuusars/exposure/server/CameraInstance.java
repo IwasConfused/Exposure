@@ -40,7 +40,7 @@ public class CameraInstance {
         this.currentCaptureProperties = captureProperties;
         captureStartTick = level.getGameTime();
 
-        if (captureProperties.fileProjectingInfo().isPresent()) {
+        if (captureProperties.fileLoadingInfo().isPresent()) {
             waitForInterplanarProjectionResult(25);
         }
     }

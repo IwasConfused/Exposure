@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.item;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ProjectionMode;
-import io.github.mortuusars.exposure.core.FileProjectingInfo;
+import io.github.mortuusars.exposure.core.FileLoadingInfo;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -78,7 +78,7 @@ public class InterplanarProjectorItem extends Item {
         return customName != null ? Optional.of(customName.getString()) : Optional.empty();
     }
 
-    public Optional<FileProjectingInfo> getFileLoadingData(ItemStack stack) {
-        return getFilepath(stack).map(filepath -> new FileProjectingInfo(filepath, getMode(stack) == ProjectionMode.DITHERED));
+    public Optional<FileLoadingInfo> getFileLoadingData(ItemStack stack) {
+        return getFilepath(stack).map(filepath -> new FileLoadingInfo(filepath, getMode(stack) == ProjectionMode.DITHERED));
     }
 }

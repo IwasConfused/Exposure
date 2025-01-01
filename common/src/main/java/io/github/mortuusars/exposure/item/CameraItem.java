@@ -13,7 +13,7 @@ import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.CaptureProperties;
-import io.github.mortuusars.exposure.core.FileProjectingInfo;
+import io.github.mortuusars.exposure.core.FileLoadingInfo;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
@@ -53,8 +53,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
@@ -221,7 +219,7 @@ public class CameraItem extends Item {
         if (cameraInstance != null && cameraInstance.getCurrentCaptureData().isPresent()) {
             CaptureProperties captureProperties = cameraInstance.getCurrentCaptureData().get();
 
-            if (captureProperties.fileProjectingInfo().isPresent()) {
+            if (captureProperties.fileLoadingInfo().isPresent()) {
                 return PROJECT_COOLDOWN;
             }
 
@@ -486,11 +484,11 @@ public class CameraItem extends Item {
         return Attachment.FILTER.map(stack, ChromaChannel::fromFilterStack).orElse(Optional.empty());
     }
 
-    protected Optional<FileProjectingInfo> getFileLoadingData(ItemStack stack) {
+    protected Optional<FileLoadingInfo> getFileLoadingData(ItemStack stack) {
         return Attachment.FILTER.map(stack, (filterItem, filterStack) ->
                         filterItem instanceof InterplanarProjectorItem projectorItem
                                 ? projectorItem.getFileLoadingData(filterStack)
-                                : Optional.<FileProjectingInfo>empty())
+                                : Optional.<FileLoadingInfo>empty())
                 .orElse(Optional.empty());
     }
 
@@ -685,7 +683,7 @@ public class CameraItem extends Item {
         captureProperties.chromaChannel().ifPresent(channel ->
                 tag.putString(FrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
-        captureProperties.fileProjectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(FrameTag.FROM_FILE, true));
+        captureProperties.fileLoadingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(FrameTag.FROM_FILE, true));
 
         // Position
         ListTag pos = new ListTag();
@@ -725,7 +723,7 @@ public class CameraItem extends Item {
 
         List<EntityInFrame> entitiesInFrame;
 
-        if (captureProperties.fileProjectingInfo().isPresent()) {
+        if (captureProperties.fileLoadingInfo().isPresent()) {
             entitiesInFrame = Collections.emptyList();
         } else {
             if (photographerEntity instanceof ServerPlayer player) {

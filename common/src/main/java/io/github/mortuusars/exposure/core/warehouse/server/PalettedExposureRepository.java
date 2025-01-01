@@ -34,8 +34,6 @@ public class PalettedExposureRepository {
 
     protected final Map<ServerPlayer, Set<String>> expectedExposures = new HashMap<>();
 
-//    protected final Map<ServerPlayer, RateLimiter> rateLimiters = new ConcurrentHashMap<>();
-
     public PalettedExposureRepository(MinecraftServer server) {
         this.server = server;
         this.dataStorage = server.overworld().getDataStorage();
@@ -106,13 +104,6 @@ public class PalettedExposureRepository {
     }
 
     public void handleClientRequest(ServerPlayer player, String id) {
-        if (isOverRequestLimit(player)) {
-            LOGGER.error("Disconnecting player '{}': too many exposures requested. Max 200/second.",
-                    player.getScoreboardName());
-            player.disconnect();
-            return;
-        }
-
         RequestedPalettedExposure result;
 
         if (StringUtil.isBlank(id)) {
@@ -143,18 +134,6 @@ public class PalettedExposureRepository {
 
     protected boolean isExposureExpected(ServerPlayer player, String id) {
         return expectedExposures.containsKey(player) && expectedExposures.get(player).contains(id);
-    }
-
-    protected boolean isOverRequestLimit(ServerPlayer player) {
-        //TODO: Probably a good idea to keep this disabled for now, as I'm not sure it'll not cause any problems.
-        // It can be enabled later if someone reports it being an issue.
-        /*
-        if (server.isDedicatedServer()) {
-            RateLimiter limiter = rateLimiters.computeIfAbsent(player, pl -> new RateLimiter(200, 200));
-            return !limiter.tryConsume();
-        }
-        */
-        return false;
     }
 
     protected boolean ensureExposuresDirectoryExists() {
