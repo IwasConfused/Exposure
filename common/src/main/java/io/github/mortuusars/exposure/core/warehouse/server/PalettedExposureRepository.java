@@ -22,6 +22,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.BiConsumer;
 
 public class PalettedExposureRepository {
     public static final int EXPECTED_TIMEOUT_SECONDS = 60;
@@ -98,14 +99,14 @@ public class PalettedExposureRepository {
         }
     }
 
-    public void expect(ServerPlayer player, String id, Runnable onReceived) {
+    public void expect(ServerPlayer player, String id, BiConsumer<ServerPlayer, String> onReceived) {
         Preconditions.checkArgument(!StringUtil.isBlank(id), "id cannot be null or empty.");
         Set<ExpectedExposure> exposures = expectedExposures.computeIfAbsent(player, pl -> new HashSet<>());
         exposures.add(new ExpectedExposure(id, UnixTimestamp.Seconds.fromNow(EXPECTED_TIMEOUT_SECONDS), onReceived));
     }
 
     public void expect(ServerPlayer player, String id) {
-        expect(player, id, () -> {});
+        expect(player, id, (pl, i) -> {});
     }
 
     public void handleClientRequest(ServerPlayer player, String id) {
@@ -159,8 +160,11 @@ public class PalettedExposureRepository {
     protected void onExposureReceived(ServerPlayer player, String id) {
         expectedExposures.getOrDefault(player, Collections.emptySet())
                 .removeIf(expectedExposure -> {
-                    expectedExposure.onReceived().run();
-                    return expectedExposure.id().equals(id);
+                    if (expectedExposure.id().equals(id)) {
+                        expectedExposure.onReceived().accept(player, id);
+                        return true;
+                    }
+                    return false;
                 });
     }
 
