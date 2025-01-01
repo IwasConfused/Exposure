@@ -96,7 +96,16 @@ public class DebugCommand {
                     new CompoundTag()
             ));
 
-            ExposureServer.exposureRepository().expect(player, exposureId);
+            Supplier<Component> msg = () -> Component.literal("Captured " + channel.getSerializedName() + " channel exposure: ")
+                    .append(Component.literal(exposureId)
+                            .withStyle(Style.EMPTY
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                            "/exposure show id " + exposureId))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
+                                    .withUnderlined(true)));
+
+            ExposureServer.exposureRepository().expect(player, exposureId,
+                    () -> context.getSource().sendSuccess(msg, true));
 
             ExposureServer.frameHistory().add(player, new Frame(ExposureIdentifier.id(exposureId),
                     ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), FrameTag.EMPTY));
@@ -104,7 +113,7 @@ public class DebugCommand {
 
         Packets.sendToClient(new StartDebugRGBCaptureS2CP(Exposure.resource("debug_rgb"), properties), player);
 
-        context.getSource().sendSuccess(() -> Component.literal("Capturing RGB channels. "), true);
+        context.getSource().sendSuccess(() -> Component.literal("Capturing RGB channels..."), true);
 
         return 0;
     }
@@ -166,8 +175,7 @@ public class DebugCommand {
 
                 if (replace) {
                     player.setItemInHand(hand, developedFilmStack);
-                }
-                else if (!player.addItem(developedFilmStack)) {
+                } else if (!player.addItem(developedFilmStack)) {
                     player.drop(developedFilmStack, true, false);
                 }
 

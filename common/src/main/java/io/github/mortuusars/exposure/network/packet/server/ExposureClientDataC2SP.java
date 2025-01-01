@@ -31,7 +31,7 @@ public record ExposureClientDataC2SP(String id, PalettedExposure exposure) imple
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        ExposureServer.exposureRepository().handleClientUpload(((ServerPlayer) player), id, exposure);
+        ExposureServer.exposureRepository().receiveClientUpload(((ServerPlayer) player), id, exposure);
         return true;
     }
 }

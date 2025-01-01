@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataChangedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataResponseS2CP;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.util.UnixTimestamp;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.StringUtil;
@@ -23,6 +24,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class PalettedExposureRepository {
+    public static final int EXPECTED_TIMEOUT_SECONDS = 60;
     public static final String EXPOSURES_DIRECTORY_NAME = "exposures";
 
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -32,7 +34,7 @@ public class PalettedExposureRepository {
     protected final Path worldFolderPath;
     protected final Path exposuresFolderPath;
 
-    protected final Map<ServerPlayer, Set<String>> expectedExposures = new HashMap<>();
+    protected final Map<ServerPlayer, Set<ExpectedExposure>> expectedExposures = new HashMap<>();
 
     public PalettedExposureRepository(MinecraftServer server) {
         this.server = server;
@@ -97,10 +99,14 @@ public class PalettedExposureRepository {
         }
     }
 
-    public void expect(ServerPlayer player, String id) {
+    public void expect(ServerPlayer player, String id, Runnable onReceived) {
         Preconditions.checkArgument(!StringUtil.isBlank(id), "id cannot be null or empty.");
-        Set<String> exposures = expectedExposures.computeIfAbsent(player, pl -> new HashSet<>());
-        exposures.add(id);
+        Set<ExpectedExposure> exposures = expectedExposures.computeIfAbsent(player, pl -> new HashSet<>());
+        exposures.add(new ExpectedExposure(id, UnixTimestamp.Seconds.fromNow(EXPECTED_TIMEOUT_SECONDS), onReceived));
+    }
+
+    public void expect(ServerPlayer player, String id) {
+        expect(player, id, () -> {});
     }
 
     public void handleClientRequest(ServerPlayer player, String id) {
@@ -116,24 +122,47 @@ public class PalettedExposureRepository {
         Packets.sendToClient(new ExposureDataResponseS2CP(id, result), player);
     }
 
-    public void handleClientUpload(ServerPlayer player, String id, PalettedExposure exposure) {
-        if (StringUtil.isBlank(id)) {
-            LOGGER.error("Null or empty id cannot be used to save captured exposure. Player: '{}'", player.getScoreboardName());
-            return;
-        }
-
-        if (!isExposureExpected(player, id)) {
-            LOGGER.error("Unexpected upload from player '{}' with ID '{}'. Discarding.", player.getScoreboardName(), id);
+    public void receiveClientUpload(ServerPlayer player, String id, PalettedExposure exposure) {
+        if (!validateUpload(player, id)) {
             return;
         }
 
         saveExposure(id, exposure);
-        expectedExposures.get(player).remove(id);
+        onExposureReceived(player, id);
+
         LOGGER.debug("Saved exposure '{}' uploaded by '{}'.", id, player.getScoreboardName());
     }
 
-    protected boolean isExposureExpected(ServerPlayer player, String id) {
-        return expectedExposures.containsKey(player) && expectedExposures.get(player).contains(id);
+    protected boolean validateUpload(ServerPlayer player, String id) {
+        if (StringUtil.isBlank(id)) {
+            LOGGER.error("Null or empty id cannot be used to save captured exposure. Player: '{}'", player.getScoreboardName());
+            return false;
+        }
+
+        @Nullable ExpectedExposure expectedExposure = expectedExposures.getOrDefault(player, Collections.emptySet())
+                .stream()
+                .filter(ee -> ee.id().equals(id))
+                .findFirst()
+                .orElse(null);
+
+        if (expectedExposure == null) {
+            LOGGER.error("Received unexpected upload from player '{}' with ID '{}'. Discarding.", player.getScoreboardName(), id);
+            return false;
+        } else if (expectedExposure.isTimedOut(UnixTimestamp.Seconds.now())) {
+            LOGGER.error("Received expected upload from player '{}' with ID '{}' - {}seconds later than expected. Discarding.",
+                    player.getScoreboardName(), id, UnixTimestamp.Seconds.now() - expectedExposure.timeoutAt());
+            return false;
+        }
+
+        return true;
+    }
+
+    protected void onExposureReceived(ServerPlayer player, String id) {
+        expectedExposures.getOrDefault(player, Collections.emptySet())
+                .removeIf(expectedExposure -> {
+                    expectedExposure.onReceived().run();
+                    return expectedExposure.id().equals(id);
+                });
     }
 
     protected boolean ensureExposuresDirectoryExists() {
