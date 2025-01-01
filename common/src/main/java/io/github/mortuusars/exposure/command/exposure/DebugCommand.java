@@ -105,7 +105,7 @@ public class DebugCommand {
                                     .withUnderlined(true)));
 
             ExposureServer.exposureRepository().expect(player, exposureId,
-                    () -> context.getSource().sendSuccess(msg, true));
+                    (pl, id) -> context.getSource().sendSuccess(msg, true));
 
             ExposureServer.frameHistory().add(player, new Frame(ExposureIdentifier.id(exposureId),
                     ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), FrameTag.EMPTY));
@@ -122,8 +122,11 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
-        List<Frame> frames = ExposureServer.frameHistory().getFramesOf(player).stream()
-                .filter(frame -> !frame.isChromatic()).toList();
+        List<Frame> allFrames = ExposureServer.frameHistory().getFramesOf(player)
+                .stream()
+                .filter(frame -> !frame.isChromatic())
+                .toList();
+        List<Frame> frames = new ArrayList<>(allFrames.subList(Math.max(allFrames.size() - 3, 0), allFrames.size()));
 
         if (frames.size() < 3) {
             stack.sendFailure(Component.literal("Not enough frames captured. 3 is required."));
@@ -134,9 +137,9 @@ public class DebugCommand {
             ChromaticSheetItem item = Exposure.Items.CHROMATIC_SHEET.get();
             ItemStack itemStack = new ItemStack(item);
 
-            item.addLayer(itemStack, frames.get(frames.size() - 3)); // Red
-            item.addLayer(itemStack, frames.get(frames.size() - 2)); // Green
-            item.addLayer(itemStack, frames.getLast()); // Blue
+            for (Frame frame : frames) {
+                item.addLayer(itemStack, frame);
+            }
 
             ItemStack photographStack = item.combineIntoPhotograph(player, itemStack);
             @Nullable Frame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
@@ -145,7 +148,7 @@ public class DebugCommand {
             ExposureServer.frameHistory().add(player, frame);
 
             Supplier<Component> msg = () -> Component.literal("Created chromatic exposure: ")
-                    .append(Component.literal(frame.exposureIdentifier().toString())
+                    .append(Component.literal(frame.exposureIdentifier().toValueString())
                             .withStyle(Style.EMPTY
                                     .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
                                             "/exposure show id " + frame.exposureIdentifier().getId().orElse("")))
