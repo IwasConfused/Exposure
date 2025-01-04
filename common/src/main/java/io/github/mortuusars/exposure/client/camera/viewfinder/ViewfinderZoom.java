@@ -29,10 +29,10 @@ public class ViewfinderZoom {
     public ViewfinderZoom(Camera camera, Viewfinder viewfinder) {
         this.camera = camera;
         this.viewfinder = viewfinder;
-
         this.focalRange = camera.map(CameraItem::getFocalRange).orElse(FocalRange.getDefault());
 
         animation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
+
         double defaultFov = Minecrft.options().fov().get();
         currentFov = defaultFov;
         targetFov = camera.map(stack -> Setting.ZOOM.getOrDefault(stack, 0f))

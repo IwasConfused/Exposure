@@ -1,8 +1,7 @@
 package io.github.mortuusars.exposure.core.cycles.task;
 
-import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.util.TranslatableError;
-import org.slf4j.Logger;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -10,8 +9,6 @@ import java.util.concurrent.CompletableFuture;
  * If first task is failed, second task will be executed, and it's result returned.
  */
 public class FallbackTask<T> extends Task<Result<T>> {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private final Task<Result<T>> main;
     private final Task<Result<T>> fallback;
 
@@ -27,9 +24,9 @@ public class FallbackTask<T> extends Task<Result<T>> {
                     if (mainResult != null && mainResult.isSuccessful()) {
                         return mainResult;
                     } else if (mainException != null) {
-                        LOGGER.error("Main CaptureTask is failed: ", mainException);
+                        Exposure.LOGGER.error("Main CaptureTask is failed: ", mainException);
                     } else if (mainResult != null && mainResult.isError()) {
-                        LOGGER.error("Main CaptureTask is failed: {}", mainResult.getError().getLocalizedMessage());
+                        Exposure.LOGGER.error("Main CaptureTask is failed: {}", mainResult.getError().getLocalizedMessage());
                     }
 
                     return captureFallback();
@@ -39,7 +36,7 @@ public class FallbackTask<T> extends Task<Result<T>> {
     private Result<T> captureFallback() {
         return fallback.execute().handle((fallbackResult, fallbackException) -> {
             if (fallbackException != null) {
-                LOGGER.error("Both Main and Fallback tasks are failed!");
+                Exposure.LOGGER.error("Both Main and Fallback tasks are failed!");
                 return Result.<T>error(new TranslatableError(TranslatableError.GENERIC, fallbackException));
             }
             return fallbackResult;

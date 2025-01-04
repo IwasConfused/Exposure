@@ -1,6 +1,11 @@
 package io.github.mortuusars.exposure;
 
 import io.github.mortuusars.exposure.client.Censor;
+import io.github.mortuusars.exposure.client.animation.EasingFunction;
+import io.github.mortuusars.exposure.client.camera.viewfinder.*;
+import io.github.mortuusars.exposure.client.capture.template.CameraCaptureTemplate;
+import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
+import io.github.mortuusars.exposure.client.capture.template.SingleChannelCaptureTemplate;
 import io.github.mortuusars.exposure.client.image.*;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
@@ -8,6 +13,7 @@ import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.cycles.Cycles;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
 import io.github.mortuusars.exposure.core.frame.Frame;
@@ -16,6 +22,7 @@ import net.minecraft.client.renderer.item.ItemProperties;
 import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 
 public class ExposureClient {
     private static final Cycles CYCLES = new Cycles();
@@ -28,6 +35,12 @@ public class ExposureClient {
     private static boolean isIrisOrOculusInstalled;
 
     public static void init() {
+        ViewfinderRegistry.register(Exposure.Items.CAMERA.get(), camera ->
+                new Viewfinder(camera, ViewfinderZoom::new, ViewfinderOverlay::new, ViewfinderShader::new, ViewfinderCameraControlsScreen::new));
+
+        CaptureTemplates.register(Exposure.resource("camera"), new CameraCaptureTemplate());
+        CaptureTemplates.register(Exposure.resource("debug_rgb"), new SingleChannelCaptureTemplate());
+
         registerItemModelProperties();
         isIrisOrOculusInstalled = PlatformHelper.isModLoaded("iris") || PlatformHelper.isModLoaded("oculus");
     }

@@ -12,9 +12,13 @@ public class CameraInHand extends Camera {
     public CameraInHand(PhotographerEntity photographer, CameraID cameraID, InteractionHand hand) {
         super(photographer, cameraID);
         this.hand = hand;
-        Preconditions.checkState(photographer.asEntity() instanceof LivingEntity,
-                "Only LivingEntity photographer can hold camera in hand. %s does snot have hands.",
-                EntityType.getKey(photographer.asEntity().getType()));
+        if (!(photographer.asEntity() instanceof LivingEntity)) {
+            throw new IllegalStateException("Only LivingEntity photographer can hold camera in hand."
+                    + EntityType.getKey(photographer.asEntity().getType()) + " does snot have hands.");
+        }
+//        Preconditions.checkState(photographer.asEntity() instanceof LivingEntity,
+//                "Only LivingEntity photographer can hold camera in hand. %s does snot have hands.",
+//                EntityType.getKey(photographer.asEntity().getType()));
     }
 
     public InteractionHand getHand() {

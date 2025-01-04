@@ -2,13 +2,12 @@ package io.github.mortuusars.exposure.core.warehouse;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureRequester;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 
@@ -26,8 +25,6 @@ public class RequestedPalettedExposure {
             RequestedExposureStatus.STREAM_CODEC, RequestedPalettedExposure::getStatus,
             RequestedPalettedExposure::fromOptional
     );
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     @Nullable
     protected final PalettedExposure exposure;
@@ -51,7 +48,7 @@ public class RequestedPalettedExposure {
     public static RequestedPalettedExposure success(PalettedExposure data) {
         Preconditions.checkNotNull(data, "Successful result cannot be created without data.");
         if (data.equals(PalettedExposure.EMPTY)) {
-            LOGGER.warn("ExposureData.EMPTY is used to create successful ExposureResult. This is probably not intentional.");
+            Exposure.LOGGER.warn("ExposureData.EMPTY is used to create successful ExposureResult. This is probably not intentional.");
         }
         return new RequestedPalettedExposure(data, RequestedExposureStatus.SUCCESS);
     }

@@ -2,14 +2,13 @@
 package io.github.mortuusars.exposure.client.capture.task;
 
 import com.google.common.io.Files;
-import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.capture.task.file.ImageFileLoader;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
@@ -22,8 +21,6 @@ public class FileCaptureTask extends Task<Result<Image>> {
     public static final String ERROR_FILE_DOES_NOT_EXIST = "gui.exposure.capture.file.error.file_does_not_exist";
     public static final String ERROR_CANNOT_READ = "gui.exposure.capture.file.error.cannot_read";
     public static final String ERROR_NOT_SUPPORTED = "gui.exposure.capture.file.error.not_supported";
-
-    private static final Logger LOGGER = LogUtils.getLogger();
 
     protected final String filePath;
 
@@ -38,7 +35,7 @@ public class FileCaptureTask extends Task<Result<Image>> {
     @Override
     public CompletableFuture<Result<Image>> execute() {
         return CompletableFuture.supplyAsync(() -> {
-            LOGGER.info("Attempting to load image from file: '{}'", filePath);
+            Exposure.LOGGER.info("Attempting to load image from file: '{}'", filePath);
 
             Result<File> result = findFileWithExtension(filePath);
 
@@ -54,7 +51,7 @@ public class FileCaptureTask extends Task<Result<Image>> {
 
             File file = result.getValue();
 
-            LOGGER.info("Reading image from file: '{}'", file);
+            Exposure.LOGGER.info("Reading image from file: '{}'", file);
 
             return ImageFileLoader.chooseFitting(file).load(file);
         });

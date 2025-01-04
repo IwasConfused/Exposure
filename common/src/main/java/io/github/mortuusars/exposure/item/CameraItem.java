@@ -1,10 +1,7 @@
 package io.github.mortuusars.exposure.item;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureServer;
-import io.github.mortuusars.exposure.PlatformHelper;
+import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.*;
@@ -195,6 +192,7 @@ public class CameraItem extends Item {
         }
 
         photographer.playCameraSound(getViewfinderOpenSound(), 0.35f, 0.9f, 0.2f);
+
         photographer.asEntity().gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
 
         if (photographer instanceof Player player && player.level().isClientSide) {

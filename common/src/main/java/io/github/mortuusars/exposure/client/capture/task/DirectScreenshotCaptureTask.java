@@ -24,7 +24,9 @@ public class DirectScreenshotCaptureTask extends Task<Result<Image>> {
 
     @Override
     public @NotNull CompletableFuture<Result<Image>> execute() {
-        future = new CompletableFuture<>();
+        if (future == null) {
+            future = new CompletableFuture<>();
+        }
         return future;
     }
 

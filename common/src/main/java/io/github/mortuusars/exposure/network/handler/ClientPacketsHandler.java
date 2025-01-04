@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.network.handler;
 
-import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.ExposureRetrieveTask;
@@ -35,17 +34,14 @@ import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class ClientPacketsHandler {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     public static void applyShader(ApplyShaderS2CP packet) {
-        executeOnMainThread(() -> {
+        Minecrft.execute(() -> {
             if (packet.shouldRemove()) {
                 Minecraft.getInstance().gameRenderer.shutdownEffect();
             } else {
@@ -87,11 +83,11 @@ public class ClientPacketsHandler {
         LocalPlayer player = Minecrft.player();
 
         if (StringUtil.isNullOrEmpty(filePath)) {
-            LOGGER.error("Cannot load exposure: filePath is null or empty.");
+            Exposure.LOGGER.error("Cannot load exposure: filePath is null or empty.");
             return;
         }
 
-        executeOnMainThread(() -> {
+        Minecrft.execute(() -> {
             ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
                     .handleErrorAndGetResult()
                     .thenAsync(Process.with(
@@ -109,10 +105,10 @@ public class ClientPacketsHandler {
     }
 
     public static void showExposure(ShowExposureCommandS2CP packet) {
-        executeOnMainThread(() -> {
+        Minecrft.execute(() -> {
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null) {
-                LOGGER.error("Cannot show exposures. Player is null.");
+                Exposure.LOGGER.error("Cannot show exposures. Player is null.");
                 return;
             }
 
@@ -131,15 +127,15 @@ public class ClientPacketsHandler {
     }
 
     public static void clearRenderingCache() {
-        executeOnMainThread(() -> ExposureClient.imageRenderer().clearCache());
+        Minecrft.execute(() -> ExposureClient.imageRenderer().clearCache());
     }
 
     public static void syncLensesData(SyncLensesDataS2CP packet) {
-        executeOnMainThread(() -> Lenses.reload(packet.lenses()));
+        Minecrft.execute(() -> Lenses.reload(packet.lenses()));
     }
 
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
-        executeOnMainThread(() -> {
+        Minecrft.execute(() -> {
             ExposureClient.exposureStore().refresh(packet.id());
             ExposureClient.imageRenderer().clearCacheOf(packet.id());
         });
@@ -147,12 +143,12 @@ public class ClientPacketsHandler {
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
         if (packet.id().isEmpty()) {
-            LOGGER.error("Cannot create chromatic exposure: identifier is empty.");
+            Exposure.LOGGER.error("Cannot create chromatic exposure: identifier is empty.");
             return;
         }
 
         if (packet.layers().size() != 3) {
-            LOGGER.error("Cannot create chromatic exposure: 3 layers required. Provided: '{}'.", packet.layers().size());
+            Exposure.LOGGER.error("Cannot create chromatic exposure: 3 layers required. Provided: '{}'.", packet.layers().size());
             return;
         }
 
@@ -166,23 +162,16 @@ public class ClientPacketsHandler {
                 .accept(exposure -> PalettedExposureUploader.upload(packet.id(), exposure)));
     }
 
-    private static void executeOnMainThread(Runnable runnable) {
-        Minecraft.getInstance().execute(runnable);
-    }
-
     public static void startCapture(StartCaptureS2CP packet) {
-        CaptureProperties data = packet.captureProperties();
-
-        executeOnMainThread(() -> {
-            Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId()).createTask(data);
-            ExposureClient.cycles().enqueueTask(captureTask);
-        });
+        Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId())
+                .createTask(packet.captureProperties());
+        ExposureClient.cycles().enqueueTask(captureTask);
     }
 
     public static void startDebugRGBCapture(StartDebugRGBCaptureS2CP packet) {
         List<CaptureProperties> properties = packet.captureProperties();
 
-        executeOnMainThread(() -> {
+        Minecrft.execute(() -> {
             CaptureTemplate template = CaptureTemplates.getOrThrow(packet.templateId());
 
             for (CaptureProperties captureProperties : properties) {

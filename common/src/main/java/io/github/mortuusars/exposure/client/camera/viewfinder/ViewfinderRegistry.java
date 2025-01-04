@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.item.CameraItem;
 import org.jetbrains.annotations.Nullable;
@@ -26,10 +25,5 @@ public class ViewfinderRegistry {
         @Nullable Function<Camera, Viewfinder> viewfinder = VIEWFINDERS.get(item);
         Preconditions.checkNotNull(viewfinder, "No viewfinder for item '%s' is registered.", item);
         return viewfinder;
-    }
-
-    static {
-        register(Exposure.Items.CAMERA.get(), camera ->
-                new Viewfinder(camera, ViewfinderZoom::new, ViewfinderOverlay::new, ViewfinderShader::new, ViewfinderCameraControlsScreen::new));
     }
 }

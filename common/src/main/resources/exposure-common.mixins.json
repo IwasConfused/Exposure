@@ -8,6 +8,7 @@
     "client.BuggerScreenOverlayMixin",
     "client.BuggerScreenRenderLinesInvoker",
     "client.CameraMixin",
+    "client.ClientPacketListenerMixin",
     "client.ExposureLightTextureMixin",
     "client.GameRendererMixin",
     "client.GuiMixin",

@@ -20,12 +20,12 @@ import java.util.*;
  * Because we are not using Holder of SoundEvent - SoundsEvents should be compared by their location, not directly.
  */
 public class OnePerEntitySoundsClient {
-    private static final Map<Entity, Map<ResourceLocation, SoundInstance>> sounds = new HashMap<>();
+    private static final Map<Entity, Map<ResourceLocation, SoundInstance>> SOUNDS = new HashMap<>();
 
     public static void play(@NotNull Entity sourceEntity, SoundEvent soundEvent, SoundSource source, float volume, float pitch) {
         SoundInstance soundInstance = createSoundInstance(sourceEntity, soundEvent, source, volume, pitch);
 
-        Map<ResourceLocation, SoundInstance> instances = sounds.computeIfAbsent(sourceEntity, e -> new HashMap<>());
+        Map<ResourceLocation, SoundInstance> instances = SOUNDS.computeIfAbsent(sourceEntity, e -> new HashMap<>());
 
         @Nullable SoundInstance previousInstance = instances.remove(soundEvent.getLocation());
         if (previousInstance != null) {
@@ -38,7 +38,7 @@ public class OnePerEntitySoundsClient {
     }
 
     public static void stop(@NotNull Entity sourceEntity, SoundEvent soundEvent) {
-        @Nullable Map<ResourceLocation, SoundInstance> instances = sounds.get(sourceEntity);
+        @Nullable Map<ResourceLocation, SoundInstance> instances = SOUNDS.get(sourceEntity);
         if (instances == null) {
             return;
         }
@@ -53,7 +53,7 @@ public class OnePerEntitySoundsClient {
                                                float volume, float pitch, int durationTicks) {
         SoundEvent soundEvent = Exposure.SoundEvents.SHUTTER_TICKING.get();
         SoundInstance soundInstance = createShutterTickingSoundInstance(photographer, cameraID, soundEvent, volume, pitch, durationTicks);
-        Map<ResourceLocation, SoundInstance> instances = sounds.computeIfAbsent(photographer.asEntity(), e -> new HashMap<>());
+        Map<ResourceLocation, SoundInstance> instances = SOUNDS.computeIfAbsent(photographer.asEntity(), e -> new HashMap<>());
 
         @Nullable SoundInstance previousInstance = instances.get(soundEvent.getLocation());
         if (previousInstance != null) {

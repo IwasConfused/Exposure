@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.util.Shader;
 import io.github.mortuusars.exposure.core.camera.Camera;
@@ -13,13 +13,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 
 public class ViewfinderShader implements AutoCloseable {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private final Minecraft minecraft;
     private final Camera camera;
     private final Viewfinder viewfinder;
@@ -50,10 +47,10 @@ public class ViewfinderShader implements AutoCloseable {
             shader.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
             active = true;
         } catch (IOException e) {
-            LOGGER.warn("Failed to load shader: {}", shaderLocation, e);
+            Exposure.LOGGER.warn("Failed to load shader: {}", shaderLocation, e);
             active = false;
         } catch (JsonSyntaxException e) {
-            LOGGER.warn("Failed to parse shader: {}", shaderLocation, e);
+            Exposure.LOGGER.warn("Failed to parse shader: {}", shaderLocation, e);
             active = false;
         }
     }

@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client;
 
 import com.google.common.base.Preconditions;
-import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
@@ -11,7 +11,6 @@ import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
 import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -19,8 +18,6 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     protected final List<ExposureIdentifier> identifiers;
     protected final int timeoutMs;
 
@@ -50,7 +47,7 @@ public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
     @Override
     public void tick() {
         if (System.currentTimeMillis() - startedAtMs > timeoutMs) {
-            LOGGER.error("Failed to retrieve exposures [{}]: Timed out. {}ms were not enough.",
+            Exposure.LOGGER.error("Failed to retrieve exposures [{}]: Timed out. {}ms were not enough.",
                     String.join(",", identifiers.stream().map(ExposureIdentifier::toString).toList()), timeoutMs);
             setDone();
             future.complete(Result.error("gui.exposure.error_message.exposure_retrieve.timeout"));
@@ -65,7 +62,7 @@ public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
             if (identifier.isId()) {
                 RequestedPalettedExposure request = ExposureClient.exposureStore().getOrRequest(identifier.id());
                 if (request.isError()) {
-                    LOGGER.error("Failed to retrieve exposures [{}]: unable to get exposure '{}' - {}.",
+                    Exposure.LOGGER.error("Failed to retrieve exposures [{}]: unable to get exposure '{}' - {}.",
                             String.join(",", identifiers.stream().map(ExposureIdentifier::toString).toList()),
                             identifier.id(), request.getStatus());
                     setDone();

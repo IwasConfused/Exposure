@@ -37,14 +37,14 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         CaptureActions.modifyGamma(brightnessStops),
                         CaptureActions.optional(data.flash(), () -> CaptureActions.flash(cameraHolder)))
                 .handleErrorAndGetResult(printCasualErrorInChat())
-                .then(Process.with(
+                .thenAsync(Process.with(
                         Processor.Crop.SQUARE_CENTER,
                         Processor.Crop.factor(data.cropFactor()),
                         Processor.Resize.to(data.frameSize()),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette(), true))
-                .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
+                .thenAsync(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
                         image.getPixels(), image.getPalette(), createExposureTag(data, false)));
 
         if (data.fileLoadingInfo().isPresent()) {
@@ -56,18 +56,22 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             CaptureActions.optional(data.cameraID(),
                                     id -> CaptureActions.interplanarProjection(data.photographer(), id)))
                     .handleErrorAndGetResult(printCasualErrorInChat())
-                    .then(Process.with(
+                    .thenAsync(Process.with(
                             Processor.Crop.SQUARE_CENTER,
                             Processor.Resize.to(data.frameSize()),
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(data)))
                     .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette(), dither))
-                    .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
+                    .thenAsync(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
                             image.getPixels(), image.getPalette(), createExposureTag(data, true))));
         }
 
+        if (data.exposureId().isEmpty()) {
+            return captureTask;
+        }
+
         return captureTask
-                .accept(image -> PalettedExposureUploader.upload(data.exposureId(), image))
+                .acceptAsync(image -> PalettedExposureUploader.upload(data.exposureId(), image))
                 .onError(printCasualErrorInChat());
     }
 

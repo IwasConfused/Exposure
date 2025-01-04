@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.client.camera;
 
-import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderRegistry;
 import io.github.mortuusars.exposure.client.util.Minecrft;
@@ -12,7 +11,6 @@ import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCamer
 import net.minecraft.client.CameraType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
 
 import java.util.Optional;
 
@@ -90,8 +88,6 @@ Client:
  */
 
 public class CameraClient {
-    private static final Logger LOGGER = LogUtils.getLogger();
-
     private static @Nullable Viewfinder activeViewfinder;
 
     public static void tick() {
