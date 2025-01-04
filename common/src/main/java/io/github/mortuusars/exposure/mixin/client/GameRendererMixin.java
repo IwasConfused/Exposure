@@ -26,13 +26,6 @@ public abstract class GameRendererMixin {
         ExposureClient.cycles().tick();
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getProfiler()Lnet/minecraft/util/profiling/ProfilerFiller;", ordinal = 1))
-    private void renderViewfinder(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
-        if (CameraClient.viewfinder() != null) {
-            CameraClient.viewfinder().overlay().render();
-        }
-    }
-
     @Inject(method = "resize", at = @At(value = "HEAD"))
     void onResize(int width, int height, CallbackInfo ci) {
         if (CameraClient.viewfinder() != null) {

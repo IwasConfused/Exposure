@@ -6,7 +6,6 @@ import com.google.gson.JsonObject;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.serialization.JsonOps;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.event_hub.ClientEvents;
 import io.github.mortuusars.exposure.mixin.client.BuggerScreenRenderLinesInvoker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;

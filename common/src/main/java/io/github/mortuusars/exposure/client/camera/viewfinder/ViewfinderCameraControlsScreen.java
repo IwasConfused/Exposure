@@ -223,8 +223,7 @@ public class ViewfinderCameraControlsScreen extends Screen {
             return;
         }
 
-        if (Minecrft.options().hideGui)
-            return;
+        if (Minecrft.options().hideGui) return;
 
         guiGraphics.pose().pushPose();
 

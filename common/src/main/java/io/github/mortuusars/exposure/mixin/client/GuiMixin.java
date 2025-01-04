@@ -19,6 +19,7 @@ public abstract class GuiMixin {
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
     private void renderGui(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         if (CameraClient.viewfinder() != null && CameraClient.viewfinder().isLookingThrough()) {
+            CameraClient.viewfinder().overlay().render(guiGraphics, deltaTracker);
             ci.cancel();
         }
     }
