@@ -12,6 +12,7 @@ import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsScreen;
 import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
+import io.github.mortuusars.exposure.network.fabric.FabricS2CPacketHandler;
 import io.github.mortuusars.exposure.network.fabric.FabricS2CPackets;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
 import net.fabricmc.api.ClientModInitializer;
@@ -55,6 +56,6 @@ public class ExposureFabricClient implements ClientModInitializer {
         TooltipComponentCallback.EVENT.register(data -> data instanceof PhotographTooltip photographTooltip
                 ? new PhotographClientTooltip(photographTooltip) : null);
 
-        FabricS2CPackets.registerS2CPackets();
+        FabricS2CPacketHandler.register();
     }
 }

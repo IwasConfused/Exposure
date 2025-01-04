@@ -19,7 +19,7 @@ import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.part.Setting;
+import io.github.mortuusars.exposure.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
 import io.github.mortuusars.exposure.network.packet.client.StartDebugRGBCaptureS2CP;
@@ -83,7 +83,7 @@ public class DebugCommand {
                     exposureId,
                     player,
                     camera.map(Camera::getCameraID),
-                    camera.flatMap(c -> c.map(s -> Setting.SHUTTER_SPEED.getOrDefault(s, ShutterSpeed.DEFAULT))).orElse(ShutterSpeed.DEFAULT),
+                    camera.flatMap(c -> c.map(CameraSetting.SHUTTER_SPEED::getOrDefault)).orElse(ShutterSpeed.DEFAULT),
                     Optional.empty(),
                     ExposureType.BLACK_AND_WHITE,
                     camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, IFilmItem::getFrameSize, () -> 320))).orElse(320),

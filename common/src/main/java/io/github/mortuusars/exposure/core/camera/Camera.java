@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.core.camera;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.item.part.Setting;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
@@ -101,9 +100,5 @@ public abstract class Camera {
             return map.apply(item, stack);
         }
         return orElse;
-    }
-
-    public <T> T getSettingOrElse(Setting<T> setting, T orElse) {
-        return setting.getOrDefault(getItemStack(), orElse);
     }
 }

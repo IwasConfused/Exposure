@@ -4,10 +4,11 @@ import com.google.common.base.Preconditions;
 import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuide;
+import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.server.CameraSetSettingC2SP;
+import io.github.mortuusars.exposure.network.packet.server.SetCameraSettingC2SP;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.component.DataComponentType;
@@ -21,32 +22,32 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public record Setting<T>(DataComponentType<T> component) {
-    public static final Codec<Setting<?>> CODEC = ResourceLocation.CODEC.xmap(Setting::byId, Setting::idOf);
+public record CameraSetting<T>(DataComponentType<T> component, T defaultValue) {
+    public static final Codec<CameraSetting<?>> CODEC = ResourceLocation.CODEC.xmap(CameraSetting::byId, CameraSetting::idOf);
 
-    public static final StreamCodec<ByteBuf, Setting<?>> STREAM_CODEC = StreamCodec.composite(
-            ResourceLocation.STREAM_CODEC, Setting::idOf,
-            Setting::byId
+    public static final StreamCodec<ByteBuf, CameraSetting<?>> STREAM_CODEC = StreamCodec.composite(
+            ResourceLocation.STREAM_CODEC, CameraSetting::idOf,
+            CameraSetting::byId
     );
 
-    private static final Map<ResourceLocation, Setting<?>> REGISTRY = new HashMap<>();
+    private static final Map<ResourceLocation, CameraSetting<?>> REGISTRY = new HashMap<>();
 
-    public static <T> Setting<T> register(ResourceLocation id, Setting<T> setting) {
+    public static <T> CameraSetting<T> register(ResourceLocation id, CameraSetting<T> setting) {
         Preconditions.checkArgument(!REGISTRY.containsKey(id), "Setting with id '%s' is already registered.", id);
         REGISTRY.put(id, setting);
         return setting;
     }
 
-    public static Setting<?> byId(ResourceLocation id) {
-        @Nullable Setting<?> setting = REGISTRY.get(id);
+    public static CameraSetting<?> byId(ResourceLocation id) {
+        @Nullable CameraSetting<?> setting = REGISTRY.get(id);
         if (setting == null) {
             throw new IllegalStateException("Setting with id '" + id + "' is not registered.");
         }
         return setting;
     }
 
-    public static ResourceLocation idOf(Setting<?> setting) {
-        for (Map.Entry<ResourceLocation, Setting<?>> entry : REGISTRY.entrySet()) {
+    public static ResourceLocation idOf(CameraSetting<?> setting) {
+        for (Map.Entry<ResourceLocation, CameraSetting<?>> entry : REGISTRY.entrySet()) {
             if (entry.getValue().equals(setting)) {
                 return entry.getKey();
             }
@@ -56,18 +57,16 @@ public record Setting<T>(DataComponentType<T> component) {
 
     // --
 
-    public static final Setting<Boolean> ACTIVE =
-            register(Exposure.resource("active"), new Setting<>(Exposure.DataComponents.CAMERA_ACTIVE));
-    public static final Setting<Boolean> SELFIE_MODE =
-            register(Exposure.resource("selfie"), new Setting<>(Exposure.DataComponents.SELFIE_MODE));
-    public static final Setting<Float> ZOOM =
-            register(Exposure.resource("zoom"), new Setting<>(Exposure.DataComponents.ZOOM));
-    public static final Setting<ShutterSpeed> SHUTTER_SPEED =
-            register(Exposure.resource("shutter_speed"), new Setting<>(Exposure.DataComponents.SHUTTER_SPEED));
-    public static final Setting<CompositionGuide> COMPOSITION_GUIDE =
-            register(Exposure.resource("composition_guide"), new Setting<>(Exposure.DataComponents.COMPOSITION_GUIDE));
-    public static final Setting<FlashMode> FLASH_MODE =
-            register(Exposure.resource("flash_mode"), new Setting<>(Exposure.DataComponents.FLASH_MODE));
+    public static final CameraSetting<Boolean> SELFIE_MODE = register(Exposure.resource("selfie"),
+            new CameraSetting<>(Exposure.DataComponents.SELFIE_MODE, false));
+    public static final CameraSetting<Float> ZOOM = register(Exposure.resource("zoom"),
+            new CameraSetting<>(Exposure.DataComponents.ZOOM, 0f));
+    public static final CameraSetting<ShutterSpeed> SHUTTER_SPEED = register(Exposure.resource("shutter_speed"),
+            new CameraSetting<>(Exposure.DataComponents.SHUTTER_SPEED, ShutterSpeed.DEFAULT));
+    public static final CameraSetting<CompositionGuide> COMPOSITION_GUIDE = register(Exposure.resource("composition_guide"),
+            new CameraSetting<>(Exposure.DataComponents.COMPOSITION_GUIDE, CompositionGuides.NONE));
+    public static final CameraSetting<FlashMode> FLASH_MODE = register(Exposure.resource("flash_mode"),
+            new CameraSetting<>(Exposure.DataComponents.FLASH_MODE, FlashMode.OFF));
 
     // --
 
@@ -75,11 +74,15 @@ public record Setting<T>(DataComponentType<T> component) {
         return stack.get(component);
     }
 
-    public T getOrDefault(ItemStack stack, T defaultValue) {
+    public T getOrDefault(ItemStack stack) {
         return stack.getOrDefault(component, defaultValue);
     }
 
-    public Setting<T> set(ItemStack stack, T value) {
+    public T getOrElse(ItemStack stack, T defaultValue) {
+        return stack.getOrDefault(component, defaultValue);
+    }
+
+    public CameraSetting<T> set(ItemStack stack, T value) {
         if (value instanceof Boolean bool && !bool) {
             stack.remove(component);
         } else {
@@ -88,7 +91,7 @@ public record Setting<T>(DataComponentType<T> component) {
         return this;
     }
 
-    public Setting<T> set(ItemStack stack, RegistryFriendlyByteBuf buffer) {
+    public CameraSetting<T> set(ItemStack stack, RegistryFriendlyByteBuf buffer) {
         T value = component.streamCodec().decode(buffer);
         set(stack, value);
         return this;
@@ -101,7 +104,7 @@ public record Setting<T>(DataComponentType<T> component) {
             RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());
             component.streamCodec().encode(buffer, value);
             byte[] bytes = buffer.array();
-            Packets.sendToServer(new CameraSetSettingC2SP(this, bytes));
+            Packets.sendToServer(new SetCameraSettingC2SP(this, bytes));
             buffer.clear();
         });
     }

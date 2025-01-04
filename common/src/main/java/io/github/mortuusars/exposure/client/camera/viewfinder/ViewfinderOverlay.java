@@ -9,10 +9,9 @@ import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.core.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.item.FilmRollItem;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.part.Setting;
+import io.github.mortuusars.exposure.item.part.CameraSetting;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
 import net.minecraft.client.Minecraft;
@@ -158,7 +157,7 @@ public class ViewfinderOverlay {
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, 0f, 0f, 1f, 0f, 1f);
 
         // Guide
-        RenderSystem.setShaderTexture(0, Setting.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack(), CompositionGuides.NONE).overlayTextureLocation());
+        RenderSystem.setShaderTexture(0, CameraSetting.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack()).overlayTextureLocation());
         GuiUtil.blit(poseStack, opening.x, opening.x + opening.width, opening.y, opening.y + opening.height, -1f, 0f, 1f, 0f, 1f);
 
         if (!(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {

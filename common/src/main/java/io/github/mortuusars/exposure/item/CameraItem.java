@@ -6,7 +6,6 @@ import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.*;
 import io.github.mortuusars.exposure.core.camera.*;
-import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.CaptureProperties;
@@ -18,7 +17,7 @@ import io.github.mortuusars.exposure.core.frame.EntityInFrame;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.part.Setting;
+import io.github.mortuusars.exposure.item.part.CameraSetting;
 import io.github.mortuusars.exposure.item.part.Shutter;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
@@ -172,7 +171,7 @@ public class CameraItem extends Item {
     }
 
     public boolean isInSelfieMode(ItemStack stack) {
-        return Setting.SELFIE_MODE.getOrDefault(stack, false);
+        return CameraSetting.SELFIE_MODE.getOrDefault(stack);
     }
 
     public void setActive(ItemStack stack, boolean active) {
@@ -204,7 +203,7 @@ public class CameraItem extends Item {
 
     public @NotNull InteractionResultHolder<ItemStack> deactivate(PhotographerEntity photographer, ItemStack stack) {
         setActive(stack, false);
-        Setting.SELFIE_MODE.set(stack, false);
+        CameraSetting.SELFIE_MODE.set(stack, false);
         photographer.removeActiveExposureCamera();
         photographer.playCameraSound(getViewfinderCloseSound(), 0.35f, 0.9f, 0.2f);
         photographer.asEntity().gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
@@ -409,7 +408,7 @@ public class CameraItem extends Item {
 
             int lightLevel = LevelUtil.getLightLevelAt(level, entity.blockPosition());
             boolean shouldFlashFire = shouldFlashFire(stack, lightLevel);
-            ShutterSpeed shutterSpeed = Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT);
+            ShutterSpeed shutterSpeed = CameraSetting.SHUTTER_SPEED.getOrDefault(stack);
 
             boolean flashHasFired = shouldFlashFire && tryUseFlash(photographer, stack);
 
@@ -428,7 +427,7 @@ public class CameraItem extends Item {
                     exposureId,
                     photographer,
                     Optional.of(cameraID),
-                    Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT),
+                    CameraSetting.SHUTTER_SPEED.getOrDefault(stack),
                     Optional.empty(),
                     film.getItem().getType(),
                     film.getItem().getFrameSize(film.getItemStack()),
@@ -539,7 +538,7 @@ public class CameraItem extends Item {
         if (Attachment.FLASH.isEmpty(stack))
             return false;
 
-        return switch (Setting.FLASH_MODE.getOrDefault(stack, FlashMode.OFF)) {
+        return switch (CameraSetting.FLASH_MODE.getOrDefault(stack)) {
             case OFF -> false;
             case ON -> true;
             case AUTO -> lightLevel < 8;
@@ -670,11 +669,11 @@ public class CameraItem extends Item {
             tag.putBoolean(FrameTag.FLASH, true);
         }
 
-        double zoom = Setting.ZOOM.getOrDefault(stack, 0.0f);
+        double zoom = CameraSetting.ZOOM.getOrDefault(stack);
         int focalLength = (int) getFocalRange(stack).focalLengthFromZoom(zoom);
         tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
 
-        tag.putFloat(FrameTag.SHUTTER_SPEED_MS, Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT).getDurationMilliseconds());
+        tag.putFloat(FrameTag.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
 
         tag.putInt(FrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
 
@@ -770,7 +769,7 @@ public class CameraItem extends Item {
     }
 
     public List<LivingEntity> getEntitiesInFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
-        float zoom = Setting.ZOOM.getOrDefault(stack, 0f);
+        float zoom = CameraSetting.ZOOM.getOrDefault(stack);
         double fov = getFocalRange(stack).fovFromZoom(zoom);
 
         return EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));

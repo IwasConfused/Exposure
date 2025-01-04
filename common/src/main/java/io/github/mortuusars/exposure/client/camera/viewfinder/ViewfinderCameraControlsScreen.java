@@ -16,7 +16,7 @@ import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.component.*;
 import io.github.mortuusars.exposure.item.part.Attachment;
-import io.github.mortuusars.exposure.item.part.Setting;
+import io.github.mortuusars.exposure.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.ActiveCameraReleaseC2SP;
 import net.minecraft.ChatFormatting;
@@ -148,24 +148,22 @@ public class ViewfinderCameraControlsScreen extends Screen {
     }
 
     protected @NotNull Button createShutterSpeedButton() {
-        List<ShutterSpeed> shutterSpeeds = camera.map((item, stack) -> item.getAvailableShutterSpeeds())
-                .orElse(List.of(ShutterSpeed.DEFAULT));
-        ShutterSpeed currentShutterSpeed = camera.map((item, stack) -> Setting.SHUTTER_SPEED.getOrDefault(stack, ShutterSpeed.DEFAULT))
-                .orElse(ShutterSpeed.DEFAULT);
+        List<ShutterSpeed> shutterSpeeds = camera.map((item, stack) -> item.getAvailableShutterSpeeds(), List.of(ShutterSpeed.DEFAULT));
+        ShutterSpeed currentShutterSpeed = camera.map(CameraSetting.SHUTTER_SPEED::getOrDefault, ShutterSpeed.DEFAULT);
 
         return new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, shutterSpeeds,
-                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> CameraClient.setSetting(Setting.SHUTTER_SPEED, speed))
+                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> CameraClient.setSetting(CameraSetting.SHUTTER_SPEED, speed))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.shutter_speed.tooltip")))
                 .setClickSound(Exposure.SoundEvents.CAMERA_DIAL_CLICK.get());
     }
 
     protected @NotNull Button createCompositionGuideButton() {
         List<CompositionGuide> guides = CompositionGuides.getGuides();
-        CompositionGuide currentGuide = camera.getSettingOrElse(Setting.COMPOSITION_GUIDE, CompositionGuides.NONE);
+        CompositionGuide currentGuide = camera.map(CameraSetting.COMPOSITION_GUIDE::getOrDefault, CompositionGuides.NONE);
         Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(guide.buttonSpriteLocation());
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
-                currentGuide, spritesFunc, (b, guide) -> CameraClient.setSetting(Setting.COMPOSITION_GUIDE, guide))
+                currentGuide, spritesFunc, (b, guide) -> CameraClient.setSetting(CameraSetting.COMPOSITION_GUIDE, guide))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")))
                 .setTooltips(guide -> Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")
                         .append(CommonComponents.NEW_LINE)
@@ -175,12 +173,12 @@ public class ViewfinderCameraControlsScreen extends Screen {
 
     protected @NotNull Button createFlashModeButton() {
         List<FlashMode> modes = Arrays.asList(FlashMode.values());
-        FlashMode currentMode = camera.getSettingOrElse(Setting.FLASH_MODE, FlashMode.OFF);
+        FlashMode currentMode = camera.map(CameraSetting.FLASH_MODE::getOrDefault, FlashMode.OFF);
         Function<FlashMode, WidgetSprites> spritesFunc = mode -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
-                currentMode, spritesFunc, (b, mode) -> CameraClient.setSetting(Setting.FLASH_MODE, mode))
+                currentMode, spritesFunc, (b, mode) -> CameraClient.setSetting(CameraSetting.FLASH_MODE, mode))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")))
                 .setTooltips(mode -> Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")
                         .append(CommonComponents.NEW_LINE)

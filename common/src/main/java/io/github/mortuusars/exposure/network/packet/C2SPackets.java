@@ -11,7 +11,7 @@ public class C2SPackets {
         return List.of(
                 new CustomPacketPayload.TypeAndCodec<>(AlbumSignC2SP.TYPE, AlbumSignC2SP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(AlbumSyncNoteC2SP.TYPE, AlbumSyncNoteC2SP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(CameraSetSettingC2SP.TYPE, CameraSetSettingC2SP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(SetCameraSettingC2SP.TYPE, SetCameraSettingC2SP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(OpenCameraAttachmentsInCreativePacketC2SP.TYPE, OpenCameraAttachmentsInCreativePacketC2SP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ExposureRequestC2SP.TYPE, ExposureRequestC2SP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ActiveCameraReleaseC2SP.TYPE, ActiveCameraReleaseC2SP.STREAM_CODEC),

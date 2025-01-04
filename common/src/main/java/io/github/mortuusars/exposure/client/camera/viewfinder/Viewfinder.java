@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.item.part.Setting;
+import io.github.mortuusars.exposure.item.part.CameraSetting;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -104,7 +104,7 @@ public class Viewfinder {
                     : CameraType.FIRST_PERSON;
 
             Minecrft.options().setCameraType(newCameraType);
-            CameraClient.setSetting(Setting.SELFIE_MODE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
+            CameraClient.setSetting(CameraSetting.SELFIE_MODE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
             return true;
         }
 

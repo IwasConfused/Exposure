@@ -12,24 +12,17 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public class FabricS2CPackets {
     @SuppressWarnings("unchecked")
-    public static void registerS2CPackets() {
-        // This monstrosity is to avoid having to define packets for forge and fabric separately.
+    public static void register() {
         for (var definition : S2CPackets.getDefinitions()) {
             PayloadTypeRegistry.playS2C().register(
                     (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
                     (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec());
-            ClientPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<IPacket>) definition.type(), FabricS2CPackets::handleClientboundPacket);
         }
 
         for (var definition : CommonPackets.getDefinitions()) {
             PayloadTypeRegistry.playS2C().register(
                     (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
                     (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec());
-            ClientPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<IPacket>) definition.type(), FabricS2CPackets::handleClientboundPacket);
         }
-    }
-
-    private static <T extends IPacket> void handleClientboundPacket(T payload, ClientPlayNetworking.Context context) {
-        payload.handle(PacketFlow.CLIENTBOUND, context.player());
     }
 }
