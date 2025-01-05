@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.client.gui.screen;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -83,7 +84,7 @@ public class ItemListScreen extends Screen {
             rowY += 18;
         }
 
-        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 1f));
+        Minecrft.get().getSoundManager().play(SimpleSoundInstance.forUI(Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 1f));
     }
 
     @Override
@@ -108,6 +109,8 @@ public class ItemListScreen extends Screen {
 
         int left = leftPos;
         int top = topPos;
+
+        renderTransparentBackground(guiGraphics);
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate((width / 2f), (height / 2f), 0.0f);
@@ -141,6 +144,11 @@ public class ItemListScreen extends Screen {
         guiGraphics.pose().popPose();
 
         renderTooltip(guiGraphics, mouseX, mouseY);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+
     }
 
     protected void renderBg(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
