@@ -72,8 +72,7 @@ public class RenderedImageInstance implements AutoCloseable {
     }
 
     protected void updateTexture() {
-        if (texture.getPixels() == null)
-            return;
+        if (texture.getPixels() == null) return;
 
         int width = this.image.getWidth();
         int height = this.image.getHeight();
@@ -86,20 +85,27 @@ public class RenderedImageInstance implements AutoCloseable {
         }
 
         int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
-        if (mipmapLevel > 0) {
-            texture.setFilter(false,true);
-            TextureUtil.prepareImage(texture.getId(), mipmapLevel, width, height);
-            SpriteContents spriteContents = new SpriteContents(this.textureLocation, new FrameSize(width, height),  texture.getPixels(), ResourceMetadata.EMPTY);
-
-            try {
-                spriteContents.increaseMipLevel(mipmapLevel);
-                spriteContents.uploadFirstFrame(0,0);
-            } catch (Exception e) {
-                Exposure.LOGGER.error("Failed to generate mipmaps: {}", e.getMessage());
-            }
+        if (mipmapLevel > 0 && width > 0 && height > 0) {
+            applyMipMap(mipmapLevel, width, height);
         }
 
         this.texture.upload();
+    }
+
+    private void applyMipMap(int mipmapLevel, int width, int height) {
+        if (texture.getPixels() == null) return;
+
+        try {
+            texture.setFilter(false, true);
+            TextureUtil.prepareImage(texture.getId(), mipmapLevel, width, height);
+            SpriteContents spriteContents = new SpriteContents(this.textureLocation,
+                    new FrameSize(width, height), texture.getPixels(), ResourceMetadata.EMPTY);
+
+            spriteContents.increaseMipLevel(mipmapLevel);
+            spriteContents.uploadFirstFrame(0, 0);
+        } catch (Exception e) {
+            Exposure.LOGGER.error("Failed to generate mipmaps: {}", e.getMessage());
+        }
     }
 
     public void draw(PoseStack poseStack, MultiBufferSource bufferSource, float minX, float minY, float maxX, float maxY,
