@@ -41,7 +41,7 @@ public class PalettedImage implements Image {
     }
 
     public int getPixelARGB(int x, int y) {
-        return getPixelColorARGB(x, y).getRGB();
+        return getPixelColorARGB(x, y).getARGB();
     }
 
     public Color getPixelColorARGB(int x, int y) {

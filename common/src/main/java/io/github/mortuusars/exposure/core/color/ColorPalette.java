@@ -43,7 +43,7 @@ public class ColorPalette {
     }
 
     public static final ColorPalette MAP_COLORS = register(Exposure.resource("map_colors"), new ColorPalette(new int[]{
-            0x00000000, 0x00000000, 0x00000000, 0x00000000,
+            0x00000000, 0xFF000000, 0xFF000000, 0xFF000000,
             0xFF597D27, 0xFF6D9930, 0xFF7FB238, 0xFF435E1D,
             0xFFAEA473, 0xFFD5C98C, 0xFFF7E9A3, 0xFF827B56,
             0xFF8C8C8C, 0xFFABABAB, 0xFFC7C7C7, 0xFF696969,
@@ -105,8 +105,8 @@ public class ColorPalette {
             0xFF464646, 0xFF565656, 0xFF646464, 0xFF343434,
             0xFF987B67, 0xFFBA967E, 0xFFD8AF93, 0xFF725C4D,
             0xFF597569, 0xFF6D9081, 0xFF7FA796, 0xFF43584F,
-            0x00000000, 0x00000000, 0x00000000, 0x00000000,
-            0x00000000, 0x00000000, 0x00000000, 0x00000000
+            0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000,
+            0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000
 
     }));
 
@@ -132,10 +132,14 @@ public class ColorPalette {
     }
 
     public int closestTo(Color color) {
+        if (color.getA() == 0) {
+            return 0;
+        }
+
         int closest = 0;
         int closestDistance = Integer.MAX_VALUE;
 
-        for (int i = 0; i < colors.length; i++) {
+        for (int i = 1; i < colors.length; i++) { // Starting from 1 to skip transparent color
             int distance = colors[i].squaredDifferenceTo(color);
             if (distance < closestDistance) {
                 closest = i;

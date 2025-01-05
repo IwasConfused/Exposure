@@ -80,7 +80,7 @@ public class RenderedImageInstance implements AutoCloseable {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 int ARGB = this.image.getPixelARGB(x, y);
-                this.texture.getPixels().setPixelRGBA(x, y, Color.ARGBtoABGR(ARGB)); // Texture is in ABGR format
+                this.texture.getPixels().setPixelRGBA(x, y, Color.ABGRtoARGB(ARGB)); // Texture is in ABGR format
             }
         }
 

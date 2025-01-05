@@ -59,6 +59,8 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                 .thenAsync(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
                         image.getPixels(), image.getPalette(), createExposureTag(data, photographer, false)));
 
+//        captureTask = new EmptyTask<>();
+
         if (data.fileLoadingInfo().isPresent()) {
             FileLoadingInfo fileLoadingData = data.fileLoadingInfo().get();
             String filepath = fileLoadingData.getFilepath();

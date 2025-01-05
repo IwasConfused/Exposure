@@ -138,11 +138,11 @@ public class Color {
     }
 
     public Color.Unbounded addUnbounded(Color other) {
-        return new Color.Unbounded(this.r + other.r, this.g + other.g, this.b + other.b);
+        return new Color.Unbounded(this.r + other.r, this.g + other.g, this.b + other.b, this.a + other.a);
     }
 
     public Color.Unbounded addUnbounded(Color.Unbounded other) {
-        return new Color.Unbounded(this.r + other.r, this.g + other.g, this.b + other.b);
+        return new Color.Unbounded(this.r + other.r, this.g + other.g, this.b + other.b, this.a + other.a);
     }
 
     public Color subtract(Color other) {
@@ -153,7 +153,7 @@ public class Color {
     }
 
     public Color.Unbounded subtractUnbounded(Color other) {
-        return new Color.Unbounded(this.r - other.r, this.g - other.g, this.b - other.b);
+        return new Color.Unbounded(this.r - other.r, this.g - other.g, this.b - other.b, this.a - other.a);
     }
 
     public Color multiply(double scalar) {
@@ -322,13 +322,13 @@ public class Color {
         }
     }
 
-    public record Unbounded(int r, int g, int b) {
+    public record Unbounded(int r, int g, int b, int a) {
         public Color.Unbounded multiply(double scalar) {
-            return new Color.Unbounded((int) (this.r * scalar), (int) (this.g * scalar), (int) (this.b * scalar));
+            return new Color.Unbounded((int) (this.r * scalar), (int) (this.g * scalar), (int) (this.b * scalar), (int) (this.a * scalar));
         }
 
         public Color clamp() {
-            return Color.rgb(Color.clamp(r), Color.clamp(g), Color.clamp(b));
+            return Color.argb(Color.clamp(a), Color.clamp(r), Color.clamp(g), Color.clamp(b));
         }
     }
 }

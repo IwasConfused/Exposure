@@ -25,6 +25,13 @@ public class DitheredPalettizer implements ImagePalettizer {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 Color oldColor = pixels[y][x];
+
+                // This fixes white outline bordering opaque pixels next to transparent
+                if (oldColor.getA() == 0) {
+                    indexedPixels[y * width + x] = (byte) 0;
+                    continue;
+                }
+
                 int colorIndex = palette.closestTo(oldColor);
 
                 indexedPixels[y * width + x] = (byte)colorIndex;
@@ -55,7 +62,7 @@ public class DitheredPalettizer implements ImagePalettizer {
     }
 
     private Color applyError(Color color, Color.Unbounded error, double scalar) {
-        return color.addUnbounded(error.multiply(scalar)).clamp();
+        return color.addUnbounded(error.multiply(scalar)).clamp().withAlpha(color.getA());
     }
 
     private Color[][] getPixels(Image image) {
