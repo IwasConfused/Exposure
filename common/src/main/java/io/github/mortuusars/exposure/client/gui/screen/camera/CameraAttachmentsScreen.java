@@ -60,12 +60,6 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     }
 
     @Override
-    public void added() {
-        getMenu().getCamera().getItem().playSound(null, player,
-                Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 0.9f, 0.9f, 0.2f);
-    }
-
-    @Override
     protected void init() {
         this.imageHeight = 185;
         inventoryLabelY = this.imageHeight - 94;
@@ -155,7 +149,6 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
 
     protected void renderFilter(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, Filter filter, int filterX, int filterY) {
         Color tint = filter.getTintColor();
-        float a = tint.getAF();
         float r = tint.getRF();
         float g = tint.getGF();
         float b = tint.getBF();
@@ -166,7 +159,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
             b *= 1.35f;
         }
 
-        RenderSystem.setShaderColor(r, g, b, a);
+        RenderSystem.setShaderColor(r, g, b, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 

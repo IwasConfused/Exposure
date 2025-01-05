@@ -531,6 +531,8 @@ public class CameraItem extends Item {
             PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(slotIndex));
         }
 
+        playSound(player, player, Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 0.9f, 0.9f, 0.2f);
+
         return InteractionResultHolder.success(stack);
     }
 
