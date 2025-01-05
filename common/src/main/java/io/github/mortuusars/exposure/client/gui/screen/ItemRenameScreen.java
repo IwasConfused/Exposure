@@ -106,7 +106,8 @@ public class ItemRenameScreen extends AbstractContainerScreen<ItemRenameMenu> {
 
     protected void onNameChanged(String name) {
         ItemStack itemStack = getMenu().getSlot(0).getItem();
-        if (!itemStack.has(DataComponents.CUSTOM_NAME) && name.equals(itemStack.getHoverName().getString())) {
+        if (!itemStack.has(DataComponents.CUSTOM_NAME) && name.equals(itemStack.getHoverName().getString())
+                || name.equals(itemStack.getItem().getName(itemStack).getString())) {
             name = "";
         }
 
