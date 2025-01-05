@@ -252,7 +252,7 @@ public class ViewfinderCameraControlsScreen extends Screen {
         if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
             if (camera.isActive()) {
                 camera.release();
-                Packets.sendToServer(new ActiveCameraReleaseC2SP(camera.getPhotographer(), camera.getCameraID()));
+                Packets.sendToServer(new ActiveCameraReleaseC2SP(camera.getPhotographer().asEntity().getUUID(), camera.getCameraID()));
             }
             return true;
         }

@@ -63,8 +63,4 @@ public abstract class Task<T> {
     public Task<T> overridenBy(Task<T> override) {
         return new OverrideTask<>(this, override);
     }
-
-//    public Task<T> fallbackTo(Task<T> fallback) {
-//        return new FallbackTask<>(this, fallback);
-//    }
 }

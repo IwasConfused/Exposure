@@ -57,16 +57,18 @@ public class OnePerEntitySounds {
         }
     }
 
-    public static void playShutterTickingSoundForAllPlayers(PhotographerEntity photographer, CameraID cameraID,
-                                                            float volume, float pitch, int durationTicks) {
-        if (!photographer.asEntity().level().isClientSide) {
-            Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(photographer, cameraID, volume, pitch, durationTicks));
+    public static void playShutterTickingSoundForAll(Entity entity, CameraID cameraID,
+                                                     float volume, float pitch, int durationTicks) {
+        if (!entity.level().isClientSide) {
+            Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(
+                    entity.getUUID(), cameraID, volume, pitch, durationTicks));
         }
     }
 
-    public static void stopShutterTickingSoundForAllPlayers(Entity sourceEntity) {
+    public static void stopShutterTickingSoundForAll(Entity sourceEntity) {
         if (!sourceEntity.level().isClientSide) {
-            Packets.sendToAllClients(new StopOnePerEntitySoundS2CP(sourceEntity.getUUID(), Exposure.SoundEvents.SHUTTER_TICKING.get()));
+            Packets.sendToAllClients(new StopOnePerEntitySoundS2CP(sourceEntity.getUUID(),
+                    Exposure.SoundEvents.SHUTTER_TICKING.get()));
         }
     }
 }

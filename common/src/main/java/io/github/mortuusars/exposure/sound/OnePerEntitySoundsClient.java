@@ -49,8 +49,8 @@ public class OnePerEntitySoundsClient {
         }
     }
 
-    public static void playShutterTickingSound(PhotographerEntity photographer, CameraID cameraID,
-                                               float volume, float pitch, int durationTicks) {
+    public static void playShutterTicking(PhotographerEntity photographer, CameraID cameraID,
+                                          float volume, float pitch, int durationTicks) {
         SoundEvent soundEvent = Exposure.SoundEvents.SHUTTER_TICKING.get();
         SoundInstance soundInstance = createShutterTickingSoundInstance(photographer, cameraID, soundEvent, volume, pitch, durationTicks);
         Map<ResourceLocation, SoundInstance> instances = SOUNDS.computeIfAbsent(photographer.asEntity(), e -> new HashMap<>());

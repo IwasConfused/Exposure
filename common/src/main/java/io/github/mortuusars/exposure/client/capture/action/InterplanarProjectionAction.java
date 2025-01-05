@@ -26,7 +26,7 @@ public class InterplanarProjectionAction implements CaptureAction {
                     entity.getY() + entity.getRandom().nextDouble() * 2.0, entity.getZ(),
                     entity.getRandom().nextGaussian(), 0.0, entity.getRandom().nextGaussian());
         }
-        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(photographer, cameraID, true));
+        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(photographer.asEntity().getUUID(), cameraID, true));
     }
 
     @Override
@@ -38,6 +38,6 @@ public class InterplanarProjectionAction implements CaptureAction {
                     entity.getY() + entity.getRandom().nextDouble() * 2.0, entity.getZ(),
                     entity.getRandom().nextGaussian(), 0.0, entity.getRandom().nextGaussian());
         }
-        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(photographer, cameraID, false));
+        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(photographer.asEntity().getUUID(), cameraID, false));
     }
 }

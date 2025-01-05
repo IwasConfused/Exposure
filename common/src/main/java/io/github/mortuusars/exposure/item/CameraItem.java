@@ -417,7 +417,7 @@ public class CameraItem extends Item {
             CameraID cameraID = getOrCreateID(stack);
 
             if (shutterSpeed.shouldCauseTickingSound()) {
-                OnePerEntitySounds.playShutterTickingSoundForAllPlayers(photographer, cameraID,
+                OnePerEntitySounds.playShutterTickingSoundForAll(photographer.asEntity(), cameraID,
                         1f, 1f, shutterSpeed.getDurationTicks());
             }
 
@@ -425,7 +425,7 @@ public class CameraItem extends Item {
 
             CaptureProperties captureProperties = new CaptureProperties(
                     exposureId,
-                    photographer,
+                    photographer.asEntity().getUUID(),
                     Optional.of(cameraID),
                     CameraSetting.SHUTTER_SPEED.getOrDefault(stack),
                     Optional.empty(),
@@ -746,7 +746,7 @@ public class CameraItem extends Item {
         //TODO: modifyFrameData event
         //PlatformHelper.fireModifyFrameDataEvent(player, stack, frame, entities);
 
-        return new Frame(ExposureIdentifier.id(captureProperties.exposureId()), captureProperties.filmType(),
+        return new Frame(ExposureIdentifier.id(captureProperties.exposureID()), captureProperties.filmType(),
                 new Photographer(photographer), entitiesInFrame, FrameTag.of(tag));
     }
 

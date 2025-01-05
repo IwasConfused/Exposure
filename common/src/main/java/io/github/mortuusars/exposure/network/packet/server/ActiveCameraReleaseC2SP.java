@@ -5,6 +5,7 @@ import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.network.packet.IPacket;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
@@ -12,16 +13,19 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record ActiveCameraReleaseC2SP(PhotographerEntity photographer,
+import java.util.UUID;
+
+public record ActiveCameraReleaseC2SP(UUID photographerEntityID,
                                       CameraID cameraID) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("active_camera_release");
     public static final Type<ActiveCameraReleaseC2SP> TYPE = new Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, ActiveCameraReleaseC2SP> STREAM_CODEC = StreamCodec.composite(
-            PhotographerEntity.STREAM_CODEC, ActiveCameraReleaseC2SP::photographer,
+            UUIDUtil.STREAM_CODEC, ActiveCameraReleaseC2SP::photographerEntityID,
             CameraID.STREAM_CODEC, ActiveCameraReleaseC2SP::cameraID,
             ActiveCameraReleaseC2SP::new
     );
@@ -33,13 +37,11 @@ public record ActiveCameraReleaseC2SP(PhotographerEntity photographer,
 
     @Override
     public boolean handle(PacketFlow direction, Player player) {
-        ServerLevel level = ((ServerPlayer) player).serverLevel();
-
-        level.getServer().execute(() -> {
+        PhotographerEntity.fromUUID(player.level(), photographerEntityID).ifPresentOrElse(photographer -> {
             photographer.getActiveExposureCamera().ifPresentOrElse(
                     Camera::release,
-                    () -> Exposure.LOGGER.error("Cannot release: '{}' does not have an active camera.", photographer.asEntity()));
-        });
+                    () -> Exposure.LOGGER.error("Cannot release shutter of an active camera: '{}' does not have an active camera.", photographer.asEntity()));
+        }, () -> Exposure.LOGGER.error("Cannot release shutter of an active camera: PhotographerEntity is not found."));
 
         return true;
     }

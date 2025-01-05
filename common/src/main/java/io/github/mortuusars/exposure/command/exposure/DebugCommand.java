@@ -81,7 +81,7 @@ public class DebugCommand {
 
             properties.add(new CaptureProperties(
                     exposureId,
-                    player,
+                    player.getUUID(),
                     camera.map(Camera::getCameraID),
                     camera.flatMap(c -> c.map(CameraSetting.SHUTTER_SPEED::getOrDefault)).orElse(ShutterSpeed.DEFAULT),
                     Optional.empty(),

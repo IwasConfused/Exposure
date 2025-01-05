@@ -10,8 +10,9 @@ import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.FileLoadingInfo;
+import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
+import io.github.mortuusars.exposure.core.cycles.task.EmptyTask;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
 import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
 import io.github.mortuusars.exposure.util.TranslatableError;
@@ -27,7 +28,15 @@ import java.util.function.Consumer;
 public class SingleChannelCaptureTemplate implements CaptureTemplate {
     @Override
     public Task<?> createTask(CaptureProperties data) {
-        Entity cameraHolder = data.photographer().asEntity();
+        @Nullable PhotographerEntity photographer = PhotographerEntity.fromUUID(Minecrft.level(), data.photographerEntityID())
+                .orElse(null);
+
+        if (photographer == null) {
+            Exposure.LOGGER.error("Failed to create capture task: photographer cannot be obtained. '{}'", data);
+            return new EmptyTask<>();
+        }
+
+        Entity cameraHolder = photographer.asEntity();
 
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
@@ -36,7 +45,7 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                 .orElse(null);
 
         return Capture.of(Capture.screenshot(),
-                        CaptureActions.optional(!data.photographer().getExecutingPlayer().equals(cameraHolder),
+                        CaptureActions.optional(!photographer.getExecutingPlayer().equals(cameraHolder),
                                 () -> CaptureActions.setCameraEntity(cameraHolder)),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
@@ -52,8 +61,8 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                         chooseColorProcessor(data)))
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette(), true))
                 .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                        image.getPixels(), image.getPalette(), createExposureTag(data)))
-                .accept(image -> PalettedExposureUploader.upload(data.exposureId(), image))
+                        image.getPixels(), image.getPalette(), createExposureTag(data, photographer)))
+                .accept(image -> PalettedExposureUploader.upload(data.exposureID(), image))
                 .onError(printCasualErrorInChat());
     }
 
@@ -63,8 +72,8 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                 : Processor.EMPTY;
     }
 
-    protected PalettedExposure.Tag createExposureTag(CaptureProperties data) {
-        return new PalettedExposure.Tag(data.filmType(), data.photographer().getExecutingPlayer().getScoreboardName(),
+    protected PalettedExposure.Tag createExposureTag(CaptureProperties data, PhotographerEntity photographer) {
+        return new PalettedExposure.Tag(data.filmType(), photographer.getExecutingPlayer().getScoreboardName(),
                 UnixTimestamp.Seconds.now(), false, false);
     }
 

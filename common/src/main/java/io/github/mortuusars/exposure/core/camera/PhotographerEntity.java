@@ -1,17 +1,12 @@
 package io.github.mortuusars.exposure.core.camera;
 
-import io.github.mortuusars.exposure.PlatformHelper;
-import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.item.CameraItem;
-import io.netty.buffer.ByteBuf;
-import net.minecraft.core.UUIDUtil;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,26 +16,10 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 public interface PhotographerEntity {
-    StreamCodec<ByteBuf, PhotographerEntity> STREAM_CODEC = UUIDUtil.STREAM_CODEC.map(
-            PhotographerEntity::fromUUID, entity -> entity.asEntity().getUUID()
-    );
-
-    static PhotographerEntity fromUUID(UUID uuid) {
-        // 1. This can cause problems potentially.
-        // 2. Comparing against 'SERVER' because network client thread group is named 'main' not 'CLIENT'
-        //    but server thread does have proper group name.
-        if (Thread.currentThread().getThreadGroup().getName().equals("SERVER")) {
-            for (ServerLevel level : PlatformHelper.getServer().getAllLevels()) {
-                @Nullable Entity entity = level.getEntity(uuid);
-                if (entity != null) {
-                    return ((PhotographerEntity) entity);
-                }
-            }
-        } else {
-            return ((PhotographerEntity) Minecrft.level().getEntities().get(uuid));
-        }
-
-        return null;
+    static Optional<PhotographerEntity> fromUUID(Level level, UUID uuid) {
+        return level.getEntities().get(uuid) instanceof PhotographerEntity photographerEntity
+                ? Optional.of(photographerEntity)
+                : Optional.empty();
     }
 
     /**
