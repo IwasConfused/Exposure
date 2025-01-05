@@ -11,6 +11,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.LoadExposureFromFileCommandS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import org.apache.commons.lang3.NotImplementedException;
 
@@ -39,6 +40,11 @@ public class LoadCommand {
 
     private static int loadExposureFromFile(CommandSourceStack stack, String exposureId, String path, int size, boolean dither) throws CommandSyntaxException {
         throw new NotImplementedException();
+
+        //TODO: use onReceived exposure to send message
+
+//        Component.translatable("command.exposure.load_from_file.success", id)
+
 //        ServerPlayer player = stack.getPlayerOrException();
 //        ExposureIdentifier identifier = ExposureIdentifier.id(exposureId);
 //        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());

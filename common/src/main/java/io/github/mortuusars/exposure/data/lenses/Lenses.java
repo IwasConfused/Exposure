@@ -33,14 +33,4 @@ public class Lenses {
     public static IPacket getSyncToClientPacket() {
         return new SyncLensesDataS2CP(new ConcurrentHashMap<>(lenses));
     }
-
-    public static void onDatapackSync(@Nullable ServerPlayer joiningPlayer) {
-        //TODO: Encoding failed
-        IPacket packet = getSyncToClientPacket();
-
-        if (joiningPlayer != null)
-            Packets.sendToClient(packet, joiningPlayer);
-        else
-            Packets.sendToAllClients(packet);
-    }
 }

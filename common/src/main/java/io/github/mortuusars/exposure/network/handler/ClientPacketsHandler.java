@@ -25,13 +25,10 @@ import io.github.mortuusars.exposure.network.packet.client.*;
 import io.github.mortuusars.exposure.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
-import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.minecraft.util.StringUtil;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
@@ -42,13 +39,11 @@ import java.util.List;
 
 public class ClientPacketsHandler {
     public static void applyShader(ApplyShaderS2CP packet) {
-        Minecrft.execute(() -> {
-            if (packet.shouldRemove()) {
-                Minecraft.getInstance().gameRenderer.shutdownEffect();
-            } else {
-                Minecraft.getInstance().gameRenderer.loadEffect(packet.shaderLocation());
-            }
-        });
+        if (packet.shouldRemove()) {
+            Minecraft.getInstance().gameRenderer.shutdownEffect();
+        } else {
+            Minecraft.getInstance().gameRenderer.loadEffect(packet.shaderLocation());
+        }
     }
 
     //TODO: Use CaptureData
@@ -88,58 +83,49 @@ public class ClientPacketsHandler {
             return;
         }
 
-        Minecrft.execute(() -> {
-            ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
-                    .handleErrorAndGetResult()
-                    .thenAsync(Process.with(
-                            Processor.Crop.SQUARE_CENTER,
-                            Processor.Resize.to(size)))
-                    .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
-                    .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(), image.getPixels(), image.getPalette(),
-                            new PalettedExposure.Tag(ExposureType.COLOR, player.getScoreboardName(),
-                                    UnixTimestamp.Seconds.now(), true, false)))
-                    .accept(image -> PalettedExposureUploader.upload(id, image))
-                    .accept(v -> player.displayClientMessage(
-                            Component.translatable("command.exposure.load_from_file.success", id)
-                                    .withStyle(ChatFormatting.GREEN), false)));
-        });
+        ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
+                .handleErrorAndGetResult()
+                .thenAsync(Process.with(
+                        Processor.Crop.SQUARE_CENTER,
+                        Processor.Resize.to(size)))
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
+                .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(), image.getPixels(), image.getPalette(),
+                        new PalettedExposure.Tag(ExposureType.COLOR, player.getScoreboardName(),
+                                UnixTimestamp.Seconds.now(), true, false)))
+                .accept(image -> PalettedExposureUploader.upload(id, image)));
     }
 
     public static void showExposure(ShowExposureCommandS2CP packet) {
-        Minecrft.execute(() -> {
-            LocalPlayer player = Minecraft.getInstance().player;
-            if (player == null) {
-                Exposure.LOGGER.error("Cannot show exposures. Player is null.");
-                return;
-            }
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) {
+            Exposure.LOGGER.error("Cannot show exposures. Player is null.");
+            return;
+        }
 
-            List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(packet.frames().stream().map(frame -> {
-                ItemStack photographStack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
-                photographStack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
-                return new ItemAndStack<PhotographItem>(photographStack);
-            }).toList());
+        List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(packet.frames().stream().map(frame -> {
+            ItemStack photographStack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
+            photographStack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
+            return new ItemAndStack<PhotographItem>(photographStack);
+        }).toList());
 
-            Collections.reverse(photographs);
+        Collections.reverse(photographs);
 
-            @Nullable Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
+        @Nullable Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
 
-            Minecraft.getInstance().setScreen(screen);
-        });
+        Minecraft.getInstance().setScreen(screen);
     }
 
     public static void clearRenderingCache() {
-        Minecrft.execute(() -> ExposureClient.imageRenderer().clearCache());
+        ExposureClient.imageRenderer().clearCache();
     }
 
     public static void syncLensesData(SyncLensesDataS2CP packet) {
-        Minecrft.execute(() -> Lenses.reload(packet.lenses()));
+        Lenses.reload(packet.lenses());
     }
 
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
-        Minecrft.execute(() -> {
-            ExposureClient.exposureStore().refresh(packet.id());
-            ExposureClient.imageRenderer().clearCacheOf(packet.id());
-        });
+        ExposureClient.exposureStore().refresh(packet.id());
+        ExposureClient.imageRenderer().clearCacheOf(packet.id());
     }
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
@@ -164,21 +150,16 @@ public class ClientPacketsHandler {
     }
 
     public static void startCapture(StartCaptureS2CP packet) {
-        Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId())
-                .createTask(packet.captureProperties());
+        Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId()).createTask(packet.captureProperties());
         ExposureClient.cycles().enqueueTask(captureTask);
     }
 
     public static void startDebugRGBCapture(StartDebugRGBCaptureS2CP packet) {
-        List<CaptureProperties> properties = packet.captureProperties();
+        CaptureTemplate template = CaptureTemplates.getOrThrow(packet.templateId());
 
-        Minecrft.execute(() -> {
-            CaptureTemplate template = CaptureTemplates.getOrThrow(packet.templateId());
-
-            for (CaptureProperties captureProperties : properties) {
-                Task<?> captureTask = template.createTask(captureProperties);
-                ExposureClient.cycles().enqueueTask(captureTask);
-            }
-        });
+        for (CaptureProperties captureProperties : packet.captureProperties()) {
+            Task<?> captureTask = template.createTask(captureProperties);
+            ExposureClient.cycles().enqueueTask(captureTask);
+        }
     }
 }

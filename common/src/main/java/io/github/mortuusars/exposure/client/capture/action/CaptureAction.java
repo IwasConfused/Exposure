@@ -24,10 +24,4 @@ public interface CaptureAction {
 
     default void afterCapture() {
     }
-
-    default CaptureAction combine(CaptureAction other) {
-        if (this.equals(EMPTY)) return other;
-        if (other.equals(EMPTY)) return this;
-        else return new CompositeAction(this, other);
-    }
 }
