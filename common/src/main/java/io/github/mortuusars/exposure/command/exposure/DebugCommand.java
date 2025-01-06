@@ -7,7 +7,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.CaptureProperties;
-import io.github.mortuusars.exposure.core.ChromaChannel;
+import io.github.mortuusars.exposure.core.CaptureType;
+import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.Camera;
@@ -111,7 +112,7 @@ public class DebugCommand {
                     ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), FrameTag.EMPTY));
         }
 
-        Packets.sendToClient(new StartDebugRGBCaptureS2CP(Exposure.resource("debug_rgb"), properties), player);
+        Packets.sendToClient(new StartDebugRGBCaptureS2CP(CaptureType.DEBUG_RGB, properties), player);
 
         context.getSource().sendSuccess(() -> Component.literal("Capturing RGB channels..."), true);
 

@@ -4,7 +4,7 @@ import io.github.mortuusars.exposure.client.image.CensoredImage;
 import io.github.mortuusars.exposure.client.image.CroppedImage;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ResizedImage;
-import io.github.mortuusars.exposure.core.ChromaChannel;
+import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import io.github.mortuusars.exposure.util.Rect2i;
 import net.minecraft.util.StringUtil;
 
@@ -31,7 +31,6 @@ public interface Processor {
     };
 
     Processor CENSORED = new Instance("censored", CensoredImage::new);
-    ;
 
     Processor NEGATIVE = new NegativeProcessor();
     Processor NEGATIVE_FILM = new NegativeFilmProcessor();

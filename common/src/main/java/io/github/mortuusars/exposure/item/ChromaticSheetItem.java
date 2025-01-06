@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
-import io.github.mortuusars.exposure.core.ChromaChannel;
+import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;

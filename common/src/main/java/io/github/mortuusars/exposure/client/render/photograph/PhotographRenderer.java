@@ -6,7 +6,6 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.client.render.texture.TextureRenderer;
-import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.item.StackedPhotographsItem;
 import io.github.mortuusars.exposure.core.frame.Frame;
@@ -34,22 +33,21 @@ public class PhotographRenderer {
                                         PhotographItem photographItem, ItemStack photographStack,
                                         boolean renderPaper, boolean renderBackside, int packedLight, int r, int g, int b, int a) {
 
-        PhotographType photographType = photographItem.getType(photographStack);
-        PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
+        PhotographStyle style = PhotographStyle.of(photographStack);
 
         Frame frame = photographItem.getFrame(photographStack);
 
-        RenderableImage image = photographFeatures.process(ExposureClient.createRenderableExposureImage(frame));
+        RenderableImage image = style.process(ExposureClient.createRenderableExposureImage(frame));
 
         int paperRotation = frame.exposureIdentifier().hashCode() % 4 * 90;
 
-        if (renderPaper && photographFeatures.paperTexture() != ExposureClient.Textures.EMPTY) {
+        if (renderPaper && style.paperTexture() != ExposureClient.Textures.EMPTY) {
             poseStack.pushPose();
             poseStack.translate(0.5f, 0.5f, 0);
             poseStack.mulPose(Axis.ZP.rotationDegrees(paperRotation));
             poseStack.translate(-0.5f, -0.5f, 0);
 
-            TextureRenderer.render(poseStack, bufferSource, photographFeatures.paperTexture(), packedLight, r, g, b, a);
+            TextureRenderer.render(poseStack, bufferSource, style.paperTexture(), packedLight, r, g, b, a);
 
             poseStack.popPose();
 
@@ -62,7 +60,7 @@ public class PhotographRenderer {
                 poseStack.mulPose(Axis.ZP.rotationDegrees(paperRotation));
                 poseStack.translate(-0.5f, -0.5f, 0);
 
-                TextureRenderer.render(poseStack, bufferSource, photographFeatures.paperTexture(),
+                TextureRenderer.render(poseStack, bufferSource, style.paperTexture(),
                         packedLight, (int) (r * 0.85f), (int) (g * 0.85f), (int) (b * 0.85f), a);
 
                 poseStack.popPose();
@@ -80,7 +78,7 @@ public class PhotographRenderer {
             ExposureClient.imageRenderer().render(image, poseStack, bufferSource, RenderCoordinates.DEFAULT, packedLight, r, g, b, a);
         }
 
-        if (renderPaper && photographFeatures.hasOverlayTexture()) {
+        if (renderPaper && style.hasOverlayTexture()) {
             poseStack.pushPose();
 
             poseStack.translate(0.5f, 0.5f, 0);
@@ -88,7 +86,7 @@ public class PhotographRenderer {
             poseStack.translate(-0.5f, -0.5f, 0);
 
             poseStack.translate(0, 0, 0.002);
-            TextureRenderer.render(poseStack, bufferSource, photographFeatures.overlayTexture(), packedLight, r, g, b, a);
+            TextureRenderer.render(poseStack, bufferSource, style.overlayTexture(), packedLight, r, g, b, a);
             poseStack.popPose();
         }
     }
@@ -122,12 +120,6 @@ public class PhotographRenderer {
                 break;
             }
 
-            PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
-            Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
-            PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
-
-            int rotation = frame.exposureIdentifier().hashCode() % 4 * 90;
-
             // Photographs below (only paper)
             float posOffset = getStackedPhotographOffset() * i;
 
@@ -135,12 +127,18 @@ public class PhotographRenderer {
             poseStack.translate(posOffset, posOffset, 0.002 - i / 1000f);
 
             poseStack.translate(0.5f, 0.5f, 0);
+
+            Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
+            int rotation = frame.exposureIdentifier().hashCode() % 4 * 90;
             poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
+
             poseStack.translate(-0.5f, -0.5f, 0);
 
             float brightnessMul = 1f - (getStackedBrightnessStep() * i);
 
-            TextureRenderer.render(poseStack, bufferSource, photographFeatures.paperTexture(),
+            PhotographStyle photographStyle = PhotographStyle.of(photograph.getItemStack());
+
+            TextureRenderer.render(poseStack, bufferSource, photographStyle.paperTexture(),
                     packedLight, (int)(r * brightnessMul), (int)(g * brightnessMul), (int)(b * brightnessMul), a);
 
             poseStack.popPose();

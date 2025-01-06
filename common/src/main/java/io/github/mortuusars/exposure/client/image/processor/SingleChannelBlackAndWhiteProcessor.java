@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.image.processor;
 
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ProcessedImage;
-import io.github.mortuusars.exposure.core.ChromaChannel;
+import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import net.minecraft.util.FastColor;
 
 public class SingleChannelBlackAndWhiteProcessor implements Processor {

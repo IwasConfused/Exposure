@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.core.frame.Frame;
@@ -249,7 +249,7 @@ public class PhotographScreen extends Screen {
 
         frame.exposureIdentifier().ifId(id -> {
             PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
-            PhotographFeatures photographFeatures = PhotographFeatures.get(photographType);
+            PhotographStyle photographStyle = PhotographStyle.of(photograph.getItemStack());
 
             String filename = getFilename(id, photographType);
 

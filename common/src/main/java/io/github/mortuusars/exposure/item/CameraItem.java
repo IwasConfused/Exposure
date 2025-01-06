@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.core.camera.component.FocalRange;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.FileLoadingInfo;
+import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
@@ -442,18 +443,16 @@ public class CameraItem extends Item {
             CameraInstances.createOrUpdate(cameraID, instance -> instance.setCurrentCaptureData(level, captureProperties));
             ExposureServer.exposureRepository().expect(serverPlayer, exposureId);
 
-            //TODO: since we get entities in frame only server-side, it may potentially differ from what player sees on client
-            // Needs testing. If it is a problem: maybe sending packet to server with updated player pitch/yaw is a solution?
             addNewFrame(photographer, serverLevel, stack);
 
-            Packets.sendToClient(new StartCaptureS2CP(getCaptureTemplateId(stack), captureProperties), serverPlayer);
+            Packets.sendToClient(new StartCaptureS2CP(getCaptureType(stack), captureProperties), serverPlayer);
         }
 
         return InteractionResultHolder.consume(stack);
     }
 
-    public ResourceLocation getCaptureTemplateId(ItemStack stack) {
-        return Exposure.resource("camera");
+    public ResourceLocation getCaptureType(ItemStack stack) {
+        return CaptureType.CAMERA;
     }
 
     protected void onShutterOpen(PhotographerEntity photographer, ServerLevel serverLevel, ItemStack stack) {

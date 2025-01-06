@@ -4,7 +4,7 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographFeatures;
+import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -53,13 +53,13 @@ public class PhotographSlotButton extends ImageButton {
     public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         ItemStack photograph = getPhotograph();
 
-        if (photograph.getItem() instanceof PhotographItem photographItem) {
+        if (photograph.getItem() instanceof PhotographItem) {
             hasPhotograph = true;
 
-            PhotographFeatures photographFeatures = PhotographFeatures.get(photographItem.getType(photograph));
+            PhotographStyle photographStyle = PhotographStyle.of(photograph);
 
             // Paper
-            guiGraphics.blit(photographFeatures.albumPaperTexture(),
+            guiGraphics.blit(photographStyle.albumPaperTexture(),
                     getX(), getY(), 0, 0, 0, width, height, width, height);
 
             // Exposure
@@ -74,10 +74,10 @@ public class PhotographSlotButton extends ImageButton {
             guiGraphics.pose().popPose();
 
             // Paper overlay
-            if (photographFeatures.hasAlbumOverlayTexture()) {
+            if (photographStyle.hasAlbumOverlayTexture()) {
                 guiGraphics.pose().pushPose();
                 guiGraphics.pose().translate(0, 0, 2);
-                guiGraphics.blit(photographFeatures.albumOverlayTexture(),
+                guiGraphics.blit(photographStyle.albumOverlayTexture(),
                         getX(), getY(), 0, 0, 0, width, height, width, height);
                 guiGraphics.pose().popPose();
             }

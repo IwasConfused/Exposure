@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.core;
 
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
+import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
