@@ -37,6 +37,7 @@ public class Bugger {
         if (key == InputConstants.KEY_DOWN) down();
         if (key == InputConstants.KEY_INSERT) zoom = 0;
         if (key == InputConstants.KEY_HOME) scroll = 0;
+        if (key == InputConstants.KEY_END) test();
         if (key == InputConstants.KEY_LEFT) page = Mth.clamp(page - 1, -1, 1);
         if (key == InputConstants.KEY_RIGHT) page = Mth.clamp(page + 1, -1, 1);
         return false;
@@ -72,6 +73,9 @@ public class Bugger {
             boolean shift = Screen.hasShiftDown();
             scroll = Math.max(shift ? scroll + 5 : scroll + 1, 0);
         }
+    }
+
+    private static void test() {
     }
 
     public static void renderMainPage(GuiGraphics guiGraphics) {

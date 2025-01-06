@@ -28,7 +28,7 @@ public class DitheredPalettizer implements ImagePalettizer {
 
                 // This fixes white outline bordering opaque pixels next to transparent
                 if (oldColor.getA() == 0) {
-                    indexedPixels[y * width + x] = (byte) 0;
+                    indexedPixels[y * width + x] = (byte) 255;
                     continue;
                 }
 
