@@ -50,7 +50,7 @@ public class ExposureClient {
                 ExposureClient.Textures.Photograph.AGED_ALBUM_OVERLAY,
                 Processor.AGED));
 
-        cycles().enqueueTask(new ClearStaleRenderedImagesIndefiniteTask());
+        cycles().addParallelTask(new ClearStaleRenderedImagesIndefiniteTask());
 
         registerItemModelProperties();
         isIrisOrOculusInstalled = PlatformHelper.isModLoaded("iris") || PlatformHelper.isModLoaded("oculus");
