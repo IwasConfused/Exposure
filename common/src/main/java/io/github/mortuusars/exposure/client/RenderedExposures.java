@@ -52,7 +52,11 @@ public class RenderedExposures {
 
     public void clearStale() {
         cachedRenderedExposures.entrySet().removeIf(entry -> {
-            return UnixTimestamp.Milliseconds.now() - entry.getValue().getLastAccess() > 120_000; // 2 minutes
+            boolean stale = UnixTimestamp.Milliseconds.now() - entry.getValue().getLastAccess() > 120_000; // 2 minutes
+            if (stale) {
+                ExposureClient.imageRenderer().clearCacheOf(entry.getKey());
+            }
+            return stale;
         });
     }
 
