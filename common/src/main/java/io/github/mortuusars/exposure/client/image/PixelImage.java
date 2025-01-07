@@ -1,7 +1,5 @@
 package io.github.mortuusars.exposure.client.image;
 
-import com.google.common.base.Preconditions;
-
 import java.util.function.Function;
 
 public class PixelImage implements Image {
@@ -10,11 +8,7 @@ public class PixelImage implements Image {
     private final int[] pixels;
 
     public PixelImage(int width, int height, int[] pixels) {
-        Preconditions.checkArgument(width >= 0, "Width cannot be negative. %s", this);
-        Preconditions.checkArgument(height >= 0, "Height cannot be negative. %s ", this);
-        Preconditions.checkArgument(pixels.length == width * height,
-                "Pixel count '%s' is not correct for image dimensions of '%sx%s'. " +
-                        "Count should be '%s'.", pixels.length, width, height, width * height);
+        Image.validate(width, height, pixels.length);
         this.width = width;
         this.height = height;
         this.pixels = pixels;

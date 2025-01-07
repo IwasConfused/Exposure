@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client;
+package io.github.mortuusars.exposure.client.task;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
@@ -70,7 +70,10 @@ public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
                     return;
                 }
 
-                images[i] = request.getExposure().map(PalettedImage::new).orElse(null);
+                images[i] = request.getData().map(exposure ->
+                        new PalettedImage(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(),
+                                ExposureClient.colorPalettes().getOrDefault(exposure.getPaletteId())))
+                        .orElse(null);
             }
 
             if (identifier.isTexture()) {

@@ -1,24 +1,21 @@
 package io.github.mortuusars.exposure;
 
-import io.github.mortuusars.exposure.client.Censor;
+import io.github.mortuusars.exposure.client.task.ClearStaleRenderedImagesIndefiniteTask;
+import io.github.mortuusars.exposure.client.RenderedExposures;
 import io.github.mortuusars.exposure.client.camera.viewfinder.*;
 import io.github.mortuusars.exposure.client.capture.template.CameraCaptureTemplate;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.capture.template.SingleChannelCaptureTemplate;
-import io.github.mortuusars.exposure.client.image.*;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
-import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyles;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.CaptureType;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.cycles.Cycles;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
-import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.item.*;
@@ -30,6 +27,7 @@ import net.minecraft.resources.ResourceLocation;
 public class ExposureClient {
     private static final Cycles CYCLES = new Cycles();
     private static final ExposureStore EXPOSURE_STORE = new ExposureStore();
+    private static final RenderedExposures RENDERED_EXPOSURES = new RenderedExposures();
     private static final ImageRenderer IMAGE_RENDERER = new ImageRenderer();
     private static final PhotographRenderer PHOTOGRAPH_RENDERER = new PhotographRenderer();
     private static final ColorPalettes COLOR_PALETTES = new ColorPalettes();
@@ -52,6 +50,8 @@ public class ExposureClient {
                 ExposureClient.Textures.Photograph.AGED_ALBUM_OVERLAY,
                 Processor.AGED));
 
+        cycles().enqueueTask(new ClearStaleRenderedImagesIndefiniteTask());
+
         registerItemModelProperties();
         isIrisOrOculusInstalled = PlatformHelper.isModLoaded("iris") || PlatformHelper.isModLoaded("oculus");
     }
@@ -62,6 +62,10 @@ public class ExposureClient {
 
     public static ExposureStore exposureStore() {
         return EXPOSURE_STORE;
+    }
+
+    public static RenderedExposures renderedExposures() {
+        return RENDERED_EXPOSURES;
     }
 
     public static ImageRenderer imageRenderer() {
@@ -86,22 +90,6 @@ public class ExposureClient {
         return isIrisOrOculusInstalled;
     }
 
-    // --
-
-    public static RenderableImage createRenderableExposureImage(Frame frame) {
-        RenderableImage image = createRawRenderableExposureImage(frame.exposureIdentifier());
-        return Censor.isAllowedToRender(frame)
-                ? image
-                : image.processWith(Processor.CENSORED);
-    }
-
-    public static RenderableImage createRawRenderableExposureImage(ExposureIdentifier identifier) {
-        return identifier.map(
-                id -> ExposureClient.exposureStore().getOrRequest(id).map(
-                        exposure -> RenderableImage.fromExposure(exposure, id),
-                        RenderableImage.EMPTY),
-                ResourceImage::getOrCreate);
-    }
 
     // --
 

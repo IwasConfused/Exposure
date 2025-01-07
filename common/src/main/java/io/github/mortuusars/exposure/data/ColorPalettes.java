@@ -38,7 +38,7 @@ public class ColorPalettes extends SimpleJsonResourceReloadListener {
     public @NotNull ColorPalette getOrDefault(ResourceLocation paletteId) {
         @Nullable ColorPalette palette = palettes.get(paletteId);
         if (palette == null) {
-//            LOGGER.warn("Color Palette with id '{}' is not found. Default palette will be used instead.", paletteId);
+            LOGGER.warn("Color Palette with id '{}' is not found. Default palette will be used instead.", paletteId);
             return ColorPalette.MAP_COLORS_PLUS;
         }
         return palette;

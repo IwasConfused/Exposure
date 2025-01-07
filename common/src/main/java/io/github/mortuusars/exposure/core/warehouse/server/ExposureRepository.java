@@ -23,8 +23,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Function;
 
-public class PalettedExposureRepository {
+public class ExposureRepository {
     public static final int EXPECTED_TIMEOUT_SECONDS = 60;
     public static final String EXPOSURES_DIRECTORY_NAME = "exposures";
 
@@ -37,7 +38,7 @@ public class PalettedExposureRepository {
 
     protected final Map<ServerPlayer, Set<ExpectedExposure>> expectedExposures = new HashMap<>();
 
-    public PalettedExposureRepository(MinecraftServer server) {
+    public ExposureRepository(MinecraftServer server) {
         this.server = server;
         this.dataStorage = server.overworld().getDataStorage();
         this.worldFolderPath = server.getWorldPath(LevelResource.ROOT);
@@ -97,6 +98,17 @@ public class PalettedExposureRepository {
             data.setDirty();
             Packets.sendToAllClients(new ExposureDataChangedS2CP(id));
         }
+    }
+
+    public void updateExposure(@NotNull String id, Function<ExposureData, ExposureData> updateFunction) {
+        Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot update exposure: id is null or empty.");
+
+        loadExposure(id).getData().ifPresent(exposure -> {
+            ExposureData updatedExposure = updateFunction.apply(exposure);
+            if (!updatedExposure.equals(exposure)) {
+                saveExposure(id, updatedExposure);
+            }
+        });
     }
 
     public void expect(ServerPlayer player, String id, BiConsumer<ServerPlayer, String> onReceived) {

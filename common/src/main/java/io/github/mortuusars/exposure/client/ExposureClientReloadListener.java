@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client;
 
-import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.event_hub.ClientEvents;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
@@ -14,7 +14,6 @@ public class ExposureClientReloadListener extends SimplePreparableReloadListener
 
     @Override
     protected void apply(Boolean object, ResourceManager resourceManager, ProfilerFiller profiler) {
-        ExposureClient.exposureStore().clear();
-        ExposureClient.imageRenderer().clearCache();
+        ClientEvents.resourcesReloaded();
     }
 }

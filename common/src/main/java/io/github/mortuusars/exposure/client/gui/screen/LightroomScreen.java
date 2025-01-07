@@ -321,8 +321,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
 
     public void renderFrame(@NotNull Frame frame, PoseStack poseStack,
                             float x, float y, float size, float alpha, ExposureType exposureType) {
-        RenderableImage image = ExposureClient.createRenderableExposureImage(frame)
-                .processWith(Processor.NEGATIVE_FILM);
+        RenderableImage image = ExposureClient.renderedExposures().getOrCreate(frame).processWith(Processor.NEGATIVE_FILM);
 
         MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
         ExposureClient.imageRenderer().render(image, poseStack, bufferSource, new RenderCoordinates(x, y, size, size),

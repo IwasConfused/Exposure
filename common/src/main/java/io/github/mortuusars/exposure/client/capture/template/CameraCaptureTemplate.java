@@ -59,7 +59,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
                         ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), true))
                 .thenAsync(image -> new ExposureData(image.getWidth(), image.getHeight(),
-                        image.getPixels(), data.colorPaletteId(), createExposureTag(data, photographer, false)));
+                        image.pixels(), data.colorPaletteId(), createExposureTag(data, photographer, false)));
 
         if (data.fileLoadingInfo().isPresent()) {
             FileLoadingInfo fileLoadingData = data.fileLoadingInfo().get();
@@ -77,7 +77,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             chooseColorProcessor(data)))
                     .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), dither))
                     .thenAsync(image -> new ExposureData(image.getWidth(), image.getHeight(),
-                            image.getPixels(), data.colorPaletteId(), createExposureTag(data,  photographer, true))));
+                            image.pixels(), data.colorPaletteId(), createExposureTag(data,  photographer, true))));
         }
 
         if (data.exposureID().isEmpty()) {

@@ -21,7 +21,7 @@ public class RequestedPalettedExposure {
     public static final RequestedPalettedExposure CANNOT_LOAD = status(RequestedExposureStatus.CANNOT_LOAD);
 
     public static final StreamCodec<FriendlyByteBuf, RequestedPalettedExposure> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.optional(ExposureData.STREAM_CODEC), RequestedPalettedExposure::getExposure,
+            ByteBufCodecs.optional(ExposureData.STREAM_CODEC), RequestedPalettedExposure::getData,
             RequestedExposureStatus.STREAM_CODEC, RequestedPalettedExposure::getStatus,
             RequestedPalettedExposure::fromOptional
     );
@@ -67,7 +67,7 @@ public class RequestedPalettedExposure {
         };
     }
 
-    public Optional<ExposureData> getExposure() {
+    public Optional<ExposureData> getData() {
         return Optional.ofNullable(exposure);
     }
 

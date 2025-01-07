@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.core.warehouse.server.PalettedExposureRepository;
+import io.github.mortuusars.exposure.core.warehouse.server.ExposureRepository;
 import io.github.mortuusars.exposure.core.warehouse.server.ExposureFrameHistory;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.data.Lenses;
@@ -12,11 +12,11 @@ public class ExposureServer {
     private static final ColorPalettes ColorPalettes = new ColorPalettes();
     private static final Lenses lensesManager = new Lenses();
 
-    private static PalettedExposureRepository vault;
+    private static ExposureRepository vault;
     private static ExposureFrameHistory exposureFrameHistory;
 
     public static void init(MinecraftServer server) {
-        vault = new PalettedExposureRepository(server);
+        vault = new ExposureRepository(server);
         exposureFrameHistory = ExposureFrameHistory.loadOrCreate(server);
     }
 
@@ -30,7 +30,7 @@ public class ExposureServer {
 
     // --
 
-    public static PalettedExposureRepository exposureRepository() {
+    public static ExposureRepository exposureRepository() {
         return ensureInitialized(vault);
     }
 

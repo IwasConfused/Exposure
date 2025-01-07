@@ -98,7 +98,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
                         ? ExposureType.BLACK_AND_WHITE
                         : ExposureType.COLOR);
 
-        RenderableImage image = ExposureClient.createRawRenderableExposureImage(exposureIdentifier)
+        RenderableImage image = ExposureClient.renderedExposures().getOrCreateRaw(exposureIdentifier)
                 .processWith(Processor.NEGATIVE_FILM);
 
         int width = image.getWidth();

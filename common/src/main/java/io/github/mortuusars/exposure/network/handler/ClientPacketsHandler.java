@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.network.handler;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.ExposureRetrieveTask;
+import io.github.mortuusars.exposure.client.task.ExposureRetrieveTask;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplate;
 import io.github.mortuusars.exposure.client.image.TrichromeImage;
 import io.github.mortuusars.exposure.client.util.Minecrft;
@@ -89,7 +89,7 @@ public class ClientPacketsHandler {
                         Processor.Resize.to(size)))
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
                         ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), dither))
-                .then(image -> new ExposureData(image.getWidth(), image.getHeight(), image.getPixels(), ColorPalettes.DEFAULT,
+                .then(image -> new ExposureData(image.getWidth(), image.getHeight(), image.pixels(), ColorPalettes.DEFAULT,
                         new ExposureData.Tag(ExposureType.COLOR, player.getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), true, false)))
                 .accept(image -> PalettedExposureUploader.upload(id, image)));
@@ -115,10 +115,6 @@ public class ClientPacketsHandler {
         Minecraft.getInstance().setScreen(screen);
     }
 
-    public static void clearRenderingCache() {
-        ExposureClient.imageRenderer().clearCache();
-    }
-
     public static void syncColorPalettes(SyncColorPalettesS2CP packet) {
         ExposureClient.colorPalettes().set(packet.palettes());
     }
@@ -127,9 +123,15 @@ public class ClientPacketsHandler {
         ExposureClient.lenses().set(packet.lenses());
     }
 
+    public static void clearRenderingCache() {
+        ExposureClient.imageRenderer().clearCache();
+        ExposureClient.renderedExposures().clearCache();
+    }
+
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
         ExposureClient.exposureStore().refresh(packet.id());
         ExposureClient.imageRenderer().clearCacheOf(packet.id());
+        ExposureClient.renderedExposures().clearCacheOf(packet.id());
     }
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
@@ -147,7 +149,7 @@ public class ClientPacketsHandler {
                 .then(Result::unwrap)
                 .then(layers -> new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
                 .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), true))
-                .then(img -> new ExposureData(img.getWidth(), img.getHeight(), img.getPixels(), ColorPalettes.DEFAULT,
+                .then(img -> new ExposureData(img.getWidth(), img.getHeight(), img.pixels(), ColorPalettes.DEFAULT,
                         new ExposureData.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), false, false)))
                 .accept(exposure -> PalettedExposureUploader.upload(packet.id(), exposure)));

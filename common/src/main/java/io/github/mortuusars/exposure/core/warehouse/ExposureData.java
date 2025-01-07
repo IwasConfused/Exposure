@@ -19,6 +19,9 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 public class ExposureData extends SavedData {
     public static final Codec<ExposureData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.INT.fieldOf("width").forGetter(ExposureData::getWidth),
@@ -44,11 +47,11 @@ public class ExposureData extends SavedData {
     private final int height;
     private final byte[] pixels;
     private final ResourceLocation palette;
-    private Tag tag;
+    private final Tag tag;
 
     public ExposureData(int width, int height, byte[] pixels, ResourceLocation paletteId, Tag tag) {
-        Preconditions.checkArgument(width >= 0, "Width cannot be negative. %s", this);
-        Preconditions.checkArgument(height >= 0, "Height cannot be negative. %s ", this);
+        Preconditions.checkArgument(width > 0, "Width should be larger than 0. %s", width);
+        Preconditions.checkArgument(height > 0, "Height should be larger than 0. %s ", height);
         Preconditions.checkArgument(pixels.length == width * height,
                 "Pixel count '%s' is not correct for image dimensions of '%sx%s'. " +
                         "Count should be '%s'.", pixels.length, width, height, width * height);
@@ -83,13 +86,22 @@ public class ExposureData extends SavedData {
         return tag;
     }
 
-    public void setTag(Tag tag) {
-        this.tag = tag;
-        setDirty();
+    public ExposureData withTag(Function<Tag, Tag> updateFunction) {
+        return new ExposureData(width, height, pixels, palette, updateFunction.apply(this.tag));
     }
 
-    public void updateTag(Function<Tag, Tag> updateFunction) {
-        setTag(updateFunction.apply(this.tag));
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ExposureData that = (ExposureData) o;
+        return width == that.width && height == that.height && Objects.deepEquals(pixels, that.pixels)
+                && Objects.equals(palette, that.palette) && Objects.equals(tag, that.tag);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(width, height, Arrays.hashCode(pixels), palette, tag);
     }
 
     // --

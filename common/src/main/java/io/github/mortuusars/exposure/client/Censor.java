@@ -8,6 +8,10 @@ import org.jetbrains.annotations.Nullable;
 
 public class Censor {
     public static boolean isAllowedToRender(Frame frame) {
+        if (frame.exposureIdentifier().isTexture()) {
+            return true;
+        }
+
         @Nullable Player player = Minecraft.getInstance().player;
 
         if (Config.Client.HIDE_ALL_PHOTOGRAPHS_MADE_BY_OTHERS.get()

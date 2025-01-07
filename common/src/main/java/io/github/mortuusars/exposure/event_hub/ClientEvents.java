@@ -53,10 +53,12 @@ public class ClientEvents {
     }
 
     public static void disconnect() {
-        ExposureClient.exposureStore().clear();
+        resetRenderData();
     }
 
     public static void resetRenderData() {
+        ExposureClient.exposureStore().clear();
+        ExposureClient.renderedExposures().clearCache();
         ExposureClient.imageRenderer().clearCache();
     }
 
@@ -71,5 +73,11 @@ public class ClientEvents {
         poseStack.popPose();
 
         return true;
+    }
+
+    public static void resourcesReloaded() {
+        ExposureClient.exposureStore().clear();
+        ExposureClient.renderedExposures().clearCache();
+        ExposureClient.imageRenderer().clearCache();
     }
 }

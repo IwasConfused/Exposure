@@ -70,7 +70,7 @@ public class ShowCommand {
         }
 
         RequestedPalettedExposure palettedExposure = ExposureServer.exposureRepository().loadExposure(id);
-        if (palettedExposure.getExposure().isEmpty()) {
+        if (palettedExposure.getData().isEmpty()) {
             stack.sendFailure(Component.translatable("command.exposure.show.error.not_found", id));
             return 0;
         }

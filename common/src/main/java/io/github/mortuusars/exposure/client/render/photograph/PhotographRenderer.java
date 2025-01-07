@@ -37,7 +37,7 @@ public class PhotographRenderer {
 
         Frame frame = photographItem.getFrame(photographStack);
 
-        RenderableImage image = style.process(ExposureClient.createRenderableExposureImage(frame));
+        RenderableImage image = style.process(ExposureClient.renderedExposures().getOrCreate(frame));
 
         int paperRotation = frame.exposureIdentifier().hashCode() % 4 * 90;
 

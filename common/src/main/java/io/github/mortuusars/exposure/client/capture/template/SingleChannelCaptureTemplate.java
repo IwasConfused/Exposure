@@ -63,7 +63,7 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                 .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
                         ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), true))
                 .then(image -> new ExposureData(image.getWidth(), image.getHeight(),
-                        image.getPixels(), data.colorPaletteId(), createExposureTag(data, photographer)))
+                        image.pixels(), data.colorPaletteId(), createExposureTag(data, photographer)))
                 .accept(image -> PalettedExposureUploader.upload(data.exposureID(), image))
                 .onError(printCasualErrorInChat());
     }
