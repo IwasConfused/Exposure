@@ -29,7 +29,8 @@ public class ViewfinderZoom {
     public ViewfinderZoom(Camera camera, Viewfinder viewfinder) {
         this.camera = camera;
         this.viewfinder = viewfinder;
-        this.focalRange = camera.map(CameraItem::getFocalRange).orElse(FocalRange.getDefault());
+        this.focalRange = camera.map((cameraItem, cameraStack) -> cameraItem.getFocalRange(Minecrft.level(), cameraStack))
+                .orElse(FocalRange.getDefault());
 
         animation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
 

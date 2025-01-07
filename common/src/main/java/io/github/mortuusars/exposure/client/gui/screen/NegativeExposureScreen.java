@@ -14,7 +14,7 @@ import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.util.ItemAndStack;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import net.minecraft.client.Minecraft;
@@ -93,7 +93,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
                 .getOrDefault(Exposure.DataComponents.PHOTOGRAPH_FRAME, Frame.EMPTY).exposureIdentifier();
 
         ExposureType type = exposureIdentifier.map(
-                id -> ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY).getTag().type(),
+                id -> ExposureClient.exposureStore().getOrRequest(id).orElse(ExposureData.EMPTY).getTag().type(),
                 texture -> (texture.getPath().endsWith("_black_and_white") || texture.getPath().endsWith("_bw"))
                         ? ExposureType.BLACK_AND_WHITE
                         : ExposureType.COLOR);

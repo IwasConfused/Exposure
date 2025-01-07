@@ -42,6 +42,8 @@ public class ItemListScreen extends Screen {
     protected Slot hoveredSlot;
     protected List<Slot> slots = new ArrayList<>();
 
+    //TODO: Animation
+
     protected long openedAt;
 
     public ItemListScreen(Screen parent, Component title, List<ItemStack> items) {
@@ -189,12 +191,13 @@ public class ItemListScreen extends Screen {
     protected void renderTooltip(GuiGraphics guiGraphics, int x, int y) {
         if (hoveredSlot != null && hoveredSlot.hasItem()) {
             ItemStack itemStack = hoveredSlot.getItem();
-            guiGraphics.renderTooltip(font, getTooltipFromContainerItem(itemStack), itemStack.getTooltipImage(), x, y);
-        }
-    }
 
-    protected List<Component> getTooltipFromContainerItem(ItemStack stack) {
-        return AbstractContainerScreen.getTooltipFromItem(Minecraft.getInstance(), stack);
+            List<Component> tooltipLines = parent instanceof AbstractContainerScreen<?> abstractContainerScreen
+                    ? abstractContainerScreen.getTooltipFromContainerItem(itemStack)
+                    : Screen.getTooltipFromItem(Minecrft.get(), itemStack);
+
+            guiGraphics.renderTooltip(font, tooltipLines, itemStack.getTooltipImage(), x, y);
+        }
     }
 
     protected boolean isHovering(Slot slot, double mouseX, double mouseY) {
@@ -209,7 +212,7 @@ public class ItemListScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (Minecraft.getInstance().options.keyInventory.matches(keyCode, scanCode)) {
+        if (Minecrft.options().keyInventory.matches(keyCode, scanCode)) {
             onClose();
             return true;
         }
@@ -218,6 +221,6 @@ public class ItemListScreen extends Screen {
 
     @Override
     public void onClose() {
-        Minecraft.getInstance().setScreen(parent);
+        Minecrft.get().setScreen(parent);
     }
 }

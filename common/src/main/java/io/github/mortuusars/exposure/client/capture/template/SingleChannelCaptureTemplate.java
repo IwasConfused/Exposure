@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
@@ -14,7 +15,7 @@ import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.cycles.task.EmptyTask;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import net.minecraft.ChatFormatting;
@@ -59,9 +60,10 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                         Processor.Resize.to(data.frameSize()),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette(), true))
-                .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                        image.getPixels(), image.getPalette(), createExposureTag(data, photographer)))
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
+                        ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), true))
+                .then(image -> new ExposureData(image.getWidth(), image.getHeight(),
+                        image.getPixels(), data.colorPaletteId(), createExposureTag(data, photographer)))
                 .accept(image -> PalettedExposureUploader.upload(data.exposureID(), image))
                 .onError(printCasualErrorInChat());
     }
@@ -72,8 +74,8 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                 : Processor.EMPTY;
     }
 
-    protected PalettedExposure.Tag createExposureTag(CaptureProperties data, PhotographerEntity photographer) {
-        return new PalettedExposure.Tag(data.filmType(), photographer.getExecutingPlayer().getScoreboardName(),
+    protected ExposureData.Tag createExposureTag(CaptureProperties data, PhotographerEntity photographer) {
+        return new ExposureData.Tag(data.filmType(), photographer.getExecutingPlayer().getScoreboardName(),
                 UnixTimestamp.Seconds.now(), false, false);
     }
 

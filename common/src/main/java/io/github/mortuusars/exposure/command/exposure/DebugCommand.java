@@ -14,9 +14,9 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.CameraInHand;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.item.part.Attachment;
@@ -89,7 +89,7 @@ public class DebugCommand {
                     ExposureType.BLACK_AND_WHITE,
                     camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, IFilmItem::getFrameSize, () -> 320))).orElse(320),
                     camera.flatMap(c -> c.map((cItem, cStack) -> cItem.getCropFactor())).orElse(Exposure.CROP_FACTOR),
-                    ColorPalette.MAP_COLORS,
+                    ColorPalettes.DEFAULT,
                     false,
                     0,
                     Optional.empty(),

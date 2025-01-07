@@ -15,11 +15,10 @@ import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploa
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
-import io.github.mortuusars.exposure.data.lenses.Lenses;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.network.packet.client.*;
 import io.github.mortuusars.exposure.util.ItemAndStack;
@@ -88,9 +87,10 @@ public class ClientPacketsHandler {
                 .thenAsync(Process.with(
                         Processor.Crop.SQUARE_CENTER,
                         Processor.Resize.to(size)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, dither))
-                .then(image -> new PalettedExposure(image.getWidth(), image.getHeight(), image.getPixels(), image.getPalette(),
-                        new PalettedExposure.Tag(ExposureType.COLOR, player.getScoreboardName(),
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
+                        ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), dither))
+                .then(image -> new ExposureData(image.getWidth(), image.getHeight(), image.getPixels(), ColorPalettes.DEFAULT,
+                        new ExposureData.Tag(ExposureType.COLOR, player.getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), true, false)))
                 .accept(image -> PalettedExposureUploader.upload(id, image)));
     }
@@ -119,8 +119,12 @@ public class ClientPacketsHandler {
         ExposureClient.imageRenderer().clearCache();
     }
 
+    public static void syncColorPalettes(SyncColorPalettesS2CP packet) {
+        ExposureClient.colorPalettes().set(packet.palettes());
+    }
+
     public static void syncLensesData(SyncLensesDataS2CP packet) {
-        Lenses.reload(packet.lenses());
+        ExposureClient.lenses().set(packet.lenses());
     }
 
     public static void exposureDataChanged(ExposureDataChangedS2CP packet) {
@@ -142,9 +146,9 @@ public class ClientPacketsHandler {
         ExposureClient.cycles().addParallelTask(new ExposureRetrieveTask(packet.layers(), 20_000)
                 .then(Result::unwrap)
                 .then(layers -> new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
-                .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, ColorPalette.MAP_COLORS, true))
-                .then(img -> new PalettedExposure(img.getWidth(), img.getHeight(), img.getPixels(), img.getPalette(),
-                        new PalettedExposure.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
+                .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), true))
+                .then(img -> new ExposureData(img.getWidth(), img.getHeight(), img.getPixels(), ColorPalettes.DEFAULT,
+                        new ExposureData.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), false, false)))
                 .accept(exposure -> PalettedExposureUploader.upload(packet.id(), exposure)));
     }

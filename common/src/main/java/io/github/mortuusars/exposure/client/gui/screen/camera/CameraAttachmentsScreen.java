@@ -3,12 +3,12 @@ package io.github.mortuusars.exposure.client.gui.screen.camera;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
-import io.github.mortuusars.exposure.core.camera.component.FocalRange;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.color.Color;
 import io.github.mortuusars.exposure.data.filter.Filter;
-import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import net.minecraft.ChatFormatting;
@@ -28,10 +28,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Supplier;
 
 public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttachmentsMenu> {
@@ -222,12 +219,18 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     }
 
     @Override
-    protected @NotNull List<Component> getTooltipFromContainerItem(ItemStack stack) {
+    public @NotNull List<Component> getTooltipFromContainerItem(ItemStack stack) {
         List<Component> tooltip = super.getTooltipFromContainerItem(stack);
-        if (stack.is(Exposure.Tags.Items.LENSES) && hoveredSlot != null && hoveredSlot.getItem().equals(stack)) {
-            tooltip.add(Component.translatable("gui.exposure.camera_controls.focal_length", FocalRange.ofStack(stack).getSerializedName())
+
+        ExposureClient.lenses().getFocalRange(stack).ifPresent(focalRange -> {
+            tooltip.add(Component.translatable("gui.exposure.camera_controls.focal_range", focalRange.getSerializedName())
                     .withStyle(ChatFormatting.GOLD));
-        }
+        });
+
+        Filters.of(stack).filter(f -> Minecrft.options().advancedItemTooltips).ifPresent(filter ->
+                tooltip.add(Component.literal(filter.getShader().toString())
+                        .withStyle(ChatFormatting.GRAY)));
+
         return tooltip;
     }
 
@@ -242,18 +245,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
                 itemStacks.add(new ItemStack(holder));
             }
 
-            ItemListScreen screen = new ItemListScreen(this, Component.translatable("gui.exposure.filters"), itemStacks) {
-                @Override
-                protected List<Component> getTooltipFromContainerItem(ItemStack stack) {
-                    List<Component> tooltip = super.getTooltipFromContainerItem(stack);
-                    if (Minecraft.getInstance().options.advancedItemTooltips) {
-                        Filters.of(stack).ifPresent(filter ->
-                                tooltip.add(Component.literal(filter.getShader().toString())
-                                        .withStyle(ChatFormatting.GRAY)));
-                    }
-                    return tooltip;
-                }
-            };
+            ItemListScreen screen = new ItemListScreen(this, Component.translatable("gui.exposure.filters"), itemStacks);
             Minecraft.getInstance().setScreen(screen);
 
             return true;
@@ -263,17 +255,8 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
                 itemStacks.add(new ItemStack(holder));
             }
 
-            ItemListScreen screen = new ItemListScreen(this, Component.translatable("gui.exposure.lenses"), itemStacks) {
-                @Override
-                protected List<Component> getTooltipFromContainerItem(ItemStack stack) {
-                    List<Component> tooltip = super.getTooltipFromContainerItem(stack);
-                    Lenses.getFocalRangeOf(stack).ifPresent(fr ->
-                            tooltip.add(Component.translatable("gui.exposure.camera_controls.focal_length", fr.getSerializedName())
-                                    .withStyle(ChatFormatting.GOLD)));
-                    return tooltip;
-                }
-            };
-            Minecraft.getInstance().setScreen(screen);
+            ItemListScreen screen = new ItemListScreen(this, Component.translatable("gui.exposure.lenses"), itemStacks);
+            Minecrft.get().setScreen(screen);
             return true;
         }
 

@@ -21,21 +21,21 @@ public class RequestedPalettedExposure {
     public static final RequestedPalettedExposure CANNOT_LOAD = status(RequestedExposureStatus.CANNOT_LOAD);
 
     public static final StreamCodec<FriendlyByteBuf, RequestedPalettedExposure> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.optional(PalettedExposure.STREAM_CODEC), RequestedPalettedExposure::getExposure,
+            ByteBufCodecs.optional(ExposureData.STREAM_CODEC), RequestedPalettedExposure::getExposure,
             RequestedExposureStatus.STREAM_CODEC, RequestedPalettedExposure::getStatus,
             RequestedPalettedExposure::fromOptional
     );
 
     @Nullable
-    protected final PalettedExposure exposure;
+    protected final ExposureData exposure;
     protected final RequestedExposureStatus status;
 
-    protected RequestedPalettedExposure(@Nullable PalettedExposure exposure, RequestedExposureStatus status) {
+    protected RequestedPalettedExposure(@Nullable ExposureData exposure, RequestedExposureStatus status) {
         this.exposure = exposure;
         this.status = status;
     }
 
-    private static RequestedPalettedExposure fromOptional(Optional<PalettedExposure> data, RequestedExposureStatus status) {
+    private static RequestedPalettedExposure fromOptional(Optional<ExposureData> data, RequestedExposureStatus status) {
         return new RequestedPalettedExposure(data.orElse(null), status);
     }
 
@@ -45,9 +45,9 @@ public class RequestedPalettedExposure {
         return new RequestedPalettedExposure(null, status);
     }
 
-    public static RequestedPalettedExposure success(PalettedExposure data) {
+    public static RequestedPalettedExposure success(ExposureData data) {
         Preconditions.checkNotNull(data, "Successful result cannot be created without data.");
-        if (data.equals(PalettedExposure.EMPTY)) {
+        if (data.equals(ExposureData.EMPTY)) {
             Exposure.LOGGER.warn("ExposureData.EMPTY is used to create successful ExposureResult. This is probably not intentional.");
         }
         return new RequestedPalettedExposure(data, RequestedExposureStatus.SUCCESS);
@@ -67,15 +67,15 @@ public class RequestedPalettedExposure {
         };
     }
 
-    public Optional<PalettedExposure> getExposure() {
+    public Optional<ExposureData> getExposure() {
         return Optional.ofNullable(exposure);
     }
 
-    public <T> T map(Function<PalettedExposure, T> ifPresent, T orElse) {
+    public <T> T map(Function<ExposureData, T> ifPresent, T orElse) {
         return exposure != null ? ifPresent.apply(exposure) : orElse;
     }
 
-    public PalettedExposure orElse(PalettedExposure orElse) {
+    public ExposureData orElse(ExposureData orElse) {
         return exposure != null ? exposure : orElse;
     }
 

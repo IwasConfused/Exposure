@@ -187,6 +187,7 @@ public class Exposure {
 
     public static class DataComponents {
         // Camera State
+
         public static final DataComponentType<CameraID> CAMERA_ID = Register.dataComponentType("camera_id",
                 arg -> arg.persistent(CameraID.CODEC).networkSynchronized(CameraID.STREAM_CODEC));
 
@@ -199,7 +200,8 @@ public class Exposure {
         public static final DataComponentType<ShutterState> SHUTTER_STATE = Register.dataComponentType("camera_shutter_state",
                 arg -> arg.persistent(ShutterState.CODEC).networkSynchronized(ShutterState.STREAM_CODEC));
 
-        // Camera Settings
+        // Settings
+
         public static final DataComponentType<ShutterSpeed> SHUTTER_SPEED = Register.dataComponentType("camera_shutter_speed",
                 arg -> arg.persistent(ShutterSpeed.CODEC).networkSynchronized(ShutterSpeed.STREAM_CODEC));
 
@@ -212,7 +214,8 @@ public class Exposure {
         public static final DataComponentType<FlashMode> FLASH_MODE = Register.dataComponentType("camera_flash_mode",
                 arg -> arg.persistent(FlashMode.CODEC).networkSynchronized(FlashMode.STREAM_CODEC));
 
-        // Camera Attachments
+        // Attachments
+
         public static final DataComponentType<StoredItemStack> FILM = Register.dataComponentType("camera_film",
                 arg -> arg.persistent(StoredItemStack.CODEC).networkSynchronized(StoredItemStack.STREAM_CODEC));
 
@@ -226,6 +229,10 @@ public class Exposure {
                 arg -> arg.persistent(StoredItemStack.CODEC).networkSynchronized(StoredItemStack.STREAM_CODEC));
 
         // Film
+
+        public static final DataComponentType<ResourceLocation> FILM_COLOR_PALETTE = Register.dataComponentType("film_color_palette",
+                arg -> arg.persistent(ResourceLocation.CODEC).networkSynchronized(ResourceLocation.STREAM_CODEC));
+
         public static final DataComponentType<Integer> FILM_FRAME_COUNT = Register.dataComponentType("film_frame_count",
                 arg -> arg.persistent(ExtraCodecs.intRange(1, 256)).networkSynchronized(ByteBufCodecs.VAR_INT));
 
@@ -237,17 +244,8 @@ public class Exposure {
                         arg -> arg.persistent(Frame.CODEC.listOf())
                                 .networkSynchronized(Frame.STREAM_CODEC.apply(ByteBufCodecs.list())));
 
-        public static final DataComponentType<ProjectionMode> INTERPLANAR_PROJECTOR_MODE =
-                Register.dataComponentType("interplanar_projector_mode",
-                        arg -> arg.persistent(ProjectionMode.CODEC)
-                                .networkSynchronized(ProjectionMode.STREAM_CODEC));
-
-        public static final DataComponentType<List<Frame>> CHROMATIC_SHEET_LAYERS =
-                Register.dataComponentType("chromatic_layers",
-                        arg -> arg.persistent(Frame.CODEC.listOf(0, 3))
-                                .networkSynchronized(Frame.STREAM_CODEC.apply(ByteBufCodecs.list())));
-
         // Photograph
+
         public static final DataComponentType<Frame> PHOTOGRAPH_FRAME = Register.dataComponentType("photograph_frame",
                 arg -> arg.persistent(Frame.CODEC).networkSynchronized(Frame.STREAM_CODEC));
 
@@ -263,11 +261,24 @@ public class Exposure {
                                 .networkSynchronized(StackedPhotographsItem.PHOTOGRAPH_ITEM_AND_STACK_STREAM_CODEC.apply(ByteBufCodecs.list())));
 
         // Album
+
         public static final DataComponentType<AlbumContent> ALBUM_CONTENT = Register.dataComponentType("album_content",
                 arg -> arg.persistent(AlbumContent.CODEC).networkSynchronized(AlbumContent.STREAM_CODEC));
 
         public static final DataComponentType<SignedAlbumContent> SIGNED_ALBUM_CONTENT = Register.dataComponentType("signed_album_content",
                 arg -> arg.persistent(SignedAlbumContent.CODEC).networkSynchronized(SignedAlbumContent.STREAM_CODEC));
+
+        // --
+
+        public static final DataComponentType<ProjectionMode> INTERPLANAR_PROJECTOR_MODE =
+                Register.dataComponentType("interplanar_projector_mode",
+                        arg -> arg.persistent(ProjectionMode.CODEC)
+                                .networkSynchronized(ProjectionMode.STREAM_CODEC));
+
+        public static final DataComponentType<List<Frame>> CHROMATIC_SHEET_LAYERS =
+                Register.dataComponentType("chromatic_layers",
+                        arg -> arg.persistent(Frame.CODEC.listOf(0, 3))
+                                .networkSynchronized(Frame.STREAM_CODEC.apply(ByteBufCodecs.list())));
 
         static void init() {
         }

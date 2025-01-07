@@ -42,11 +42,9 @@ public record PlayOnePerEntityShutterTickingSoundS2CP(UUID photographerEntityID,
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        Minecrft.execute(() -> PhotographerEntity.fromUUID(player.level(), photographerEntityID)
+        PhotographerEntity.fromUUID(player.level(), photographerEntityID)
                 .ifPresent(photographer ->
-                        OnePerEntitySoundsClient.playShutterTicking(photographer, cameraID, volume, pitch, durationTicks))
-        );
-
+                        OnePerEntitySoundsClient.playShutterTicking(photographer, cameraID, volume, pitch, durationTicks));
         return true;
     }
 }

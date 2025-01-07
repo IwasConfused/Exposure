@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.image.renderable;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.function.Function;
@@ -25,7 +25,7 @@ public interface RenderableImage extends Image {
         return processWith(processor::process, processor.getIdentifier());
     }
 
-    static RenderableImage fromExposure(PalettedExposure exposure, String id) {
+    static RenderableImage fromExposure(ExposureData exposure, String id) {
         return new Instance(new PalettedImage(exposure), new RenderableImageIdentifier(id));
     }
 

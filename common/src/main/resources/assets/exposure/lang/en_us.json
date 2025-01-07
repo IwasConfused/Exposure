@@ -99,6 +99,7 @@
   "gui.exposure.camera_controls.film_frame_counter.tooltip.no_film": "No Film",
   "gui.exposure.camera_controls.flash_mode.tooltip": "Flash Mode",
   "gui.exposure.camera_controls.focal_length": "%smm",
+  "gui.exposure.camera_controls.focal_range": "%smm",
   "gui.exposure.camera_controls.focal_length.tooltip": "Focal Length",
   "gui.exposure.camera_controls.shutter_speed.tooltip": "Shutter Speed",
   "gui.exposure.channel.blue": "B",

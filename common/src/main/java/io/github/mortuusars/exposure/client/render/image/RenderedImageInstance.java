@@ -85,7 +85,7 @@ public class RenderedImageInstance implements AutoCloseable {
         }
 
         int mipmapLevel = Minecraft.getInstance().options.mipmapLevels().get();
-        if (mipmapLevel > 0 && width > 0 && height > 0) {
+        if (mipmapLevel > 0 && width > 2 && height > 2) {
             applyMipMap(mipmapLevel, width, height);
         }
 

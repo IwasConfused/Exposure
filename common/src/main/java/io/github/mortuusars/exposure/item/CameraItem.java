@@ -13,9 +13,10 @@ import io.github.mortuusars.exposure.core.FileLoadingInfo;
 import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.EntityInFrame;
 import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.data.ColorPalettes;
+import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import io.github.mortuusars.exposure.item.part.CameraSetting;
@@ -150,12 +151,9 @@ public class CameraItem extends Item {
         return Exposure.SoundEvents.FLASH.get();
     }
 
-    public FocalRange getDefaultFocalRange() {
-        return FocalRange.getDefault();
-    }
-
-    public FocalRange getFocalRange(ItemStack stack) {
-        return Attachment.LENS.mapOrElse(stack, FocalRange::ofStack, this::getDefaultFocalRange);
+    public FocalRange getFocalRange(Level level, ItemStack stack) {
+        Lenses lenses = level.isClientSide ? ExposureClient.lenses() : ExposureServer.lenses();
+        return Attachment.LENS.map(stack, lenses::getFocalRange).flatMap(opt -> opt).orElse(FocalRange.getDefault());
     }
 
     public float getCropFactor() {
@@ -424,6 +422,8 @@ public class CameraItem extends Item {
 
             String exposureId = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
+            ResourceLocation colorPalette = Attachment.FILM.map(stack, IFilmItem::getColorPalette).orElse(ColorPalettes.DEFAULT);
+
             CaptureProperties captureProperties = new CaptureProperties(
                     exposureId,
                     photographer.asEntity().getUUID(),
@@ -433,7 +433,7 @@ public class CameraItem extends Item {
                     film.getItem().getType(),
                     film.getItem().getFrameSize(film.getItemStack()),
                     getCropFactor(),
-                    ColorPalette.MAP_COLORS,
+                    colorPalette,
                     flashHasFired,
                     lightLevel,
                     getFileLoadingData(stack),
@@ -671,7 +671,7 @@ public class CameraItem extends Item {
         }
 
         double zoom = CameraSetting.ZOOM.getOrDefault(stack);
-        int focalLength = (int) getFocalRange(stack).focalLengthFromZoom(zoom);
+        int focalLength = (int) getFocalRange(level, stack).focalLengthFromZoom(zoom);
         tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
 
         tag.putFloat(FrameTag.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
@@ -771,7 +771,7 @@ public class CameraItem extends Item {
 
     public List<LivingEntity> getEntitiesInFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
         float zoom = CameraSetting.ZOOM.getOrDefault(stack);
-        double fov = getFocalRange(stack).fovFromZoom(zoom);
+        double fov = getFocalRange(level, stack).fovFromZoom(zoom);
 
         return EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
     }

@@ -7,7 +7,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.util.ByteArrayUtils;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.HolderLookup;
@@ -15,37 +15,38 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.SavedData;
 import org.jetbrains.annotations.NotNull;
 
-public class PalettedExposure extends SavedData {
-    public static final Codec<PalettedExposure> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Codec.INT.fieldOf("width").forGetter(PalettedExposure::getWidth),
-            Codec.INT.fieldOf("height").forGetter(PalettedExposure::getHeight),
-            ByteArrayUtils.CODEC.fieldOf("pixels").forGetter(PalettedExposure::getPixels),
-            ColorPalette.CODEC.optionalFieldOf("palette", ColorPalette.MAP_COLORS).forGetter(PalettedExposure::getPalette),
-            Tag.CODEC.optionalFieldOf("metadata", Tag.EMPTY).forGetter(PalettedExposure::getTag)
-    ).apply(instance, PalettedExposure::new));
+public class ExposureData extends SavedData {
+    public static final Codec<ExposureData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.fieldOf("width").forGetter(ExposureData::getWidth),
+            Codec.INT.fieldOf("height").forGetter(ExposureData::getHeight),
+            ByteArrayUtils.CODEC.fieldOf("pixels").forGetter(ExposureData::getPixels),
+            ResourceLocation.CODEC.optionalFieldOf("palette", ColorPalettes.DEFAULT).forGetter(ExposureData::getPaletteId),
+            Tag.CODEC.optionalFieldOf("metadata", Tag.EMPTY).forGetter(ExposureData::getTag)
+    ).apply(instance, ExposureData::new));
 
-    public static final StreamCodec<ByteBuf, PalettedExposure> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.VAR_INT, PalettedExposure::getWidth,
-            ByteBufCodecs.VAR_INT, PalettedExposure::getHeight,
-            ByteBufCodecs.byteArray(2048 * 2048), PalettedExposure::getPixels,
-            ColorPalette.STREAM_CODEC, PalettedExposure::getPalette,
-            Tag.STREAM_CODEC, PalettedExposure::getTag,
-            PalettedExposure::new
+    public static final StreamCodec<ByteBuf, ExposureData> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.VAR_INT, ExposureData::getWidth,
+            ByteBufCodecs.VAR_INT, ExposureData::getHeight,
+            ByteBufCodecs.byteArray(2048 * 2048), ExposureData::getPixels,
+            ResourceLocation.STREAM_CODEC, ExposureData::getPaletteId,
+            Tag.STREAM_CODEC, ExposureData::getTag,
+            ExposureData::new
     );
 
-    public static final PalettedExposure EMPTY = new PalettedExposure(
-            1, 1, new byte[]{0}, ColorPalette.MAP_COLORS, Tag.EMPTY);
+    public static final ExposureData EMPTY = new ExposureData(
+            1, 1, new byte[]{0}, ColorPalettes.DEFAULT, Tag.EMPTY);
 
     private final int width;
     private final int height;
     private final byte[] pixels;
-    private final ColorPalette palette;
+    private final ResourceLocation palette;
     private Tag tag;
 
-    public PalettedExposure(int width, int height, byte[] pixels, ColorPalette palette, Tag tag) {
+    public ExposureData(int width, int height, byte[] pixels, ResourceLocation paletteId, Tag tag) {
         Preconditions.checkArgument(width >= 0, "Width cannot be negative. %s", this);
         Preconditions.checkArgument(height >= 0, "Height cannot be negative. %s ", this);
         Preconditions.checkArgument(pixels.length == width * height,
@@ -54,7 +55,7 @@ public class PalettedExposure extends SavedData {
         this.width = width;
         this.height = height;
         this.pixels = pixels;
-        this.palette = palette;
+        this.palette = paletteId;
         this.tag = tag;
     }
 
@@ -74,7 +75,7 @@ public class PalettedExposure extends SavedData {
         return pixels[y * width + x];
     }
 
-    public ColorPalette getPalette() {
+    public ResourceLocation getPaletteId() {
         return palette;
     }
 
@@ -110,13 +111,13 @@ public class PalettedExposure extends SavedData {
         return tag;
     }
 
-    public static SavedData.Factory<PalettedExposure> factory() {
+    public static SavedData.Factory<ExposureData> factory() {
         return new SavedData.Factory<>(() -> {
             throw new IllegalStateException("Should never create an empty exposure saved data");
-        }, PalettedExposure::load, null);
+        }, ExposureData::load, null);
     }
 
-    public static PalettedExposure load(CompoundTag tag, HolderLookup.Provider levelRegistry) {
+    public static ExposureData load(CompoundTag tag, HolderLookup.Provider levelRegistry) {
         return CODEC.decode(NbtOps.INSTANCE, tag).getOrThrow().getFirst();
     }
 
@@ -134,7 +135,7 @@ public class PalettedExposure extends SavedData {
         ).apply(instance, Tag::new));
 
         public static final StreamCodec<ByteBuf, Tag> STREAM_CODEC = new StreamCodec<>() {
-            public @NotNull PalettedExposure.Tag decode(ByteBuf buffer) {
+            public @NotNull ExposureData.Tag decode(ByteBuf buffer) {
                 return new Tag(
                         ExposureType.STREAM_CODEC.decode(buffer),
                         ByteBufCodecs.STRING_UTF8.decode(buffer),

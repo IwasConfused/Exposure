@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.data.export;
 
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;
@@ -78,5 +78,5 @@ public abstract class ExposureExporter<T extends ExposureExporter<?>> {
         catch (Exception ignored) { }
     }
 
-    public abstract boolean export(PalettedExposure savedData);
+    public abstract boolean export(ExposureData savedData);
 }

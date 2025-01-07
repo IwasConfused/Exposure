@@ -5,15 +5,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.data.lenses.Lenses;
 import io.github.mortuusars.exposure.util.Fov;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.util.Mth;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,18 +71,6 @@ public final class FocalRange implements StringRepresentable {
 
     public double clampFov(double fov) {
         return Mth.clamp(fov, Fov.focalLengthToFov(max), Fov.focalLengthToFov(min));
-    }
-
-    public static FocalRange ofStack(ItemStack stack) {
-        if (stack.isEmpty())
-            return getDefault();
-
-        if (!stack.is(Exposure.Tags.Items.LENSES)) {
-            Exposure.LOGGER.error("{} is not a valid lens. Should have '#exposure:lenses' tag.", stack);
-            return getDefault();
-        }
-
-        return Lenses.getFocalRangeOf(stack).orElse(getDefault());
     }
 
     public static @NotNull FocalRange getDefault() {

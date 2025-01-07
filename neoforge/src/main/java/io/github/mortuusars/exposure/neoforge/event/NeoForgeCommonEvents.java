@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.neoforge.event;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.data.lenses.LensesDataLoader;
+import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
@@ -113,7 +113,8 @@ public class NeoForgeCommonEvents {
 
         @SubscribeEvent
         public static void addReloadListeners(AddReloadListenerEvent event) {
-            event.addListener(new LensesDataLoader());
+            event.addListener(ExposureServer.colorPalettes());
+            event.addListener(ExposureServer.lenses());
         }
     }
 }

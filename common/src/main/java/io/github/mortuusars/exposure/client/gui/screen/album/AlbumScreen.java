@@ -297,7 +297,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
     }
 
     @Override
-    protected @NotNull List<Component> getTooltipFromContainerItem(ItemStack stack) {
+    public @NotNull List<Component> getTooltipFromContainerItem(ItemStack stack) {
         List<Component> tooltipLines = super.getTooltipFromContainerItem(stack);
         if (isInAddingMode() && hoveredSlot != null && hoveredSlot.getItem() == stack
                 && stack.getItem() instanceof PhotographItem) {

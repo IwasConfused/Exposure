@@ -11,7 +11,7 @@ import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
 import io.github.mortuusars.exposure.core.frame.Frame;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.item.PhotographItem;
 import io.github.mortuusars.exposure.util.ItemAndStack;
@@ -256,8 +256,8 @@ public class PhotographScreen extends Screen {
             if (savedExposures.contains(filename))
                 return;
 
-            PalettedExposure palettedExposure = ExposureClient.exposureStore().getOrRequest(id).orElse(PalettedExposure.EMPTY);
-            if (!palettedExposure.equals(PalettedExposure.EMPTY)) {
+            ExposureData exposureData = ExposureClient.exposureStore().getOrRequest(id).orElse(ExposureData.EMPTY);
+            if (!exposureData.equals(ExposureData.EMPTY)) {
                 savedExposures.add(filename);
 
                 Exposure.LOGGER.error("Saving not implemented yet!");

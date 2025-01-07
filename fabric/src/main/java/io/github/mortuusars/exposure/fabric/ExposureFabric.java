@@ -4,9 +4,12 @@ import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.data.ColorPalettes;
+import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
-import io.github.mortuusars.exposure.fabric.resources.FabricLensesDataLoader;
+import io.github.mortuusars.exposure.fabric.resources.IdentifiableResourceReloadListenerWrapper;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.network.fabric.FabricC2SPackets;
 import io.github.mortuusars.exposure.network.fabric.FabricS2CPackets;
@@ -56,11 +59,14 @@ public class ExposureFabric implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register(CommonEvents::registerCommands);
 
-        addToCreativeTabs();
+        addItemsToCreativeTabs();
 
         Exposure.Stats.register();
 
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(new FabricLensesDataLoader());
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
+                new IdentifiableResourceReloadListenerWrapper(Exposure.resource("lenses"), ExposureServer.lenses()));
+        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
+                new IdentifiableResourceReloadListenerWrapper(Exposure.resource("color_palettes"), ExposureServer.colorPalettes()));
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             ServerEvents.serverStarted(server);
@@ -79,7 +85,7 @@ public class ExposureFabric implements ModInitializer {
         FabricS2CPackets.register();
     }
 
-    private static void addToCreativeTabs() {
+    private static void addItemsToCreativeTabs() {
         ItemGroupEvents.modifyEntriesEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(content -> {
             content.accept(Exposure.Items.CAMERA.get());
             content.accept(Exposure.Items.BLACK_AND_WHITE_FILM.get());

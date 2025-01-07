@@ -36,7 +36,7 @@ public class DitheredPalettizer implements ImagePalettizer {
 
                 indexedPixels[y * width + x] = (byte)colorIndex;
 
-                Color newColor = palette.byIndex(colorIndex);
+                Color newColor = Color.argb(palette.byId(colorIndex));
 
                 Color.Unbounded error = oldColor.subtractUnbounded(newColor);
 

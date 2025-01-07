@@ -6,7 +6,7 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.block.LightroomBlock;
 import io.github.mortuusars.exposure.core.print.PrintingMode;
 import io.github.mortuusars.exposure.core.print.PrintingProcess;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.menu.LightroomMenu;
@@ -468,7 +468,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         if (process.isRegular()) { // Chromatics create new exposure. Marking is not needed.
             frame.exposureIdentifier().ifId(id ->
                     ExposureServer.exposureRepository().loadExposure(id).getExposure()
-                            .ifPresent(exposure -> exposure.updateTag(PalettedExposure.Tag::setPrinted))
+                            .ifPresent(exposure -> exposure.updateTag(ExposureData.Tag::setPrinted))
             );
         }
 

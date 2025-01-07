@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.data.export;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +18,7 @@ public class ServersideExposureExporter extends ExposureExporter<ServersideExpos
     }
 
     @Override
-    public boolean export(PalettedExposure exposure) {
+    public boolean export(ExposureData exposure) {
         try {
             BufferedImage image = convertToBufferedImage(exposure);
             @Nullable File writtenFile = writeImageToFile(image);
@@ -55,9 +55,9 @@ public class ServersideExposureExporter extends ExposureExporter<ServersideExpos
     }
 
     @NotNull
-    protected BufferedImage convertToBufferedImage(PalettedExposure palettedExposure) {
-        int width = palettedExposure.getWidth();
-        int height = palettedExposure.getHeight();
+    protected BufferedImage convertToBufferedImage(ExposureData exposureData) {
+        int width = exposureData.getWidth();
+        int height = exposureData.getHeight();
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 //        PixelModifier modifier = getModifier();
 //

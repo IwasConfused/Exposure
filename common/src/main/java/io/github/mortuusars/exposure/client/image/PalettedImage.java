@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.client.image;
 
-import io.github.mortuusars.exposure.core.color.Color;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 
 public class PalettedImage implements Image {
     private final int width;
@@ -18,8 +18,9 @@ public class PalettedImage implements Image {
         this.palette = palette;
     }
 
-    public PalettedImage(PalettedExposure exposure) {
-        this(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(), exposure.getPalette());
+    public PalettedImage(ExposureData exposure) {
+        this(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(),
+                ExposureClient.colorPalettes().getOrDefault(exposure.getPaletteId()));
     }
 
     @Override
@@ -41,11 +42,7 @@ public class PalettedImage implements Image {
     }
 
     public int getPixelARGB(int x, int y) {
-        return getPixelColorARGB(x, y).getARGB();
-    }
-
-    public Color getPixelColorARGB(int x, int y) {
-        int colorIndex = pixels[y * width + x] & 0xFF;
-        return palette.byIndex(colorIndex);
+        int id = pixels[y * width + x] & 0xFF;
+        return palette.byId(id);
     }
 }

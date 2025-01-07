@@ -4,6 +4,8 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.data.ColorPalettes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Collections;
@@ -18,6 +20,10 @@ public interface IFilmItem {
 
     default int getDefaultFrameSize(ItemStack stack) {
         return Config.Server.EXPOSURE_RESOLUTION.get();
+    }
+
+    default ResourceLocation getColorPalette(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.FILM_COLOR_PALETTE, ColorPalettes.DEFAULT);
     }
 
     default int getMaxFrameCount(ItemStack stack) {

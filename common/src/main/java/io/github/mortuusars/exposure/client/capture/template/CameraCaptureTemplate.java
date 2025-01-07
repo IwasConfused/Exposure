@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
@@ -14,7 +15,7 @@ import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.FileLoadingInfo;
 import io.github.mortuusars.exposure.core.cycles.task.EmptyTask;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
@@ -40,7 +41,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
 
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
-        Task<PalettedExposure> captureTask = Capture.of(Capture.screenshot(),
+        Task<ExposureData> captureTask = Capture.of(Capture.screenshot(),
                         CaptureActions.optional(!photographer.getExecutingPlayer().equals(cameraHolder),
                                 () -> CaptureActions.setCameraEntity(cameraHolder)),
                         CaptureActions.hideGui(),
@@ -55,9 +56,10 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         Processor.Resize.to(data.frameSize()),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette(), true))
-                .thenAsync(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                        image.getPixels(), image.getPalette(), createExposureTag(data, photographer, false)));
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
+                        ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), true))
+                .thenAsync(image -> new ExposureData(image.getWidth(), image.getHeight(),
+                        image.getPixels(), data.colorPaletteId(), createExposureTag(data, photographer, false)));
 
         if (data.fileLoadingInfo().isPresent()) {
             FileLoadingInfo fileLoadingData = data.fileLoadingInfo().get();
@@ -73,9 +75,9 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             Processor.Resize.to(data.frameSize()),
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(data)))
-                    .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette(), dither))
-                    .thenAsync(image -> new PalettedExposure(image.getWidth(), image.getHeight(),
-                            image.getPixels(), image.getPalette(), createExposureTag(data,  photographer, true))));
+                    .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), dither))
+                    .thenAsync(image -> new ExposureData(image.getWidth(), image.getHeight(),
+                            image.getPixels(), data.colorPaletteId(), createExposureTag(data,  photographer, true))));
         }
 
         if (data.exposureID().isEmpty()) {
@@ -93,8 +95,8 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                 : Processor.EMPTY;
     }
 
-    protected PalettedExposure.Tag createExposureTag(CaptureProperties data, PhotographerEntity photographer, boolean isFromFile) {
-        return new PalettedExposure.Tag(data.filmType(), photographer.getExecutingPlayer().getScoreboardName(),
+    protected ExposureData.Tag createExposureTag(CaptureProperties data, PhotographerEntity photographer, boolean isFromFile) {
+        return new ExposureData.Tag(data.filmType(), photographer.getExecutingPlayer().getScoreboardName(),
                 UnixTimestamp.Seconds.now(), isFromFile, false);
     }
 

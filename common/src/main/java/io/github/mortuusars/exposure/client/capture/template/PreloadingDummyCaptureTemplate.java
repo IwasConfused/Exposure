@@ -1,14 +1,15 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
 import io.github.mortuusars.exposure.client.image.processor.Process;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.core.CaptureProperties;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import net.minecraft.client.CameraType;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,8 @@ public class PreloadingDummyCaptureTemplate implements CaptureTemplate {
                         Processor.Resize.to(16),
                         Processor.brightness(brightnessStops),
                         Processor.blackAndWhite(1)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ColorPalette.MAP_COLORS, true))
-                .thenAsync(img -> PalettedExposure.EMPTY);
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
+                        ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), true))
+                .thenAsync(img -> ExposureData.EMPTY);
     }
 }

@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataChangedS2CP;
 import io.github.mortuusars.exposure.network.packet.client.ExposureDataResponseS2CP;
-import io.github.mortuusars.exposure.core.warehouse.PalettedExposure;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,9 +72,9 @@ public class PalettedExposureRepository {
         Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot load exposure: id is empty.");
 
         String name = EXPOSURES_DIRECTORY_NAME + "/" + id;
-        @Nullable PalettedExposure palettedExposure = dataStorage.get(PalettedExposure.factory(), name);
+        @Nullable ExposureData exposureData = dataStorage.get(ExposureData.factory(), name);
 
-        if (palettedExposure == null) {
+        if (exposureData == null) {
             File filepath = exposuresFolderPath.resolve(id + ".dat").toFile();
             if (!filepath.exists()) {
                 LOGGER.error("Exposure '{}' was not loaded. File '{}' does not exist.", id, filepath);
@@ -85,10 +85,10 @@ public class PalettedExposureRepository {
             return RequestedPalettedExposure.CANNOT_LOAD;
         }
 
-        return RequestedPalettedExposure.success(palettedExposure);
+        return RequestedPalettedExposure.success(exposureData);
     }
 
-    public void saveExposure(@NotNull String id, PalettedExposure data) {
+    public void saveExposure(@NotNull String id, ExposureData data) {
         Preconditions.checkArgument(!StringUtil.isBlank(id), "Cannot save exposure: id is null or empty.");
 
         if (ensureExposuresDirectoryExists()) {
@@ -122,7 +122,7 @@ public class PalettedExposureRepository {
         Packets.sendToClient(new ExposureDataResponseS2CP(id, result), player);
     }
 
-    public void receiveClientUpload(ServerPlayer player, String id, PalettedExposure exposure) {
+    public void receiveClientUpload(ServerPlayer player, String id, ExposureData exposure) {
         if (!validateUpload(player, id)) {
             return;
         }

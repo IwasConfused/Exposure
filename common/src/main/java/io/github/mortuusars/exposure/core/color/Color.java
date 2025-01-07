@@ -2,8 +2,12 @@ package io.github.mortuusars.exposure.core.color;
 
 import net.minecraft.util.Mth;
 
+import java.util.Objects;
+
 public class Color {
     public static final Color WHITE = new Color(255, 255, 255, 255);
+    public static final Color BLACK = new Color(255, 0, 0, 0);
+    public static final Color TRANSPARENT = new Color(0, 0, 0, 0);
 
     private final int a, r, g, b;
 
@@ -170,8 +174,24 @@ public class Color {
         return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff;
     }
 
-    public float differenceTo(Color color) {
-        return Mth.sqrt(squaredDifferenceTo(color));
+    public int squaredDifferenceTo(int argb) {
+        int rDiff = Math.abs(r - Color.red(argb));
+        int gDiff = Math.abs(g - Color.green(argb));
+        int bDiff = Math.abs(b - Color.blue(argb));
+        return rDiff * rDiff + gDiff * gDiff + bDiff * bDiff;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Color color = (Color) o;
+        return a == color.a && r == color.r && g == color.g && b == color.b;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(a, r, g, b);
     }
 
     // --
