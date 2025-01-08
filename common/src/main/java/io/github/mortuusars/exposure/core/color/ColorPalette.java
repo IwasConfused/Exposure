@@ -2,6 +2,8 @@ package io.github.mortuusars.exposure.core.color;
 
 
 import com.google.common.base.Preconditions;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -19,11 +21,16 @@ public class ColorPalette {
             .map(list -> new ColorPalette(list.stream().mapToInt(Integer::intValue).toArray()),
                     palette -> Arrays.stream(palette.getColors()).boxed().toList());
 
+    public static final Codec<ColorPalette> STRING_COLORS_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.list(Codec.STRING.xmap(str -> Color.fromHex(str).getARGB(), i -> Integer.toHexString(i).toUpperCase()), 1, 256)
+                    .fieldOf("colors").forGetter(o -> Arrays.stream(o.getColors()).boxed().toList())
+    ).apply(instance, list -> new ColorPalette(list.stream().mapToInt(i -> i).toArray())));
+
     /**
      * Fallback palette in case no palettes were loaded from a datapack.
      */
     public static final ColorPalette MAP_COLORS_PLUS = new ColorPalette(new int[]{
-            0xFF000000, 0xFF02260F, 0xFF261F14, 0xFF131322,
+            0xFF000000, 0xFF02260F, 0xFF211C37, 0xFFFF8058,
             0xFF597D27, 0xFF6D9930, 0xFF7FB238, 0xFF435E1D,
             0xFFAEA473, 0xFFD5C98C, 0xFFF7E9A3, 0xFF827B56,
             0xFF8C8C8C, 0xFFABABAB, 0xFFC7C7C7, 0xFF696969,
@@ -85,8 +92,8 @@ public class ColorPalette {
             0xFF464646, 0xFF565656, 0xFF646464, 0xFF343434,
             0xFF987B67, 0xFFBA967E, 0xFFD8AF93, 0xFF725C4D,
             0xFF597569, 0xFF6D9081, 0xFF7FA796, 0xFF43584F,
-            0xFFAADCF9, 0xFFFFF8DE, 0xFFFFEBD8, 0xFFFEE4DD,
-            0xFFC7FFD2, 0xFFE9D6FA, 0xFFE8F3FB, 0x00000000
+            0xFFFFA274, 0xFFC5F1AA, 0xFFA2B7F9, 0xFFFFD6D2,
+            0xFFFFF5C8, 0xFFDAE9FF, 0xFFFFDCF5, 0x00000000
     });
 
     private final int[] colors;
@@ -113,6 +120,9 @@ public class ColorPalette {
         return newColors;
     }
 
+    /**
+     * @return Array of 256 colors.
+     */
     public int[] getColors() {
         return colors;
     }

@@ -7,13 +7,10 @@ import io.github.mortuusars.exposure.advancement.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.block.FlashBlock;
 import io.github.mortuusars.exposure.block.LightroomBlock;
 import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
+import io.github.mortuusars.exposure.command.argument.*;
 import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.component.CompositionGuide;
 import io.github.mortuusars.exposure.core.camera.component.FlashMode;
-import io.github.mortuusars.exposure.command.argument.ExposureLookArgument;
-import io.github.mortuusars.exposure.command.argument.ExposureSizeArgument;
-import io.github.mortuusars.exposure.command.argument.ShaderLocationArgument;
-import io.github.mortuusars.exposure.command.argument.TextureLocationArgument;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.ProjectionMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
@@ -440,6 +437,8 @@ public class Exposure {
                 Register.commandArgumentType("shader_location", ShaderLocationArgument.class, SingletonArgumentInfo.contextFree(ShaderLocationArgument::new));
         public static final Supplier<ArgumentTypeInfo<TextureLocationArgument, SingletonArgumentInfo<TextureLocationArgument>.Template>> TEXTURE_LOCATION =
                 Register.commandArgumentType("texture_location", TextureLocationArgument.class, SingletonArgumentInfo.contextFree(TextureLocationArgument::new));
+        public static final Supplier<ArgumentTypeInfo<ColorPaletteArgument, SingletonArgumentInfo<ColorPaletteArgument>.Template>> COLOR_PALETTE_LOCATION =
+                Register.commandArgumentType("color_palette_location", ColorPaletteArgument.class, SingletonArgumentInfo.contextFree(ColorPaletteArgument::new));
 
         public static void init() {
         }

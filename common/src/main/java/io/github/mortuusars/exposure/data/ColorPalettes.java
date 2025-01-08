@@ -35,6 +35,10 @@ public class ColorPalettes extends SimpleJsonResourceReloadListener {
         super(new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create(), "exposure/color_palette");
     }
 
+    public @Nullable ColorPalette get(ResourceLocation paletteId) {
+        return palettes.get(paletteId);
+    }
+
     public @NotNull ColorPalette getOrDefault(ResourceLocation paletteId) {
         @Nullable ColorPalette palette = palettes.get(paletteId);
         if (palette == null) {
@@ -53,7 +57,7 @@ public class ColorPalettes extends SimpleJsonResourceReloadListener {
         return palette;
     }
 
-    public Map<ResourceLocation, ColorPalette> get() {
+    public Map<ResourceLocation, ColorPalette> getAll() {
         return ImmutableMap.copyOf(palettes);
     }
 
