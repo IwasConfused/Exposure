@@ -118,10 +118,6 @@ public class ClientPacketsHandler {
         Minecraft.getInstance().setScreen(screen);
     }
 
-    public static void syncLensesData(SyncLensesDataS2CP packet) {
-        ExposureClient.lenses().set(packet.lenses());
-    }
-
     public static void clearRenderingCache() {
         ExposureClient.imageRenderer().clearCache();
         ExposureClient.renderedExposures().clearCache();

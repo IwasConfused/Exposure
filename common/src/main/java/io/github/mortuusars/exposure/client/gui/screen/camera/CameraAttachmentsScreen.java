@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.color.Color;
+import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.data.filter.Filter;
 import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
@@ -222,7 +223,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     public @NotNull List<Component> getTooltipFromContainerItem(ItemStack stack) {
         List<Component> tooltip = super.getTooltipFromContainerItem(stack);
 
-        ExposureClient.lenses().getFocalRange(stack).ifPresent(focalRange -> {
+        Lenses.getFocalRange(Minecrft.registryAccess(), stack).ifPresent(focalRange -> {
             tooltip.add(Component.translatable("gui.exposure.camera_controls.focal_range", focalRange.getSerializedName())
                     .withStyle(ChatFormatting.GOLD));
         });

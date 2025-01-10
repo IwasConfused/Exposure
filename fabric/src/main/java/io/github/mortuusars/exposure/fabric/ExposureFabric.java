@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.fabric.resources.IdentifiableResourceReloadListenerWrapper;
@@ -43,7 +44,8 @@ public class ExposureFabric implements ModInitializer {
     public void onInitialize() {
         Exposure.init();
 
-        DynamicRegistries.registerSynced(Exposure.Registries.COLOR_PALETTES, ColorPalette.CODEC, ColorPalette.CODEC);
+        DynamicRegistries.registerSynced(Exposure.Registry.COLOR_PALETTE, ColorPalette.CODEC, ColorPalette.CODEC);
+        DynamicRegistries.registerSynced(Exposure.Registry.LENS, Lens.CODEC, Lens.CODEC);
 
         NeoForgeModConfigEvents.reloading(Exposure.ID).register(config -> {
             if (config.getType() == ModConfig.Type.COMMON && FabricLoader.getInstance().isModLoaded("create")) {
@@ -64,9 +66,6 @@ public class ExposureFabric implements ModInitializer {
         addItemsToCreativeTabs();
 
         Exposure.Stats.register();
-
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
-                new IdentifiableResourceReloadListenerWrapper(Exposure.resource("lenses"), ExposureServer.lenses()));
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             ServerEvents.serverStarted(server);

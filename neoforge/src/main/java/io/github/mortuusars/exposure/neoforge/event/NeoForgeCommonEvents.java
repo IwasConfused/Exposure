@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.neoforge.event;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
@@ -19,7 +19,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -44,7 +43,8 @@ public class NeoForgeCommonEvents {
 
         @SubscribeEvent
         public static void addDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
-            event.dataPackRegistry(Exposure.Registries.COLOR_PALETTES, ColorPalette.CODEC, ColorPalette.CODEC);
+            event.dataPackRegistry(Exposure.Registry.COLOR_PALETTE, ColorPalette.CODEC, ColorPalette.CODEC);
+            event.dataPackRegistry(Exposure.Registry.LENS, Lens.CODEC, Lens.CODEC);
         }
 
         @SuppressWarnings("unchecked")
@@ -114,13 +114,6 @@ public class NeoForgeCommonEvents {
         @SubscribeEvent
         public static void registerCommands(RegisterCommandsEvent event) {
             CommonEvents.registerCommands(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection());
-        }
-
-        // --
-
-        @SubscribeEvent
-        public static void addReloadListeners(AddReloadListenerEvent event) {
-            event.addListener(ExposureServer.lenses());
         }
     }
 }

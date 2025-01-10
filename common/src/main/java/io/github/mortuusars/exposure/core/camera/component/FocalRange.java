@@ -4,6 +4,9 @@ import com.google.common.base.Preconditions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.util.Fov;
 import io.netty.buffer.ByteBuf;
@@ -17,6 +20,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public final class FocalRange implements StringRepresentable {
+    public static final Codec<FocalRange> RANGE_CODEC = RecordCodecBuilder.create(instance -> instance.group(
+            Codec.INT.fieldOf("min").forGetter(FocalRange::min),
+            Codec.INT.fieldOf("max").forGetter(FocalRange::max)
+    ).apply(instance, FocalRange::new));
+
+    public static final Codec<FocalRange> PRIME_CODEC = Codec.INT.xmap(FocalRange::new, FocalRange::min);
+
+    public static final Codec<FocalRange> CODEC = Codec.either(PRIME_CODEC, RANGE_CODEC).xmap(Either::unwrap,
+            focalRange -> focalRange.isPrime() ? Either.left(focalRange) : Either.right(focalRange));
+
     public static final StreamCodec<ByteBuf, FocalRange> STREAM_CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, FocalRange::min,
             ByteBufCodecs.VAR_INT, FocalRange::max,
@@ -40,11 +53,11 @@ public final class FocalRange implements StringRepresentable {
         this.max = max;
     }
 
-    public FocalRange(int fixedValue) {
-        Preconditions.checkArgument(ALLOWED_MIN <= fixedValue && fixedValue <= ALLOWED_MAX,
-                fixedValue + " is not in allowed range: " + ALLOWED_MIN + "-" + ALLOWED_MAX);
-        this.min = fixedValue;
-        this.max = fixedValue;
+    public FocalRange(int primeValue) {
+        Preconditions.checkArgument(ALLOWED_MIN <= primeValue && primeValue <= ALLOWED_MAX,
+                primeValue + " is not in allowed range: " + ALLOWED_MIN + "-" + ALLOWED_MAX);
+        this.min = primeValue;
+        this.max = primeValue;
     }
 
     public boolean isPrime() {

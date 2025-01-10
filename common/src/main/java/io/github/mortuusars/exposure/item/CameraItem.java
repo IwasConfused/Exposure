@@ -150,9 +150,9 @@ public class CameraItem extends Item {
         return Exposure.SoundEvents.FLASH.get();
     }
 
-    public FocalRange getFocalRange(Level level, ItemStack stack) {
-        Lenses lenses = level.isClientSide ? ExposureClient.lenses() : ExposureServer.lenses();
-        return Attachment.LENS.map(stack, lenses::getFocalRange).flatMap(opt -> opt).orElse(FocalRange.getDefault());
+    public FocalRange getFocalRange(RegistryAccess registryAccess, ItemStack stack) {
+        return Attachment.LENS.map(stack, lensStack -> Lenses.getFocalRangeOrDefault(registryAccess, lensStack))
+                .orElse(FocalRange.getDefault());
     }
 
     public Holder<ColorPalette> getColorPalette(RegistryAccess registryAccess, ItemStack stack) {
@@ -673,7 +673,7 @@ public class CameraItem extends Item {
         }
 
         double zoom = CameraSetting.ZOOM.getOrDefault(stack);
-        int focalLength = (int) getFocalRange(level, stack).focalLengthFromZoom(zoom);
+        int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
         tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
 
         tag.putFloat(FrameTag.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
@@ -773,7 +773,7 @@ public class CameraItem extends Item {
 
     public List<LivingEntity> getEntitiesInFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
         float zoom = CameraSetting.ZOOM.getOrDefault(stack);
-        double fov = getFocalRange(level, stack).fovFromZoom(zoom);
+        double fov = getFocalRange(level.registryAccess(), stack).fovFromZoom(zoom);
 
         return EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
     }

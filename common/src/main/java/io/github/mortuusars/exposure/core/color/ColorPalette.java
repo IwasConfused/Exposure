@@ -31,7 +31,7 @@ public record ColorPalette(int[] colors) {
             .map(list -> new ColorPalette(list.stream().mapToInt(Integer::intValue).toArray()),
                     palette -> Arrays.stream(palette.colors()).boxed().toList());
 
-    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<ColorPalette>> STREAM_CODEC = ByteBufCodecs.holder(Exposure.Registries.COLOR_PALETTES, DIRECT_STREAM_CODEC);
+    public static final StreamCodec<RegistryFriendlyByteBuf, Holder<ColorPalette>> STREAM_CODEC = ByteBufCodecs.holder(Exposure.Registry.COLOR_PALETTE, DIRECT_STREAM_CODEC);
 
     public ColorPalette {
         Preconditions.checkState(colors.length > 0, "Cannot create palette that's empty.");

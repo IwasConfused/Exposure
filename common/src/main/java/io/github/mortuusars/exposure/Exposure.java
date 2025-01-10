@@ -15,6 +15,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.ProjectionMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.core.frame.Frame;
@@ -31,7 +32,6 @@ import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -377,7 +377,7 @@ public class Exposure {
 
         public static void register() {
             STATS.forEach((location, formatter) -> {
-                Registry.register(BuiltInRegistries.CUSTOM_STAT, location, location);
+                net.minecraft.core.Registry.register(BuiltInRegistries.CUSTOM_STAT, location, location);
                 net.minecraft.stats.Stats.CUSTOM.get(location, formatter);
             });
         }
@@ -444,8 +444,11 @@ public class Exposure {
         }
     }
 
-    public static class Registries {
-        public static final ResourceKey<Registry<ColorPalette>> COLOR_PALETTES =
+    public static class Registry {
+        public static final ResourceKey<net.minecraft.core.Registry<ColorPalette>> COLOR_PALETTE =
                 ResourceKey.createRegistryKey(Exposure.resource("color_palette"));
+
+        public static final ResourceKey<net.minecraft.core.Registry<Lens>> LENS =
+                ResourceKey.createRegistryKey(Exposure.resource("lens"));
     }
 }

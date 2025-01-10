@@ -15,7 +15,7 @@ public class ColorPaletteArgument extends ResourceLocationArgument {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         SharedSuggestionProvider provider = (SharedSuggestionProvider) context.getSource();
-        Set<ResourceLocation> keys = provider.registryAccess().registryOrThrow(Exposure.Registries.COLOR_PALETTES).keySet();
+        Set<ResourceLocation> keys = provider.registryAccess().registryOrThrow(Exposure.Registry.COLOR_PALETTE).keySet();
         return SharedSuggestionProvider.suggestResource(keys, builder);
     }
 }

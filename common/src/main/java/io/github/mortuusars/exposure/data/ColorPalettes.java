@@ -17,16 +17,16 @@ public class ColorPalettes {
     public static final ResourceKey<ColorPalette> DEFAULT = MAP_COLORS_PLUS;
 
     private static ResourceKey<ColorPalette> createKey(String name) {
-        return ResourceKey.create(Exposure.Registries.COLOR_PALETTES, Exposure.resource(name));
+        return ResourceKey.create(Exposure.Registry.COLOR_PALETTE, Exposure.resource(name));
     }
 
     public static Holder<ColorPalette> get(RegistryAccess registryAccess, ResourceKey<ColorPalette> key) {
-        Registry<ColorPalette> registry = registryAccess.registryOrThrow(Exposure.Registries.COLOR_PALETTES);
+        Registry<ColorPalette> registry = registryAccess.registryOrThrow(Exposure.Registry.COLOR_PALETTE);
         return registry.getHolder(key).or(() -> registry.getHolder(DEFAULT)).or(registry::getAny).orElseThrow();
     }
 
     public static Holder<ColorPalette> get(RegistryAccess registryAccess, ResourceLocation key) {
-        Registry<ColorPalette> registry = registryAccess.registryOrThrow(Exposure.Registries.COLOR_PALETTES);
+        Registry<ColorPalette> registry = registryAccess.registryOrThrow(Exposure.Registry.COLOR_PALETTE);
         return registry.getHolder(key).or(() -> registry.getHolder(DEFAULT)).or(registry::getAny).orElseThrow();
     }
 }
