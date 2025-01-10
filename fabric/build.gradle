@@ -57,7 +57,8 @@ dependencies {
 //    modRuntimeOnly("curse.maven:probejs-585406:${probejs_fabric_id}")
 
     //modCompileOnlyApi("curse.maven:jade-324717:${jade_fabric_id}")
-    //modRuntimeOnly("curse.maven:jade-324717:${jade_fabric_id}") { transitive = false }
+//    modRuntimeOnly("curse.maven:jade-324717:${jade_fabric_id}") { transitive = false }
+    modRuntimeOnly("curse.maven:yeetusexperimentus-635427:5444189")
 
     common(project(path: ':common', configuration: 'namedElements')) { transitive false }
     shadowBundle project(path: ':common', configuration: 'transformProductionFabric')
