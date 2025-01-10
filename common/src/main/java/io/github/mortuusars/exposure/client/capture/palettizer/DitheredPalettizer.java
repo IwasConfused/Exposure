@@ -66,8 +66,8 @@ public class DitheredPalettizer implements ImagePalettizer {
     }
 
     private Color[][] getPixels(Image image) {
-        int width = image.getWidth();
-        int height = image.getHeight();
+        int width = image.width();
+        int height = image.height();
 
         Color[][] pixels = new Color[height][width];
 

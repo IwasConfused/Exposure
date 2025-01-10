@@ -8,8 +8,8 @@ import io.github.mortuusars.exposure.client.image.PalettedImage;
 public class NearestColorPalettizer implements ImagePalettizer {
     @Override
     public PalettedImage palettize(Image image, ColorPalette palette) {
-        int width = image.getWidth();
-        int height = image.getHeight();
+        int width = image.width();
+        int height = image.height();
 
         byte[] indexedPixels = new byte[width * height];
 

@@ -5,7 +5,6 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.serialization.JsonOps;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.command.argument.ColorPaletteArgument;
 import io.github.mortuusars.exposure.core.color.Color;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
@@ -49,7 +48,7 @@ public class PaletteCommand {
     }
 
     private static int exportAsJson(CommandSourceStack source, ResourceLocation paletteId, String filePath) {
-        @Nullable ColorPalette palette = ExposureServer.colorPalettes().get(paletteId);
+        @Nullable ColorPalette palette = source.registryAccess().registryOrThrow(Exposure.Registries.COLOR_PALETTES).get(paletteId);
         if (palette == null) {
             source.sendFailure(Component.literal(paletteId + " is not found."));
             return 0;
@@ -71,7 +70,7 @@ public class PaletteCommand {
     }
 
     private static int exportAsPng(CommandSourceStack source, ResourceLocation paletteId, String filePath) {
-        @Nullable ColorPalette palette = ExposureServer.colorPalettes().get(paletteId);
+        @Nullable ColorPalette palette = source.registryAccess().registryOrThrow(Exposure.Registries.COLOR_PALETTES).get(paletteId);
         if (palette == null) {
             source.sendFailure(Component.literal(paletteId + " is not found."));
             return 0;
@@ -166,7 +165,7 @@ public class PaletteCommand {
     }
 
     private static void savePaletteAsJson(ColorPalette palette, File file) throws IOException {
-        JsonElement jsonElement = ColorPalette.STRING_COLORS_CODEC.encodeStart(JsonOps.INSTANCE, palette).getOrThrow();
+        JsonElement jsonElement = ColorPalette.CODEC.encodeStart(JsonOps.INSTANCE, palette).getOrThrow();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(jsonElement);
 
@@ -177,7 +176,7 @@ public class PaletteCommand {
 
     private static void savePaletteAsPng(ColorPalette palette, File file) throws IOException {
         BufferedImage image = new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB);
-        int[] colors = palette.getColors();
+        int[] colors = palette.colors();
 
         for (int y = 0; y < 16; y++) {
             for (int x = 0; x < 16; x++) {
@@ -191,7 +190,7 @@ public class PaletteCommand {
     private static ColorPalette loadPaletteFromJson(File file) throws IOException {
         try (FileReader reader = new FileReader(file)) {
             JsonObject jsonObject = new Gson().fromJson(reader, JsonObject.class);
-            return ColorPalette.STRING_COLORS_CODEC.decode(JsonOps.INSTANCE, jsonObject).getOrThrow().getFirst();
+            return ColorPalette.CODEC.decode(JsonOps.INSTANCE, jsonObject).getOrThrow().getFirst();
         }
     }
 

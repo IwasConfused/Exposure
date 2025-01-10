@@ -70,10 +70,7 @@ public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
                     return;
                 }
 
-                images[i] = request.getData().map(exposure ->
-                        new PalettedImage(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(),
-                                ExposureClient.colorPalettes().getOrDefault(exposure.getPaletteId())))
-                        .orElse(null);
+                images[i] = request.getData().map(PalettedImage::fromExposure).orElse(null);
             }
 
             if (identifier.isTexture()) {

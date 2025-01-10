@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.neoforge.event;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
@@ -25,6 +26,7 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStartedEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.registries.DataPackRegistryEvent;
 
 @SuppressWarnings("unused")
 public class NeoForgeCommonEvents {
@@ -38,6 +40,11 @@ public class NeoForgeCommonEvents {
                     Stats.CUSTOM.get(location);
                 });
             });
+        }
+
+        @SubscribeEvent
+        public static void addDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
+            event.dataPackRegistry(Exposure.Registries.COLOR_PALETTES, ColorPalette.CODEC, ColorPalette.CODEC);
         }
 
         @SuppressWarnings("unchecked")
@@ -113,7 +120,6 @@ public class NeoForgeCommonEvents {
 
         @SubscribeEvent
         public static void addReloadListeners(AddReloadListenerEvent event) {
-            event.addListener(ExposureServer.colorPalettes());
             event.addListener(ExposureServer.lenses());
         }
     }

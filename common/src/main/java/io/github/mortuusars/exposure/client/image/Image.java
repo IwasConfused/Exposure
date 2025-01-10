@@ -6,8 +6,8 @@ public interface Image extends AutoCloseable {
     Image EMPTY = new EmptyImage();
     Image MISSING = new MissingImage();
 
-    int getWidth();
-    int getHeight();
+    int width();
+    int height();
     int getPixelARGB(int x, int y);
     default void close() {}
 
@@ -31,13 +31,13 @@ public interface Image extends AutoCloseable {
         }
 
         @Override
-        public int getWidth() {
-            return image.getWidth();
+        public int width() {
+            return image.width();
         }
 
         @Override
-        public int getHeight() {
-            return image.getHeight();
+        public int height() {
+            return image.height();
         }
 
         @Override

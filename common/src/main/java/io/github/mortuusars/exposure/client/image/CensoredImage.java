@@ -10,22 +10,22 @@ public class CensoredImage implements Image {
     public CensoredImage(Image image) {
         this.image = image;
         float blockSize = getBlockSize();
-        this.cache = new Integer[Mth.ceil(getWidth() / blockSize)][Mth.ceil(getHeight() / blockSize)];
+        this.cache = new Integer[Mth.ceil(width() / blockSize)][Mth.ceil(height() / blockSize)];
     }
 
     public int getBlockSize() {
-        int largerSize = Math.max(getWidth(), getHeight());
+        int largerSize = Math.max(width(), height());
         return Math.max(largerSize / 16, 1);
     }
 
     @Override
-    public int getWidth() {
-        return image.getWidth();
+    public int width() {
+        return image.width();
     }
 
     @Override
-    public int getHeight() {
-        return image.getHeight();
+    public int height() {
+        return image.height();
     }
 
     @Override
@@ -52,8 +52,8 @@ public class CensoredImage implements Image {
     }
 
     private int calculateAverageBlockColor(int startX, int startY, int blockSize) {
-        int endX = Math.min(startX + blockSize, getWidth());
-        int endY = Math.min(startY + blockSize, getHeight());
+        int endX = Math.min(startX + blockSize, width());
+        int endY = Math.min(startY + blockSize, height());
 
         int totalR = 0, totalG = 0, totalB = 0, totalA = 0;
         int pixelCount = 0;

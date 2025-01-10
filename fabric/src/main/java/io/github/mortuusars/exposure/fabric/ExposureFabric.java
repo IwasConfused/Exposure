@@ -5,8 +5,7 @@ import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
-import io.github.mortuusars.exposure.data.ColorPalettes;
-import io.github.mortuusars.exposure.data.Lenses;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
 import io.github.mortuusars.exposure.fabric.resources.IdentifiableResourceReloadListenerWrapper;
@@ -16,6 +15,7 @@ import io.github.mortuusars.exposure.network.fabric.FabricS2CPackets;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableSource;
@@ -43,6 +43,8 @@ public class ExposureFabric implements ModInitializer {
     public void onInitialize() {
         Exposure.init();
 
+        DynamicRegistries.registerSynced(Exposure.Registries.COLOR_PALETTES, ColorPalette.CODEC, ColorPalette.CODEC);
+
         NeoForgeModConfigEvents.reloading(Exposure.ID).register(config -> {
             if (config.getType() == ModConfig.Type.COMMON && FabricLoader.getInstance().isModLoaded("create")) {
 //                CreateFilmDeveloping.clearCachedData();
@@ -65,8 +67,6 @@ public class ExposureFabric implements ModInitializer {
 
         ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
                 new IdentifiableResourceReloadListenerWrapper(Exposure.resource("lenses"), ExposureServer.lenses()));
-        ResourceManagerHelper.get(PackType.SERVER_DATA).registerReloadListener(
-                new IdentifiableResourceReloadListenerWrapper(Exposure.resource("color_palettes"), ExposureServer.colorPalettes()));
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             ServerEvents.serverStarted(server);

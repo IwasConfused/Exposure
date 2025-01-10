@@ -42,13 +42,13 @@ public class ResourceImage extends SimpleTexture implements RenderableImage {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         @Nullable NativeImage image = getNativeImage();
         return image != null ? image.getWidth() : 1;
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         @Nullable NativeImage image = getNativeImage();
         return image != null ? image.getHeight() : 1;
     }

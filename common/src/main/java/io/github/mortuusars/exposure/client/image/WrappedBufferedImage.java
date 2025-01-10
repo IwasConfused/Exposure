@@ -10,12 +10,12 @@ public class WrappedBufferedImage implements Image {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return bufferedImage.getWidth();
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return bufferedImage.getHeight();
     }
 

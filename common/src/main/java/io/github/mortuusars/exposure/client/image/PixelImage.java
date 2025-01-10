@@ -15,12 +15,12 @@ public class PixelImage implements Image {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return width;
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return height;
     }
 
@@ -30,11 +30,11 @@ public class PixelImage implements Image {
     }
 
     public void setPixelARGB(int x, int y, int color) {
-        pixels[y * getWidth() + x] = color;
+        pixels[y * width() + x] = color;
     }
 
     public void modifyPixelARGB(int x, int y, Function<Integer, Integer> modifyFunc) {
-        pixels[y * getWidth() + x] = modifyFunc.apply(pixels[y * getWidth() + x]);
+        pixels[y * width() + x] = modifyFunc.apply(pixels[y * width() + x]);
     }
 
     public static PixelImage create(int width, int height) {
@@ -42,14 +42,14 @@ public class PixelImage implements Image {
     }
 
     public static PixelImage copyFrom(Image image) {
-        int[] pixels = new int[image.getWidth() * image.getHeight()];
+        int[] pixels = new int[image.width() * image.height()];
 
-        for (int y = 0; y < image.getHeight(); y++) {
-            for (int x = 0; x < image.getWidth(); x++) {
-                pixels[y * image.getWidth() + x] = image.getPixelARGB(x, y);
+        for (int y = 0; y < image.height(); y++) {
+            for (int x = 0; x < image.width(); x++) {
+                pixels[y * image.width() + x] = image.getPixelARGB(x, y);
             }
         }
 
-        return new PixelImage(image.getWidth(), image.getHeight(), pixels);
+        return new PixelImage(image.width(), image.height(), pixels);
     }
 }

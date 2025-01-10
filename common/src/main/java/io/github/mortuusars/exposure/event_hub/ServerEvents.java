@@ -24,9 +24,9 @@ public class ServerEvents {
     }
 
     public static void syncDatapack(Stream<ServerPlayer> relevantPlayers) {
-        relevantPlayers.forEach(player -> {
-            Packets.sendToClient(new SyncColorPalettesS2CP(ExposureServer.colorPalettes().getAll()), player);
-            Packets.sendToClient(new SyncLensesDataS2CP(ExposureServer.lenses().get()), player);
-        });
+//        relevantPlayers.forEach(player -> {
+//            Packets.sendToClient(new SyncColorPalettesS2CP(ExposureServer.colorPalettes().getAll()), player);
+//            Packets.sendToClient(new SyncLensesDataS2CP(ExposureServer.lenses().get()), player);
+//        });
     }
 }

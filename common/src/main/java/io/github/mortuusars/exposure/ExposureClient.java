@@ -16,7 +16,6 @@ import io.github.mortuusars.exposure.core.CaptureType;
 import io.github.mortuusars.exposure.core.PhotographType;
 import io.github.mortuusars.exposure.core.cycles.Cycles;
 import io.github.mortuusars.exposure.core.warehouse.client.ExposureStore;
-import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.item.*;
 import net.minecraft.client.renderer.item.ItemProperties;
@@ -30,7 +29,6 @@ public class ExposureClient {
     private static final RenderedExposures RENDERED_EXPOSURES = new RenderedExposures();
     private static final ImageRenderer IMAGE_RENDERER = new ImageRenderer();
     private static final PhotographRenderer PHOTOGRAPH_RENDERER = new PhotographRenderer();
-    private static final ColorPalettes COLOR_PALETTES = new ColorPalettes();
     private static final Lenses LENSES = new Lenses();
 
     private static boolean isIrisOrOculusInstalled;
@@ -74,10 +72,6 @@ public class ExposureClient {
 
     public static PhotographRenderer photographRenderer() {
         return PHOTOGRAPH_RENDERER;
-    }
-
-    public static ColorPalettes colorPalettes() {
-        return COLOR_PALETTES;
     }
 
     public static Lenses lenses() {

@@ -14,6 +14,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.camera.Camera;
 import io.github.mortuusars.exposure.core.camera.CameraInHand;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.data.ColorPalettes;
@@ -26,6 +27,7 @@ import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2
 import io.github.mortuusars.exposure.network.packet.client.StartDebugRGBCaptureS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.Holder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
@@ -80,6 +82,8 @@ public class DebugCommand {
             ChromaChannel channel = ChromaChannel.values()[i];
             String exposureId = ExposureIdentifier.createId(player, channel.getSerializedName());
 
+            Holder<ColorPalette> colorPalette = ColorPalettes.get(context.getSource().registryAccess(), ColorPalettes.DEFAULT);
+
             properties.add(new CaptureProperties(
                     exposureId,
                     player.getUUID(),
@@ -89,7 +93,7 @@ public class DebugCommand {
                     ExposureType.BLACK_AND_WHITE,
                     camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, IFilmItem::getFrameSize, () -> 320))).orElse(320),
                     camera.flatMap(c -> c.map((cItem, cStack) -> cItem.getCropFactor())).orElse(Exposure.CROP_FACTOR),
-                    ColorPalettes.DEFAULT,
+                    colorPalette,
                     false,
                     0,
                     Optional.empty(),

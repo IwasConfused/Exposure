@@ -2,12 +2,12 @@ package io.github.mortuusars.exposure.client.image;
 
 public class MissingImage implements Image {
     @Override
-    public int getWidth() {
+    public int width() {
         return 2;
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return 2;
     }
 

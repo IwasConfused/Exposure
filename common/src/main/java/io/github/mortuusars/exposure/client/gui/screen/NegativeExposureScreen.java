@@ -101,8 +101,8 @@ public class NegativeExposureScreen extends ZoomableScreen {
         RenderableImage image = ExposureClient.renderedExposures().getOrCreateRaw(exposureIdentifier)
                 .processWith(Processor.NEGATIVE_FILM);
 
-        int width = image.getWidth();
-        int height = image.getHeight();
+        int width = image.width();
+        int height = image.height();
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(x + this.width / 2f, y + this.height / 2f, 0);

@@ -50,18 +50,18 @@ public interface Processor {
 
     interface Crop extends Processor {
         Processor SQUARE_CENTER = new Instance("crop-square", image -> {
-            int smallerSide = Math.min(image.getWidth(), image.getHeight());
-            int x = (image.getWidth() - smallerSide) / 2;
-            int y = (image.getHeight() - smallerSide) / 2;
+            int smallerSide = Math.min(image.width(), image.height());
+            int x = (image.width() - smallerSide) / 2;
+            int y = (image.height() - smallerSide) / 2;
             return new CroppedImage(image, new Rect2i(x, y, smallerSide, smallerSide));
         });
 
         static Processor factor(double factor) {
             return new Instance("crop-factor-" + String.format("%,.4f", factor), image -> {
-                int newWidth = (int) (image.getWidth() * factor);
-                int newHeight = (int) (image.getHeight() * factor);
-                int x = (image.getWidth() - newWidth) / 2;
-                int y = (image.getHeight() - newHeight) / 2;
+                int newWidth = (int) (image.width() * factor);
+                int newHeight = (int) (image.height() * factor);
+                int x = (image.width() - newWidth) / 2;
+                int y = (image.height() - newHeight) / 2;
                 return new CroppedImage(image, new Rect2i(x, y, newWidth, newHeight));
             });
         }

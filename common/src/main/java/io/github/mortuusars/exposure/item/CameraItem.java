@@ -11,6 +11,7 @@ import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.FileLoadingInfo;
 import io.github.mortuusars.exposure.core.color.ChromaChannel;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.FrameTag;
 import io.github.mortuusars.exposure.core.frame.Photographer;
 import io.github.mortuusars.exposure.core.frame.EntityInFrame;
@@ -32,9 +33,7 @@ import io.github.mortuusars.exposure.util.*;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
+import net.minecraft.core.*;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
@@ -154,6 +153,11 @@ public class CameraItem extends Item {
     public FocalRange getFocalRange(Level level, ItemStack stack) {
         Lenses lenses = level.isClientSide ? ExposureClient.lenses() : ExposureServer.lenses();
         return Attachment.LENS.map(stack, lenses::getFocalRange).flatMap(opt -> opt).orElse(FocalRange.getDefault());
+    }
+
+    public Holder<ColorPalette> getColorPalette(RegistryAccess registryAccess, ItemStack stack) {
+        ResourceKey<ColorPalette> key = Attachment.FILM.map(stack, IFilmItem::getColorPaletteId).orElse(ColorPalettes.DEFAULT);
+        return ColorPalettes.get(registryAccess, key);
     }
 
     public float getCropFactor() {
@@ -422,8 +426,6 @@ public class CameraItem extends Item {
 
             String exposureId = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
-            ResourceLocation colorPalette = Attachment.FILM.map(stack, IFilmItem::getColorPalette).orElse(ColorPalettes.DEFAULT);
-
             CaptureProperties captureProperties = new CaptureProperties(
                     exposureId,
                     photographer.asEntity().getUUID(),
@@ -433,7 +435,7 @@ public class CameraItem extends Item {
                     film.getItem().getType(),
                     film.getItem().getFrameSize(film.getItemStack()),
                     getCropFactor(),
-                    colorPalette,
+                    getColorPalette(level.registryAccess(), stack),
                     flashHasFired,
                     lightLevel,
                     getFileLoadingData(stack),

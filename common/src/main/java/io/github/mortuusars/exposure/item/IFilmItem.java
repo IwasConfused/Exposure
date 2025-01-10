@@ -3,10 +3,13 @@ package io.github.mortuusars.exposure.item;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.Frame;
 import io.github.mortuusars.exposure.data.ColorPalettes;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -22,8 +25,10 @@ public interface IFilmItem {
         return Config.Server.EXPOSURE_RESOLUTION.get();
     }
 
-    default ResourceLocation getColorPalette(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.FILM_COLOR_PALETTE, ColorPalettes.DEFAULT);
+    default ResourceKey<ColorPalette> getColorPaletteId(ItemStack stack) {
+        @Nullable ResourceLocation location = stack.get(Exposure.DataComponents.FILM_COLOR_PALETTE);
+        if (location != null) return ResourceKey.create(Exposure.Registries.COLOR_PALETTES, location);
+        return ColorPalettes.DEFAULT;
     }
 
     default int getMaxFrameCount(ItemStack stack) {

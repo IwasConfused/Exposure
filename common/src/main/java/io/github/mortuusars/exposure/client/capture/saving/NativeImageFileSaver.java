@@ -21,9 +21,9 @@ public class NativeImageFileSaver {
     public void save(Image image) {
         //TODO: support different image formats like in loader (buffered and native) because NativeImage does not exist on server
 
-        try (NativeImage nativeImage = new NativeImage(image.getWidth(), image.getHeight(), false)) {
-            for (int y = 0; y < image.getHeight(); y++) {
-                for (int x = 0; x < image.getWidth(); x++) {
+        try (NativeImage nativeImage = new NativeImage(image.width(), image.height(), false)) {
+            for (int y = 0; y < image.height(); y++) {
+                for (int x = 0; x < image.width(); x++) {
                     int pixelColor = image.getPixelARGB(x, y);
                     nativeImage.setPixelRGBA(x, y, Color.ARGBtoABGR(pixelColor));
                 }

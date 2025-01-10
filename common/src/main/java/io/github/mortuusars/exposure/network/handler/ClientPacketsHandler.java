@@ -14,6 +14,7 @@ import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.CaptureProperties;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
@@ -27,6 +28,7 @@ import io.github.mortuusars.exposure.core.cycles.task.Task;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.Holder;
 import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.NotImplementedException;
@@ -82,14 +84,15 @@ public class ClientPacketsHandler {
             return;
         }
 
+        Holder<ColorPalette> colorPalette = ColorPalettes.get(Minecrft.registryAccess(), ColorPalettes.DEFAULT);
+
         ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
                 .handleErrorAndGetResult()
                 .thenAsync(Process.with(
                         Processor.Crop.SQUARE_CENTER,
                         Processor.Resize.to(size)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
-                        ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), dither))
-                .then(image -> new ExposureData(image.getWidth(), image.getHeight(), image.pixels(), ColorPalettes.DEFAULT,
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, colorPalette.value(), dither))
+                .then(image -> new ExposureData(image.width(), image.height(), image.pixels(), colorPalette.unwrapKey().orElseThrow().location(),
                         new ExposureData.Tag(ExposureType.COLOR, player.getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), true, false)))
                 .accept(image -> PalettedExposureUploader.upload(id, image)));
@@ -113,10 +116,6 @@ public class ClientPacketsHandler {
         @Nullable Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
 
         Minecraft.getInstance().setScreen(screen);
-    }
-
-    public static void syncColorPalettes(SyncColorPalettesS2CP packet) {
-        ExposureClient.colorPalettes().set(packet.palettes());
     }
 
     public static void syncLensesData(SyncLensesDataS2CP packet) {
@@ -145,11 +144,13 @@ public class ClientPacketsHandler {
             return;
         }
 
+        Holder<ColorPalette> colorPalette = ColorPalettes.get(Minecrft.registryAccess(), ColorPalettes.DEFAULT);
+
         ExposureClient.cycles().addParallelTask(new ExposureRetrieveTask(packet.layers(), 20_000)
                 .then(Result::unwrap)
                 .then(layers -> new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
-                .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, ExposureClient.colorPalettes().getOrDefault(ColorPalettes.DEFAULT), true))
-                .then(img -> new ExposureData(img.getWidth(), img.getHeight(), img.pixels(), ColorPalettes.DEFAULT,
+                .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, colorPalette.value(), true))
+                .then(img -> new ExposureData(img.width(), img.height(), img.pixels(), colorPalette.unwrapKey().orElseThrow().location(),
                         new ExposureData.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), false, false)))
                 .accept(exposure -> PalettedExposureUploader.upload(packet.id(), exposure)));

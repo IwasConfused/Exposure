@@ -1,22 +1,20 @@
 package io.github.mortuusars.exposure.core.color;
 
+import com.mojang.serialization.Codec;
 import net.minecraft.util.Mth;
 
 import java.util.Objects;
 
-public class Color {
+public record Color(int a, int r, int g, int b) {
+    public static final Codec<Color> CODEC = Codec.INT.xmap(Color::argb, Color::getARGB);
+    public static final Codec<Color> HEX_STRING_CODEC = Codec.STRING.xmap(Color::fromHex, Color::asHexString);
+
     public static final Color WHITE = new Color(255, 255, 255, 255);
     public static final Color BLACK = new Color(255, 0, 0, 0);
     public static final Color TRANSPARENT = new Color(0, 0, 0, 0);
 
-    private final int a, r, g, b;
-
-    private Color(int a, int r, int g, int b) {
+    public Color {
         validate(a, r, g, b);
-        this.a = a;
-        this.r = r;
-        this.g = g;
-        this.b = b;
     }
 
     private static void validate(int a, int r, int g, int b) {
@@ -39,6 +37,7 @@ public class Color {
             rangeError = true;
             badComponentString = badComponentString + " Blue";
         }
+
         if (rangeError) {
             throw new IllegalArgumentException("Color parameter outside of expected range:" + badComponentString);
         }
@@ -124,6 +123,10 @@ public class Color {
 
     public int getBGR() {
         return 255 << 24 | b << 16 | g << 8 | r;
+    }
+
+    public String asHexString() {
+        return String.format("%08X", getARGB());
     }
 
     public Color withAlpha(int alpha) {

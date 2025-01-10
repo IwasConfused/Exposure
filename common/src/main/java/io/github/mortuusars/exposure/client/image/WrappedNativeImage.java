@@ -11,12 +11,12 @@ public class WrappedNativeImage implements Image {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return nativeImage.getWidth();
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return nativeImage.getHeight();
     }
 

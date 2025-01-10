@@ -14,6 +14,7 @@ import io.github.mortuusars.exposure.core.camera.component.FlashMode;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.ProjectionMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.item.*;
 import io.github.mortuusars.exposure.core.frame.Frame;
@@ -33,7 +34,6 @@ import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -393,38 +393,38 @@ public class Exposure {
 
     public static class LootTables {
         public static final ResourceKey<LootTable> SIMPLE_DUNGEON_INJECT =
-                ResourceKey.create(Registries.LOOT_TABLE, Exposure.resource("chests/simple_dungeon"));
+                ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Exposure.resource("chests/simple_dungeon"));
         public static final ResourceKey<LootTable> ABANDONED_MINESHAFT_INJECT =
-                ResourceKey.create(Registries.LOOT_TABLE, Exposure.resource("chests/abandoned_mineshaft"));
+                ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Exposure.resource("chests/abandoned_mineshaft"));
         public static final ResourceKey<LootTable> STRONGHOLD_CROSSING_INJECT =
-                ResourceKey.create(Registries.LOOT_TABLE, Exposure.resource("chests/stronghold"));
+                ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Exposure.resource("chests/stronghold"));
         public static final ResourceKey<LootTable> VILLAGE_PLAINS_HOUSE_INJECT =
-                ResourceKey.create(Registries.LOOT_TABLE, Exposure.resource("chests/village_plains_house"));
+                ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Exposure.resource("chests/village_plains_house"));
         public static final ResourceKey<LootTable> SHIPWRECK_MAP_INJECT =
-                ResourceKey.create(Registries.LOOT_TABLE, Exposure.resource("chests/shipwreck_map"));
+                ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE, Exposure.resource("chests/shipwreck_map"));
     }
 
     public static class Tags {
         public static class Items {
-            public static final TagKey<Item> FILM_ROLLS = TagKey.create(Registries.ITEM, Exposure.resource("film_rolls"));
-            public static final TagKey<Item> DEVELOPED_FILM_ROLLS = TagKey.create(Registries.ITEM, Exposure.resource("developed_film_rolls"));
-            public static final TagKey<Item> CYAN_PRINTING_DYES = TagKey.create(Registries.ITEM, Exposure.resource("cyan_printing_dyes"));
-            public static final TagKey<Item> MAGENTA_PRINTING_DYES = TagKey.create(Registries.ITEM, Exposure.resource("magenta_printing_dyes"));
-            public static final TagKey<Item> YELLOW_PRINTING_DYES = TagKey.create(Registries.ITEM, Exposure.resource("yellow_printing_dyes"));
-            public static final TagKey<Item> BLACK_PRINTING_DYES = TagKey.create(Registries.ITEM, Exposure.resource("black_printing_dyes"));
-            public static final TagKey<Item> PHOTO_PAPERS = TagKey.create(Registries.ITEM, Exposure.resource("photo_papers"));
-            public static final TagKey<Item> PHOTO_AGERS = TagKey.create(Registries.ITEM, Exposure.resource("photo_agers"));
-            public static final TagKey<Item> FLASHES = TagKey.create(Registries.ITEM, Exposure.resource("flashes"));
-            public static final TagKey<Item> LENSES = TagKey.create(Registries.ITEM, Exposure.resource("lenses"));
-            public static final TagKey<Item> FILTERS = TagKey.create(Registries.ITEM, Exposure.resource("filters"));
+            public static final TagKey<Item> FILM_ROLLS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("film_rolls"));
+            public static final TagKey<Item> DEVELOPED_FILM_ROLLS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("developed_film_rolls"));
+            public static final TagKey<Item> CYAN_PRINTING_DYES = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("cyan_printing_dyes"));
+            public static final TagKey<Item> MAGENTA_PRINTING_DYES = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("magenta_printing_dyes"));
+            public static final TagKey<Item> YELLOW_PRINTING_DYES = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("yellow_printing_dyes"));
+            public static final TagKey<Item> BLACK_PRINTING_DYES = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("black_printing_dyes"));
+            public static final TagKey<Item> PHOTO_PAPERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("photo_papers"));
+            public static final TagKey<Item> PHOTO_AGERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("photo_agers"));
+            public static final TagKey<Item> FLASHES = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("flashes"));
+            public static final TagKey<Item> LENSES = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("lenses"));
+            public static final TagKey<Item> FILTERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("filters"));
 
-            public static final TagKey<Item> RED_FILTERS = TagKey.create(Registries.ITEM, Exposure.resource("red_filters"));
-            public static final TagKey<Item> GREEN_FILTERS = TagKey.create(Registries.ITEM, Exposure.resource("green_filters"));
-            public static final TagKey<Item> BLUE_FILTERS = TagKey.create(Registries.ITEM, Exposure.resource("blue_filters"));
+            public static final TagKey<Item> RED_FILTERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("red_filters"));
+            public static final TagKey<Item> GREEN_FILTERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("green_filters"));
+            public static final TagKey<Item> BLUE_FILTERS = TagKey.create(net.minecraft.core.registries.Registries.ITEM, Exposure.resource("blue_filters"));
         }
 
         public static class Blocks {
-            public static final TagKey<Block> CHROMATIC_REFRACTORS = TagKey.create(Registries.BLOCK, Exposure.resource("chromatic_refractors"));
+            public static final TagKey<Block> CHROMATIC_REFRACTORS = TagKey.create(net.minecraft.core.registries.Registries.BLOCK, Exposure.resource("chromatic_refractors"));
         }
     }
 
@@ -442,5 +442,10 @@ public class Exposure {
 
         public static void init() {
         }
+    }
+
+    public static class Registries {
+        public static final ResourceKey<Registry<ColorPalette>> COLOR_PALETTES =
+                ResourceKey.createRegistryKey(Exposure.resource("color_palette"));
     }
 }

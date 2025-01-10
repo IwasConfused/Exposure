@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
@@ -38,7 +37,6 @@ public class CameraCaptureTemplate implements CaptureTemplate {
         }
 
         Entity cameraHolder = photographer.asEntity();
-
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
         Task<ExposureData> captureTask = Capture.of(Capture.screenshot(),
@@ -56,10 +54,9 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         Processor.Resize.to(data.frameSize()),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
-                        ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), true))
-                .thenAsync(image -> new ExposureData(image.getWidth(), image.getHeight(),
-                        image.pixels(), data.colorPaletteId(), createExposureTag(data, photographer, false)));
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette().value(), true))
+                .thenAsync(image -> new ExposureData(image.width(), image.height(),
+                        image.pixels(), data.colorPalette().unwrapKey().orElseThrow().location(), createExposureTag(data, photographer, false)));
 
         if (data.fileLoadingInfo().isPresent()) {
             FileLoadingInfo fileLoadingData = data.fileLoadingInfo().get();
@@ -75,9 +72,9 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                             Processor.Resize.to(data.frameSize()),
                             Processor.brightness(brightnessStops),
                             chooseColorProcessor(data)))
-                    .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), dither))
-                    .thenAsync(image -> new ExposureData(image.getWidth(), image.getHeight(),
-                            image.pixels(), data.colorPaletteId(), createExposureTag(data,  photographer, true))));
+                    .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette().value(), dither))
+                    .thenAsync(image -> new ExposureData(image.width(), image.height(),
+                            image.pixels(), data.colorPalette().unwrapKey().orElseThrow().location(), createExposureTag(data,  photographer, true))));
         }
 
         if (data.exposureID().isEmpty()) {

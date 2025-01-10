@@ -9,20 +9,20 @@ public class CroppedImage implements Image {
 
     public CroppedImage(Image original, Rect2i crop) {
         Preconditions.checkArgument(crop.getX() >= 0 && crop.getY() >= 0
-                        && crop.getX() + crop.getWidth() <= original.getWidth()
-                        && crop.getY() + crop.getHeight() <= original.getHeight(),
-                "%s is out of bounds for image size {%s, %s}", crop, original.getWidth(), original.getHeight());
+                        && crop.getX() + crop.getWidth() <= original.width()
+                        && crop.getY() + crop.getHeight() <= original.height(),
+                "%s is out of bounds for image size {%s, %s}", crop, original.width(), original.height());
         this.original = original;
         this.crop = crop;
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return crop.getWidth();
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return crop.getHeight();
     }
 

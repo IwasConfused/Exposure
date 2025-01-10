@@ -27,7 +27,7 @@ public class ExposureData extends SavedData {
             Codec.INT.fieldOf("width").forGetter(ExposureData::getWidth),
             Codec.INT.fieldOf("height").forGetter(ExposureData::getHeight),
             ByteArrayUtils.CODEC.fieldOf("pixels").forGetter(ExposureData::getPixels),
-            ResourceLocation.CODEC.optionalFieldOf("palette", ColorPalettes.DEFAULT).forGetter(ExposureData::getPaletteId),
+            ResourceLocation.CODEC.optionalFieldOf("palette", ColorPalettes.DEFAULT.location()).forGetter(ExposureData::getPaletteId),
             Tag.CODEC.optionalFieldOf("metadata", Tag.EMPTY).forGetter(ExposureData::getTag)
     ).apply(instance, ExposureData::new));
 
@@ -41,7 +41,7 @@ public class ExposureData extends SavedData {
     );
 
     public static final ExposureData EMPTY = new ExposureData(
-            1, 1, new byte[]{0}, ColorPalettes.DEFAULT, Tag.EMPTY);
+            1, 1, new byte[]{0}, ColorPalettes.DEFAULT.location(), Tag.EMPTY);
 
     private final int width;
     private final int height;

@@ -48,7 +48,7 @@ public class RenderedImageInstance implements AutoCloseable {
 
     RenderedImageInstance(RenderableImage image) {
         this.image = image;
-        this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
+        this.texture = new DynamicTexture(image.width(), image.height(), true);
         this.textureLocation = image.getIdentifier().toResourceLocation();
         Minecraft.getInstance().getTextureManager().register(textureLocation, this.texture);
 
@@ -62,7 +62,7 @@ public class RenderedImageInstance implements AutoCloseable {
         boolean hasChanged = !image.getIdentifier().equals(this.image.getIdentifier());
         this.image = image;
         if (hasChanged) {
-            this.texture = new DynamicTexture(image.getWidth(), image.getHeight(), true);
+            this.texture = new DynamicTexture(image.width(), image.height(), true);
             forceUpload();
         }
     }
@@ -74,8 +74,8 @@ public class RenderedImageInstance implements AutoCloseable {
     protected void updateTexture() {
         if (texture.getPixels() == null) return;
 
-        int width = this.image.getWidth();
-        int height = this.image.getHeight();
+        int width = this.image.width();
+        int height = this.image.height();
 
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {

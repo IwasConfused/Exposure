@@ -12,12 +12,12 @@ public class test {
 
     public static class ExposureImage implements Image {
         @Override
-        public int getWidth() {
+        public int width() {
             return 0;
         }
 
         @Override
-        public int getHeight() {
+        public int height() {
             return 0;
         }
 
@@ -28,12 +28,12 @@ public class test {
     }
     public static class ExposureTexture implements Image {
         @Override
-        public int getWidth() {
+        public int width() {
             return 0;
         }
 
         @Override
-        public int getHeight() {
+        public int height() {
             return 0;
         }
 

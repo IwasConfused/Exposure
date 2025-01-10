@@ -4,12 +4,12 @@ import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.color.ChromaChannel;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import net.minecraft.core.Holder;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
@@ -23,7 +23,7 @@ public record CaptureProperties(String exposureID,
                                 ExposureType filmType,
                                 int frameSize,
                                 float cropFactor,
-                                ResourceLocation colorPaletteId,
+                                Holder<ColorPalette> colorPalette,
                                 boolean flash,
                                 int lightLevel,
                                 Optional<FileLoadingInfo> fileLoadingInfo,
@@ -40,7 +40,7 @@ public record CaptureProperties(String exposureID,
                     ExposureType.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer),
                     ByteBufCodecs.FLOAT.decode(buffer),
-                    ResourceLocation.STREAM_CODEC.decode(buffer),
+                    ColorPalette.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.BOOL.decode(buffer),
                     ByteBufCodecs.VAR_INT.decode(buffer),
                     ByteBufCodecs.optional(FileLoadingInfo.STREAM_CODEC).decode(buffer),
@@ -57,7 +57,7 @@ public record CaptureProperties(String exposureID,
             ExposureType.STREAM_CODEC.encode(buffer, data.filmType());
             ByteBufCodecs.VAR_INT.encode(buffer, data.frameSize());
             ByteBufCodecs.FLOAT.encode(buffer, data.cropFactor());
-            ResourceLocation.STREAM_CODEC.encode(buffer, data.colorPaletteId());
+            ColorPalette.STREAM_CODEC.encode(buffer, data.colorPalette());
             ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.VAR_INT.encode(buffer, data.lightLevel());
             ByteBufCodecs.optional(FileLoadingInfo.STREAM_CODEC).encode(buffer, data.fileLoadingInfo());

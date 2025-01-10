@@ -13,8 +13,8 @@ public class TrichromeImage implements Image {
         this.red = red;
         this.green = green;
         this.blue = blue;
-        this.width = Math.min(red.getWidth(), Math.min(green.getWidth(), blue.getWidth()));
-        this.height = Math.min(red.getHeight(), Math.min(green.getHeight(), blue.getHeight()));
+        this.width = Math.min(red.width(), Math.min(green.width(), blue.width()));
+        this.height = Math.min(red.height(), Math.min(green.height(), blue.height()));
         Preconditions.checkArgument(this.width > 0,
                 "Cannot create TrichromeImage: " +
                         "smallest image should have width larger than 0. {%s, %s, %s}", red, green, blue);
@@ -24,12 +24,12 @@ public class TrichromeImage implements Image {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return width;
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return height;
     }
 

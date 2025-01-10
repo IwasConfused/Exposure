@@ -14,22 +14,22 @@ public class ResizedImage implements Image {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return width;
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return height;
     }
 
     @Override
     public int getPixelARGB(int x, int y) {
-        double xRatio = (double) original.getWidth() / width;
-        double yRatio = (double) original.getHeight() / height;
+        double xRatio = (double) original.width() / width;
+        double yRatio = (double) original.height() / height;
 
-        int originalX = Mth.clamp(Mth.floor(x * xRatio), 0, original.getWidth() - 1);
-        int originalY = Mth.clamp(Mth.floor(y * yRatio), 0, original.getHeight() - 1);
+        int originalX = Mth.clamp(Mth.floor(x * xRatio), 0, original.width() - 1);
+        int originalY = Mth.clamp(Mth.floor(y * yRatio), 0, original.height() - 1);
 
         return original.getPixelARGB(originalX, originalY);
     }

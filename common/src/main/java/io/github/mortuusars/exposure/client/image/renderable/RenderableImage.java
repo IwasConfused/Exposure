@@ -1,9 +1,10 @@
 package io.github.mortuusars.exposure.client.image.renderable;
 
-import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.warehouse.ExposureData;
 
 import java.util.function.Function;
@@ -25,9 +26,13 @@ public interface RenderableImage extends Image {
         return processWith(processor::process, processor.getIdentifier());
     }
 
-    static RenderableImage fromExposure(String id, ExposureData exposure) {
-        return new Instance(new PalettedImage(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(),
-                ExposureClient.colorPalettes().getOrDefault(exposure.getPaletteId())), new RenderableImageIdentifier(id));
+//    static RenderableImage fromExposure(String id, ExposureData exposure) {
+//        return new Instance(new PalettedImage(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(),
+//                Exposure.Registries.getColorPaletteOrDefault(Minecrft.level(), exposure.getPaletteId()).value()), new RenderableImageIdentifier(id));
+//    }
+
+    static RenderableImage of(String id, Image image) {
+        return new Instance(image, new RenderableImageIdentifier(id));
     }
 
     class Instance extends Image.Wrapped implements RenderableImage {

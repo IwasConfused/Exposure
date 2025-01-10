@@ -1,13 +1,15 @@
 package io.github.mortuusars.exposure.core.color;
 
+import com.google.gson.JsonPrimitive;
+import com.mojang.serialization.JsonOps;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class ColorTests {
     @Test
     void ARGBtoABGR() {
-        assertEquals(Color.argb(0x992233AA).getABGR(), 0x99AA3322);
-        assertEquals(Color.ARGBtoABGR(0x992233AA), 0x99AA3322);
+        assertEquals(0x99AA3322, Color.argb(0x992233AA).getABGR());
+        assertEquals(0x99AA3322, Color.ARGBtoABGR(0x992233AA));
     }
 
     @Test
@@ -37,5 +39,29 @@ public class ColorTests {
         assertEquals(194, random.getR());
         assertEquals(195, random.getG());
         assertEquals(81, random.getB());
+
+        Color noAlpha = Color.fromHex("C2C351");
+        assertEquals(0, noAlpha.getA());
+        assertEquals(194, noAlpha.getR());
+        assertEquals(195, noAlpha.getG());
+        assertEquals(81, noAlpha.getB());
+    }
+
+    @Test
+    void intCodec() {
+        int integer = Color.CODEC.encodeStart(JsonOps.INSTANCE, Color.fromHex("7F7F7F7F")).getOrThrow().getAsInt();
+        assertEquals(0x7F7F7F7F, integer);
+
+        Color decodedColor = Color.CODEC.decode(JsonOps.INSTANCE, new JsonPrimitive(0x7F7F7F7F)).getOrThrow().getFirst();
+        assertEquals(0x7F7F7F7F, decodedColor.getARGB());
+    }
+
+    @Test
+    void hexCodec() {
+        String json = Color.HEX_STRING_CODEC.encodeStart(JsonOps.INSTANCE, Color.argb(0x7F7F7F7F)).getOrThrow().getAsString();
+        assertEquals("7F7F7F7F", json);
+
+        Color decodedColor = Color.HEX_STRING_CODEC.decode(JsonOps.INSTANCE, new JsonPrimitive("7F7F7F7F")).getOrThrow().getFirst();
+        assertEquals(0x7F7F7F7F, decodedColor.getARGB());
     }
 }

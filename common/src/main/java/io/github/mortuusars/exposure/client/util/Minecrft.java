@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.RegistryAccess;
 
 import java.util.Objects;
 
@@ -18,6 +19,10 @@ public class Minecrft {
 
     public static ClientLevel level() {
         return Objects.requireNonNull(Minecraft.getInstance().level, "Level is not available.");
+    }
+
+    public static RegistryAccess registryAccess() {
+        return level().registryAccess();
     }
 
     public static Options options() {

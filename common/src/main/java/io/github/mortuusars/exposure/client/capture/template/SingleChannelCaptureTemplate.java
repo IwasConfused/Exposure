@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
@@ -60,10 +59,9 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                         Processor.Resize.to(data.frameSize()),
                         Processor.brightness(brightnessStops),
                         chooseColorProcessor(data)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image,
-                        ExposureClient.colorPalettes().getOrDefault(data.colorPaletteId()), true))
-                .then(image -> new ExposureData(image.getWidth(), image.getHeight(),
-                        image.pixels(), data.colorPaletteId(), createExposureTag(data, photographer)))
+                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, data.colorPalette().value(), true))
+                .then(image -> new ExposureData(image.width(), image.height(),
+                        image.pixels(), data.colorPalette().unwrapKey().orElseThrow().location(), createExposureTag(data, photographer)))
                 .accept(image -> PalettedExposureUploader.upload(data.exposureID(), image))
                 .onError(printCasualErrorInChat());
     }

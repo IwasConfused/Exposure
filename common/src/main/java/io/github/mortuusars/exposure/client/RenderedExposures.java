@@ -1,12 +1,21 @@
 package io.github.mortuusars.exposure.client;
 
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.image.ResourceImage;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.core.warehouse.ExposureData;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
+import net.minecraft.core.Registry;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -35,7 +44,7 @@ public class RenderedExposures {
 
         return ExposureClient.exposureStore().getOrRequest(id).map(
                 exposure -> {
-                    RenderableImage image = RenderableImage.fromExposure(id, exposure);
+                    RenderableImage image = RenderableImage.of(id, imageFromExposure(exposure));
                     cachedRenderedExposures.put(id, new RenderedExposureInstance(image, UnixTimestamp.Milliseconds.now()));
                     return image;
                 },
@@ -58,6 +67,11 @@ public class RenderedExposures {
             }
             return stale;
         });
+    }
+
+    private @NotNull Image imageFromExposure(ExposureData exposure) {
+        ColorPalette palette = ColorPalettes.get(Minecrft.level().registryAccess(), exposure.getPaletteId()).value();
+        return new PalettedImage(exposure.getWidth(), exposure.getHeight(), exposure.getPixels(), palette);
     }
 
     private static class RenderedExposureInstance {
