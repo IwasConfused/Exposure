@@ -44,13 +44,14 @@ public class CaptureTimer {
     }
 
     public CaptureTimer start() {
-        isRunning = true;
-        startedAtGameTick = getCurrentGameTick();
-        lastGameTick = startedAtGameTick;
-        onStart.run();
+        if (!isRunning) {
+            isRunning = true;
+            startedAtGameTick = getCurrentGameTick();
+            lastGameTick = startedAtGameTick;
+            onStart.run();
+        }
 
-        //TODO: test if ticking is needed here
-//        tick();
+        tick();
 
         return this;
     }

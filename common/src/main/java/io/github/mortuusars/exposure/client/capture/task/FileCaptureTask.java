@@ -73,13 +73,6 @@ public class FileCaptureTask extends Task<Result<Image>> {
             return Result.error(ERROR_NO_EXTENSION);
         }
 
-        //TODO: supported formats
-//        List<String> formats = getSupportedFormats();
-//        String ext = extension.replace(".", "");
-//        if (!formats.contains(ext)) {
-//            return Optional.of(ImageLoader.Error.NOT_SUPPORTED);
-//        }
-
         if (!file.exists()) {
             return Result.error(ERROR_FILE_DOES_NOT_EXIST);
         }

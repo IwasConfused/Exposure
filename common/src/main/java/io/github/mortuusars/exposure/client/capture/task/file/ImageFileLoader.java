@@ -11,10 +11,9 @@ public interface ImageFileLoader {
     Result<Image> load(File file);
 
     static ImageFileLoader chooseFitting(File file) {
-        return new BufferedImageFileLoader();
-//        return !Files.getFileExtension(file.toString()).equals("png")
-//                ? new BufferedImageFileLoader()
-//                : fallback(new NativeImagePngFileLoader(), new BufferedImageFileLoader());
+        return !Files.getFileExtension(file.toString()).equals("png")
+                ? new BufferedImageFileLoader()
+                : fallback(new NativeImagePngFileLoader(), new BufferedImageFileLoader());
     }
 
     static ImageFileLoader fallback(ImageFileLoader main, ImageFileLoader fallback) {

@@ -13,7 +13,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-//TODO: comment about not needing packet splitting, if it works without it
 public record ExposureDataResponseS2CP(String id, RequestedPalettedExposure result) implements IPacket {
     public static final ResourceLocation ID = Exposure.resource("exposure_data_response");
     public static final Type<ExposureDataResponseS2CP> TYPE = new Type<>(ID);

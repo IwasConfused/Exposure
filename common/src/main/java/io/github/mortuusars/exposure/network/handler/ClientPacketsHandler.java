@@ -1,17 +1,19 @@
 package io.github.mortuusars.exposure.network.handler;
 
+import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.task.ExposureRetrieveTask;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplate;
 import io.github.mortuusars.exposure.client.image.TrichromeImage;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.capture.Capture;
-import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
+import io.github.mortuusars.exposure.client.capture.palettizer.Palettizer;
 import io.github.mortuusars.exposure.client.image.processor.Process;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
-import io.github.mortuusars.exposure.client.capture.saving.PalettedExposureUploader;
+import io.github.mortuusars.exposure.client.capture.saving.ExposureUploader;
 import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.CaptureProperties;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
@@ -34,12 +36,15 @@ import net.minecraft.util.StringUtil;
 import net.minecraft.world.item.ItemStack;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class ClientPacketsHandler {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static void applyShader(ApplyShaderS2CP packet) {
         if (packet.shouldRemove()) {
             Minecraft.getInstance().gameRenderer.shutdownEffect();
@@ -48,7 +53,7 @@ public class ClientPacketsHandler {
         }
     }
 
-    //TODO: Use CaptureData
+    //TODO: Use CaptureProperties
     public static void exposeScreenshot(String exposureId, int size, float brightnessStops) {
         throw new NotImplementedException();
 
@@ -77,32 +82,36 @@ public class ClientPacketsHandler {
 //        });
     }
 
+    //TODO: Use CaptureProperties
     public static void loadExposure(String id, String filePath, int size, boolean dither) {
         LocalPlayer player = Minecrft.player();
 
         if (StringUtil.isNullOrEmpty(filePath)) {
-            Exposure.LOGGER.error("Cannot load exposure: filePath is null or empty.");
+            LOGGER.error("Cannot load exposure: filePath is null or empty.");
             return;
         }
 
         Holder<ColorPalette> colorPalette = ColorPalettes.get(Minecrft.registryAccess(), ColorPalettes.DEFAULT);
+        ColorPalette palette = colorPalette.value();
+        ResourceLocation paletteId = colorPalette.unwrapKey().orElseThrow().location();
+        Palettizer palettizer = dither ? Palettizer.DITHERED : Palettizer.NEAREST;
 
         ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
                 .handleErrorAndGetResult()
                 .thenAsync(Process.with(
                         Processor.Crop.SQUARE_CENTER,
                         Processor.Resize.to(size)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, colorPalette.value(), dither))
-                .then(image -> new ExposureData(image.width(), image.height(), image.pixels(), colorPalette.unwrapKey().orElseThrow().location(),
+                .thenAsync(Palettizer.palettizeAndClose(palettizer, palette))
+                .then(image -> new ExposureData(image.width(), image.height(), image.pixels(), paletteId,
                         new ExposureData.Tag(ExposureType.COLOR, player.getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), true, false)))
-                .accept(image -> PalettedExposureUploader.upload(id, image)));
+                .accept(image -> ExposureUploader.upload(id, image)));
     }
 
     public static void showExposure(ShowExposureCommandS2CP packet) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
-            Exposure.LOGGER.error("Cannot show exposures. Player is null.");
+            LOGGER.error("Cannot show exposures. Player is null.");
             return;
         }
 
@@ -132,25 +141,27 @@ public class ClientPacketsHandler {
 
     public static void createChromaticExposure(CreateChromaticExposureS2CP packet) {
         if (packet.id().isEmpty()) {
-            Exposure.LOGGER.error("Cannot create chromatic exposure: identifier is empty.");
+            LOGGER.error("Cannot create chromatic exposure: identifier is empty.");
             return;
         }
 
         if (packet.layers().size() != 3) {
-            Exposure.LOGGER.error("Cannot create chromatic exposure: 3 layers required. Provided: '{}'.", packet.layers().size());
+            LOGGER.error("Cannot create chromatic exposure: 3 layers required. Provided: '{}'.", packet.layers().size());
             return;
         }
 
-        Holder<ColorPalette> colorPalette = ColorPalettes.get(Minecrft.registryAccess(), ColorPalettes.DEFAULT);
+        Holder<ColorPalette> colorPalette = ColorPalettes.getDefault(Minecrft.registryAccess());
+        ColorPalette palette = colorPalette.value();
+        ResourceLocation paletteId = colorPalette.unwrapKey().orElseThrow().location();
 
         ExposureClient.cycles().addParallelTask(new ExposureRetrieveTask(packet.layers(), 20_000)
                 .then(Result::unwrap)
-                .then(layers -> new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
-                .thenAsync(img -> ImagePalettizer.palettizeAndClose(img, colorPalette.value(), true))
-                .then(img -> new ExposureData(img.width(), img.height(), img.pixels(), colorPalette.unwrapKey().orElseThrow().location(),
+                .thenAsync(layers -> (Image)new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
+                .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette))
+                .thenAsync(img -> new ExposureData(img.width(), img.height(), img.pixels(), paletteId,
                         new ExposureData.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
                                 UnixTimestamp.Seconds.now(), false, false)))
-                .accept(exposure -> PalettedExposureUploader.upload(packet.id(), exposure)));
+                .acceptAsync(ExposureUploader.upload(packet.id())));
     }
 
     public static void startCapture(StartCaptureS2CP packet) {

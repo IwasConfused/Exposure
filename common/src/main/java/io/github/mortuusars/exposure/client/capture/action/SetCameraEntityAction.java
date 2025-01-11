@@ -16,7 +16,7 @@ public class SetCameraEntityAction implements CaptureAction {
     public void beforeCapture() {
         cameraEntityBeforeCapture = Minecrft.get().getCameraEntity();
         // Using field directly instead of Minecraft#setCameraEntity here because it's removing currently active postEffect(shader).
-        // postEffect will be disabled anyway for the capture (unless turned off in a config).
+        // Even though postEffect will be disabled anyway for the capture (unless turned off in a config), it is not desirable overall.
         Minecrft.get().cameraEntity = cameraEntity;
     }
 

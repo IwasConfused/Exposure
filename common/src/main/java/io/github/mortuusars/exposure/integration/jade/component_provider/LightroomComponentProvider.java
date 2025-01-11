@@ -59,7 +59,7 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
 
         PrintingMode process = PrintingMode.fromStringOrDefault(tag.getString("Process"), PrintingMode.REGULAR);
         if (process != PrintingMode.REGULAR)
-            tooltip.add(helper.text(Component.translatable("gui.exposure.lightroom.process." + process.getSerializedName())));
+            tooltip.add(helper.text(Component.translatable("gui.exposure.lightroom.printing_mode." + process.getSerializedName())));
 
         tooltip.add(helper.spacer(0, 2));
     }

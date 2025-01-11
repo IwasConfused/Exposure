@@ -5,7 +5,7 @@ import io.github.mortuusars.exposure.core.color.ColorPalette;
 import io.github.mortuusars.exposure.core.color.Color;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
 
-public class NearestColorPalettizer implements ImagePalettizer {
+public class NearestColorPalettizer implements Palettizer {
     @Override
     public PalettedImage palettize(Image image, ColorPalette palette) {
         int width = image.width();

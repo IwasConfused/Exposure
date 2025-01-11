@@ -10,65 +10,10 @@ import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
-import net.minecraft.client.Minecraft;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
-
-//TODO: revisit and think about capturing more
-
-// Capture Types:
-// Screenshot (background | direct)
-// File
-
-// Capture Components:
-// HideGui, ForceFirstPerson, DisablePostEffect
-// Flash (sound and particles)?
-// Interplanar Projection (sound and particles)
-
-// Capture can consist of multiple capture types (with separate components) in fallback system
-// Processing is then applied to whatever capture result
-
-// Image Processing: T process(Image image) contains list of pixel processors
-// <Composite class to handle multiple at once>
-// Crop
-// Resize
-// Pixel Processing: int process(int ARGB)
-// Brightness
-// BlackAndWhite | Selective Channel BW
-
-// Converting to paletted image: <Converting can also be done with Image Processors, as a next step after modifications>
-// Dithered
-// Nearest
-
-    /*
-
-    SnapShot.setup()
-        .capture(Capture.takeScreenshot() // Supplier<T>
-            .withComponents(
-                CaptureComponents.hideGui(),
-                CaptureComponents.forceFirstPersonCamera(),
-                CaptureComponents.disablePostEffect()
-                CaptureComponents.optional(stops != 0, () -> CaptureComponents.modifyGamma(stops)))
-            .overridenBy(Capture.fromFile(filePath)
-                .onError(error -> player.display(error))) // send packet to brake projector
-        .then(Process.with( // Consumer<T>
-            ImageProcessors.crop(getCropFactor(), Crop.CENTER_SQUARE))
-            ImageProcessors.resize(size)
-            ImageProcessors.modifyPixel(
-                PixelModifiers.optional(stops != 0, () -> PixelModifiers.brightness(stops)),
-                PixelModifiers.optional(filmType == BW, () -> PixelModifiers.blackAndWhite())
-            ),
-            ImageProcessors.convert(Converter.DITHER)
-        )
-        .thenConsume(FileSaver.saveToDefaultFolder()) // Consumer<T2>
-        .thenConsume(Uploader.toServer(exposureId))   // Consumer<T2>
-        .enqueue()
-
-        ))
-
-     */
 
 public class Capture<T> extends Task<Result<T>> {
     public static final String ERROR_TIMED_OUT = "gui.exposure.capture.error.timed_out";

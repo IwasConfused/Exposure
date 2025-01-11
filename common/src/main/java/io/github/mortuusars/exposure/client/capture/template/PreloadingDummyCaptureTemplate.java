@@ -1,9 +1,8 @@
 package io.github.mortuusars.exposure.client.capture.template;
 
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
-import io.github.mortuusars.exposure.client.capture.palettizer.ImagePalettizer;
+import io.github.mortuusars.exposure.client.capture.palettizer.Palettizer;
 import io.github.mortuusars.exposure.client.image.processor.Process;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.util.Minecrft;
@@ -36,7 +35,7 @@ public class PreloadingDummyCaptureTemplate implements CaptureTemplate {
                         Processor.Resize.to(16),
                         Processor.brightness(brightnessStops),
                         Processor.blackAndWhite(1)))
-                .thenAsync(image -> ImagePalettizer.palettizeAndClose(image, palette, true))
+                .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette))
                 .thenAsync(img -> ExposureData.EMPTY);
     }
 }

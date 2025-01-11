@@ -29,4 +29,8 @@ public class ColorPalettes {
         Registry<ColorPalette> registry = registryAccess.registryOrThrow(Exposure.Registries.COLOR_PALETTE);
         return registry.getHolder(key).or(() -> registry.getHolder(DEFAULT)).or(registry::getAny).orElseThrow();
     }
+
+    public static Holder<ColorPalette> getDefault(RegistryAccess registryAccess) {
+        return get(registryAccess, DEFAULT);
+    }
 }

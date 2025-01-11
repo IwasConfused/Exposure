@@ -10,7 +10,7 @@ import io.github.mortuusars.exposure.client.image.PalettedImage;
  * <br>Credit:
  * <a href="http://stackoverflow.com/questions/5940188/how-to-convert-a-24-bit-png-to-3-bit-png-using-floyd-steinberg-dithering">stackoverflow post</a>
  */
-public class DitheredPalettizer implements ImagePalettizer {
+public class DitheredPalettizer implements Palettizer {
     @Override
     public PalettedImage palettize(Image image, ColorPalette palette) {
         return palettize(getPixels(image), palette);

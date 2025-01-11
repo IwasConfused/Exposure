@@ -116,10 +116,10 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         Map<PrintingMode, WidgetSprites> spritesMap = Map.of(PrintingMode.REGULAR, PRINTING_MODE_TOGGLE_REGULAR_SPRITES,
                 PrintingMode.CHROMATIC, PRINTING_MODE_TOGGLE_CHROMATIC_SPRITES);
         Map<PrintingMode, Tooltip> tooltipMap = Map.of(
-                PrintingMode.REGULAR, Tooltip.create(Component.translatable("gui.exposure.lightroom.mode.regular")),
-                PrintingMode.CHROMATIC, Tooltip.create(Component.translatable("gui.exposure.lightroom.mode.chromatic")
+                PrintingMode.REGULAR, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.regular")),
+                PrintingMode.CHROMATIC, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic")
                         .append(CommonComponents.NEW_LINE)
-                        .append(Component.translatable("gui.exposure.lightroom.mode.chromatic.info").withStyle(ChatFormatting.GRAY))));
+                        .append(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic.info").withStyle(ChatFormatting.GRAY))));
         return new CycleButton<>(leftPos - 19, topPos + 91, 18, 18,
                 Arrays.asList(PrintingMode.values()), getMenu().getBlockEntity().getPrintingMode(),
                 spritesMap, (button, newMode) -> onPrintingModeToggleButtonPressed(button))

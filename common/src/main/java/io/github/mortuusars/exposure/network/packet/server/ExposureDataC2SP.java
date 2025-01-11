@@ -14,14 +14,14 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record ExposureClientDataC2SP(String id, ExposureData exposure) implements IPacket {
-    public static final ResourceLocation ID = Exposure.resource("exposure_client_data");
-    public static final Type<ExposureClientDataC2SP> TYPE = new Type<>(ID);
+public record ExposureDataC2SP(String id, ExposureData exposure) implements IPacket {
+    public static final ResourceLocation ID = Exposure.resource("exposure_data");
+    public static final Type<ExposureDataC2SP> TYPE = new Type<>(ID);
 
-    public static final StreamCodec<FriendlyByteBuf, ExposureClientDataC2SP> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.STRING_UTF8, ExposureClientDataC2SP::id,
-            ExposureData.STREAM_CODEC, ExposureClientDataC2SP::exposure,
-            ExposureClientDataC2SP::new
+    public static final StreamCodec<FriendlyByteBuf, ExposureDataC2SP> STREAM_CODEC = StreamCodec.composite(
+            ByteBufCodecs.STRING_UTF8, ExposureDataC2SP::id,
+            ExposureData.STREAM_CODEC, ExposureDataC2SP::exposure,
+            ExposureDataC2SP::new
     );
 
     @Override
