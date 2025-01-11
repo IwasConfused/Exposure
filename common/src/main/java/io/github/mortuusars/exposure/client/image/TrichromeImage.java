@@ -35,11 +35,11 @@ public class TrichromeImage implements Image {
 
     @Override
     public int getPixelARGB(int x, int y) {
-        return FastColor.ABGR32.color(
-                FastColor.ABGR32.alpha(red.getPixelARGB(x, y)),
-                FastColor.ABGR32.red(red.getPixelARGB(x, y)),
-                FastColor.ABGR32.green(green.getPixelARGB(x, y)),
-                FastColor.ABGR32.blue(blue.getPixelARGB(x, y)));
+        return FastColor.ARGB32.color(
+                FastColor.ARGB32.alpha(red.getPixelARGB(x, y)),
+                FastColor.ARGB32.red(red.getPixelARGB(x, y)),
+                FastColor.ARGB32.green(green.getPixelARGB(x, y)),
+                FastColor.ARGB32.blue(blue.getPixelARGB(x, y)));
     }
 
     public static TrichromeImage withSize(Image red, Image green, Image blue, int width, int height) {

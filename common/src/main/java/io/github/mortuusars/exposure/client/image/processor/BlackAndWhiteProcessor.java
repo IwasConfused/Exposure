@@ -31,11 +31,11 @@ public class BlackAndWhiteProcessor implements Processor {
         return "bw-" + contrast;
     }
 
-    public int modifyPixel(int colorABGR) {
-        int alpha = FastColor.ABGR32.alpha(colorABGR);
-        int blue = FastColor.ABGR32.blue(colorABGR);
-        int green = FastColor.ABGR32.green(colorABGR);
-        int red = FastColor.ABGR32.red(colorABGR);
+    public int modifyPixel(int colorARGB) {
+        int alpha = FastColor.ARGB32.alpha(colorARGB);
+        int red = FastColor.ARGB32.red(colorARGB);
+        int green = FastColor.ARGB32.green(colorARGB);
+        int blue = FastColor.ARGB32.blue(colorARGB);
 
         // Weights adding up to more than 1 - to make the image slightly brighter and better emulate the look of BW photos
         int luma = Mth.clamp((int) (0.299 * red + 0.587 * green + 0.114 * blue), 0, 255);
@@ -45,7 +45,7 @@ public class BlackAndWhiteProcessor implements Processor {
             luma = Mth.clamp((luma - 127) * contrast / 127 + 127, 0, 255);
         }
 
-        return FastColor.ABGR32.color(alpha, luma, luma, luma);
+        return FastColor.ARGB32.color(alpha, luma, luma, luma);
     }
 
     @Override

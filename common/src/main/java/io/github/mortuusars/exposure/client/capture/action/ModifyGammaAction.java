@@ -8,12 +8,12 @@ public class ModifyGammaAction implements CaptureAction {
 
     public ModifyGammaAction(float brightnessStops, float gammaPerStop) {
         float currentGamma = Minecraft.getInstance().options.gamma().get().floatValue();
-        //TODO: test and define magical numbers
-        this.offset = brightnessStops != 0 ? (gammaPerStop * brightnessStops) * ((1f - currentGamma) * 0.65f + 0.35f) : 0;
+        float strength = (1f - currentGamma) * 0.65f + 0.35f;
+        this.offset = (gammaPerStop * brightnessStops) * strength;
     }
 
     public ModifyGammaAction(float brightnessStops) {
-        this(brightnessStops, 0.01f);
+        this(brightnessStops, 0.02f);
     }
 
     @Override

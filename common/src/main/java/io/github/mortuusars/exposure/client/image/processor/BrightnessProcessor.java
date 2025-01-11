@@ -6,8 +6,8 @@ import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 public class BrightnessProcessor implements Processor {
-    public float brightenPerStop = 0.3f;
-    public float darkenPerStop = 0.3f;
+    public float brightenPerStop = 0.2f;
+    public float darkenPerStop = 0.2f;
 
     protected final float brightnessStops;
 
@@ -25,15 +25,15 @@ public class BrightnessProcessor implements Processor {
         return "brightness-" + brightnessStops;
     }
 
-    public int modifyPixel(int colorABGR) {
+    public int modifyPixel(int colorARGB) {
         float stopsDif = brightnessStops;
         if (stopsDif == 0f)
-            return colorABGR;
+            return colorARGB;
 
-        int alpha = FastColor.ABGR32.alpha(colorABGR);
-        int blue = FastColor.ABGR32.blue(colorABGR);
-        int green = FastColor.ABGR32.green(colorABGR);
-        int red = FastColor.ABGR32.red(colorABGR);
+        int alpha = FastColor.ARGB32.alpha(colorARGB);
+        int red = FastColor.ARGB32.red(colorARGB);
+        int green = FastColor.ARGB32.green(colorARGB);
+        int blue = FastColor.ARGB32.blue(colorARGB);
 
         float brightness = 1f + (stopsDif * (stopsDif < 0 ? darkenPerStop : brightenPerStop));
 
@@ -57,10 +57,10 @@ public class BrightnessProcessor implements Processor {
 
         // BUT it does not look perfect (IDK, maybe because of dithering), so we blend them together.
         // This makes transitions smoother, subtler. Which looks good imo.
-        return FastColor.ABGR32.color(alpha,
-                Mth.clamp((int) ((b + rdst[2]) / 2), 0, 255),
-                Mth.clamp((int) ((g + rdst[1]) / 2), 0, 255),
-                Mth.clamp((int) ((r + rdst[0]) / 2), 0, 255));
+        return FastColor.ARGB32.color(alpha,
+                Mth.clamp(Mth.lerpInt(0.5f, (int)r, rdst[0]), 0, 255),
+                Mth.clamp(Mth.lerpInt(0.5f, (int)g, rdst[1]), 0, 255),
+                Mth.clamp(Mth.lerpInt(0.5f, (int)b, rdst[2]), 0, 255));
     }
 
     /**

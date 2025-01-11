@@ -21,25 +21,25 @@ public class MultiplyProcessor implements Processor {
         return multiplyColor != 0 ? "tint-" + Integer.toHexString(multiplyColor) : "";
     }
 
-    public int modifyPixel(int ARGB) {
+    public int modifyPixel(int colorARGB) {
         if (multiplyColor == 0)
-            return ARGB;
+            return colorARGB;
 
-        int alpha = FastColor.ABGR32.alpha(ARGB);
-        int blue = FastColor.ABGR32.blue(ARGB);
-        int green = FastColor.ABGR32.green(ARGB);
-        int red = FastColor.ABGR32.red(ARGB);
+        int alpha = FastColor.ARGB32.alpha(colorARGB);
+        int red = FastColor.ARGB32.red(colorARGB);
+        int green = FastColor.ARGB32.green(colorARGB);
+        int blue = FastColor.ARGB32.blue(colorARGB);
 
-        int tintAlpha = FastColor.ARGB32.alpha(ARGB);
-        int tintBlue = FastColor.ARGB32.blue(ARGB);
-        int tintGreen = FastColor.ARGB32.green(ARGB);
-        int tintRed = FastColor.ARGB32.red(ARGB);
+        int tintAlpha = FastColor.ARGB32.alpha(colorARGB);
+        int tintRed = FastColor.ARGB32.red(colorARGB);
+        int tintGreen = FastColor.ARGB32.green(colorARGB);
+        int tintBlue = FastColor.ARGB32.blue(colorARGB);
 
         alpha = Math.min(255, (alpha * tintAlpha) / 255);
-        blue = Math.min(255, (blue * tintBlue) / 255);
-        green = Math.min(255, (green * tintGreen) / 255);
         red = Math.min(255, (red * tintRed) / 255);
+        green = Math.min(255, (green * tintGreen) / 255);
+        blue = Math.min(255, (blue * tintBlue) / 255);
 
-        return FastColor.ABGR32.color(alpha, blue, green, red);
+        return FastColor.ARGB32.color(alpha, green, red, blue);
     }
 }
