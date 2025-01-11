@@ -4,12 +4,11 @@ import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
-import io.github.mortuusars.exposure.fabric.resources.IdentifiableResourceReloadListenerWrapper;
 import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.network.fabric.FabricC2SPackets;
 import io.github.mortuusars.exposure.network.fabric.FabricS2CPackets;
@@ -20,12 +19,10 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableSource;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -44,8 +41,9 @@ public class ExposureFabric implements ModInitializer {
     public void onInitialize() {
         Exposure.init();
 
-        DynamicRegistries.registerSynced(Exposure.Registry.COLOR_PALETTE, ColorPalette.CODEC, ColorPalette.CODEC);
-        DynamicRegistries.registerSynced(Exposure.Registry.LENS, Lens.CODEC, Lens.CODEC);
+        DynamicRegistries.registerSynced(Exposure.Registries.COLOR_PALETTE, ColorPalette.CODEC, ColorPalette.CODEC);
+        DynamicRegistries.registerSynced(Exposure.Registries.LENS, Lens.CODEC, Lens.CODEC);
+        DynamicRegistries.registerSynced(Exposure.Registries.FILTER, Filter.CODEC, Filter.CODEC);
 
         NeoForgeModConfigEvents.reloading(Exposure.ID).register(config -> {
             if (config.getType() == ModConfig.Type.COMMON && FabricLoader.getInstance().isModLoaded("create")) {

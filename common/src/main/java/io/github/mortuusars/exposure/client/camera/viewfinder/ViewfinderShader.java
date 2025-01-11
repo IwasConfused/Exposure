@@ -7,11 +7,13 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.util.Shader;
 import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.data.filter.Filters;
+import io.github.mortuusars.exposure.data.Filter;
+import io.github.mortuusars.exposure.data.Filters;
 import io.github.mortuusars.exposure.item.part.Attachment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -85,16 +87,17 @@ public class ViewfinderShader implements AutoCloseable {
         }
     }
 
+    public void update() {
+        ItemStack filterStack = Attachment.FILTER.get(camera.getItemStack()).getForReading();
+        Filters.of(Minecrft.registryAccess(), filterStack).map(Filter::shader).ifPresentOrElse(this::apply, this::remove);
+    }
+
     public void remove() {
         if (shader != null) {
             shader.close();
         }
 
         shader = null;
-    }
-
-    public void update() {
-        Filters.getShaderOf(Attachment.FILTER.get(camera.getItemStack()).getForReading()).ifPresentOrElse(this::apply, this::remove);
     }
 
     @Override

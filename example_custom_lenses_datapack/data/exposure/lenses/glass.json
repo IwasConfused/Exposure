@@ -1,6 +1,6 @@
 {
-  "item": {
-    "item": "minecraft:glass"
+  "predicate": {
+    "items": "minecraft:glass"
   },
   "focal_range": {
     "min": 10,

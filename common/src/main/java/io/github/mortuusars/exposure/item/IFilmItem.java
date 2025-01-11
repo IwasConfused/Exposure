@@ -27,7 +27,7 @@ public interface IFilmItem {
 
     default ResourceKey<ColorPalette> getColorPaletteId(ItemStack stack) {
         @Nullable ResourceLocation location = stack.get(Exposure.DataComponents.FILM_COLOR_PALETTE);
-        if (location != null) return ResourceKey.create(Exposure.Registry.COLOR_PALETTE, location);
+        if (location != null) return ResourceKey.create(Exposure.Registries.COLOR_PALETTE, location);
         return ColorPalettes.DEFAULT;
     }
 

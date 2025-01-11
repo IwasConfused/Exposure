@@ -1,7 +1,0 @@
-{
-  "item": {
-    "item": "minecraft:brown_stained_glass_pane"
-  },
-  "tint_color": "#51301A",
-  "shader": "exposure:shaders/brown_tint.json"
-}

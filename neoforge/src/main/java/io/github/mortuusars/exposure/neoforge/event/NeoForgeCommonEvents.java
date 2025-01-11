@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.neoforge.event;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.event_hub.CommonEvents;
 import io.github.mortuusars.exposure.event_hub.ServerEvents;
@@ -43,8 +44,9 @@ public class NeoForgeCommonEvents {
 
         @SubscribeEvent
         public static void addDatapackRegistries(DataPackRegistryEvent.NewRegistry event) {
-            event.dataPackRegistry(Exposure.Registry.COLOR_PALETTE, ColorPalette.CODEC, ColorPalette.CODEC);
-            event.dataPackRegistry(Exposure.Registry.LENS, Lens.CODEC, Lens.CODEC);
+            event.dataPackRegistry(Exposure.Registries.COLOR_PALETTE, ColorPalette.CODEC, ColorPalette.CODEC);
+            event.dataPackRegistry(Exposure.Registries.LENS, Lens.CODEC, Lens.CODEC);
+            event.dataPackRegistry(Exposure.Registries.FILTER, Filter.CODEC, Filter.CODEC);
         }
 
         @SuppressWarnings("unchecked")

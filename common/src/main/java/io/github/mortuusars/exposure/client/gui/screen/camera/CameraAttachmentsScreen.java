@@ -3,14 +3,13 @@ package io.github.mortuusars.exposure.client.gui.screen.camera;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.screen.ItemListScreen;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.core.color.Color;
 import io.github.mortuusars.exposure.data.Lenses;
-import io.github.mortuusars.exposure.data.filter.Filter;
-import io.github.mortuusars.exposure.data.filter.Filters;
+import io.github.mortuusars.exposure.data.Filter;
+import io.github.mortuusars.exposure.data.Filters;
 import io.github.mortuusars.exposure.menu.CameraAttachmentsMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -127,7 +126,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
         int filterX = hasLens ? 102 : 98;
         int filterY = hasLens ? 54 : 52;
         if (filterSlot.hasItem()) {
-            Filters.of(filterSlot.getItem()).ifPresent(filter -> {
+            Filters.of(Minecrft.registryAccess(), filterSlot.getItem()).ifPresent(filter -> {
                 renderFilter(guiGraphics, mouseX, mouseY, filter, filterX, filterY);
             });
         } else if (isMouseOver(filterOnLens, mouseX, mouseY)) {
@@ -146,7 +145,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
     }
 
     protected void renderFilter(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, Filter filter, int filterX, int filterY) {
-        Color tint = filter.getTintColor();
+        Color tint = filter.attachmentTintColor();
         float r = tint.getRF();
         float g = tint.getGF();
         float b = tint.getBF();
@@ -161,7 +160,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
 
-        ResourceLocation filterTexture = filter.getAttachmentTexture();
+        ResourceLocation filterTexture = filter.attachmentTexture();
         guiGraphics.blit(filterTexture, leftPos + filterX, topPos + filterY, 0, 0, 32, 32, 32, 32);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
     }
@@ -228,8 +227,8 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
                     .withStyle(ChatFormatting.GOLD));
         });
 
-        Filters.of(stack).filter(f -> Minecrft.options().advancedItemTooltips).ifPresent(filter ->
-                tooltip.add(Component.literal(filter.getShader().toString())
+        Filters.of(Minecrft.registryAccess(), stack).filter(f -> Minecrft.options().advancedItemTooltips).ifPresent(filter ->
+                tooltip.add(Component.literal(filter.shader().toString())
                         .withStyle(ChatFormatting.GRAY)));
 
         return tooltip;

@@ -48,7 +48,7 @@ public class PaletteCommand {
     }
 
     private static int exportAsJson(CommandSourceStack source, ResourceLocation paletteId, String filePath) {
-        @Nullable ColorPalette palette = source.registryAccess().registryOrThrow(Exposure.Registry.COLOR_PALETTE).get(paletteId);
+        @Nullable ColorPalette palette = source.registryAccess().registryOrThrow(Exposure.Registries.COLOR_PALETTE).get(paletteId);
         if (palette == null) {
             source.sendFailure(Component.literal(paletteId + " is not found."));
             return 0;
@@ -70,7 +70,7 @@ public class PaletteCommand {
     }
 
     private static int exportAsPng(CommandSourceStack source, ResourceLocation paletteId, String filePath) {
-        @Nullable ColorPalette palette = source.registryAccess().registryOrThrow(Exposure.Registry.COLOR_PALETTE).get(paletteId);
+        @Nullable ColorPalette palette = source.registryAccess().registryOrThrow(Exposure.Registries.COLOR_PALETTE).get(paletteId);
         if (palette == null) {
             source.sendFailure(Component.literal(paletteId + " is not found."));
             return 0;

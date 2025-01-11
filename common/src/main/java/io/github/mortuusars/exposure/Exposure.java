@@ -15,6 +15,7 @@ import io.github.mortuusars.exposure.core.ExposureType;
 import io.github.mortuusars.exposure.core.ProjectionMode;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.item.*;
@@ -32,6 +33,7 @@ import io.github.mortuusars.exposure.util.ItemAndStack;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -444,11 +446,9 @@ public class Exposure {
         }
     }
 
-    public static class Registry {
-        public static final ResourceKey<net.minecraft.core.Registry<ColorPalette>> COLOR_PALETTE =
-                ResourceKey.createRegistryKey(Exposure.resource("color_palette"));
-
-        public static final ResourceKey<net.minecraft.core.Registry<Lens>> LENS =
-                ResourceKey.createRegistryKey(Exposure.resource("lens"));
+    public static class Registries {
+        public static final ResourceKey<Registry<ColorPalette>> COLOR_PALETTE = ResourceKey.createRegistryKey(Exposure.resource("color_palette"));
+        public static final ResourceKey<Registry<Lens>> LENS = ResourceKey.createRegistryKey(Exposure.resource("lens"));
+        public static final ResourceKey<Registry<Filter>> FILTER = ResourceKey.createRegistryKey(Exposure.resource("filter"));
     }
 }

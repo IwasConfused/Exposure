@@ -4,7 +4,6 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.ExposureClientReloadListener;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
-import io.github.mortuusars.exposure.data.filter.Filters;
 import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
 import io.github.mortuusars.exposure.client.gui.screen.ItemRenameScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
@@ -50,7 +49,6 @@ public class NeoForgeClientEvents {
         @SubscribeEvent
         public static void registerResourceReloadListeners(RegisterClientReloadListenersEvent event) {
             event.registerReloadListener(new ExposureClientReloadListener());
-            event.registerReloadListener(new Filters.Loader());
         }
 
         @SubscribeEvent
@@ -72,9 +70,4 @@ public class NeoForgeClientEvents {
             });
         }
     }
-
-//    @EventBusSubscriber(modid = Exposure.ID, bus = EventBusSubscriber.Bus.GAME, value = Dist.CLIENT)
-//    public static class GameBus {
-//
-//    }
 }
