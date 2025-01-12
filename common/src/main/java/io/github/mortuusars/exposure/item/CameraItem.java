@@ -746,6 +746,7 @@ public class CameraItem extends Item {
         if (projectionState == CameraInstance.ProjectionState.FAILED) {
             ItemStack filterStack = filter.getCopy().transmuteCopy(Exposure.Items.BROKEN_INTERPLANAR_PROJECTOR.get());
             Attachment.FILTER.set(stack, filterStack);
+            playSound(null, photographer.asEntity(), Exposure.SoundEvents.BSOD.get(), 1f, 1f, 0);
             return;
         }
 

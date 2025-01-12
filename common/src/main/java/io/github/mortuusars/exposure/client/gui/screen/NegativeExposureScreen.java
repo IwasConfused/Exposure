@@ -67,7 +67,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
     @Override
     protected void init() {
         super.init();
-        zoomFactor = 1f / (minecraft.options.guiScale().get() + 1);
+        zoomFactor = 1f / ((float)minecraft.getWindow().getGuiScale());
         ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
                 PREV_BUTTON_SPRITES,
                 button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));

@@ -166,6 +166,8 @@
   "item.exposure.interplanar_projector": "Interplanar Projector",
   "item.exposure.broken_interplanar_projector": "Broken Interplanar Projector",
   "item.exposure.broken_interplanar_projector.tooltip.broken": "Broken",
+  "item.exposure.broken_interplanar_projector.viewfinder.message": "Interplanar Projector has ran into a problem and was broken.",
+  "item.exposure.broken_interplanar_projector.viewfinder.error_code": "Error code:",
   "item.exposure.interplanar_projector.mode.clean": "§6Clean",
   "item.exposure.interplanar_projector.mode.dithered": "§6Dithered",
   "item.exposure.interplanar_projector.tooltip.disabled": "§7This realm has protective barrier which makes projecting from another plane impossible.",
@@ -211,5 +213,6 @@
   "subtitle.exposure.photograph_frame.place": "Photograph Frame placed",
   "subtitle.exposure.photograph_frame.remove_item": "Photograph Frame empties",
   "subtitle.exposure.photograph_frame.rotate_item": "Photograph Frame clicks",
+  "subtitle.exposure.misc.bsod": "Blue Screen of Death appears",
   "tooltip.exposure.hold_for_details": "§8Hold [§7Shift§8] for Details"
 }

@@ -17,6 +17,7 @@
     "minecraft:green_stained_glass_pane",
     "minecraft:red_stained_glass_pane",
     "minecraft:black_stained_glass_pane",
-    "exposure:interplanar_projector"
+    "exposure:interplanar_projector",
+    "exposure:broken_interplanar_projector"
   ]
 }

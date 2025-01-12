@@ -36,4 +36,8 @@ public class Minecrft {
     public static void releaseUseButton() {
         Minecraft.getInstance().options.keyUse.setDown(false);
     }
+
+//    public int getTrueGuiScale() {
+//
+//    }
 }

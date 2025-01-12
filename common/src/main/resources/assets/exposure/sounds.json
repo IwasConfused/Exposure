@@ -275,5 +275,11 @@
       "ui/cartography_table/drawmap2",
       "ui/cartography_table/drawmap3"
     ]
+  },
+  "misc.bsod": {
+    "sounds": [
+      "exposure:misc/bsod"
+    ],
+    "subtitle": "subtitle.exposure.misc.bsod"
   }
 }

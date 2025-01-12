@@ -278,6 +278,10 @@ public class Exposure {
                         arg -> arg.persistent(ProjectionMode.CODEC)
                                 .networkSynchronized(ProjectionMode.STREAM_CODEC));
 
+        public static final DataComponentType<String> INTERPLANAR_PROJECTOR_ERROR_CODE =
+                Register.dataComponentType("interplanar_projector_error_code",
+                        arg -> arg.persistent(Codec.STRING).networkSynchronized(ByteBufCodecs.STRING_UTF8));
+
         public static final DataComponentType<List<Frame>> CHROMATIC_SHEET_LAYERS =
                 Register.dataComponentType("chromatic_layers",
                         arg -> arg.persistent(Frame.CODEC.listOf(0, 3))
@@ -360,6 +364,7 @@ public class Exposure {
         public static final Supplier<SoundEvent> LIGHTROOM_PRINT = register("block", "lightroom.print");
 
         public static final Supplier<SoundEvent> WRITE = register("misc", "write");
+        public static final Supplier<SoundEvent> BSOD = register("misc", "bsod");
 
         private static Supplier<SoundEvent> register(String category, String key) {
             Preconditions.checkState(category != null && !category.isEmpty(), "'category' should not be empty.");
