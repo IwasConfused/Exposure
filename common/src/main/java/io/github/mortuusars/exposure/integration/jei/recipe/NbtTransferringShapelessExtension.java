@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.jei.recipe;
 
-import io.github.mortuusars.exposure.recipe.AbstractComponentTransferringRecipe;
+import io.github.mortuusars.exposure.recipe.ComponentTransferringRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -11,11 +11,11 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NbtTransferringShapelessExtension implements ICraftingCategoryExtension<AbstractComponentTransferringRecipe> {
+public class NbtTransferringShapelessExtension implements ICraftingCategoryExtension<ComponentTransferringRecipe> {
     @Override
-    public void setRecipe(RecipeHolder<AbstractComponentTransferringRecipe> recipeHolder, IRecipeLayoutBuilder builder,
+    public void setRecipe(RecipeHolder<ComponentTransferringRecipe> recipeHolder, IRecipeLayoutBuilder builder,
                           ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
-        AbstractComponentTransferringRecipe recipe = recipeHolder.value();
+        ComponentTransferringRecipe recipe = recipeHolder.value();
 
         List<List<ItemStack>> inputs = recipe.getIngredients().stream()
                 .map(ingredient -> List.of(ingredient.getItems()))

@@ -257,7 +257,7 @@ public class CameraItem extends Item {
             });
         }
 
-        if (/*!isTooltipRemoved(stack) &&*/ Config.Client.CAMERA_SHOW_TOOLTIP_DETAILS.get()) {
+        if (Config.Client.CAMERA_SHOW_TOOLTIP_DETAILS.get()) {
             boolean rClickAttachments = Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get();
             boolean rClickHotswap = Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get();
 
@@ -267,7 +267,6 @@ public class CameraItem extends Item {
                         components.add(Component.translatable("item.exposure.camera.tooltip.details_attachments_screen"));
                     if (rClickHotswap)
                         components.add(Component.translatable("item.exposure.camera.tooltip.details_hotswap"));
-                    // components.add(Component.translatable("item.exposure.camera.tooltip.details_remove_tooltip"));
                 } else
                     components.add(Component.translatable("tooltip.exposure.hold_for_details"));
             }
@@ -291,30 +290,6 @@ public class CameraItem extends Item {
             openCameraAttachments(player, slot.getContainerSlot());
             return true;
         }
-
-//        if (PlatformHelper.canShear(otherStack) && !isTooltipRemoved(stack)) {
-//            if (otherStack.isDamageableItem() && player instanceof ServerPlayer serverPlayer) {
-//                // broadcasting break event is expecting item to be in hand,
-//                // but making it work for carried items would be too much work for such small feature.
-//                // No one will ever notice it anyway.
-//                otherStack.hurtAndBreak(1, serverPlayer.serverLevel(),
-//                        serverPlayer, item -> serverPlayer.onEquippedItemBroken(item, EquipmentSlot.MAINHAND));
-//            }
-//
-//            if (player.level().isClientSide)
-//                player.playSound(SoundEvents.SHEEP_SHEAR);
-//
-//            setTooltipRemoved(stack, true);
-//            return true;
-//        }
-//
-//        if (isTooltipRemoved(stack) && (otherStack.getItem() instanceof BookItem || otherStack.getItem() instanceof WritableBookItem
-//                || otherStack.getItem() instanceof WrittenBookItem || otherStack.getItem() instanceof KnowledgeBookItem)) {
-//            setTooltipRemoved(stack, false);
-//            if (player.level().isClientSide)
-//                player.playSound(SoundEvents.UI_CARTOGRAPHY_TABLE_TAKE_RESULT);
-//            return true;
-//        }
 
         if (Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get()) {
             for (Attachment<?> attachment : getAttachments()) {
@@ -769,7 +744,7 @@ public class CameraItem extends Item {
         if (!interplanarProjector.isConsumable(filter.getForReading())) return;
 
         if (projectionState == CameraInstance.ProjectionState.FAILED) {
-            ItemStack filterStack = new ItemStack(Items.COAL);
+            ItemStack filterStack = filter.getCopy().transmuteCopy(Exposure.Items.BROKEN_INTERPLANAR_PROJECTOR.get());
             Attachment.FILTER.set(stack, filterStack);
             return;
         }

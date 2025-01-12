@@ -1,28 +1,31 @@
 package io.github.mortuusars.exposure.recipe;
 
+import io.github.mortuusars.exposure.Exposure;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingBookCategory;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.CustomRecipe;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.*;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractComponentTransferringRecipe extends CustomRecipe {
+public class ComponentTransferringRecipe extends CustomRecipe {
     private final Ingredient sourceIngredient;
     private final NonNullList<Ingredient> ingredients;
     private final ItemStack result;
 
-    public AbstractComponentTransferringRecipe(Ingredient sourceIngredient, NonNullList<Ingredient> ingredients, ItemStack result) {
-        super(CraftingBookCategory.MISC);
+    public ComponentTransferringRecipe(CraftingBookCategory category, Ingredient sourceIngredient, NonNullList<Ingredient> ingredients, ItemStack result) {
+        super(category);
         this.sourceIngredient = sourceIngredient;
         this.ingredients = ingredients;
         this.result = result;
+    }
+
+    @Override
+    public @NotNull RecipeSerializer<?> getSerializer() {
+        return Exposure.RecipeSerializers.COMPONENT_TRANSFERRING.get();
     }
 
     public @NotNull Ingredient getSourceIngredient() {

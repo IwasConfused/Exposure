@@ -164,6 +164,8 @@
   "item.exposure.film_roll.tooltip.frame_size": "Size: %smm",
   "item.exposure.film_roll.tooltip.renaming": "§8[§7Use§8] to rename",
   "item.exposure.interplanar_projector": "Interplanar Projector",
+  "item.exposure.broken_interplanar_projector": "Broken Interplanar Projector",
+  "item.exposure.broken_interplanar_projector.tooltip.broken": "Broken",
   "item.exposure.interplanar_projector.mode.clean": "§6Clean",
   "item.exposure.interplanar_projector.mode.dithered": "§6Dithered",
   "item.exposure.interplanar_projector.tooltip.disabled": "§7This realm has protective barrier which makes projecting from another plane impossible.",
