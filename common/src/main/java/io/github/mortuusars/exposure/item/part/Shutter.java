@@ -4,6 +4,8 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.item.component.camera.ShutterState;
+import io.github.mortuusars.exposure.server.CameraInstance;
+import io.github.mortuusars.exposure.server.CameraInstances;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -39,14 +41,15 @@ public class Shutter {
 
     public boolean shouldClose(ItemStack stack, long gameTime) {
         ShutterState state = getState(stack);
-        return state.isOpen() && gameTime >= state.getCloseTick();
+        boolean projecting = CameraInstances.getOptional(stack).map(CameraInstance::isWaitingForProjection).orElse(false);
+        return state.isOpen() && !projecting && gameTime >= state.getCloseTick();
     }
 
     public void tick(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
         long gameTime = photographer.asEntity().level().getGameTime();
         if (shouldClose(stack, gameTime)) {
             ShutterState state = getState(stack);
-            if (gameTime - state.getCloseTick() > 30) {
+            if (gameTime - state.getCloseTick() > 200) {
                 setState(stack, ShutterState.CLOSED);
             } else {
                 close(photographer, level, stack);

@@ -19,25 +19,25 @@ public class InterplanarProjectionAction implements CaptureAction {
 
     @Override
     public void onSuccess() {
-        Entity entity = photographer.asEntity();
-        photographer.playCameraSoundSided(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.8f, 1.1f, 0.1f);
-        for (int i = 0; i < 32; ++i) {
-            entity.level().addParticle(ParticleTypes.PORTAL, entity.getX(),
-                    entity.getY() + entity.getRandom().nextDouble() * 2.0, entity.getZ(),
-                    entity.getRandom().nextGaussian(), 0.0, entity.getRandom().nextGaussian());
-        }
+//        Entity entity = photographer.asEntity();
+//        photographer.playCameraSoundSided(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.8f, 1.1f, 0.1f);
+//        for (int i = 0; i < 32; ++i) {
+//            entity.level().addParticle(ParticleTypes.PORTAL, entity.getX(),
+//                    entity.getY() + entity.getRandom().nextDouble() * 2.0, entity.getZ(),
+//                    entity.getRandom().nextGaussian(), 0.0, entity.getRandom().nextGaussian());
+//        }
         Packets.sendToServer(new InterplanarProjectionFinishedC2SP(photographer.asEntity().getUUID(), cameraID, true));
     }
 
     @Override
     public void onFailure() {
-        Entity entity = photographer.asEntity();
-        photographer.playCameraSoundSided(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.8f, 0.6f, 0.1f);
-        for (int i = 0; i < 32; ++i) {
-            entity.level().addParticle(ParticleTypes.PORTAL, entity.getX(),
-                    entity.getY() + entity.getRandom().nextDouble() * 2.0, entity.getZ(),
-                    entity.getRandom().nextGaussian(), 0.0, entity.getRandom().nextGaussian());
-        }
+//        Entity entity = photographer.asEntity();
+//        photographer.playCameraSoundSided(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.8f, 0.6f, 0.1f);
+//        for (int i = 0; i < 32; ++i) {
+//            entity.level().addParticle(ParticleTypes.PORTAL, entity.getX(),
+//                    entity.getY() + entity.getRandom().nextDouble() * 2.0, entity.getZ(),
+//                    entity.getRandom().nextGaussian(), 0.0, entity.getRandom().nextGaussian());
+//        }
         Packets.sendToServer(new InterplanarProjectionFinishedC2SP(photographer.asEntity().getUUID(), cameraID, false));
     }
 }

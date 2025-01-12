@@ -57,6 +57,7 @@ public class Viewfinder {
     }
 
     public void tick() {
+        shader().update();
     }
 
     public void close() {

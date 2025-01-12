@@ -17,7 +17,7 @@ import java.util.function.Consumer;
 
 public class Capture<T> extends Task<Result<T>> {
     public static final String ERROR_TIMED_OUT = "gui.exposure.capture.error.timed_out";
-    public static final int TIMEOUT_MS = 10_000; // 10 seconds
+    public static final int TIMEOUT_MS = 12_000; // 12 seconds
     public static final String ERROR_FAILED_GENERIC = "gui.exposure.capture.error.failed";
 
     protected final Task<Result<T>> capturingTask;

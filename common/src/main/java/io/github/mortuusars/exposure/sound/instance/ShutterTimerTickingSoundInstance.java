@@ -33,7 +33,15 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
     public void tick() {
         super.tick();
 
+        //TODO: refactor
+
         if (endsAtTick - photographer.asEntity().level().getGameTime() < 0) {
+            stop();
+            return;
+        }
+
+        if (photographer.getActiveExposureCamera().map(camera ->
+                camera.getCameraID().equals(cameraID) && !camera.isShutterOpen()).orElse(false)) {
             stop();
             return;
         }
@@ -44,8 +52,16 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
             return;
         }
 
-        if (photographer.asEntity() instanceof Player player && isCameraOnHotbar(player)) {
-            volume = fullVolume * 0.35f;
+        if (photographer.asEntity() instanceof Player player) {
+            ItemStack cameraOnHotbar = getCameraOnHotbar(player);
+            if (cameraOnHotbar.isEmpty()) {
+                // Not stopping to resume sound if camera becomes available again.
+                volume = fullVolume * 0.01f;
+            } else if (cameraOnHotbar.getItem() instanceof CameraItem cameraItem && cameraItem.getShutter().isOpen(cameraOnHotbar)) {
+                volume = fullVolume * 0.35f;
+            } else {
+                stop();
+            }
         } else {
             // Not stopping to resume sound if camera becomes available again.
             volume = fullVolume * 0.01f;
@@ -53,12 +69,16 @@ public class ShutterTimerTickingSoundInstance extends EntityBoundSoundInstance {
     }
 
     protected boolean isCameraOnHotbar(Player player) {
+        return !getCameraOnHotbar(player).isEmpty();
+    }
+
+    protected ItemStack getCameraOnHotbar(Player player) {
         for (int i = 0; i < 9; i++) {
             ItemStack stack = player.getInventory().getItem(i);
-            if (stack.getItem() instanceof CameraItem cameraItem && cameraItem.getOrCreateID(stack).equals(cameraID)) {
-                return true;
+            if (CameraID.ofStack(stack).equals(cameraID)) {
+                return stack;
             }
         }
-        return false;
+        return ItemStack.EMPTY;
     }
 }

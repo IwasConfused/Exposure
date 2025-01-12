@@ -17,6 +17,7 @@ public class Config {
 
         public static final ModConfigSpec.IntValue EXPOSURE_RESOLUTION;
         public static final ModConfigSpec.BooleanValue CAN_PROJECT_FROM_FILE;
+        public static final ModConfigSpec.IntValue PROJECT_FROM_FILE_TIMEOUT_TICKS;
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -28,7 +29,12 @@ public class Config {
                         .defineInRange("ExposureResolution", 320, 1, 2048);
                 CAN_PROJECT_FROM_FILE = builder
                         .comment("Interplanar Projector can load images from a file on client's PC. Default: true")
-                        .define("CanProjectFromFile", true);
+                        .define("LoadingFromFileEnabled", true);
+                PROJECT_FROM_FILE_TIMEOUT_TICKS = builder
+                        .comment("Time limit in ticks for how long image can load.",
+                                "This is affecting gameplay slightly - Interplanar Projector will be consumed if loading times out.",
+                                "Default: 80 (4 seconds)")
+                        .defineInRange("LoadingFromFileTimeoutTicks", 80, 1, 200);
             }
             builder.pop();
 

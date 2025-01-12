@@ -75,6 +75,8 @@
   "gui.exposure.capture.file.error.cannot_read.casual": "Source at the address is protected by an unknown force.",
   "gui.exposure.capture.file.error.not_supported.technical": "Cannot load from file: image format is not supported.",
   "gui.exposure.capture.file.error.not_supported.casual": "Source at the address has unknown structure and cannot be projected.",
+  "gui.exposure.capture.file.error.timed_out.technical": "Cannot load from file: timed out.",
+  "gui.exposure.capture.file.error.timed_out.casual": "Source at the address lies beyond temporal limits of a Projector.",
 
   "exposure.jei.info.photograph_frame": "Has three sizes: 1x1, 2x2 and 3x3. Placed like a Painting, but can be placed on floors and ceilings as well. Glow Ink Sac will make it glow. Axe can be used to strip the frame, Stick will restore it. Glass Pane will make the frame invisible, Wooden Planks will restore it.",
   "gui.exposure.album.add_photograph": "Add Photograph",
@@ -142,6 +144,8 @@
   "item.exposure.black_and_white_film": "Black and White Film",
   "item.exposure.camera": "Camera",
   "item.exposure.camera.camera_attachments.fail.shutter_open": "Cannot disassemble the camera while shutter is open.",
+  "item.exposure.camera.camera_attachments.fail.projecting": "Cannot disassemble the camera while projecting.",
+  "item.exposure.camera.interplanar_projector.timed_out": "Interplanar Projector disintegrated from prolonged ",
   "item.exposure.camera.sneak_to_open_tooltip": "Use while sneaking to configure",
   "item.exposure.camera.tooltip.details_attachments_screen": "§8[§7Sneak + Use§8] or §8[§7Right Click§8] to configure",
   "item.exposure.camera.tooltip.details_hotswap": "§8[§7Right Click§8] with item to install/swap attachment",

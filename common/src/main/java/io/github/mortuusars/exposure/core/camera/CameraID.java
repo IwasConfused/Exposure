@@ -1,9 +1,12 @@
 package io.github.mortuusars.exposure.core.camera;
 
 import com.mojang.serialization.Codec;
+import io.github.mortuusars.exposure.Exposure;
 import io.netty.buffer.ByteBuf;
+import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.world.item.ItemStack;
 
 import java.util.UUID;
 
@@ -13,5 +16,9 @@ public record CameraID(UUID uuid) {
 
     public static CameraID createRandom() {
         return new CameraID(UUID.randomUUID());
+    }
+
+    public static CameraID ofStack(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.CAMERA_ID, new CameraID(Util.NIL_UUID));
     }
 }

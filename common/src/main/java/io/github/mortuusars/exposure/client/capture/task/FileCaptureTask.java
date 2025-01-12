@@ -2,16 +2,20 @@
 package io.github.mortuusars.exposure.client.capture.task;
 
 import com.google.common.io.Files;
-import io.github.mortuusars.exposure.Exposure;
+import com.mojang.logging.LogUtils;
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.capture.task.file.ImageFileLoader;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
+import net.minecraft.SharedConstants;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class FileCaptureTask extends Task<Result<Image>> {
     public static final String ERROR_PATH_EMPTY = "gui.exposure.capture.file.error.path_empty";
@@ -21,8 +25,12 @@ public class FileCaptureTask extends Task<Result<Image>> {
     public static final String ERROR_FILE_DOES_NOT_EXIST = "gui.exposure.capture.file.error.file_does_not_exist";
     public static final String ERROR_CANNOT_READ = "gui.exposure.capture.file.error.cannot_read";
     public static final String ERROR_NOT_SUPPORTED = "gui.exposure.capture.file.error.not_supported";
+    public static final String ERROR_TIMED_OUT = "gui.exposure.capture.file.error.timed_out";
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     protected final String filePath;
+
+    protected final CompletableFuture<Result<Image>> future = new CompletableFuture<>();
 
     public FileCaptureTask(String filePath) {
         this.filePath = filePath;
@@ -34,8 +42,8 @@ public class FileCaptureTask extends Task<Result<Image>> {
 
     @Override
     public CompletableFuture<Result<Image>> execute() {
-        return CompletableFuture.supplyAsync(() -> {
-            Exposure.LOGGER.info("Attempting to load image from file: '{}'", filePath);
+        return future.completeAsync(() -> {
+            LOGGER.info("Attempting to load image from file: '{}'", filePath);
 
             Result<File> result = findFileWithExtension(filePath);
 
@@ -51,10 +59,11 @@ public class FileCaptureTask extends Task<Result<Image>> {
 
             File file = result.getValue();
 
-            Exposure.LOGGER.info("Reading image from file: '{}'", file);
+            LOGGER.info("Reading image from file: '{}'", file);
 
             return ImageFileLoader.chooseFitting(file).load(file);
-        });
+        }).completeOnTimeout(Result.error(ERROR_TIMED_OUT),
+                Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get() * SharedConstants.MILLIS_PER_TICK, TimeUnit.MILLISECONDS);
     }
 
     private static Result<File> validateFilepath(File file) {

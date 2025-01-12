@@ -1,71 +1,111 @@
 package io.github.mortuusars.exposure.server;
 
+import io.github.mortuusars.exposure.core.camera.CameraID;
 import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
-import io.github.mortuusars.exposure.core.CaptureProperties;
-import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.util.ItemAndStack;
+import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public class CameraInstance {
-    @Nullable
-    private CaptureProperties currentCaptureProperties = null;
+    protected final CameraID cameraID;
 
-    private long captureStartTick = -1;
-    private boolean waitingForProjectionResult = false;
-    private int projectionTimeoutTicks = -1;
-    private ProjectionResult projectionResult = ProjectionResult.TIMED_OUT;
+    private UUID lastPhotographerId = Util.NIL_UUID;
+    private int deferredCooldownTicks = 0;
+    private long projectionDeadline = -1;
+    private ProjectionState projectionState = ProjectionState.IDLE;
 
-    public void tick(PhotographerEntity photographer, ItemStack stack) {
-        if (waitingForProjectionResult
-                && projectionTimeoutTicks >= 0
-                && photographer.asEntity().level().getGameTime() - captureStartTick > projectionTimeoutTicks) {
-            waitingForProjectionResult = false;
-            projectionTimeoutTicks = -1;
-            projectionResult = ProjectionResult.TIMED_OUT;
+    public CameraInstance(CameraID cameraID) {
+        this.cameraID = cameraID;
+    }
 
-            ItemAndStack.executeIfItemMatches(CameraItem.class, stack, cameraItem ->
-                    cameraItem.handleProjectionResult(photographer, stack, projectionResult));
+    public void tick(ItemStack stack, PhotographerEntity photographer) {
+//        if (waitingForProjectionResult
+//                && projectionTimeoutTicks >= 0
+//                && photographer.asEntity().level().getGameTime() - captureStartTick > projectionTimeoutTicks) {
+//            waitingForProjectionResult = false;
+//            projectionTimeoutTicks = -1;
+//            projectionResult = ProjectionResult.TIMED_OUT;
+//
+//            ItemAndStack.executeIfItemMatches(CameraItem.class, stack, cameraItem ->
+//                    cameraItem.handleProjectionResult(photographer, stack, projectionResult));
+//        }
+    }
+
+    // --
+
+    public Optional<PhotographerEntity> getLastPhotographer(Level level) {
+        return PhotographerEntity.fromUUID(level, lastPhotographerId);
+    }
+
+    public void setPhotographer(PhotographerEntity photographer) {
+        lastPhotographerId = photographer.asEntity().getUUID();
+    }
+
+    // --
+
+    public int getDeferredCooldown() {
+        return deferredCooldownTicks;
+    }
+
+    public void setDeferredCooldown(int ticks) {
+        deferredCooldownTicks = ticks;
+    }
+
+    // --
+
+    public ProjectionState getProjectionState(Level level) {
+        if (isWaitingForProjection() && isProjectionTimedOut(level)) {
+            return ProjectionState.TIMED_OUT;
+        }
+        return projectionState;
+    }
+
+    public long getProjectionDeadline() {
+        return projectionDeadline;
+    }
+
+    public void waitForProjection(long deadline) {
+        projectionDeadline = deadline;
+    }
+
+    public boolean isWaitingForProjection() {
+        return projectionDeadline >= 0;
+    }
+
+    public boolean isProjectionTimedOut(Level level) {
+        return level.getGameTime() > projectionDeadline;
+    }
+
+    public void setProjectionResult(Level level, boolean successful) {
+        if (isWaitingForProjection() && !isProjectionTimedOut(level)) {
+            projectionState = successful ? ProjectionState.SUCCESSFUL : ProjectionState.FAILED;
+            projectionDeadline = -1;
         }
     }
 
-    public Optional<CaptureProperties> getCurrentCaptureData() {
-        return Optional.ofNullable(currentCaptureProperties);
+    public void stopWaitingForProjection() {
+        projectionState = ProjectionState.IDLE;
+        projectionDeadline = -1;
     }
 
-    public void setCurrentCaptureData(Level level, CaptureProperties captureProperties) {
-        this.currentCaptureProperties = captureProperties;
-        captureStartTick = level.getGameTime();
+    // --
 
-        if (captureProperties.fileLoadingInfo().isPresent()) {
-            waitForInterplanarProjectionResult(25);
-        }
+    public boolean canReleaseShutter() {
+        return !isWaitingForProjection();
     }
 
-    public CameraInstance waitForInterplanarProjectionResult(int projectionTimeoutTicks) {
-        this.projectionTimeoutTicks = projectionTimeoutTicks;
-        this.waitingForProjectionResult = true;
-        return this;
+    public boolean canOpenAttachments() {
+        return !isWaitingForProjection();
     }
 
-    public CameraInstance setProjectionResult(boolean isSuccessful) {
-        this.projectionResult = isSuccessful ? ProjectionResult.SUCCESSFUL : ProjectionResult.FAILED;
-        this.waitingForProjectionResult = false;
-        return this;
-    }
-
-    public enum ProjectionResult {
+    public enum ProjectionState {
+        IDLE,
+        WAITING,
         SUCCESSFUL,
         FAILED,
         TIMED_OUT;
-
-        public static ProjectionResult get(@Nullable Boolean result) {
-            return result == null ? TIMED_OUT :
-                    result ? SUCCESSFUL
-                            : FAILED;
-        }
     }
 }

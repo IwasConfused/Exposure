@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.core.camera;
 
 import io.github.mortuusars.exposure.item.CameraItem;
+import net.minecraft.Util;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
@@ -17,6 +18,7 @@ import java.util.function.BiFunction;
 
 public interface PhotographerEntity {
     static Optional<PhotographerEntity> fromUUID(Level level, UUID uuid) {
+        if (uuid.equals(Util.NIL_UUID)) return Optional.empty();
         return level.getEntities().get(uuid) instanceof PhotographerEntity photographerEntity
                 ? Optional.of(photographerEntity)
                 : Optional.empty();
