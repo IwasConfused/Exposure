@@ -5,7 +5,7 @@
     "dstrgb": "zero"
   },
   "vertex": "sobel",
-  "fragment": "exposure_processor",
+  "fragment": "exposure:color_processor",
   "attributes": [ "Position" ],
   "samplers": [
     { "name": "DiffuseSampler" }

@@ -3,5 +3,5 @@
     "items": "minecraft:glass_pane"
   },
   "attachment_texture": "exposure:textures/gui/filter/glass.png",
-  "shader": "exposure:shaders/crisp.json"
+  "shader": "exposure:shaders/post/crisp.json"
 }

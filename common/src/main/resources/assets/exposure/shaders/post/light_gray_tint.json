@@ -4,14 +4,13 @@
   ],
   "passes": [
     {
-      "name": "exposure_processor",
+      "name": "exposure:color_processor",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
-        { "name": "Mul", "values": [ 0.98, 0.98, 0.98 ] },
+        { "name": "Mul", "values": [ 0.75, 0.75, 0.75 ] },
         { "name": "Add", "values": [ 0.05, 0.05, 0.05 ] },
-        { "name": "Contrast", "values": [ 1.25 ] },
-        { "name": "Saturation", "values": [ 0.9 ] }
+        { "name": "Contrast", "values": [ 1.15 ] }
       ]
     },
     {
