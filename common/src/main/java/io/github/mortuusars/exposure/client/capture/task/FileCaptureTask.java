@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.client.capture.task.file.ImageFileLoader;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import net.minecraft.SharedConstants;
 import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.Nullable;
@@ -18,15 +19,16 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public class FileCaptureTask extends Task<Result<Image>> {
-    public static final String ERROR_PATH_EMPTY = "gui.exposure.capture.file.error.path_empty";
-    public static final String ERROR_PATH_INVALID = "gui.exposure.capture.file.error.path_invalid";
-    public static final String ERROR_NO_EXTENSION = "gui.exposure.capture.file.error.no_extension";
-    public static final String ERROR_PATH_IS_DIRECTORY = "gui.exposure.capture.file.error.path_is_directory";
-    public static final String ERROR_FILE_DOES_NOT_EXIST = "gui.exposure.capture.file.error.file_does_not_exist";
-    public static final String ERROR_CANNOT_READ = "gui.exposure.capture.file.error.cannot_read";
-    public static final String ERROR_NOT_SUPPORTED = "gui.exposure.capture.file.error.not_supported";
-    public static final String ERROR_TIMED_OUT = "gui.exposure.capture.file.error.timed_out";
     private static final Logger LOGGER = LogUtils.getLogger();
+
+    public static final TranslatableError ERROR_PATH_EMPTY = new TranslatableError("error.exposure.capture.file.path_empty", "ERR_PATH_EMPTY");
+    public static final TranslatableError ERROR_PATH_INVALID = new TranslatableError("error.exposure.capture.file.path_invalid", "ERR_PATH_INVALID");
+    public static final TranslatableError ERROR_NO_EXTENSION = new TranslatableError("error.exposure.capture.file.no_extension", "ERR_NO_EXTENSION");
+    public static final TranslatableError ERROR_PATH_IS_DIRECTORY = new TranslatableError("error.exposure.capture.file.path_is_directory", "ERR_PATH_IS_DIRECTORY");
+    public static final TranslatableError ERROR_FILE_DOES_NOT_EXIST = new TranslatableError("error.exposure.capture.file.file_does_not_exist", "ERR_FILE_DOES_NOT_EXIST");
+    public static final TranslatableError ERROR_CANNOT_READ = new TranslatableError("error.exposure.capture.file.cannot_read", "ERR_CANNOT_READ");
+    public static final TranslatableError ERROR_NOT_SUPPORTED = new TranslatableError("error.exposure.capture.file.not_supported", "ERR_NOT_SUPPORTED");
+    public static final TranslatableError ERROR_TIMED_OUT = new TranslatableError("error.exposure.capture.file.timed_out", "ERR_TIMED_OUT");
 
     protected final String filePath;
 

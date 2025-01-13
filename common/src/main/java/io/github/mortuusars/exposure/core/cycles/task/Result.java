@@ -63,10 +63,6 @@ public class Result<T> {
         return new Result<>(null, error);
     }
 
-    public static <T> Result<T> error(String baseTranslationKey) {
-        return new Result<>(null, new TranslatableError(baseTranslationKey));
-    }
-
     public T unwrap(Consumer<TranslatableError> errorConsumer) throws IllegalStateException {
         this.ifError(errorConsumer);
         return getValue();

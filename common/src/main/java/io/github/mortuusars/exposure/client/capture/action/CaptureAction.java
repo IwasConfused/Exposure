@@ -1,5 +1,7 @@
 package io.github.mortuusars.exposure.client.capture.action;
 
+import io.github.mortuusars.exposure.util.TranslatableError;
+
 public interface CaptureAction {
     CaptureAction EMPTY = new CaptureAction() {};
 
@@ -19,7 +21,7 @@ public interface CaptureAction {
     default void onSuccess() {
     }
 
-    default void onFailure() {
+    default void onFailure(TranslatableError error) {
     }
 
     default void afterCapture() {

@@ -23,6 +23,6 @@ public class BrokenInterplanarProjectorItem extends Item {
     }
 
     public String getErrorCode(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.INTERPLANAR_PROJECTOR_ERROR_CODE, "ERR_FAILURE");
+        return stack.getOrDefault(Exposure.DataComponents.INTERPLANAR_PROJECTOR_ERROR_CODE, "ERR_FAILURE_SEE_LOGS");
     }
 }

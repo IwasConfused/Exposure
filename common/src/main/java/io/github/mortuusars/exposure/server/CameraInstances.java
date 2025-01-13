@@ -3,7 +3,6 @@ package io.github.mortuusars.exposure.server;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.core.camera.CameraID;
-import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
 import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -64,6 +63,6 @@ public class CameraInstances {
     // --
 
     public static boolean canReleaseShutter(CameraID id) {
-        return getOptional(id).map(CameraInstance::canReleaseShutter).orElse(true);
+        return getOptional(id).map(cameraInstance -> !cameraInstance.isWaitingForProjection()).orElse(true);
     }
 }

@@ -331,8 +331,8 @@ public class CameraItem extends Item {
             CameraInstance.ProjectionState state = instance.getProjectionState(level);
             switch (state) {
                 case SUCCESSFUL, FAILED, TIMED_OUT -> {
+                    handleProjectionResult(stack, player, serverLevel, state, instance.getProjectionError(level));
                     instance.stopWaitingForProjection();
-                    handleProjectionResult(stack, player, serverLevel, state);
                 }
             }
         });
@@ -492,12 +492,6 @@ public class CameraItem extends Item {
 
         if (getShutter().isOpen(stack)) {
             player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.shutter_open")
-                    .withStyle(ChatFormatting.RED), true);
-            return InteractionResultHolder.fail(stack);
-        }
-
-        if (CameraInstances.getOptional(stack).map(CameraInstance::isWaitingForProjection).orElse(false)) {
-            player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.projecting")
                     .withStyle(ChatFormatting.RED), true);
             return InteractionResultHolder.fail(stack);
         }
@@ -737,7 +731,8 @@ public class CameraItem extends Item {
         }
     }
 
-    public void handleProjectionResult(ItemStack stack, PhotographerEntity photographer, ServerLevel level, CameraInstance.ProjectionState projectionState) {
+    public void handleProjectionResult(ItemStack stack, PhotographerEntity photographer, ServerLevel level,
+                                       CameraInstance.ProjectionState projectionState, Optional<TranslatableError> error) {
         StoredItemStack filter = Attachment.FILTER.get(stack);
         if (filter.isEmpty()) return;
         if (!(filter.getItem() instanceof InterplanarProjectorItem interplanarProjector)) return;
@@ -745,6 +740,7 @@ public class CameraItem extends Item {
 
         if (projectionState == CameraInstance.ProjectionState.FAILED) {
             ItemStack filterStack = filter.getCopy().transmuteCopy(Exposure.Items.BROKEN_INTERPLANAR_PROJECTOR.get());
+            error.ifPresent(err -> filterStack.set(Exposure.DataComponents.INTERPLANAR_PROJECTOR_ERROR_CODE, err.code()));
             Attachment.FILTER.set(stack, filterStack);
             playSound(null, photographer.asEntity(), Exposure.SoundEvents.BSOD.get(), 1f, 1f, 0);
             return;

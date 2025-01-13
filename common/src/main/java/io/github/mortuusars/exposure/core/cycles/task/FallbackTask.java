@@ -26,7 +26,7 @@ public class FallbackTask<T> extends Task<Result<T>> {
                     } else if (mainException != null) {
                         Exposure.LOGGER.error("Main CaptureTask is failed: ", mainException);
                     } else if (mainResult != null && mainResult.isError()) {
-                        Exposure.LOGGER.error("Main CaptureTask is failed: {}", mainResult.getError().getLocalizedMessage());
+                        Exposure.LOGGER.error("Main CaptureTask is failed: {}", mainResult.getError().technical().getString());
                     }
 
                     return captureFallback();
@@ -36,8 +36,8 @@ public class FallbackTask<T> extends Task<Result<T>> {
     private Result<T> captureFallback() {
         return fallback.execute().handle((fallbackResult, fallbackException) -> {
             if (fallbackException != null) {
-                Exposure.LOGGER.error("Both Main and Fallback tasks are failed!");
-                return Result.<T>error(new TranslatableError(TranslatableError.GENERIC, fallbackException));
+                Exposure.LOGGER.error("Both Main and Fallback tasks are failed! Fallback error: ", fallbackException);
+                return Result.<T>error(TranslatableError.GENERIC);
             }
             return fallbackResult;
         }).join();

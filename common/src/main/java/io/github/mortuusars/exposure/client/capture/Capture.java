@@ -16,9 +16,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 public class Capture<T> extends Task<Result<T>> {
-    public static final String ERROR_TIMED_OUT = "gui.exposure.capture.error.timed_out";
+    public static final TranslatableError ERROR_TIMED_OUT = new TranslatableError("error.exposure.capture.timed_out", "ERR_CAPTURE_TIMED_OUT");
+    public static final TranslatableError ERROR_FAILED_GENERIC = new TranslatableError("error.exposure.capture.failed", "ERR_CAPTURE_FAILED");
+
     public static final int TIMEOUT_MS = 12_000; // 12 seconds
-    public static final String ERROR_FAILED_GENERIC = "gui.exposure.capture.error.failed";
 
     protected final Task<Result<T>> capturingTask;
     protected final CaptureAction component;
@@ -63,7 +64,7 @@ public class Capture<T> extends Task<Result<T>> {
                     if (result.isSuccessful()) {
                         component.onSuccess();
                     } else {
-                        component.onFailure();
+                        component.onFailure(result.getError());
                     }
                     component.afterCapture();
                     return result;

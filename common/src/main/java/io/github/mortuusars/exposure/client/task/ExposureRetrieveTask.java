@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.core.cycles.task.Result;
 import io.github.mortuusars.exposure.core.cycles.task.Task;
 import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
+import io.github.mortuusars.exposure.util.TranslatableError;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -18,6 +19,9 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
 public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
+    public static final TranslatableError ERROR_TIMED_OUT = new TranslatableError("error.exposure.exposure_retrieve.timeout", "ERR_RETRIEVE_TIMED_OUT");
+    public static final TranslatableError ERROR_FAILED = new TranslatableError("error.exposure.exposure_retrieve.failed", "ERR_RETRIEVE_FAILED");
+
     protected final List<ExposureIdentifier> identifiers;
     protected final int timeoutMs;
 
@@ -50,7 +54,7 @@ public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
             Exposure.LOGGER.error("Failed to retrieve exposures [{}]: Timed out. {}ms were not enough.",
                     String.join(",", identifiers.stream().map(ExposureIdentifier::toString).toList()), timeoutMs);
             setDone();
-            future.complete(Result.error("gui.exposure.error_message.exposure_retrieve.timeout"));
+            future.complete(Result.error(ERROR_TIMED_OUT));
         }
 
         for (int i = 0; i < identifiers.size(); i++) {
@@ -66,7 +70,7 @@ public class ExposureRetrieveTask extends Task<Result<List<Image>>> {
                             String.join(",", identifiers.stream().map(ExposureIdentifier::toString).toList()),
                             identifier.id(), request.getStatus());
                     setDone();
-                    future.complete(Result.error("gui.exposure.error_message.exposure_retrieve.failed"));
+                    future.complete(Result.error(ERROR_FAILED));
                     return;
                 }
 
