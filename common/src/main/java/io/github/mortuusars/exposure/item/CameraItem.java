@@ -277,6 +277,13 @@ public class CameraItem extends Item {
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack otherStack, Slot slot, ClickAction action, Player player, SlotAccess access) {
         if (action != ClickAction.SECONDARY) return false;
 
+        if (getShutter().isOpen(stack)) {
+            playSound(player, player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f, 0);
+            player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.shutter_open")
+                    .withStyle(ChatFormatting.RED), true);
+            return true;
+        }
+
         if (otherStack.isEmpty() && Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get()) {
             if (!(slot.container instanceof Inventory)) {
                 return false; // Cannot open when not in player's inventory

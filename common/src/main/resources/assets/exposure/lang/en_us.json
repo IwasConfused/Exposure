@@ -142,7 +142,7 @@
   "item.exposure.broken_interplanar_projector.viewfinder.message": "Interplanar Projector ran into a problem and broke down.",
   "item.exposure.camera": "Camera",
   "item.exposure.camera.camera_attachments.fail.projecting": "Cannot disassemble the camera while projecting.",
-  "item.exposure.camera.camera_attachments.fail.shutter_open": "Cannot disassemble the camera while shutter is open.",
+  "item.exposure.camera.camera_attachments.fail.shutter_open": "Cannot reconfigure the camera while shutter is open.",
   "item.exposure.camera.interplanar_projector.timed_out": "Interplanar Projector disintegrated from prolonged ",
   "item.exposure.camera.sneak_to_open_tooltip": "Use while sneaking to configure",
   "item.exposure.camera.tooltip.details_attachments_screen": "§8[§7Sneak + Use§8] or §8[§7Right Click§8] to configure",
