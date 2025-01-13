@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

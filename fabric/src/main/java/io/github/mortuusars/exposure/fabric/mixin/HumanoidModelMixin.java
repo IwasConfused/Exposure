@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
 import io.github.mortuusars.exposure.client.animation.ModelPoses;
-import io.github.mortuusars.exposure.core.camera.CameraInHand;
+import io.github.mortuusars.exposure.world.camera.CameraInHand;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.HumanoidModel;

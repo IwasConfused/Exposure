@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.google.common.base.Function;
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.item.CameraItem;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

@@ -4,7 +4,7 @@ import io.github.mortuusars.exposure.client.image.CensoredImage;
 import io.github.mortuusars.exposure.client.image.CroppedImage;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.ResizedImage;
-import io.github.mortuusars.exposure.core.color.ChromaChannel;
+import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import io.github.mortuusars.exposure.util.Rect2i;
 import net.minecraft.util.StringUtil;
 
@@ -44,8 +44,8 @@ public interface Processor {
         return new BlackAndWhiteProcessor(contrast);
     }
 
-    static Processor singleChannelBlackAndWhite(ChromaChannel chromaChannel) {
-        return new SingleChannelBlackAndWhiteProcessor(chromaChannel);
+    static Processor singleChannelBlackAndWhite(ColorChannel colorChannel) {
+        return new SingleChannelBlackAndWhiteProcessor(colorChannel);
     }
 
     interface Crop extends Processor {

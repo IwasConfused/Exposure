@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.capture.action;
 
-import io.github.mortuusars.exposure.core.camera.CameraID;
-import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
+import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import net.minecraft.client.CameraType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;

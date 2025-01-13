@@ -1,10 +1,9 @@
 package io.github.mortuusars.exposure.client.gui.tooltip;
 
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
-import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
-import io.github.mortuusars.exposure.util.ItemAndStack;
+import io.github.mortuusars.exposure.world.item.PhotographItem;
+import io.github.mortuusars.exposure.world.inventory.tooltip.PhotographTooltip;
+import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

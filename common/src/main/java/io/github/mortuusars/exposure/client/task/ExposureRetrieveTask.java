@@ -6,10 +6,10 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.image.ResourceImage;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.cycles.task.Result;
-import io.github.mortuusars.exposure.core.cycles.task.Task;
-import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
+import io.github.mortuusars.exposure.util.cycles.task.Result;
+import io.github.mortuusars.exposure.util.cycles.task.Task;
+import io.github.mortuusars.exposure.world.level.storage.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import org.jetbrains.annotations.Nullable;
 

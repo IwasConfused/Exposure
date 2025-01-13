@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderCameraControlsScreen;
-import io.github.mortuusars.exposure.event_hub.ClientEvents;
+import io.github.mortuusars.exposure.event.ClientEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ReceivingLevelScreen;
 import net.minecraft.client.gui.screens.Screen;

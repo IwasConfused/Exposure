@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.item;
 
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.neoforge.enumextension.CameraArmPose;
 import io.github.mortuusars.exposure.neoforge.enumextension.CameraSelfieArmPose;
 import net.minecraft.client.model.HumanoidModel;

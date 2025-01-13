@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.item.part.CameraSetting;
+import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

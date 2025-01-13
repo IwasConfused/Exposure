@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.mixin;
 
 import com.mojang.authlib.GameProfile;
-import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.item.CameraItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;

@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.mixin.client;
 
 import com.mojang.authlib.GameProfile;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
-import io.github.mortuusars.exposure.core.camera.Camera;
+import io.github.mortuusars.exposure.world.camera.Camera;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;

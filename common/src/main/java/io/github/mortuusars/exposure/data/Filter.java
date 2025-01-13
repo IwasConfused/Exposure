@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.data;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.color.Color;
+import io.github.mortuusars.exposure.util.color.Color;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.resources.ResourceLocation;
 

@@ -1,11 +1,11 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.ExposureType;
-import io.github.mortuusars.exposure.core.frame.FrameTag;
-import io.github.mortuusars.exposure.core.frame.Photographer;
-import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
+import io.github.mortuusars.exposure.world.camera.frame.FrameTag;
+import io.github.mortuusars.exposure.world.camera.frame.Photographer;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;

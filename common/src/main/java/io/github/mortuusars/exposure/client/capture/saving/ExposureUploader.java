@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.capture.saving;
 
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.core.warehouse.ExposureData;
+import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.ExposureDataC2SP;
 import net.minecraft.util.StringUtil;

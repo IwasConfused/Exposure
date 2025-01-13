@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.jei.recipe;
 
-import io.github.mortuusars.exposure.recipe.ComponentTransferringRecipe;
+import io.github.mortuusars.exposure.world.item.crafting.recipe.ComponentTransferringRecipe;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.ICraftingGridHelper;
 import mezz.jei.api.recipe.IFocusGroup;

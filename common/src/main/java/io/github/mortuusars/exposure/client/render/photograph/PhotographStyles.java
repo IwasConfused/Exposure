@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.render.photograph;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.core.PhotographType;
+import io.github.mortuusars.exposure.world.photograph.PhotographType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

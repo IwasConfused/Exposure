@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.client.gui.screen.album;
 
 import io.github.mortuusars.exposure.client.gui.screen.element.textbox.TextBox;
-import io.github.mortuusars.exposure.menu.AlbumMenu;
-import io.github.mortuusars.exposure.menu.LecternAlbumMenu;
+import io.github.mortuusars.exposure.world.inventory.AlbumMenu;
+import io.github.mortuusars.exposure.world.inventory.LecternAlbumMenu;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;

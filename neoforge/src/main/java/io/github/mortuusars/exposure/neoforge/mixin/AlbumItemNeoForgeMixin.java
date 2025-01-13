@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.mixin;
 
-import io.github.mortuusars.exposure.item.AlbumItem;
+import io.github.mortuusars.exposure.world.item.AlbumItem;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.extensions.IItemExtension;
 import org.jetbrains.annotations.NotNull;

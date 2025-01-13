@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;

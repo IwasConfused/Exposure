@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client;
 
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;

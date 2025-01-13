@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.data;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;

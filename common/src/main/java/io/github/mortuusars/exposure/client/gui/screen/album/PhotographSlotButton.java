@@ -5,7 +5,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
-import io.github.mortuusars.exposure.item.PhotographItem;
+import io.github.mortuusars.exposure.world.item.PhotographItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;

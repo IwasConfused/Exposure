@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.fabric.mixin;
 
-import io.github.mortuusars.exposure.item.AlbumItem;
+import io.github.mortuusars.exposure.world.item.AlbumItem;
 import net.fabricmc.fabric.api.item.v1.FabricItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;

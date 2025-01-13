@@ -8,6 +8,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import net.minecraft.util.GsonHelper;
 import org.junit.jupiter.api.Test;
 

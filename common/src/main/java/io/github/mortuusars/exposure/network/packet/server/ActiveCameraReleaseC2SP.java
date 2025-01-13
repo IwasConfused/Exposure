@@ -1,9 +1,9 @@
 package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.core.camera.CameraID;
-import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
+import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
@@ -11,9 +11,6 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 

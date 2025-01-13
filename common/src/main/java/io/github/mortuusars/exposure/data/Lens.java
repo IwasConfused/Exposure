@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.core.camera.component.FocalRange;
+import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import net.minecraft.advancements.critereon.ItemPredicate;
 
 public record Lens(ItemPredicate predicate, FocalRange focalRange) {

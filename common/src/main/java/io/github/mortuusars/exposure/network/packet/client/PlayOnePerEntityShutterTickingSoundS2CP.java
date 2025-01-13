@@ -1,11 +1,10 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.core.camera.CameraID;
-import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
+import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.network.packet.IPacket;
-import io.github.mortuusars.exposure.sound.OnePerEntitySoundsClient;
+import io.github.mortuusars.exposure.client.sound.OnePerEntitySoundsClient;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

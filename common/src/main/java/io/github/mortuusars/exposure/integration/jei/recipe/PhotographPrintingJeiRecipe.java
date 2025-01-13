@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.jei.recipe;
 
-import io.github.mortuusars.exposure.core.ExposureType;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
 
 public class PhotographPrintingJeiRecipe {
     private final ExposureType exposureType;

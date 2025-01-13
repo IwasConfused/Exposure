@@ -1,0 +1,116 @@
+package io.github.mortuusars.exposure.world.item;
+
+import io.github.mortuusars.exposure.Config;
+import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.PlatformHelper;
+import io.github.mortuusars.exposure.world.item.component.album.AlbumContent;
+import io.github.mortuusars.exposure.world.item.component.album.AlbumPage;
+import io.github.mortuusars.exposure.world.item.component.album.SignedAlbumContent;
+import io.github.mortuusars.exposure.world.item.component.album.SignedAlbumPage;
+import io.github.mortuusars.exposure.world.inventory.AlbumMenu;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stats;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.context.UseOnContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LecternBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
+
+public class AlbumItem extends Item {
+    public AlbumItem(Properties properties) {
+        super(properties);
+    }
+
+    public AlbumContent getContent(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.ALBUM_CONTENT, AlbumContent.EMPTY);
+    }
+
+    public int getPhotographsCount(ItemStack stack) {
+        return getContent(stack).pages().size();
+    }
+
+    @Override
+    public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
+        ItemStack itemStack = player.getItemInHand(usedHand);
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            int albumSlot = usedHand == InteractionHand.OFF_HAND ? Inventory.SLOT_OFFHAND : player.getInventory().selected;
+            open(serverPlayer, itemStack, albumSlot);
+        }
+
+        player.awardStat(Stats.ITEM_USED.get(this));
+        return InteractionResultHolder.sidedSuccess(itemStack, level.isClientSide());
+    }
+
+    @Override
+    public @NotNull InteractionResult useOn(UseOnContext context) {
+        BlockPos blockPos = context.getClickedPos();
+        Level level = context.getLevel();
+        BlockState blockState = level.getBlockState(blockPos);
+        if (blockState.is(Blocks.LECTERN))
+            return LecternBlock.tryPlaceBook(context.getPlayer(), level, blockPos, blockState,
+                    context.getItemInHand()) ? InteractionResult.sidedSuccess(level.isClientSide) : InteractionResult.PASS;
+        return InteractionResult.PASS;
+    }
+
+    public void open(ServerPlayer player, ItemStack albumStack, int albumSlot) {
+        MenuProvider menuProvider = new MenuProvider() {
+            @Override
+            public @NotNull Component getDisplayName() {
+                return albumStack.getHoverName();
+            }
+
+            @Override
+            public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
+                return new AlbumMenu(containerId, playerInventory, albumSlot);
+            }
+        };
+
+        PlatformHelper.openMenu(player, menuProvider, buffer -> {
+            buffer.writeVarInt(albumSlot);
+//            ItemStack.STREAM_CODEC.encode(buffer, albumStack);
+        });
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
+        if (Config.Client.ALBUM_SHOW_PHOTOS_COUNT.get()) {
+            int photographsCount = getPhotographsCount(stack);
+            if (photographsCount > 0)
+                tooltipComponents.add(Component.translatable("item.exposure.album.tooltip.photos_count", photographsCount));
+        }
+    }
+
+    public boolean shouldPlayEquipAnimation(ItemStack oldStack, ItemStack newStack) {
+        return oldStack.getItem() != newStack.getItem();
+    }
+
+    public ItemStack sign(ItemStack albumStack, String title, String author) {
+        ItemStack signedAlbumStack = new ItemStack(Exposure.Items.SIGNED_ALBUM.get());
+
+        List<SignedAlbumPage> signedPages = getContent(albumStack).removeEmptyTrailingPages().pages()
+                .stream()
+                .map(AlbumPage::convertToSigned)
+                .toList();
+
+        SignedAlbumContent signedAlbumContent = new SignedAlbumContent(title, author, signedPages);
+        signedAlbumStack.set(Exposure.DataComponents.SIGNED_ALBUM_CONTENT, signedAlbumContent);
+
+        return signedAlbumStack;
+    }
+}

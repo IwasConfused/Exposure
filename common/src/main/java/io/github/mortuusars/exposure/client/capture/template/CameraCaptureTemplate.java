@@ -8,14 +8,15 @@ import io.github.mortuusars.exposure.client.image.processor.Process;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.capture.saving.ExposureUploader;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.core.camera.PhotographerEntity;
-import io.github.mortuusars.exposure.core.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.core.CaptureProperties;
-import io.github.mortuusars.exposure.core.FileLoadingInfo;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
-import io.github.mortuusars.exposure.core.cycles.task.EmptyTask;
-import io.github.mortuusars.exposure.core.warehouse.ExposureData;
-import io.github.mortuusars.exposure.core.cycles.task.Task;
+import io.github.mortuusars.exposure.world.camera.capture.ProjectionMode;
+import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
+import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
+import io.github.mortuusars.exposure.world.camera.capture.ProjectionInfo;
+import io.github.mortuusars.exposure.data.ColorPalette;
+import io.github.mortuusars.exposure.util.cycles.task.EmptyTask;
+import io.github.mortuusars.exposure.world.level.storage.ExposureData;
+import io.github.mortuusars.exposure.util.cycles.task.Task;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
@@ -63,9 +64,9 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                 .thenAsync(convertToExposureData(paletteId, createExposureTag(photographer, data, false)));
 
         if (data.fileLoadingInfo().isPresent()) {
-            FileLoadingInfo fileLoading = data.fileLoadingInfo().get();
-            String filepath = fileLoading.getFilepath();
-            Palettizer palettizer = fileLoading.shouldDither() ? Palettizer.DITHERED : Palettizer.NEAREST;
+            ProjectionInfo fileLoading = data.fileLoadingInfo().get();
+            String filepath = fileLoading.filepath();
+            Palettizer palettizer = fileLoading.mode() == ProjectionMode.DITHERED ? Palettizer.DITHERED : Palettizer.NEAREST;
 
             captureTask = captureTask.overridenBy(Capture.of(Capture.file(filepath),
                             CaptureActions.optional(data.cameraID(),

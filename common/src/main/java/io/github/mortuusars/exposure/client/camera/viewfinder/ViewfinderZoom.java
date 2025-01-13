@@ -6,11 +6,10 @@ import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.core.camera.Camera;
-import io.github.mortuusars.exposure.core.camera.component.FocalRange;
-import io.github.mortuusars.exposure.core.camera.component.ZoomDirection;
-import io.github.mortuusars.exposure.item.CameraItem;
-import io.github.mortuusars.exposure.item.part.CameraSetting;
+import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.camera.component.FocalRange;
+import io.github.mortuusars.exposure.client.util.ZoomDirection;
+import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.util.Mth;
 

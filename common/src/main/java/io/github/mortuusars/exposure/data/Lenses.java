@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.data;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.component.FocalRange;
+import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.item.ItemStack;
 

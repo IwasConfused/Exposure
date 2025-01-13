@@ -6,10 +6,10 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.client.render.texture.TextureRenderer;
-import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.item.StackedPhotographsItem;
-import io.github.mortuusars.exposure.core.frame.Frame;
-import io.github.mortuusars.exposure.util.ItemAndStack;
+import io.github.mortuusars.exposure.world.item.PhotographItem;
+import io.github.mortuusars.exposure.world.item.StackedPhotographsItem;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.item.ItemStack;
 

@@ -1,9 +1,9 @@
 package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.PlatformHelper;
-import io.github.mortuusars.exposure.item.AlbumItem;
-import io.github.mortuusars.exposure.menu.LecternAlbumMenu;
-import io.github.mortuusars.exposure.util.ItemAndStack;
+import io.github.mortuusars.exposure.world.item.AlbumItem;
+import io.github.mortuusars.exposure.world.inventory.LecternAlbumMenu;
+import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;

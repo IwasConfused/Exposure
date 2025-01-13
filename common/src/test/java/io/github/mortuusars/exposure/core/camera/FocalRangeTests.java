@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.core.camera;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.mojang.serialization.JsonOps;
-import io.github.mortuusars.exposure.core.camera.component.FocalRange;
+import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

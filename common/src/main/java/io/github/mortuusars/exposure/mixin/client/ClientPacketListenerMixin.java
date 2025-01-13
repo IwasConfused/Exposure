@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.mixin.client;
 
-import io.github.mortuusars.exposure.event_hub.ClientEvents;
+import io.github.mortuusars.exposure.event.ClientEvents;
 import net.minecraft.client.multiplayer.ClientPacketListener;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import org.spongepowered.asm.mixin.Mixin;

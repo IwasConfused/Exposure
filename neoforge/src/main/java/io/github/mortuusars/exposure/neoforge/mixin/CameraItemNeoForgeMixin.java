@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.mixin;
 
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.neoforge.item.CameraItemForgeClientExtensions;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;

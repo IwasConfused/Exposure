@@ -11,7 +11,7 @@ import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.LightroomScreen;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
-import io.github.mortuusars.exposure.item.tooltip.PhotographTooltip;
+import io.github.mortuusars.exposure.world.inventory.tooltip.PhotographTooltip;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;

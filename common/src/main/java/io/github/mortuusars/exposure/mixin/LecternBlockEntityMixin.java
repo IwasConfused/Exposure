@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.mixin;
 
-import io.github.mortuusars.exposure.item.AlbumItem;
+import io.github.mortuusars.exposure.world.item.AlbumItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;

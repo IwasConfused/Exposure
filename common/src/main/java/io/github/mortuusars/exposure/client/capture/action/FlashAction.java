@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.capture.action;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.block.FlashBlock;
+import io.github.mortuusars.exposure.world.block.FlashBlock;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;

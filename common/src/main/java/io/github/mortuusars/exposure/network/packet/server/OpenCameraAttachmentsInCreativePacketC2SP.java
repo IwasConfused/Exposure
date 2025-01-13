@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

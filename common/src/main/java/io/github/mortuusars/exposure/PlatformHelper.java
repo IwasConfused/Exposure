@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure;
 
 import dev.architectury.injectables.annotations.ExpectPlatform;
-import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;

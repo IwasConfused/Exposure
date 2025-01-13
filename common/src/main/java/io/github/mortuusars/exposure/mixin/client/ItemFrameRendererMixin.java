@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin.client;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import io.github.mortuusars.exposure.event_hub.ClientEvents;
+import io.github.mortuusars.exposure.event.ClientEvents;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

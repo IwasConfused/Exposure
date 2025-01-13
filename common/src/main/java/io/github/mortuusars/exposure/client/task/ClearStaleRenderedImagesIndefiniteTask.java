@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.task;
 
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.core.cycles.task.Task;
+import io.github.mortuusars.exposure.util.cycles.task.Task;
 
 import java.util.concurrent.CompletableFuture;
 

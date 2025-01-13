@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.mixin.client;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.render.FovModifier;
-import io.github.mortuusars.exposure.event_hub.ClientEvents;
+import io.github.mortuusars.exposure.event.ClientEvents;
 import net.minecraft.client.Camera;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.renderer.GameRenderer;

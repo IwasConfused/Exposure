@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.integration.jade.component_provider;
 
-import io.github.mortuusars.exposure.entity.PhotographFrameEntity;
+import io.github.mortuusars.exposure.world.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.integration.jade.ExposureJadePlugin;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;

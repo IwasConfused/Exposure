@@ -1,11 +1,11 @@
 package io.github.mortuusars.exposure.neoforge.event;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
+import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Lens;
-import io.github.mortuusars.exposure.event_hub.CommonEvents;
-import io.github.mortuusars.exposure.event_hub.ServerEvents;
+import io.github.mortuusars.exposure.event.CommonEvents;
+import io.github.mortuusars.exposure.event.ServerEvents;
 import io.github.mortuusars.exposure.network.neoforge.PacketsImpl;
 import io.github.mortuusars.exposure.network.packet.C2SPackets;
 import io.github.mortuusars.exposure.network.packet.CommonPackets;

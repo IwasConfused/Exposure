@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.core.warehouse.RequestedPalettedExposure;
+import io.github.mortuusars.exposure.world.level.storage.RequestedPalettedExposure;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

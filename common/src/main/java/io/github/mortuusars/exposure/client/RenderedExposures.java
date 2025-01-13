@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.client;
 
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
@@ -8,13 +7,12 @@ import io.github.mortuusars.exposure.client.image.ResourceImage;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.color.ColorPalette;
-import io.github.mortuusars.exposure.core.frame.Frame;
-import io.github.mortuusars.exposure.core.warehouse.ExposureData;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
+import io.github.mortuusars.exposure.data.ColorPalette;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
-import net.minecraft.core.Registry;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

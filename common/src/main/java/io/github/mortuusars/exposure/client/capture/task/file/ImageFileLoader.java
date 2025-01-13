@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.capture.task.file;
 
 import com.google.common.io.Files;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.cycles.task.Result;
+import io.github.mortuusars.exposure.util.cycles.task.Result;
 import io.github.mortuusars.exposure.client.image.Image;
 
 import java.io.File;

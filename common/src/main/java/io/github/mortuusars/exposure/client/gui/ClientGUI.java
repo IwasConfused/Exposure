@@ -2,10 +2,10 @@ package io.github.mortuusars.exposure.client.gui;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
-import io.github.mortuusars.exposure.item.PhotographItem;
-import io.github.mortuusars.exposure.recipe.FilmDevelopingRecipe;
-import io.github.mortuusars.exposure.recipe.PhotographCopyingRecipe;
-import io.github.mortuusars.exposure.util.ItemAndStack;
+import io.github.mortuusars.exposure.world.item.PhotographItem;
+import io.github.mortuusars.exposure.world.item.crafting.recipe.FilmDevelopingRecipe;
+import io.github.mortuusars.exposure.world.item.crafting.recipe.PhotographCopyingRecipe;
+import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;

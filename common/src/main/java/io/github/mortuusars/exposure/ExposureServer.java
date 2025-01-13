@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.core.warehouse.server.ExposureRepository;
-import io.github.mortuusars.exposure.core.warehouse.server.ExposureFrameHistory;
+import io.github.mortuusars.exposure.world.level.storage.ExposureRepository;
+import io.github.mortuusars.exposure.world.level.storage.ExposureFrameHistory;
 import net.minecraft.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 

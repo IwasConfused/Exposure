@@ -1,7 +1,8 @@
 package io.github.mortuusars.exposure.core.warehouse.server;
 
-import io.github.mortuusars.exposure.core.ExposureIdentifier;
-import io.github.mortuusars.exposure.core.frame.Frame;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.level.storage.ExposureFrameHistory;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;

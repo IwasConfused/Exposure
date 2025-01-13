@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.core.cycles;
 
-import io.github.mortuusars.exposure.core.cycles.task.Task;
+import io.github.mortuusars.exposure.util.cycles.Cycles;
+import io.github.mortuusars.exposure.util.cycles.task.Task;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;

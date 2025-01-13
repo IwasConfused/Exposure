@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.core.color;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
+import io.github.mortuusars.exposure.data.ColorPalette;
 import net.minecraft.util.GsonHelper;
 import org.junit.jupiter.api.Test;
 

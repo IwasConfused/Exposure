@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.data.export;
 
-import io.github.mortuusars.exposure.data.ExposureSize;
-import io.github.mortuusars.exposure.core.warehouse.ExposureData;
+import io.github.mortuusars.exposure.client.ExposureSize;
+import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.file.Files;

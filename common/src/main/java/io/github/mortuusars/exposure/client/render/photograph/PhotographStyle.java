@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.client.render.photograph;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
-import io.github.mortuusars.exposure.item.PhotographItem;
+import io.github.mortuusars.exposure.world.item.PhotographItem;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 

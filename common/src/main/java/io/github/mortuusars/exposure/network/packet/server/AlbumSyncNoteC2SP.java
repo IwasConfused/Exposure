@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.item.component.album.AlbumPage;
-import io.github.mortuusars.exposure.menu.AlbumMenu;
+import io.github.mortuusars.exposure.world.item.component.album.AlbumPage;
+import io.github.mortuusars.exposure.world.inventory.AlbumMenu;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;

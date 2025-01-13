@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.server;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.core.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraID;
 import net.minecraft.Util;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;

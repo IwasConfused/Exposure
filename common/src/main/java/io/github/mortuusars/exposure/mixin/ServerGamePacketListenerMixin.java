@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.mixin;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.menu.ItemRenameMenu;
+import io.github.mortuusars.exposure.world.inventory.ItemRenameMenu;
 import net.minecraft.network.protocol.PacketUtils;
 import net.minecraft.network.protocol.game.ServerboundRenameItemPacket;
 import net.minecraft.server.level.ServerPlayer;

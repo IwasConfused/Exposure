@@ -1,8 +1,8 @@
 package io.github.mortuusars.exposure.integration.jade.component_provider;
 
-import io.github.mortuusars.exposure.block.entity.Lightroom;
-import io.github.mortuusars.exposure.block.entity.LightroomBlockEntity;
-import io.github.mortuusars.exposure.core.print.PrintingMode;
+import io.github.mortuusars.exposure.world.block.entity.Lightroom;
+import io.github.mortuusars.exposure.world.block.entity.LightroomBlockEntity;
+import io.github.mortuusars.exposure.world.lightroom.PrintingMode;
 import io.github.mortuusars.exposure.integration.jade.ExposureJadePlugin;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;

@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client;
 
-import io.github.mortuusars.exposure.event_hub.ClientEvents;
+import io.github.mortuusars.exposure.event.ClientEvents;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
