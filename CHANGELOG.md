@@ -2,9 +2,15 @@
 
 ## UNRELEASED 1.21
 - Added `/exposure debug develop_film_in_hand` command.
+- Added `/exposure debug chromatic_from_last_three_exposures` command.
 - Film Roll renaming screen now has a sound when item is renamed and Enter key can be used to quickly apply changes.
 - Mundane, Awkward and Thick potions now have different colors to tell them apart easier.
 - Photographs are no longer rendered as images in Item Frames by default. Can be turned back on in the config.
+- Added custom palettes system `//add details`
+- Added colors to base palette `//add details`
+- Added ability to project from URL with Interplanar Projector
+- Changed how custom Lenses and Filters are defined.
+- Added mipmaps to exposures.
 
 - Added config option to change default exposure size.
 - Added config option to disable loading images from file with Interplanar Projector.
