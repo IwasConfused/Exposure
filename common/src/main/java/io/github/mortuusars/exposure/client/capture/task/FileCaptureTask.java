@@ -30,24 +30,24 @@ public class FileCaptureTask extends Task<Result<Image>> {
     public static final TranslatableError ERROR_NOT_SUPPORTED = new TranslatableError("error.exposure.capture.file.not_supported", "ERR_NOT_SUPPORTED");
     public static final TranslatableError ERROR_TIMED_OUT = new TranslatableError("error.exposure.capture.file.timed_out", "ERR_TIMED_OUT");
 
-    protected final String filePath;
+    protected final File file;
 
     protected final CompletableFuture<Result<Image>> future = new CompletableFuture<>();
 
-    public FileCaptureTask(String filePath) {
-        this.filePath = filePath;
+    public FileCaptureTask(File file) {
+        this.file = file;
     }
 
-    public String getFilePath() {
-        return filePath;
+    public File getFile() {
+        return file;
     }
 
     @Override
     public CompletableFuture<Result<Image>> execute() {
         return future.completeAsync(() -> {
-            LOGGER.info("Attempting to load image from file: '{}'", filePath);
+            LOGGER.info("Attempting to load image from file: '{}'", file.toString());
 
-            Result<File> result = findFileWithExtension(filePath);
+            Result<File> result = findFileWithExtension(file);
 
             if (result.isError()) {
                 return result.remapError();
@@ -97,10 +97,8 @@ public class FileCaptureTask extends Task<Result<Image>> {
      *
      * @return File with extension or error.
      */
-    private static Result<File> findFileWithExtension(String filepath) {
-        File file = new File(filepath);
-
-        String extension = Files.getFileExtension(filepath);
+    private static Result<File> findFileWithExtension(File file) {
+        String extension = Files.getFileExtension(file.getAbsolutePath());
         if (!StringUtil.isNullOrEmpty(extension)) {
             return Result.success(file);
         }

@@ -1,16 +1,24 @@
 package io.github.mortuusars.exposure.client.capture;
 
+import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.action.CompositeAction;
 import io.github.mortuusars.exposure.client.capture.task.*;
 import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.util.cycles.task.ErrorTask;
 import io.github.mortuusars.exposure.util.cycles.task.Result;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
+import net.minecraft.util.StringUtil;
+import org.slf4j.Logger;
+import org.spongepowered.asm.util.Files;
 
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -20,6 +28,7 @@ public class Capture<T> extends Task<Result<T>> {
     public static final TranslatableError ERROR_FAILED_GENERIC = new TranslatableError("error.exposure.capture.failed", "ERR_CAPTURE_FAILED");
 
     public static final int TIMEOUT_MS = 12_000; // 12 seconds
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     protected final Task<Result<T>> capturingTask;
     protected final CaptureAction component;
@@ -101,9 +110,15 @@ public class Capture<T> extends Task<Result<T>> {
                 : new BackgroundScreenshotCaptureTask();
     }
 
-    //TODO: maybe add timeout for 1-2 seconds, so result is not that delayed when loading big images.
-    // But this might be problematic if used has slow hdd or loading takes long for other reasons.
-    public static Task<Result<Image>> file(String filePath) {
-        return new FileCaptureTask(filePath);
+    public static Task<Result<Image>> fromFile(File file) {
+        return new FileCaptureTask(file);
+    }
+
+    public static Task<Result<Image>> fromUrl(URL url) {
+        return new UrlCaptureTask(url);
+    }
+
+    public static Task<Result<Image>> path(String path) {
+        return new PathCaptureTask(path);
     }
 }

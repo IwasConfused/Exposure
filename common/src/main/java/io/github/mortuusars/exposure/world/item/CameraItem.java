@@ -228,7 +228,7 @@ public class CameraItem extends Item {
     }
 
     public int calculateCooldownAfterShot(ItemStack stack, PhotographerEntity photographer, CaptureProperties captureProperties) {
-        if (captureProperties.fileLoadingInfo().isPresent()) return PROJECT_COOLDOWN;
+        if (captureProperties.projectingInfo().isPresent()) return PROJECT_COOLDOWN;
         if (captureProperties.flash()) return FLASH_COOLDOWN;
         return BASE_COOLDOWN;
     }
@@ -427,8 +427,8 @@ public class CameraItem extends Item {
                     getChromaChannel(stack),
                     new CompoundTag());
 
-            if (shutterSpeed.shouldCauseTickingSound() || captureProperties.fileLoadingInfo().isPresent()) {
-                int duration = Math.max(shutterSpeed.getDurationTicks(), captureProperties.fileLoadingInfo()
+            if (shutterSpeed.shouldCauseTickingSound() || captureProperties.projectingInfo().isPresent()) {
+                int duration = Math.max(shutterSpeed.getDurationTicks(), captureProperties.projectingInfo()
                         .map(l -> Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get()).orElse(0));
                 OnePerEntitySounds.playShutterTickingSoundForAll(photographer.asEntity(), cameraID,
                         1f, 1f, duration);
@@ -440,7 +440,7 @@ public class CameraItem extends Item {
                 int cooldown = calculateCooldownAfterShot(stack, photographer, captureProperties);
                 instance.setDeferredCooldown(cooldown);
 
-                captureProperties.fileLoadingInfo().ifPresent(fileLoading -> {
+                captureProperties.projectingInfo().ifPresent(fileLoading -> {
                     instance.waitForProjection(level.getGameTime() + Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get());
                 });
             });
@@ -621,7 +621,7 @@ public class CameraItem extends Item {
         captureProperties.chromaChannel().ifPresent(channel ->
                 tag.putString(FrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
 
-        captureProperties.fileLoadingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(FrameTag.FROM_FILE, true));
+        captureProperties.projectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(FrameTag.FROM_FILE, true));
 
         // Position
         ListTag pos = new ListTag();
@@ -661,7 +661,7 @@ public class CameraItem extends Item {
 
         List<EntityInFrame> entitiesInFrame;
 
-        if (captureProperties.fileLoadingInfo().isPresent()) {
+        if (captureProperties.projectingInfo().isPresent()) {
             entitiesInFrame = Collections.emptyList();
         } else {
             if (cameraHolder instanceof ServerPlayer player) {

@@ -83,11 +83,11 @@ public class ClientPacketsHandler {
     }
 
     //TODO: Use CaptureProperties
-    public static void loadExposure(String id, String filePath, int size, boolean dither) {
+    public static void loadExposure(String id, String path, int size, boolean dither) {
         LocalPlayer player = Minecrft.player();
 
-        if (StringUtil.isNullOrEmpty(filePath)) {
-            LOGGER.error("Cannot load exposure: filePath is null or empty.");
+        if (StringUtil.isNullOrEmpty(path)) {
+            LOGGER.error("Cannot load exposure: path is null or empty.");
             return;
         }
 
@@ -96,7 +96,7 @@ public class ClientPacketsHandler {
         ResourceLocation paletteId = colorPalette.unwrapKey().orElseThrow().location();
         Palettizer palettizer = dither ? Palettizer.DITHERED : Palettizer.NEAREST;
 
-        ExposureClient.cycles().enqueueTask(Capture.of(Capture.file(filePath))
+        ExposureClient.cycles().enqueueTask(Capture.of(Capture.path(path))
                 .handleErrorAndGetResult()
                 .thenAsync(Process.with(
                         Processor.Crop.SQUARE_CENTER,

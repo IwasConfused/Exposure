@@ -63,12 +63,12 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                 .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette))
                 .thenAsync(convertToExposureData(paletteId, createExposureTag(photographer, data, false)));
 
-        if (data.fileLoadingInfo().isPresent()) {
-            ProjectionInfo fileLoading = data.fileLoadingInfo().get();
-            String filepath = fileLoading.filepath();
-            Palettizer palettizer = fileLoading.mode() == ProjectionMode.DITHERED ? Palettizer.DITHERED : Palettizer.NEAREST;
+        if (data.projectingInfo().isPresent()) {
+            ProjectionInfo projectionInfo = data.projectingInfo().get();
+            String path = projectionInfo.path();
+            Palettizer palettizer = projectionInfo.mode() == ProjectionMode.DITHERED ? Palettizer.DITHERED : Palettizer.NEAREST;
 
-            captureTask = captureTask.overridenBy(Capture.of(Capture.file(filepath),
+            captureTask = captureTask.overridenBy(Capture.of(Capture.path(path),
                             CaptureActions.optional(data.cameraID(),
                                     id -> CaptureActions.interplanarProjection(photographer, id)))
                     .handleErrorAndGetResult(err -> LOGGER.error(err.technical().getString()))
