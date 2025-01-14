@@ -37,7 +37,7 @@ public class InterplanarProjectorItem extends Item {
     }
 
     protected boolean isAllowed() {
-        return Config.Server.CAN_PROJECT_FROM_FILE.get();
+        return Config.Server.CAN_PROJECT.get();
     }
 
     @Override
@@ -46,14 +46,18 @@ public class InterplanarProjectorItem extends Item {
             components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.disabled"));
         }
 
-        components.add(getMode(stack).translate());
+        if (getFileLoadingData(stack).isPresent()) {
+            components.add(getMode(stack).translate());
+        }
 
         if (Screen.hasShiftDown()) {
             if (isConsumable(stack)) {
                 components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.consumed_info"));
             }
             components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.info"));
-            components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.switch_info"));
+            if (getFileLoadingData(stack).isPresent()) {
+                components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.change_mode_info"));
+            }
         } else {
             components.add(Component.translatable("tooltip.exposure.hold_for_details"));
         }
@@ -61,7 +65,7 @@ public class InterplanarProjectorItem extends Item {
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
-        if (isAllowed() && other.isEmpty() && action == ClickAction.SECONDARY) {
+        if (other.isEmpty() && action == ClickAction.SECONDARY && getFileLoadingData(stack).isPresent()) {
             setMode(stack, getMode(stack).cycle());
             slot.setChanged();
             if (player.level().isClientSide) {
@@ -73,12 +77,12 @@ public class InterplanarProjectorItem extends Item {
         return super.overrideOtherStackedOnMe(stack, other, slot, action, player, access);
     }
 
-    public Optional<String> getFilepath(ItemStack stack) {
+    public Optional<String> getPath(ItemStack stack) {
         @Nullable Component customName = stack.get(DataComponents.CUSTOM_NAME);
         return customName != null ? Optional.of(customName.getString()) : Optional.empty();
     }
 
     public Optional<ProjectionInfo> getFileLoadingData(ItemStack stack) {
-        return getFilepath(stack).map(filepath -> new ProjectionInfo(filepath, getMode(stack)));
+        return isAllowed() ? getPath(stack).map(filepath -> new ProjectionInfo(filepath, getMode(stack))) : Optional.empty();
     }
 }
