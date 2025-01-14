@@ -71,7 +71,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
             captureTask = captureTask.overridenBy(Capture.of(Capture.file(filepath),
                             CaptureActions.optional(data.cameraID(),
                                     id -> CaptureActions.interplanarProjection(photographer, id)))
-                    .handleErrorAndGetResult(printCasualErrorInChat())
+                    .handleErrorAndGetResult(err -> LOGGER.error(err.technical().getString()))
                     .thenAsync(Process.with(
                             Processor.Crop.SQUARE_CENTER,
                             Processor.Resize.to(data.frameSize()),

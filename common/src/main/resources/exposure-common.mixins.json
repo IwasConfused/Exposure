@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "minVersion": "0.8",
   "client": [
+    "client.AnvilScreenMixin",
     "client.BuggerKeyboardHandlerMixin",
     "client.BuggerScreenOverlayMixin",
     "client.BuggerScreenRenderLinesInvoker",
@@ -23,6 +24,7 @@
     "client.MultiPlayerGameModeMixin"
   ],
   "mixins": [
+    "AnvilMenuMixin",
     "BookPageCountMixin",
     "LecternBlockEntityAccessor",
     "LecternBlockEntityMixin",

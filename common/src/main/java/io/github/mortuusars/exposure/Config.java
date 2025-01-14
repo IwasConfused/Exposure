@@ -19,6 +19,8 @@ public class Config {
         public static final ModConfigSpec.BooleanValue CAN_PROJECT_FROM_FILE;
         public static final ModConfigSpec.IntValue PROJECT_FROM_FILE_TIMEOUT_TICKS;
 
+        public static final ModConfigSpec.BooleanValue INTERPLANAR_PROJECTOR_LARGER_RENAMING_LIMIT;
+
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
 
@@ -35,6 +37,15 @@ public class Config {
                                 "This is affecting gameplay slightly - Interplanar Projector will be consumed if loading times out.",
                                 "Default: 80 (4 seconds)")
                         .defineInRange("LoadingFromFileTimeoutTicks", 80, 1, 200);
+            }
+            builder.pop();
+
+            builder.push("Misc");
+            {
+                INTERPLANAR_PROJECTOR_LARGER_RENAMING_LIMIT = builder
+                        .comment("Increases item name length limit for Interplanar Projector to 150 characters. Vanilla limit: 50.",
+                                "Default: true")
+                        .define("IncreaseInterplanarProjectorNameLimit", true);
             }
             builder.pop();
 
