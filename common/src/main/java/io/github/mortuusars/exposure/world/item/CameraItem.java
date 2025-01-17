@@ -68,6 +68,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -764,8 +765,10 @@ public class CameraItem extends Item {
         } else if (projectionState == CameraInstance.ProjectionState.SUCCESSFUL) {
             photographer.playCameraSound(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.8f, 1.1f, 0f);
             Entity entity = photographer.asEntity();
-            level.sendParticles(ParticleTypes.PORTAL, entity.getX(), entity.getY() + 1.2, entity.getZ(), 32,
-                    entity.getRandom().nextGaussian(), entity.getRandom().nextGaussian(), entity.getRandom().nextGaussian(), 0.01);
+            for (int i = 0; i < 16; i++) {
+                level.sendParticles(ParticleTypes.PORTAL, entity.getX(), entity.getY() + 1.2, entity.getZ(), 2,
+                        entity.getRandom().nextGaussian() * 0.3, entity.getRandom().nextGaussian() * 0.3, entity.getRandom().nextGaussian() * 0.3, 0.01);
+            }
         }
     }
 
