@@ -92,6 +92,10 @@ public class ViewfinderShader implements AutoCloseable {
         Filters.of(Minecrft.registryAccess(), filterStack).map(Filter::shader).ifPresentOrElse(this::apply, this::remove);
     }
 
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
     public void remove() {
         if (shader != null) {
             shader.close();

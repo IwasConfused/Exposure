@@ -58,6 +58,7 @@ public class Viewfinder {
 
     public void tick() {
         shader().update();
+        shader().setActive(isLookingThrough());
     }
 
     public void close() {
@@ -86,10 +87,6 @@ public class Viewfinder {
     }
 
     public boolean keyPressed(int key, int scanCode, int action) {
-        if (!isLookingThrough()) {
-            return false;
-        }
-
         if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
                 && Minecrft.options().keyAttack.matches(key, scanCode)
                 && !(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
@@ -119,6 +116,10 @@ public class Viewfinder {
                 }
             }
             return true;
+        }
+
+        if (!isLookingThrough()) {
+            return false;
         }
 
         if (!(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
