@@ -347,12 +347,12 @@ public class CameraItem extends Item {
         });
 
         // Tests entities in frame
-         if (isActive(stack)) {
-             List<LivingEntity> entitiesInFrame = getEntitiesInFrame(player, serverLevel, stack);
-             entitiesInFrame.forEach(e -> {
-                 e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 2));
-             });
-         }
+//         if (isActive(stack)) {
+//             List<LivingEntity> entitiesInFrame = getEntitiesInFrame(player, serverLevel, stack);
+//             entitiesInFrame.forEach(e -> {
+//                 e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 2));
+//             });
+//         }
     }
 
     @Override
