@@ -10,6 +10,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
+/**
+ * This system allows storing some camera data that we need to always have,
+ * regardless of player holding the camera item or not.<br>
+ * Some actions are delayed, and we cannot make sure that player will still hold
+ * a camera when that action completes (projecting from path for example).
+ * <br><br>
+ * Currently, it's not necessary to persist this data.
+ * But if the need arises - it should not be hard to make it a {@link net.minecraft.world.level.saveddata.SavedData}.
+ */
 public class CameraInstances {
     private static final Map<CameraID, CameraInstance> INSTANCES = new HashMap<>();
 

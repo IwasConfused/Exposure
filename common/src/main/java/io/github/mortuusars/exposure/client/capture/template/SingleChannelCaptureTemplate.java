@@ -42,7 +42,7 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
 
         float brightnessStops = data.shutterSpeed().getStopsDifference(ShutterSpeed.DEFAULT);
 
-        @Nullable ResourceLocation postEffect = data.chromaChannel()
+        @Nullable ResourceLocation postEffect = data.chromaticChannel()
                 .map(c -> Exposure.resource("shaders/" + c.getSerializedName() + "_filter.json"))
                 .orElse(null);
 

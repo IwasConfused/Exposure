@@ -23,19 +23,6 @@ public class CameraInstance {
         this.cameraID = cameraID;
     }
 
-    public void tick(ItemStack stack, PhotographerEntity photographer) {
-//        if (waitingForProjectionResult
-//                && projectionTimeoutTicks >= 0
-//                && photographer.asEntity().level().getGameTime() - captureStartTick > projectionTimeoutTicks) {
-//            waitingForProjectionResult = false;
-//            projectionTimeoutTicks = -1;
-//            projectionResult = ProjectionResult.TIMED_OUT;
-//
-//            ItemAndStack.executeIfItemMatches(CameraItem.class, stack, cameraItem ->
-//                    cameraItem.handleProjectionResult(photographer, stack, projectionResult));
-//        }
-    }
-
     // --
 
     public Optional<PhotographerEntity> getLastPhotographer(Level level) {

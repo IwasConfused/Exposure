@@ -28,7 +28,7 @@ public record CaptureProperties(String exposureID,
                                 boolean flash,
                                 int lightLevel,
                                 Optional<ProjectionInfo> projectingInfo,
-                                Optional<ColorChannel> chromaChannel,
+                                Optional<ColorChannel> chromaticChannel,
                                 CompoundTag extraData) {
     public static final StreamCodec<RegistryFriendlyByteBuf, CaptureProperties> STREAM_CODEC = new StreamCodec<>() {
         public @NotNull CaptureProperties decode(RegistryFriendlyByteBuf buffer) {
@@ -62,7 +62,7 @@ public record CaptureProperties(String exposureID,
             ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.VAR_INT.encode(buffer, data.lightLevel());
             ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).encode(buffer, data.projectingInfo());
-            ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.chromaChannel());
+            ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.chromaticChannel());
             ByteBufCodecs.COMPOUND_TAG.encode(buffer, data.extraData());
         }
     };

@@ -112,19 +112,19 @@ public record Frame(ExposureIdentifier exposureIdentifier,
     }
 
     public boolean isFromFile() {
-        return getAdditionalDataTagForReading().getBoolean(FrameTag.FROM_FILE);
+        return getAdditionalDataTagForReading().getBoolean(FrameTag.PROJECTED);
     }
 
     public boolean isChromatic() {
         return getAdditionalDataTagForReading().getBoolean(FrameTag.CHROMATIC);
     }
 
-    public Optional<ColorChannel> getChromaticChannel() {
-        return ColorChannel.fromString(getAdditionalDataTagForReading().getString(FrameTag.CHROMATIC_CHANNEL));
+    public Optional<ColorChannel> getColorChannel() {
+        return ColorChannel.fromString(getAdditionalDataTagForReading().getString(FrameTag.COLOR_CHANNEL));
     }
 
     public boolean wasTakenWithChromaticFilter() {
-        return getChromaticChannel().isPresent();
+        return getColorChannel().isPresent();
     }
 
     public Mutable toMutable() {

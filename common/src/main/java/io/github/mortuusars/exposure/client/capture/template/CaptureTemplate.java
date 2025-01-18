@@ -22,7 +22,7 @@ public interface CaptureTemplate {
 
     default Processor chooseColorProcessor(CaptureProperties data) {
         return data.filmType() == ExposureType.BLACK_AND_WHITE
-                ? data.chromaChannel().map(Processor::singleChannelBlackAndWhite).orElse(Processor.blackAndWhite(1.15f))
+                ? data.chromaticChannel().map(Processor::singleChannelBlackAndWhite).orElse(Processor.blackAndWhite(1.15f))
                 : Processor.EMPTY;
     }
 

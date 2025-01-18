@@ -52,6 +52,8 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
@@ -68,8 +70,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.LevelEvent;
-import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.structure.Structure;
@@ -183,7 +183,7 @@ public class CameraItem extends Item {
 
     public CameraID getOrCreateID(ItemStack stack) {
         if (!stack.has(Exposure.DataComponents.CAMERA_ID)) {
-            stack.set(Exposure.DataComponents.CAMERA_ID, CameraID.createRandom());
+            stack.set(Exposure.DataComponents.CAMERA_ID, CameraID.create());
         }
         return stack.get(Exposure.DataComponents.CAMERA_ID);
     }
@@ -347,12 +347,12 @@ public class CameraItem extends Item {
         });
 
         // Tests entities in frame
-        // if (isActive(stack)) {
-        //     List<LivingEntity> entitiesInFrame = getEntitiesInFrame(player, serverLevel, stack);
-        //     entitiesInFrame.forEach(e -> {
-        //         e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 2));
-        //     });
-        // }
+         if (isActive(stack)) {
+             List<LivingEntity> entitiesInFrame = getEntitiesInFrame(player, serverLevel, stack);
+             entitiesInFrame.forEach(e -> {
+                 e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 2));
+             });
+         }
     }
 
     @Override
@@ -382,7 +382,9 @@ public class CameraItem extends Item {
     public @NotNull InteractionResultHolder<ItemStack> release(Level level, PhotographerEntity photographer, ItemStack stack) {
         photographer.playCameraSound(getReleaseButtonSound(), 0.3f, 1f, 0.1f);
 
-        if (getShutter().isOpen(stack) || Attachment.FILM.isEmpty(stack)
+        if (level.isClientSide
+                || getShutter().isOpen(stack)
+                || Attachment.FILM.isEmpty(stack)
                 || !CameraInstances.canReleaseShutter(CameraID.ofStack(stack))) {
             return InteractionResultHolder.consume(stack);
         }
@@ -600,93 +602,84 @@ public class CameraItem extends Item {
 
     public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, ItemStack stack) {
         Entity cameraHolder = photographer.asEntity();
+        boolean projecting = captureProperties.projectingInfo().isPresent();
 
         CompoundTag tag = new CompoundTag();
-
-        if (isInSelfieMode(stack)) {
-            tag.putBoolean(FrameTag.SELFIE, true);
-        }
-
-        if (captureProperties.flash()) {
-            tag.putBoolean(FrameTag.FLASH, true);
-        }
-
-        double zoom = CameraSetting.ZOOM.getOrDefault(stack);
-        int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
-        tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
+        List<EntityInFrame> entitiesInFrame;
 
         tag.putFloat(FrameTag.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
 
-        tag.putInt(FrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
-
-        captureProperties.chromaChannel().ifPresent(channel ->
-                tag.putString(FrameTag.CHROMATIC_CHANNEL, channel.getSerializedName()));
-
-        captureProperties.projectingInfo().ifPresent(fileProjectingInfo -> tag.putBoolean(FrameTag.FROM_FILE, true));
-
-        // Position
-        ListTag pos = new ListTag();
-        pos.addAll(List.of(
-                DoubleTag.valueOf(cameraHolder.position().x()),
-                DoubleTag.valueOf(cameraHolder.position().y()),
-                DoubleTag.valueOf(cameraHolder.position().z())));
-        tag.put(FrameTag.POSITION, pos);
-        tag.put(FrameTag.PITCH, FloatTag.valueOf(cameraHolder.getXRot()));
-        tag.put(FrameTag.YAW, FloatTag.valueOf(cameraHolder.getYRot()));
-
-        // Environment
         tag.put(FrameTag.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
-        tag.putInt(FrameTag.DAY_TIME, (int) level.getDayTime());
-        tag.putString(FrameTag.DIMENSION, level.dimension().location().toString());
-        BlockPos blockPos = cameraHolder.blockPosition();
-        level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
-                .ifPresent(biome -> tag.putString(FrameTag.BIOME, biome.toString()));
-        int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
-        level.updateSkyBrightness();
-        int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
-        if (cameraHolder.isUnderWater())
-            tag.putBoolean(FrameTag.UNDERWATER, true);
-        if (cameraHolder.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0)
-            tag.putBoolean(FrameTag.IN_CAVE, true);
-        else if (!cameraHolder.isUnderWater()) {
-            Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
-            if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
-                tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
-            else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
-                tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
-            else
-                tag.putString(FrameTag.WEATHER, "Clear");
-        }
 
-        addStructuresInfo(level, blockPos, tag);
-
-        List<EntityInFrame> entitiesInFrame;
-
-        if (captureProperties.projectingInfo().isPresent()) {
+        if (projecting) {
+            tag.putBoolean(FrameTag.PROJECTED, true);
             entitiesInFrame = Collections.emptyList();
         } else {
-            if (cameraHolder instanceof ServerPlayer player) {
-                boolean lookingAtAngryEnderMan = !level.getEntities(EntityTypeTest.forClass(EnderMan.class),
-                        enderMan -> player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player)).isEmpty();
-
-                if (lookingAtAngryEnderMan) {
-                    // I wanted to implement this in a predicate,
-                    // but it's tricky because EntitySubPredicates do not get the player in their 'match' method.
-                    // So it's just easier to hardcode it like this.
-                    Exposure.CriteriaTriggers.PHOTOGRAPH_ENDERMAN_EYES.get().trigger(player);
-                }
+            if (isInSelfieMode(stack)) {
+                tag.putBoolean(FrameTag.SELFIE, true);
             }
 
+            if (captureProperties.flash()) {
+                tag.putBoolean(FrameTag.FLASH, true);
+            }
+
+            double zoom = CameraSetting.ZOOM.getOrDefault(stack);
+            int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
+            tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
+
+            tag.putInt(FrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
+
+            captureProperties.chromaticChannel().ifPresent(channel ->
+                    tag.putString(FrameTag.COLOR_CHANNEL, channel.getSerializedName()));
+
+            // Position
+            ListTag pos = new ListTag();
+            pos.addAll(List.of(
+                    DoubleTag.valueOf(cameraHolder.position().x()),
+                    DoubleTag.valueOf(cameraHolder.position().y()),
+                    DoubleTag.valueOf(cameraHolder.position().z())));
+            tag.put(FrameTag.POSITION, pos);
+            tag.put(FrameTag.PITCH, FloatTag.valueOf(cameraHolder.getXRot()));
+            tag.put(FrameTag.YAW, FloatTag.valueOf(cameraHolder.getYRot()));
+
+            // Environment
+            tag.putInt(FrameTag.DAY_TIME, (int) level.getDayTime());
+            tag.putString(FrameTag.DIMENSION, level.dimension().location().toString());
+            BlockPos blockPos = cameraHolder.blockPosition();
+            level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
+                    .ifPresent(biome -> tag.putString(FrameTag.BIOME, biome.toString()));
+            int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
+            level.updateSkyBrightness();
+            int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
+            if (cameraHolder.isUnderWater())
+                tag.putBoolean(FrameTag.UNDERWATER, true);
+            if (cameraHolder.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0)
+                tag.putBoolean(FrameTag.IN_CAVE, true);
+            else if (!cameraHolder.isUnderWater()) {
+                Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
+                if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
+                    tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
+                else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
+                    tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
+                else
+                    tag.putString(FrameTag.WEATHER, "Clear");
+            }
+
+            addStructuresInfo(level, blockPos, tag);
+
             List<LivingEntity> capturedEntities = getEntitiesInFrame(photographer, level, stack);
+            capturedEntities.forEach(entity -> entityCaptured(photographer, stack, entity));
+
             entitiesInFrame = capturedEntities.stream()
+                    .limit(Exposure.MAX_ENTITIES_IN_FRAME)
                     .map(entity -> EntityInFrame.of(cameraHolder, entity, customDataTag -> {
                         //TODO: modifyEntityInFrameData event
                     }))
                     .toList();
         }
 
-        return new Frame(ExposureIdentifier.id(captureProperties.exposureID()), captureProperties.filmType(),
-                new Photographer(photographer), entitiesInFrame, FrameTag.of(tag));
+        ExposureIdentifier identifier = ExposureIdentifier.id(captureProperties.exposureID());
+        return new Frame(identifier, captureProperties.filmType(), new Photographer(photographer), entitiesInFrame, FrameTag.of(tag));
     }
 
     public void addFrameToFilm(ItemStack stack, Frame frame) {
@@ -709,9 +702,22 @@ public class CameraItem extends Item {
 
     public List<LivingEntity> getEntitiesInFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
         float zoom = CameraSetting.ZOOM.getOrDefault(stack);
-        double fov = getFocalRange(level.registryAccess(), stack).fovFromZoom(zoom);
+        double fov = getFocalRange(level.registryAccess(), stack).fovFromZoom(zoom) * getCropFactor();
 
-        return EntitiesInFrame.get(photographer.asEntity(), fov, Exposure.MAX_ENTITIES_IN_FRAME, isInSelfieMode(stack));
+        return EntitiesInFrame.get(photographer.asEntity(), fov, isInSelfieMode(stack));
+    }
+
+    protected void entityCaptured(PhotographerEntity photographer, ItemStack stack, LivingEntity entity) {
+        if (photographer.asEntity() instanceof ServerPlayer player && entity instanceof EnderMan enderMan) {
+            boolean lookingAtAngryEnderMan = player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player);
+
+            if (lookingAtAngryEnderMan) {
+                // I wanted to implement this in a predicate,
+                // but it's tricky because EntitySubPredicates do not get the player in their 'match' method.
+                // So it's just easier to hardcode it like this.
+                Exposure.CriteriaTriggers.PHOTOGRAPH_ENDERMAN_EYES.get().trigger(player);
+            }
+        }
     }
 
     protected void addStructuresInfo(ServerLevel level, BlockPos pos, CompoundTag frame) {

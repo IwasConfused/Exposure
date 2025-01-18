@@ -285,7 +285,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     private void addFrameInfoTooltipLines(List<Component> tooltipLines, int frameIndex, boolean isAdvancedTooltips) {
         @Nullable Frame frame = getMenu().getFrameIdByIndex(frameIndex);
         if (frame != null) {
-            frame.getChromaticChannel().ifPresent(c ->
+            frame.getColorChannel().ifPresent(c ->
                     tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
                         .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
 

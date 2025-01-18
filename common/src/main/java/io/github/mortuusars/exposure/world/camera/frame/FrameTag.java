@@ -7,10 +7,10 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.component.CustomData;
 
 public record FrameTag(CustomData data) {
-    public static final String FROM_FILE = "from_file";
+    public static final String PROJECTED = "projected";
     public static final String CHROMATIC = "chromatic";
 
-    public static final String CHROMATIC_CHANNEL = "chromatic_channel";
+    public static final String COLOR_CHANNEL = "color_channel";
     public static final String SHUTTER_SPEED_MS = "shutter_speed_ms";
     public static final String FOCAL_LENGTH = "focal_length";
     public static final String TIMESTAMP = "timestamp";

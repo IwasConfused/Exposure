@@ -14,7 +14,7 @@ public record CameraID(UUID uuid) {
     public static final Codec<CameraID> CODEC = UUIDUtil.CODEC.xmap(CameraID::new, CameraID::uuid);
     public static final StreamCodec<ByteBuf, CameraID> STREAM_CODEC = UUIDUtil.STREAM_CODEC.map(CameraID::new, CameraID::uuid);
 
-    public static CameraID createRandom() {
+    public static CameraID create() {
         return new CameraID(UUID.randomUUID());
     }
 
