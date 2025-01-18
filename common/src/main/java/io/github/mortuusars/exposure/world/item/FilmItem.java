@@ -22,7 +22,7 @@ public interface FilmItem {
     }
 
     default int getDefaultFrameSize(ItemStack stack) {
-        return Config.Server.EXPOSURE_RESOLUTION.get();
+        return Config.Server.DEFAULT_FRAME_SIZE.get();
     }
 
     default ResourceKey<ColorPalette> getColorPaletteId(ItemStack stack) {

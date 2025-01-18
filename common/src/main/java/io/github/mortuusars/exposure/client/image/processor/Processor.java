@@ -57,9 +57,10 @@ public interface Processor {
         });
 
         static Processor factor(double factor) {
+            double clampedFactor = Math.min(1.0, factor);
             return new Instance("crop-factor-" + String.format("%,.4f", factor), image -> {
-                int newWidth = (int) (image.width() * factor);
-                int newHeight = (int) (image.height() * factor);
+                int newWidth = (int) (image.width() * clampedFactor);
+                int newHeight = (int) (image.height() * clampedFactor);
                 int x = (image.width() - newWidth) / 2;
                 int y = (image.height() - newHeight) / 2;
                 return new CroppedImage(image, new Rect2i(x, y, newWidth, newHeight));

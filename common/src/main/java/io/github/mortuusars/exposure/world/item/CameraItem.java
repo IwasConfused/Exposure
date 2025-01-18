@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.CameraID;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
 import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
@@ -52,8 +53,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.SlotAccess;
@@ -66,6 +65,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
@@ -167,14 +167,14 @@ public class CameraItem extends Item {
         return ColorPalettes.get(registryAccess, key);
     }
 
-    protected Optional<ColorChannel> getChromaChannel(ItemStack stack) {
+    protected Optional<ColorChannel> getChromaticChannel(ItemStack stack) {
         return Attachment.FILTER.map(stack, ColorChannel::fromFilterStack).orElse(Optional.empty());
     }
 
-    protected Optional<ProjectionInfo> getFileLoadingData(ItemStack stack) {
+    protected Optional<ProjectionInfo> getProjectingInfo(ItemStack stack) {
         return Attachment.FILTER.map(stack, (filterItem, filterStack) ->
                         filterItem instanceof InterplanarProjectorItem projectorItem
-                                ? projectorItem.getFileLoadingData(filterStack)
+                                ? projectorItem.getProjectingInfo(filterStack)
                                 : Optional.<ProjectionInfo>empty())
                 .orElse(Optional.empty());
     }
@@ -229,7 +229,7 @@ public class CameraItem extends Item {
     }
 
     public int calculateCooldownAfterShot(ItemStack stack, PhotographerEntity photographer, CaptureProperties captureProperties) {
-        if (captureProperties.projectingInfo().isPresent()) return PROJECT_COOLDOWN;
+        if (captureProperties.projection().isPresent()) return PROJECT_COOLDOWN;
         if (captureProperties.flash()) return FLASH_COOLDOWN;
         return BASE_COOLDOWN;
     }
@@ -414,25 +414,23 @@ public class CameraItem extends Item {
 
             String exposureId = ExposureIdentifier.createId(photographer.getExecutingPlayer());
 
-            CaptureProperties captureProperties = new CaptureProperties(
-                    exposureId,
-                    photographer.asEntity().getUUID(),
-                    Optional.of(cameraID),
-                    CameraSetting.SHUTTER_SPEED.getOrDefault(stack),
-                    Optional.empty(),
-                    film.getItem().getType(),
-                    film.getItem().getFrameSize(film.getItemStack()),
-                    getCropFactor(),
-                    getColorPalette(level.registryAccess(), stack),
-                    flashHasFired,
-                    lightLevel,
-                    getFileLoadingData(stack),
-                    getChromaChannel(stack),
-                    new CompoundTag());
+            CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
+                    .setPhotographer(photographer)
+                    .setCameraID(cameraID)
+                    .setShutterSpeed(CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
+                    .setFilmType(film.getItem().getType())
+                    .setFrameSize(film.getItem().getFrameSize(film.getItemStack()))
+                    .setCropFactor(getCropFactor())
+                    .setColorPalette(getColorPalette(level.registryAccess(), stack))
+                    .setFlash(flashHasFired)
+                    .setProjectingInfo(getProjectingInfo(stack))
+                    .setChromaticChannel(getChromaticChannel(stack))
+                    .extraData(tag -> tag.putInt("light_level", lightLevel))
+                    .build();
 
-            if (shutterSpeed.shouldCauseTickingSound() || captureProperties.projectingInfo().isPresent()) {
-                int duration = Math.max(shutterSpeed.getDurationTicks(), captureProperties.projectingInfo()
-                        .map(l -> Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get()).orElse(0));
+            if (shutterSpeed.shouldCauseTickingSound() || captureProperties.projection().isPresent()) {
+                int duration = Math.max(shutterSpeed.getDurationTicks(), captureProperties.projection()
+                        .map(l -> Config.Server.PROJECT_TIMEOUT_TICKS.get()).orElse(0));
                 OnePerEntitySounds.playShutterTickingSoundForAll(photographer.asEntity(), cameraID,
                         1f, 1f, duration);
             }
@@ -443,8 +441,8 @@ public class CameraItem extends Item {
                 int cooldown = calculateCooldownAfterShot(stack, photographer, captureProperties);
                 instance.setDeferredCooldown(cooldown);
 
-                captureProperties.projectingInfo().ifPresent(fileLoading -> {
-                    instance.waitForProjection(level.getGameTime() + Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get());
+                captureProperties.projection().ifPresent(fileLoading -> {
+                    instance.waitForProjection(level.getGameTime() + Config.Server.PROJECT_TIMEOUT_TICKS.get());
                 });
             });
 
@@ -602,35 +600,37 @@ public class CameraItem extends Item {
 
     public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, ItemStack stack) {
         Entity cameraHolder = photographer.asEntity();
-        boolean projecting = captureProperties.projectingInfo().isPresent();
+        boolean projecting = captureProperties.projection().isPresent();
 
         CompoundTag tag = new CompoundTag();
         List<EntityInFrame> entitiesInFrame;
 
-        tag.putFloat(FrameTag.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
+        tag.putFloat(Frame.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
 
-        tag.put(FrameTag.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
+        tag.put(Frame.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
 
         if (projecting) {
-            tag.putBoolean(FrameTag.PROJECTED, true);
+            tag.putBoolean(Frame.PROJECTED, true);
             entitiesInFrame = Collections.emptyList();
         } else {
             if (isInSelfieMode(stack)) {
-                tag.putBoolean(FrameTag.SELFIE, true);
+                tag.putBoolean(Frame.SELFIE, true);
             }
 
             if (captureProperties.flash()) {
-                tag.putBoolean(FrameTag.FLASH, true);
+                tag.putBoolean(Frame.FLASH, true);
             }
 
             double zoom = CameraSetting.ZOOM.getOrDefault(stack);
             int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
-            tag.putInt(FrameTag.FOCAL_LENGTH, focalLength);
+            tag.putInt(Frame.FOCAL_LENGTH, focalLength);
 
-            tag.putInt(FrameTag.LIGHT_LEVEL, captureProperties.lightLevel());
+            if (captureProperties.extraData().contains(CaptureProperties.LIGHT_LEVEL)) {
+                tag.putInt(Frame.LIGHT_LEVEL, captureProperties.extraData().getInt(CaptureProperties.LIGHT_LEVEL));
+            }
 
             captureProperties.chromaticChannel().ifPresent(channel ->
-                    tag.putString(FrameTag.COLOR_CHANNEL, channel.getSerializedName()));
+                    tag.putString(Frame.COLOR_CHANNEL, channel.getSerializedName()));
 
             // Position
             ListTag pos = new ListTag();
@@ -638,31 +638,31 @@ public class CameraItem extends Item {
                     DoubleTag.valueOf(cameraHolder.position().x()),
                     DoubleTag.valueOf(cameraHolder.position().y()),
                     DoubleTag.valueOf(cameraHolder.position().z())));
-            tag.put(FrameTag.POSITION, pos);
-            tag.put(FrameTag.PITCH, FloatTag.valueOf(cameraHolder.getXRot()));
-            tag.put(FrameTag.YAW, FloatTag.valueOf(cameraHolder.getYRot()));
+            tag.put(Frame.POSITION, pos);
+            tag.put(Frame.PITCH, FloatTag.valueOf(cameraHolder.getXRot()));
+            tag.put(Frame.YAW, FloatTag.valueOf(cameraHolder.getYRot()));
 
             // Environment
-            tag.putInt(FrameTag.DAY_TIME, (int) level.getDayTime());
-            tag.putString(FrameTag.DIMENSION, level.dimension().location().toString());
+            tag.putInt(Frame.DAY_TIME, (int) level.getDayTime());
+            tag.putString(Frame.DIMENSION, level.dimension().location().toString());
             BlockPos blockPos = cameraHolder.blockPosition();
             level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
-                    .ifPresent(biome -> tag.putString(FrameTag.BIOME, biome.toString()));
+                    .ifPresent(biome -> tag.putString(Frame.BIOME, biome.toString()));
             int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
             level.updateSkyBrightness();
             int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
             if (cameraHolder.isUnderWater())
-                tag.putBoolean(FrameTag.UNDERWATER, true);
+                tag.putBoolean(Frame.UNDERWATER, true);
             if (cameraHolder.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0)
-                tag.putBoolean(FrameTag.IN_CAVE, true);
+                tag.putBoolean(Frame.IN_CAVE, true);
             else if (!cameraHolder.isUnderWater()) {
                 Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
                 if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
-                    tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
+                    tag.putString(Frame.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
                 else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
-                    tag.putString(FrameTag.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
+                    tag.putString(Frame.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
                 else
-                    tag.putString(FrameTag.WEATHER, "Clear");
+                    tag.putString(Frame.WEATHER, "Clear");
             }
 
             addStructuresInfo(level, blockPos, tag);
@@ -678,8 +678,8 @@ public class CameraItem extends Item {
                     .toList();
         }
 
-        ExposureIdentifier identifier = ExposureIdentifier.id(captureProperties.exposureID());
-        return new Frame(identifier, captureProperties.filmType(), new Photographer(photographer), entitiesInFrame, FrameTag.of(tag));
+        ExposureIdentifier identifier = ExposureIdentifier.id(captureProperties.exposureId());
+        return new Frame(identifier, captureProperties.filmType().orElse(ExposureType.COLOR), new Photographer(photographer), entitiesInFrame, CustomData.of(tag));
     }
 
     public void addFrameToFilm(ItemStack stack, Frame frame) {

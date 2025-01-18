@@ -5,13 +5,13 @@ import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
 import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import net.minecraft.ChatFormatting;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
@@ -21,17 +21,20 @@ public interface CaptureTemplate {
     Task<?> createTask(CaptureProperties captureProperties);
 
     default Processor chooseColorProcessor(CaptureProperties data) {
-        return data.filmType() == ExposureType.BLACK_AND_WHITE
-                ? data.chromaticChannel().map(Processor::singleChannelBlackAndWhite).orElse(Processor.blackAndWhite(1.15f))
-                : Processor.EMPTY;
+        return data.filmType()
+                .filter(type -> type == ExposureType.BLACK_AND_WHITE)
+                .map(type -> data.chromaticChannel()
+                        .map(Processor::singleChannelBlackAndWhite)
+                        .orElse(Processor.blackAndWhite(1.15f)))
+                .orElse(Processor.EMPTY);
     }
 
     default Function<PalettedImage, ExposureData> convertToExposureData(ResourceLocation paletteId, ExposureData.Tag tag) {
         return image -> new ExposureData(image.width(), image.height(), image.pixels(), paletteId, tag);
     }
 
-    default ExposureData.Tag createExposureTag(PhotographerEntity photographer, CaptureProperties data, boolean isFromFile) {
-        return new ExposureData.Tag(data.filmType(), photographer.getExecutingPlayer().getScoreboardName(),
+    default ExposureData.Tag createExposureTag(Player executingPlayer, CaptureProperties data, boolean isFromFile) {
+        return new ExposureData.Tag(data.filmType().orElse(ExposureType.COLOR), executingPlayer.getScoreboardName(),
                 UnixTimestamp.Seconds.now(), isFromFile, false);
     }
 

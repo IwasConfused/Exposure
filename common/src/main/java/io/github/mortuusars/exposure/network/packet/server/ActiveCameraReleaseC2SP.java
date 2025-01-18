@@ -34,7 +34,7 @@ public record ActiveCameraReleaseC2SP(UUID photographerEntityID,
 
     @Override
     public boolean handle(PacketFlow direction, Player player) {
-        PhotographerEntity.fromUUID(player.level(), photographerEntityID).ifPresentOrElse(photographer -> {
+        PhotographerEntity.fromUuid(player.level(), photographerEntityID).ifPresentOrElse(photographer -> {
             photographer.getActiveExposureCamera().ifPresentOrElse(
                     Camera::release,
                     () -> Exposure.LOGGER.error("Cannot release shutter of an active camera: '{}' does not have an active camera.", photographer.asEntity()));

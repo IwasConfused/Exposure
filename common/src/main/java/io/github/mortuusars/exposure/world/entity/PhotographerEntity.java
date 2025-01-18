@@ -18,11 +18,19 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 public interface PhotographerEntity {
-    static Optional<PhotographerEntity> fromUUID(Level level, UUID uuid) {
+    static Optional<PhotographerEntity> fromUuid(Level level, UUID uuid) {
         if (uuid.equals(Util.NIL_UUID)) return Optional.empty();
         return level.getEntities().get(uuid) instanceof PhotographerEntity photographerEntity
                 ? Optional.of(photographerEntity)
                 : Optional.empty();
+    }
+
+    static Optional<PhotographerEntity> fromUuidOrWrap(Level level, UUID uuid, Player executingPlayer) {
+        return fromUuid(level, uuid).or(() -> {
+            @Nullable Entity entity = level.getEntities().get(uuid);
+            if (entity == null) return Optional.empty();
+            return Optional.of(new WrappedPhotographerEntity(entity, executingPlayer));
+        });
     }
 
     /**

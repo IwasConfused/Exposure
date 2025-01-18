@@ -56,6 +56,6 @@ public class UrlCaptureTask extends Task<Result<Image>> {
                 return Result.error(ERROR_CANNOT_READ);
             }
         }).completeOnTimeout(Result.error(ERROR_TIMED_OUT),
-                Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get() * SharedConstants.MILLIS_PER_TICK, TimeUnit.MILLISECONDS);
+                Config.Server.PROJECT_TIMEOUT_TICKS.get() * SharedConstants.MILLIS_PER_TICK, TimeUnit.MILLISECONDS);
     }
 }

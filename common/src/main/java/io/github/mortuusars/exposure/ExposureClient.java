@@ -1,11 +1,9 @@
 package io.github.mortuusars.exposure;
 
+import io.github.mortuusars.exposure.client.capture.template.*;
 import io.github.mortuusars.exposure.client.task.ClearStaleRenderedImagesIndefiniteTask;
 import io.github.mortuusars.exposure.client.RenderedExposures;
 import io.github.mortuusars.exposure.client.camera.viewfinder.*;
-import io.github.mortuusars.exposure.client.capture.template.CameraCaptureTemplate;
-import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
-import io.github.mortuusars.exposure.client.capture.template.SingleChannelCaptureTemplate;
 import io.github.mortuusars.exposure.client.image.processor.Processor;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
@@ -39,6 +37,8 @@ public class ExposureClient {
                 new Viewfinder(camera, ViewfinderZoom::new, ViewfinderOverlay::new, ViewfinderShader::new, ViewfinderCameraControlsScreen::new));
 
         CaptureTemplates.register(CaptureType.CAMERA, new CameraCaptureTemplate());
+        CaptureTemplates.register(CaptureType.EXPOSE_COMMAND, new ExposeCaptureTemplate());
+        CaptureTemplates.register(CaptureType.LOAD_COMMAND, new PathCaptureTemplate());
         CaptureTemplates.register(CaptureType.DEBUG_RGB, new SingleChannelCaptureTemplate());
 
         PhotographStyles.register(PhotographType.REGULAR, PhotographStyle.REGULAR);

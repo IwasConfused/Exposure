@@ -53,61 +53,6 @@ public class ClientPacketsHandler {
         }
     }
 
-    //TODO: Use CaptureProperties
-    public static void exposeScreenshot(String exposureId, int size, float brightnessStops) {
-        throw new NotImplementedException();
-
-//        if (size <= 0 || size > 2048) {
-//            LOGGER.error("Cannot expose a screenshot: size '{}' is invalid. Should be larger than 0.", size);
-//            return;
-//        }
-
-//        executeOnMainThread(() -> {
-//            Cycles.enqueue(Capture.of(Capture.screenshot(),
-//                            CaptureActions.hideGui(),
-//                            CaptureActions.forceRegularOrSelfieCamera(),
-//                            CaptureActions.disablePostEffect(),
-//                            CaptureActions.modifyGamma(brightnessStops))
-//                    .handleErrorAndGetResult()
-//                    .thenAsync(Process.with(
-//                            Processor.Crop.SQUARE,
-//                            Processor.Resize.to(size),
-//                            Processor.brightness(brightnessStops)))
-//                    .thenAsync(image -> {
-//                        PalettizedImage palettizedImage = ImagePalettizer.DITHERED_MAP_COLORS.palettize(image, ColorPalette.MAP_COLORS);
-//                        image.close();
-//                        return palettizedImage;
-//                    })
-//                    .acceptAsync(new ImageUploader(identifier)::upload));
-//        });
-    }
-
-    //TODO: Use CaptureProperties
-    public static void loadExposure(String id, String path, int size, boolean dither) {
-        LocalPlayer player = Minecrft.player();
-
-        if (StringUtil.isNullOrEmpty(path)) {
-            LOGGER.error("Cannot load exposure: path is null or empty.");
-            return;
-        }
-
-        Holder<ColorPalette> colorPalette = ColorPalettes.get(Minecrft.registryAccess(), ColorPalettes.DEFAULT);
-        ColorPalette palette = colorPalette.value();
-        ResourceLocation paletteId = colorPalette.unwrapKey().orElseThrow().location();
-        Palettizer palettizer = dither ? Palettizer.DITHERED : Palettizer.NEAREST;
-
-        ExposureClient.cycles().enqueueTask(Capture.of(Capture.path(path))
-                .handleErrorAndGetResult()
-                .thenAsync(Process.with(
-                        Processor.Crop.SQUARE_CENTER,
-                        Processor.Resize.to(size)))
-                .thenAsync(Palettizer.palettizeAndClose(palettizer, palette))
-                .then(image -> new ExposureData(image.width(), image.height(), image.pixels(), paletteId,
-                        new ExposureData.Tag(ExposureType.COLOR, player.getScoreboardName(),
-                                UnixTimestamp.Seconds.now(), true, false)))
-                .accept(image -> ExposureUploader.upload(id, image)));
-    }
-
     public static void showExposure(ShowExposureCommandS2CP packet) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {

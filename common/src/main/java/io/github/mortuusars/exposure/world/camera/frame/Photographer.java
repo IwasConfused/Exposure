@@ -21,7 +21,7 @@ public final class Photographer {
 
     public static final Codec<Photographer> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     Codec.STRING.optionalFieldOf("name", "").forGetter(Photographer::name),
-                    UUIDUtil.CODEC.optionalFieldOf("uuid", Util.NIL_UUID).forGetter(Photographer::uuid))
+                    UUIDUtil.LENIENT_CODEC.optionalFieldOf("uuid", Util.NIL_UUID).forGetter(Photographer::uuid))
             .apply(instance, Photographer::new));
 
     public static final StreamCodec<ByteBuf, Photographer> STREAM_CODEC = StreamCodec.composite(

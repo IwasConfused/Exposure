@@ -65,7 +65,7 @@ public class FileCaptureTask extends Task<Result<Image>> {
 
             return ImageFileLoader.chooseFitting(file).load(file);
         }).completeOnTimeout(Result.error(ERROR_TIMED_OUT),
-                Config.Server.PROJECT_FROM_FILE_TIMEOUT_TICKS.get() * SharedConstants.MILLIS_PER_TICK, TimeUnit.MILLISECONDS);
+                Config.Server.PROJECT_TIMEOUT_TICKS.get() * SharedConstants.MILLIS_PER_TICK, TimeUnit.MILLISECONDS);
     }
 
     private static Result<File> validateFilepath(File file) {

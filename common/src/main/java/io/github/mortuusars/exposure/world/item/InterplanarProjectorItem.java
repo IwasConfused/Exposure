@@ -46,7 +46,7 @@ public class InterplanarProjectorItem extends Item {
             components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.disabled"));
         }
 
-        if (getFileLoadingData(stack).isPresent()) {
+        if (getProjectingInfo(stack).isPresent()) {
             components.add(getMode(stack).translate());
         }
 
@@ -55,7 +55,7 @@ public class InterplanarProjectorItem extends Item {
                 components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.consumed_info"));
             }
             components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.info"));
-            if (getFileLoadingData(stack).isPresent()) {
+            if (getProjectingInfo(stack).isPresent()) {
                 components.add(Component.translatable("item.exposure.interplanar_projector.tooltip.change_mode_info"));
             }
         } else {
@@ -65,7 +65,7 @@ public class InterplanarProjectorItem extends Item {
 
     @Override
     public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack other, Slot slot, ClickAction action, Player player, SlotAccess access) {
-        if (other.isEmpty() && action == ClickAction.SECONDARY && getFileLoadingData(stack).isPresent()) {
+        if (other.isEmpty() && action == ClickAction.SECONDARY && getProjectingInfo(stack).isPresent()) {
             setMode(stack, getMode(stack).cycle());
             slot.setChanged();
             if (player.level().isClientSide) {
@@ -82,7 +82,7 @@ public class InterplanarProjectorItem extends Item {
         return customName != null ? Optional.of(customName.getString()) : Optional.empty();
     }
 
-    public Optional<ProjectionInfo> getFileLoadingData(ItemStack stack) {
+    public Optional<ProjectionInfo> getProjectingInfo(ItemStack stack) {
         return isAllowed() ? getPath(stack).map(filepath -> new ProjectionInfo(filepath, getMode(stack))) : Optional.empty();
     }
 }

@@ -4,7 +4,6 @@ import io.github.mortuusars.exposure.world.camera.CameraID;
 import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import net.minecraft.Util;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 import java.util.Optional;
@@ -26,7 +25,7 @@ public class CameraInstance {
     // --
 
     public Optional<PhotographerEntity> getLastPhotographer(Level level) {
-        return PhotographerEntity.fromUUID(level, lastPhotographerId);
+        return PhotographerEntity.fromUuid(level, lastPhotographerId);
     }
 
     public void setPhotographer(PhotographerEntity photographer) {

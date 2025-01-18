@@ -5,7 +5,6 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
-import io.github.mortuusars.exposure.world.camera.frame.FrameTag;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
@@ -101,7 +100,6 @@ public class ChromaticSheetItem extends Item {
         Frame frameData = Frame.intersect(identifier, layers);
         frameData = frameData.toMutable()
                 .setType(ExposureType.COLOR)
-                .updateTag(tag -> tag.putBoolean(FrameTag.CHROMATIC, true))
                 .setChromatic(true)
                 .toImmutable();
 

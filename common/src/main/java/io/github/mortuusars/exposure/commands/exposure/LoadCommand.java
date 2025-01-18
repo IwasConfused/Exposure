@@ -1,47 +1,83 @@
 package io.github.mortuusars.exposure.commands.exposure;
 
-import com.mojang.brigadier.arguments.IntegerArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.network.Packets;
+import io.github.mortuusars.exposure.network.packet.client.StartCaptureS2CP;
+import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
+import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import org.apache.commons.lang3.NotImplementedException;
+import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+
+import java.util.function.Supplier;
+
+import static net.minecraft.commands.Commands.*;
 
 public class LoadCommand {
     public static LiteralArgumentBuilder<CommandSourceStack> get() {
-        return Commands.literal("load")
-                .then(Commands.literal("with_dithering")
-                        .then(Commands.argument("size", IntegerArgumentType.integer(1, 2048))
-                                .then(Commands.argument("file_path", StringArgumentType.string())
-                                        .then(Commands.argument("id", StringArgumentType.string())
-                                                .executes(context -> loadExposureFromFile(context.getSource(),
-                                                        StringArgumentType.getString(context, "id"),
-                                                        StringArgumentType.getString(context, "file_path"),
-                                                        IntegerArgumentType.getInteger(context, "size"), true))))))
-                .then(Commands.argument("size", IntegerArgumentType.integer(1, 2048))
-                        .then(Commands.argument("file_path", StringArgumentType.string())
-                                .then(Commands.argument("id", StringArgumentType.string())
-                                        .executes(context -> loadExposureFromFile(context.getSource(),
-                                                StringArgumentType.getString(context, "id"),
-                                                StringArgumentType.getString(context, "file_path"),
-                                                IntegerArgumentType.getInteger(context, "size"), false)))));
+        return literal("load")
+                .then(argument("capture_properties", CompoundTagArgument.compoundTag())
+                        .executes(context -> load(context, CompoundTagArgument.getCompoundTag(context, "capture_properties"))));
     }
 
-    //TODO: use default id if not specified
-    //TODO: use CaptureData
+    private static int load(CommandContext<CommandSourceStack> context, CompoundTag properties) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
 
-    private static int loadExposureFromFile(CommandSourceStack stack, String exposureId, String path, int size, boolean dither) throws CommandSyntaxException {
-        throw new NotImplementedException();
+        if (!properties.contains("id", CompoundTag.TAG_STRING)) {
+            properties.putString("id", ExposureIdentifier.createId(player));
+        }
 
-        //TODO: use onReceived exposure to send message
+        CaptureProperties captureProperties;
 
-//        Component.translatable("command.exposure.load_from_file.success", id)
+        try {
+            RegistryOps<Tag> ops = RegistryOps.create(NbtOps.INSTANCE, context.getSource().registryAccess());
+            captureProperties = CaptureProperties.CODEC.decode(ops, properties).getOrThrow().getFirst();
+        } catch (Exception e) {
+            context.getSource().sendFailure(Component.literal("Cannot decode properties: " + e.getMessage()));
+            return 0;
+        }
 
-//        ServerPlayer player = stack.getPlayerOrException();
-//        ExposureIdentifier identifier = ExposureIdentifier.id(exposureId);
-//        ExposureServer.awaitExposure(identifier, ExposureType.COLOR, player.getScoreboardName());
-//        Packets.sendToClient(new LoadExposureFromFileCommandS2CP(identifier, path, size, dither), player);
-//        return 0;
+        if (captureProperties.projection().isEmpty()) {
+            context.getSource().sendFailure(Component.literal("Cannot load: missing 'projection' property."));
+            return 0;
+        }
+
+        String exposureId = captureProperties.exposureId();
+        Frame frame = Frame.EMPTY.toMutable().setIdentifier(ExposureIdentifier.id(exposureId)).toImmutable();
+
+        Supplier<Component> msg = () -> {
+            ItemStack photograph = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
+            photograph.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
+
+            return Component.literal("Loaded exposure: ")
+                    .append(Component.literal(exposureId)
+                            .withStyle(Style.EMPTY
+                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                            "/exposure show id " + exposureId))
+                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(photograph)))
+                                    .withUnderlined(true)));
+        };
+
+        ExposureServer.exposureRepository().expect(player, exposureId, (pl, id) -> context.getSource().sendSuccess(msg, true));
+        ExposureServer.frameHistory().add(player, frame);
+
+        Packets.sendToClient(new StartCaptureS2CP(CaptureType.LOAD_COMMAND, captureProperties), player);
+
+        return 0;
     }
 }

@@ -7,4 +7,9 @@ public class EmptyTask<T> extends Task<T> {
     public CompletableFuture<T> execute() {
         return CompletableFuture.completedFuture(null);
     }
+
+    @Override
+    public boolean isDone() {
+        return true;
+    }
 }

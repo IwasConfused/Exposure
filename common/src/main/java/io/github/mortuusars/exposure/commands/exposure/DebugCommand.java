@@ -15,7 +15,6 @@ import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.data.ColorPalette;
-import io.github.mortuusars.exposure.world.camera.frame.FrameTag;
 import io.github.mortuusars.exposure.world.camera.frame.Photographer;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
@@ -28,11 +27,11 @@ import io.github.mortuusars.exposure.network.packet.client.StartDebugRGBCaptureS
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -84,36 +83,38 @@ public class DebugCommand {
 
             Holder<ColorPalette> colorPalette = ColorPalettes.get(context.getSource().registryAccess(), ColorPalettes.DEFAULT);
 
-            properties.add(new CaptureProperties(
-                    exposureId,
-                    player.getUUID(),
-                    camera.map(Camera::getCameraID),
-                    camera.flatMap(c -> c.map(CameraSetting.SHUTTER_SPEED::getOrDefault)).orElse(ShutterSpeed.DEFAULT),
-                    Optional.empty(),
-                    ExposureType.BLACK_AND_WHITE,
-                    camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, FilmItem::getFrameSize, () -> 320))).orElse(320),
-                    camera.flatMap(c -> c.map((cItem, cStack) -> cItem.getCropFactor())).orElse(Exposure.CROP_FACTOR),
-                    colorPalette,
-                    false,
-                    0,
-                    Optional.empty(),
-                    Optional.of(channel),
-                    new CompoundTag()
-            ));
+            CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
+                    .setPhotographer(player)
+                    .setCameraID(camera.map(Camera::getCameraID))
+                    .setShutterSpeed(camera.flatMap(c -> c.map(CameraSetting.SHUTTER_SPEED::getOrDefault)).orElse(ShutterSpeed.DEFAULT))
+                    .setFilmType(ExposureType.BLACK_AND_WHITE)
+                    .setFrameSize(camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, FilmItem::getFrameSize, () -> 320))).orElse(320))
+                    .setCropFactor(camera.flatMap(c -> c.map((cItem, cStack) -> cItem.getCropFactor())).orElse(Exposure.CROP_FACTOR))
+                    .setColorPalette(colorPalette)
+                    .setChromaticChannel(channel)
+                    .build();
 
-            Supplier<Component> msg = () -> Component.literal("Captured " + channel.getSerializedName() + " channel exposure: ")
-                    .append(Component.literal(exposureId)
-                            .withStyle(Style.EMPTY
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/exposure show id " + exposureId))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
-                                    .withUnderlined(true)));
+            properties.add(captureProperties);
 
-            ExposureServer.exposureRepository().expect(player, exposureId,
-                    (pl, id) -> context.getSource().sendSuccess(msg, true));
+            Frame frame = camera.flatMap(c -> c.map((cameraItem, cameraStack) ->
+                            cameraItem.createFrame(context.getSource().getLevel(), captureProperties, player, cameraStack)))
+                    .orElse(new Frame(ExposureIdentifier.id(exposureId),
+                            ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), CustomData.EMPTY));
 
-            ExposureServer.frameHistory().add(player, new Frame(ExposureIdentifier.id(exposureId),
-                    ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), FrameTag.EMPTY));
+            Supplier<Component> msg = () -> {
+                ItemStack photograph = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
+                photograph.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
+                return Component.literal("Captured " + channel.getSerializedName() + " channel exposure: ")
+                        .append(Component.literal(exposureId)
+                                .withStyle(Style.EMPTY
+                                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                                "/exposure show id " + exposureId))
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(photograph)))
+                                        .withUnderlined(true)));
+            };
+
+            ExposureServer.exposureRepository().expect(player, exposureId, (pl, id) -> context.getSource().sendSuccess(msg, true));
+            ExposureServer.frameHistory().add(player, frame);
         }
 
         Packets.sendToClient(new StartDebugRGBCaptureS2CP(CaptureType.DEBUG_RGB, properties), player);
@@ -152,13 +153,18 @@ public class DebugCommand {
 
             ExposureServer.frameHistory().add(player, frame);
 
-            Supplier<Component> msg = () -> Component.literal("Created chromatic exposure: ")
-                    .append(Component.literal(frame.exposureIdentifier().toValueString())
-                            .withStyle(Style.EMPTY
-                                    .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                            "/exposure show id " + frame.exposureIdentifier().getId().orElse("")))
-                                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to view")))
-                                    .withUnderlined(true)));
+            Supplier<Component> msg = () -> {
+                String exposureId = frame.exposureIdentifier().getId().orElseThrow();
+                ItemStack photograph = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
+                photograph.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
+                return Component.literal("Created chromatic exposure: ")
+                        .append(Component.literal(exposureId)
+                                .withStyle(Style.EMPTY
+                                        .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
+                                                "/exposure show id " + exposureId))
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(photograph)))
+                                        .withUnderlined(true)));
+            };
 
             stack.sendSuccess(msg, true);
         } catch (Exception e) {

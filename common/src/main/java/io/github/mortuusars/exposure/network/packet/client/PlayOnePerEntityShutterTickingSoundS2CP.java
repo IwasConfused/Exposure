@@ -41,7 +41,7 @@ public record PlayOnePerEntityShutterTickingSoundS2CP(UUID photographerEntityID,
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        PhotographerEntity.fromUUID(player.level(), photographerEntityID)
+        PhotographerEntity.fromUuid(player.level(), photographerEntityID)
                 .ifPresent(photographer ->
                         OnePerEntitySoundsClient.playShutterTicking(photographer, cameraID, volume, pitch, durationTicks));
         return true;

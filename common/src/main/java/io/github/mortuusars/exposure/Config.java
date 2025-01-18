@@ -15,9 +15,9 @@ public class Config {
     public static class Server {
         public static final ModConfigSpec SPEC;
 
-        public static final ModConfigSpec.IntValue EXPOSURE_RESOLUTION;
+        public static final ModConfigSpec.IntValue DEFAULT_FRAME_SIZE;
         public static final ModConfigSpec.BooleanValue CAN_PROJECT;
-        public static final ModConfigSpec.IntValue PROJECT_FROM_FILE_TIMEOUT_TICKS;
+        public static final ModConfigSpec.IntValue PROJECT_TIMEOUT_TICKS;
 
         public static final ModConfigSpec.BooleanValue INTERPLANAR_PROJECTOR_LARGER_RENAMING_LIMIT;
 
@@ -26,13 +26,13 @@ public class Config {
 
             builder.push("Capture");
             {
-                EXPOSURE_RESOLUTION = builder
+                DEFAULT_FRAME_SIZE = builder
                         .comment("Default size of an exposure image. High values take more disk space and can cause lag. Default: 320")
-                        .defineInRange("ExposureResolution", 320, 1, 2048);
+                        .defineInRange("DefaultFrameSize", 320, 1, 2048);
                 CAN_PROJECT = builder
                         .comment("Interplanar Projector can load images from URL or file on client's PC. Default: true")
                         .define("ProjectingEnabled", true);
-                PROJECT_FROM_FILE_TIMEOUT_TICKS = builder
+                PROJECT_TIMEOUT_TICKS = builder
                         .comment("Time limit in ticks for projecting.",
                                 "This is affecting gameplay slightly - Interplanar Projector will be consumed if loading times out.",
                                 "Default: 100 (5 seconds)")

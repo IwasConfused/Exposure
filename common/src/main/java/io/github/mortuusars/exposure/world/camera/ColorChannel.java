@@ -1,6 +1,8 @@
 package io.github.mortuusars.exposure.world.camera;
 
+import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.world.camera.capture.ProjectionMode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,6 +16,8 @@ public enum ColorChannel implements StringRepresentable {
     RED(0xFFD8523E),
     GREEN(0xFF7BC64B),
     BLUE(0xFF4E73CE);
+
+    public static final Codec<ColorChannel> CODEC = StringRepresentable.fromEnum(ColorChannel::values);
 
     public static final StreamCodec<ByteBuf, ColorChannel> STREAM_CODEC =
             ByteBufCodecs.idMapper(id -> ColorChannel.values()[id], ColorChannel::ordinal);
