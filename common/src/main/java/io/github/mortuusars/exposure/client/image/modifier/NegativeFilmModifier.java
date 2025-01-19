@@ -1,14 +1,14 @@
-package io.github.mortuusars.exposure.client.image.processor;
+package io.github.mortuusars.exposure.client.image.modifier;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
+import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class NegativeFilmProcessor implements Processor {
+public class NegativeFilmModifier implements Modifier {
     @Override
-    public Image process(Image image) {
-        return new ProcessedImage(image, this::modifyPixel);
+    public Image modify(Image image) {
+        return new ModifiedImage(image, this::modifyPixel);
     }
 
     @Override

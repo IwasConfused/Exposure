@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.image.renderable;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.image.modifier.Modifier;
 
 import java.util.function.Function;
 
@@ -12,14 +12,14 @@ public interface RenderableImage extends Image {
     Image getImage();
     RenderableImageIdentifier getIdentifier();
 
-    default RenderableImage processWith(Function<Image, Image> transformFunction, String variant) {
+    default RenderableImage modifyWith(Function<Image, Image> transformFunction, String variant) {
         Image image = transformFunction.apply(getImage());
         RenderableImageIdentifier identifier = getIdentifier().appendVariant(variant);
         return new Instance(image, identifier);
     }
 
-    default RenderableImage processWith(Processor processor) {
-        return processWith(processor::process, processor.getIdentifier());
+    default RenderableImage modifyWith(Modifier modifier) {
+        return modifyWith(modifier::modify, modifier.getIdentifier());
     }
 
     static RenderableImage of(String id, Image image) {

@@ -1,21 +1,21 @@
-package io.github.mortuusars.exposure.client.image.processor;
+package io.github.mortuusars.exposure.client.image.modifier;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
+import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import io.github.mortuusars.exposure.world.camera.FilmColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class TintedNegativeFilmProcessor implements Processor {
+public class TintedNegativeFilmModifier implements Modifier {
     private final FilmColor tintColor;
 
-    public TintedNegativeFilmProcessor(FilmColor tintColor) {
+    public TintedNegativeFilmModifier(FilmColor tintColor) {
         this.tintColor = tintColor;
     }
 
     @Override
-    public Image process(Image image) {
-        return new ProcessedImage(image, this::modifyPixel);
+    public Image modify(Image image) {
+        return new ModifiedImage(image, this::modifyPixel);
     }
 
     @Override

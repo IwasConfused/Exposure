@@ -1,24 +1,24 @@
-package io.github.mortuusars.exposure.client.image.processor;
+package io.github.mortuusars.exposure.client.image.modifier;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
+import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class BlackAndWhiteProcessor implements Processor {
+public class BlackAndWhiteModifier implements Modifier {
     private final float rWeight;
     private final float gWeight;
     private final float bWeight;
 
-    public BlackAndWhiteProcessor(float rWeight, float gWeight, float bWeight) {
+    public BlackAndWhiteModifier(float rWeight, float gWeight, float bWeight) {
         this.rWeight = rWeight;
         this.gWeight = gWeight;
         this.bWeight = bWeight;
     }
 
     @Override
-    public Image process(Image image) {
-        return new ProcessedImage(image, this::modifyPixel);
+    public Image modify(Image image) {
+        return new ModifiedImage(image, this::modifyPixel);
     }
 
     @Override

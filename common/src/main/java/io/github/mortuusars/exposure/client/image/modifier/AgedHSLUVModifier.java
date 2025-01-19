@@ -1,16 +1,19 @@
-package io.github.mortuusars.exposure.client.image.processor;
+package io.github.mortuusars.exposure.client.image.modifier;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
-import io.github.mortuusars.exposure.util.color.Color;
+import io.github.mortuusars.exposure.client.image.ModifiedImage;
+import io.github.mortuusars.exposure.util.color.converter.HUSLColorConverter;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
+import org.apache.commons.lang3.StringUtils;
 
-public class AgedHSBProcessor implements Processor {
-    private final int tintColor;
-    private final float tintOpacity;
-    private final int blackPoint;
-    private final int whitePoint;
+// HSB is faster while giving only slightly worse result. HSLUV is slower and creates noticeable freezes when exposure is loaded.
+public class AgedHSLUVModifier implements Modifier {
+    public final int tintColor;
+    public final double[] tintColorHsluv;
+    public final float tintOpacity;
+    public final int blackPoint;
+    public final int whitePoint;
 
     /**
      * @param tintColor in 0xXXXXXX rgb format. Only rightmost 24 bits would be used, anything extra will be discarded.
@@ -18,16 +21,18 @@ public class AgedHSBProcessor implements Processor {
      * @param blackPoint Like in a Levels adjustment. 0-255.
      * @param whitePoint Like in a Levels adjustment. 0-255.
      */
-    public AgedHSBProcessor(int tintColor, float tintOpacity, int blackPoint, int whitePoint) {
+    public AgedHSLUVModifier(int tintColor, float tintOpacity, int blackPoint, int whitePoint) {
         this.tintColor = tintColor;
+        String hexStr = StringUtils.leftPad(Integer.toHexString(tintColor & 0xFFFFFF), 6, "0");
+        this.tintColorHsluv = HUSLColorConverter.hexToHsluv("#" + hexStr);
         this.tintOpacity = tintOpacity;
         this.blackPoint = blackPoint & 0xFF; // 0-255
         this.whitePoint = whitePoint & 0xFF; // 0-255
     }
 
     @Override
-    public Image process(Image image) {
-        return new ProcessedImage(image, this::modifyPixel);
+    public Image modify(Image image) {
+        return new ModifiedImage(image, this::modifyPixel);
     }
 
     @Override
@@ -46,27 +51,24 @@ public class AgedHSBProcessor implements Processor {
         green = (int) Mth.map(green, 0, 255, blackPoint, whitePoint);
         blue = (int) Mth.map(blue, 0, 255, blackPoint, whitePoint);
 
-        float[] baseHSB = new float[3];
-        Color.HSB.RGBtoHSB(red, green, blue, baseHSB);
+        // Apply sepia tone with 'color' blending mode:
+        double[] hsluv = HUSLColorConverter.rgbToHsluv(new double[] { red / 255f, green / 255f, blue / 255f });
+        hsluv[0] = tintColorHsluv[0]; // Hue
+        hsluv[1] = tintColorHsluv[1]; // Saturation
 
-        float[] tintHSB = new float[3];
-        Color.HSB.RGBtoHSB(FastColor.ARGB32.red(tintColor), FastColor.ARGB32.green(tintColor), FastColor.ARGB32.blue(tintColor), tintHSB);
-
-        // Luma is not 100% correct. It's brighter than it would have been originally, but brighter looks better.
-        int luma = Mth.clamp((int) (0.45 * red + 0.65 * green + 0.2 * blue), 0, 255);
-        int tintedRGB = Color.HSB.HSBtoRGB(tintHSB[0], tintHSB[1], luma / 255f);
+        double[] rgb = HUSLColorConverter.hsluvToRgb(hsluv);
 
         // Blend two colors together:
-        int newBlue = Mth.clamp((int) Mth.lerp(tintOpacity, blue, FastColor.ARGB32.blue(tintedRGB)), 0, 255);
-        int newGreen = Mth.clamp((int) Mth.lerp(tintOpacity, green, FastColor.ARGB32.green(tintedRGB)), 0, 255);
-        int newRed = Mth.clamp((int) Mth.lerp(tintOpacity, red, FastColor.ARGB32.red(tintedRGB)), 0, 255);
+        int newRed = Mth.clamp((int) Mth.lerp(tintOpacity, red, rgb[0] * 255), 0, 255);
+        int newGreen = Mth.clamp((int) Mth.lerp(tintOpacity, green, rgb[1] * 255), 0, 255);
+        int newBlue = Mth.clamp((int) Mth.lerp(tintOpacity, blue, rgb[2] * 255), 0, 255);
 
         return FastColor.ARGB32.color(alpha, newRed, newGreen, newBlue);
     }
 
     @Override
     public String toString() {
-        return "AgedHSBPixelModifier{" +
+        return "AgedHSLUVPixelModifier{" +
                 "tintColor=#" + Integer.toHexString(tintColor) +
                 ", tintOpacity=" + tintOpacity +
                 ", blackPoint=" + blackPoint +

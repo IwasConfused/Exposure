@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.render.photograph;
 
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.image.modifier.Modifier;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import net.minecraft.resources.ResourceLocation;
@@ -11,14 +11,14 @@ public record PhotographStyle(ResourceLocation paperTexture,
                               ResourceLocation overlayTexture,
                               ResourceLocation albumPaperTexture,
                               ResourceLocation albumOverlayTexture,
-                              Processor processor) {
+                              Modifier modifier) {
 
     public static final PhotographStyle REGULAR = new PhotographStyle(
             ExposureClient.Textures.Photograph.REGULAR_PAPER,
             ExposureClient.Textures.EMPTY,
             ExposureClient.Textures.Photograph.REGULAR_ALBUM_PAPER,
             ExposureClient.Textures.EMPTY,
-            Processor.EMPTY);
+            Modifier.EMPTY);
 
     public static PhotographStyle of(ItemStack photographStack) {
         return photographStack.getItem() instanceof PhotographItem photographItem
@@ -35,6 +35,6 @@ public record PhotographStyle(ResourceLocation paperTexture,
     }
 
     public RenderableImage process(RenderableImage image) {
-        return !processor.equals(Processor.EMPTY) ? image.processWith(processor) : image;
+        return !modifier.equals(Modifier.EMPTY) ? image.modifyWith(modifier) : image;
     }
 }

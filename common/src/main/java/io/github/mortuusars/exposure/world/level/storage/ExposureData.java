@@ -28,7 +28,7 @@ public class ExposureData extends SavedData {
             Codec.INT.fieldOf("height").forGetter(ExposureData::getHeight),
             Codecs.byteArrayCodec(1, 2048 * 2048).fieldOf("pixels").forGetter(ExposureData::getPixels),
             ResourceLocation.CODEC.optionalFieldOf("palette", ColorPalettes.DEFAULT.location()).forGetter(ExposureData::getPaletteId),
-            Tag.CODEC.optionalFieldOf("metadata", Tag.EMPTY).forGetter(ExposureData::getTag)
+            Tag.CODEC.optionalFieldOf("tag", Tag.EMPTY).forGetter(ExposureData::getTag)
     ).apply(instance, ExposureData::new));
 
     public static final StreamCodec<ByteBuf, ExposureData> STREAM_CODEC = StreamCodec.composite(
@@ -136,13 +136,13 @@ public class ExposureData extends SavedData {
     public record Tag(ExposureType type,
                       String creator,
                       long unixTimestamp,
-                      boolean isFromFile,
+                      boolean loaded,
                       boolean wasPrinted) {
         public static final Codec<Tag> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                 ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(Tag::type),
                 Codec.STRING.optionalFieldOf("creator", "").forGetter(Tag::creator),
                 Codec.LONG.optionalFieldOf("timestamp", 1645494000L).forGetter(Tag::unixTimestamp),
-                Codec.BOOL.optionalFieldOf("from_file", false).forGetter(Tag::isFromFile),
+                Codec.BOOL.optionalFieldOf("loaded", false).forGetter(Tag::loaded),
                 Codec.BOOL.optionalFieldOf("was_printed", false).forGetter(Tag::wasPrinted)
         ).apply(instance, Tag::new));
 
@@ -160,7 +160,7 @@ public class ExposureData extends SavedData {
                 ExposureType.STREAM_CODEC.encode(buffer, data.type());
                 ByteBufCodecs.STRING_UTF8.encode(buffer, data.creator());
                 ByteBufCodecs.VAR_LONG.encode(buffer, data.unixTimestamp());
-                ByteBufCodecs.BOOL.encode(buffer, data.isFromFile());
+                ByteBufCodecs.BOOL.encode(buffer, data.loaded());
                 ByteBufCodecs.BOOL.encode(buffer, data.wasPrinted());
             }
         };
@@ -168,27 +168,27 @@ public class ExposureData extends SavedData {
         public static final Tag EMPTY = new Tag(ExposureType.COLOR, "", 0, false, false);
 
         public Tag withType(ExposureType type) {
-            return new Tag(type, creator, unixTimestamp, isFromFile, wasPrinted);
+            return new Tag(type, creator, unixTimestamp, loaded, wasPrinted);
         }
 
         public Tag withCreator(String creator) {
-            return new Tag(type, creator, unixTimestamp, isFromFile, wasPrinted);
+            return new Tag(type, creator, unixTimestamp, loaded, wasPrinted);
         }
 
         public Tag withTimestamp(long unixTimestamp) {
-            return new Tag(type, creator, unixTimestamp, isFromFile, wasPrinted);
+            return new Tag(type, creator, unixTimestamp, loaded, wasPrinted);
         }
 
-        public Tag withFromFileSetTo(boolean isFromFile) {
-            return new Tag(type, creator, unixTimestamp, isFromFile, wasPrinted);
+        public Tag withLoadedSetTo(boolean isLoaded) {
+            return new Tag(type, creator, unixTimestamp, isLoaded, wasPrinted);
         }
 
         public Tag withWasPrintedSetTo(boolean wasPrinted) {
-            return new Tag(type, creator, unixTimestamp, isFromFile, wasPrinted);
+            return new Tag(type, creator, unixTimestamp, loaded, wasPrinted);
         }
 
         public Tag setPrinted() {
-            return new Tag(type, creator, unixTimestamp, isFromFile, true);
+            return new Tag(type, creator, unixTimestamp, loaded, true);
         }
     }
 }

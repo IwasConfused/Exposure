@@ -1,29 +1,29 @@
-package io.github.mortuusars.exposure.client.image.processor;
+package io.github.mortuusars.exposure.client.image.modifier;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
+import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class ContrastProcessor implements Processor {
+public class ContrastModifier implements Modifier {
     protected final float contrast;
 
     /**
      * @param contrast 1 means no change.
      */
-    public ContrastProcessor(float contrast) {
+    public ContrastModifier(float contrast) {
         Preconditions.checkArgument(contrast > 0f, "Contrast should be larger than 0.");
         this.contrast = contrast;
     }
 
-    public ContrastProcessor() {
+    public ContrastModifier() {
         this(1f);
     }
 
     @Override
-    public Image process(Image image) {
-        return new ProcessedImage(image, this::modifyPixel);
+    public Image modify(Image image) {
+        return new ModifiedImage(image, this::modifyPixel);
     }
 
     @Override

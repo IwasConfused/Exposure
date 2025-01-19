@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
-import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.image.modifier.Modifier;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
@@ -99,7 +99,7 @@ public class NegativeExposureScreen extends ZoomableScreen {
                         : ExposureType.COLOR);
 
         RenderableImage image = ExposureClient.renderedExposures().getOrCreateRaw(exposureIdentifier)
-                .processWith(Processor.NEGATIVE_FILM);
+                .modifyWith(Modifier.NEGATIVE_FILM);
 
         int width = image.width();
         int height = image.height();

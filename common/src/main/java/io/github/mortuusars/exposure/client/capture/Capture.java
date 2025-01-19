@@ -92,6 +92,10 @@ public class Capture<T> extends Task<Result<T>> {
         return onError(errorConsumer).then(Result::unwrap);
     }
 
+    public Task<T> logErrorAndGetResult(Logger logger) {
+        return onError(error -> logger.error(error.technical().getString())).then(Result::unwrap);
+    }
+
     public static <T> Capture<T> of(Task<Result<T>> capturingTask) {
         return new Capture<>(capturingTask, CaptureAction.EMPTY);
     }

@@ -1,19 +1,19 @@
-package io.github.mortuusars.exposure.client.image.processor;
+package io.github.mortuusars.exposure.client.image.modifier;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ProcessedImage;
+import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import net.minecraft.util.FastColor;
 
-public class MultiplyProcessor implements Processor {
+public class MultiplyModifier implements Modifier {
     protected final int multiplyColor;
 
-    public MultiplyProcessor(int multiplyColor) {
+    public MultiplyModifier(int multiplyColor) {
         this.multiplyColor = multiplyColor;
     }
 
     @Override
-    public Image process(Image image) {
-        return new ProcessedImage(image, this::modifyPixel);
+    public Image modify(Image image) {
+        return new ModifiedImage(image, this::modifyPixel);
     }
 
     @Override

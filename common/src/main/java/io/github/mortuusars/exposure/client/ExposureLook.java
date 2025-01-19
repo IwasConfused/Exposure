@@ -1,22 +1,22 @@
 package io.github.mortuusars.exposure.client;
 
-import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.image.modifier.Modifier;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public enum ExposureLook implements StringRepresentable {
-    REGULAR("regular", Processor.EMPTY),
-    AGED("aged", Processor.AGED),
-    NEGATIVE("negative", Processor.NEGATIVE),
-    NEGATIVE_FILM("negative_film", Processor.NEGATIVE_FILM);
+    REGULAR("regular", Modifier.EMPTY),
+    AGED("aged", Modifier.AGED),
+    NEGATIVE("negative", Modifier.NEGATIVE),
+    NEGATIVE_FILM("negative_film", Modifier.NEGATIVE_FILM);
 
     private final String name;
-    private final Processor processor;
+    private final Modifier modifier;
 
-    ExposureLook(String name, Processor processor) {
+    ExposureLook(String name, Modifier modifier) {
         this.name = name;
-        this.processor = processor;
+        this.modifier = modifier;
     }
 
     public static @Nullable ExposureLook byName(String name) {
@@ -33,8 +33,8 @@ public enum ExposureLook implements StringRepresentable {
         return name;
     }
 
-    public Processor getModifier() {
-        return processor;
+    public Modifier getFilter() {
+        return modifier;
     }
 
     public String getIdSuffix() {

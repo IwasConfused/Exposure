@@ -4,7 +4,7 @@ import io.github.mortuusars.exposure.client.capture.template.*;
 import io.github.mortuusars.exposure.client.task.ClearStaleRenderedImagesIndefiniteTask;
 import io.github.mortuusars.exposure.client.RenderedExposures;
 import io.github.mortuusars.exposure.client.camera.viewfinder.*;
-import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.image.modifier.Modifier;
 import io.github.mortuusars.exposure.client.render.image.ImageRenderer;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographRenderer;
@@ -47,7 +47,7 @@ public class ExposureClient {
                 ExposureClient.Textures.Photograph.AGED_OVERLAY,
                 ExposureClient.Textures.Photograph.AGED_ALBUM_PAPER,
                 ExposureClient.Textures.Photograph.AGED_ALBUM_OVERLAY,
-                Processor.AGED));
+                Modifier.AGED));
 
         cycles().addParallelTask(new ClearStaleRenderedImagesIndefiniteTask());
 

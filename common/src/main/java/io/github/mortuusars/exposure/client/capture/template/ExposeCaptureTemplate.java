@@ -6,8 +6,7 @@ import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.Palettizer;
 import io.github.mortuusars.exposure.client.capture.saving.ExposureUploader;
-import io.github.mortuusars.exposure.client.image.processor.Process;
-import io.github.mortuusars.exposure.client.image.processor.Processor;
+import io.github.mortuusars.exposure.client.image.modifier.Modifier;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.data.ColorPalettes;
@@ -17,7 +16,6 @@ import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import net.minecraft.core.Holder;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -44,9 +42,7 @@ public class ExposeCaptureTemplate implements CaptureTemplate {
 
         Entity cameraHolder = photographer.asEntity();
         float brightnessStops = data.shutterSpeed().orElse(ShutterSpeed.DEFAULT).getStopsDifference(ShutterSpeed.DEFAULT);
-        Holder<ColorPalette> colorPaletteHolder = data.colorPalette().orElse(ColorPalettes.getDefault(Minecrft.registryAccess()));
-        ColorPalette palette = colorPaletteHolder.value();
-        ResourceLocation paletteId = colorPaletteHolder.unwrapKey().orElseThrow().location();
+        Holder<ColorPalette> palette = data.colorPalette().orElse(ColorPalettes.getDefault(Minecrft.registryAccess()));
 
         return Capture.of(Capture.screenshot(),
                         CaptureActions.optional(!photographer.getExecutingPlayer().equals(cameraHolder),
@@ -58,14 +54,14 @@ public class ExposeCaptureTemplate implements CaptureTemplate {
                         CaptureActions.modifyGamma(brightnessStops),
                         CaptureActions.optional(data.flash(), () -> CaptureActions.flash(cameraHolder)))
                 .handleErrorAndGetResult(err -> LOGGER.error(err.technical().getString()))
-                .thenAsync(Process.with(
-                        Processor.Crop.SQUARE_CENTER,
-                        Processor.Crop.factor(data.cropFactor().orElse(1F)),
-                        Processor.Resize.to(data.frameSize().orElse(Config.Server.DEFAULT_FRAME_SIZE.getAsInt())),
-                        Processor.brightness(brightnessStops),
+                .thenAsync(Modifier.chain(
+                        Modifier.Crop.SQUARE_CENTER,
+                        Modifier.Crop.factor(data.cropFactor().orElse(1F)),
+                        Modifier.Resize.to(data.frameSize().orElse(Config.Server.DEFAULT_FRAME_SIZE.getAsInt())),
+                        Modifier.brightness(brightnessStops),
                         chooseColorProcessor(data)))
-                .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette))
-                .thenAsync(convertToExposureData(paletteId, createExposureTag(photographer.getExecutingPlayer(), data, false)))
+                .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette.value()))
+                .thenAsync(convertToExposureData(palette, createExposureTag(photographer.getExecutingPlayer(), data, false)))
                 .acceptAsync(image -> ExposureUploader.upload(data.exposureId(), image))
                 .onError(err -> LOGGER.error(err.technical().getString()));
     }
