@@ -3,6 +3,9 @@ package io.github.mortuusars.exposure.world.camera;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.world.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.part.Attachment;
+import io.github.mortuusars.exposure.world.item.part.CameraSetting;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Optional;
@@ -101,5 +104,19 @@ public abstract class Camera {
             return map.apply(item, stack);
         }
         return orElse;
+    }
+
+    public <T extends Item, R> Optional<R> mapAttachment(Attachment<T> attachment, BiFunction<T, ItemStack, R> func) {
+        if (getItemStack().getItem() instanceof CameraItem) {
+            return attachment.map(getItemStack(), func);
+        }
+        return Optional.empty();
+    }
+
+    public <T> Optional<T> getSetting(CameraSetting<T> setting) {
+        if (getItemStack().getItem() instanceof CameraItem) {
+            return setting.getOptional(getItemStack());
+        }
+        return Optional.empty();
     }
 }

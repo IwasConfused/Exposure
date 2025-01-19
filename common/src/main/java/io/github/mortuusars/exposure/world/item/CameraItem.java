@@ -6,7 +6,6 @@ import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.CameraID;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
-import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
 import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
@@ -33,14 +32,11 @@ import io.github.mortuusars.exposure.world.level.LevelUtil;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.world.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.*;
-import it.unimi.dsi.fastutil.longs.LongSet;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.*;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
 import net.minecraft.resources.ResourceKey;
@@ -65,15 +61,12 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
@@ -591,95 +584,97 @@ public class CameraItem extends Item {
 
     // --
 
-
     public void addNewFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, ItemStack stack) {
-        Frame frame = createFrame(level, captureProperties, photographer, stack);
+        List<LivingEntity> capturedEntities = captureProperties.projection().isEmpty()
+                ? getEntitiesInFrame(photographer, level, stack)
+                : Collections.emptyList();
+
+        capturedEntities.forEach(entity -> entityCaptured(photographer, stack, entity));
+
+        Frame frame = createFrame(level, captureProperties, photographer, capturedEntities, stack);
         addFrameToFilm(stack, frame);
         onFrameAdded(level, photographer, stack, frame);
     }
 
-    public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, ItemStack stack) {
+    public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, List<LivingEntity> capturedEntities, ItemStack stack) {
+        return Frame.create()
+                .setIdentifier(ExposureIdentifier.id(captureProperties.exposureId()))
+                .setType(captureProperties.filmType())
+                .setPhotographer(new Photographer(photographer))
+                .setEntitiesInFrame(capturedEntities.stream()
+                        .limit(Exposure.MAX_ENTITIES_IN_FRAME)
+                        .map(entity -> EntityInFrame.of(photographer.asEntity(), entity, data -> {
+                            //TODO: addCustomEntityInFrameData event
+                        }))
+                        .toList())
+                .addExtraData(Frame.SHUTTER_SPEED, CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
+                .addExtraData(Frame.TIMESTAMP, UnixTimestamp.Seconds.now())
+                .updateExtraData(data -> addFrameExtraData(data, photographer, level, captureProperties, stack))
+                .toImmutable();
+    }
+
+    protected void addFrameExtraData(ExtraData data, PhotographerEntity photographer, ServerLevel level, CaptureProperties captureProperties, ItemStack stack) {
         Entity cameraHolder = photographer.asEntity();
         boolean projecting = captureProperties.projection().isPresent();
 
-        CompoundTag tag = new CompoundTag();
-        List<EntityInFrame> entitiesInFrame;
-
-        tag.putFloat(Frame.SHUTTER_SPEED_MS, CameraSetting.SHUTTER_SPEED.getOrDefault(stack).getDurationMilliseconds());
-
-        tag.put(Frame.TIMESTAMP, LongTag.valueOf(UnixTimestamp.Seconds.now()));
-
         if (projecting) {
-            tag.putBoolean(Frame.PROJECTED, true);
-            entitiesInFrame = Collections.emptyList();
-        } else {
-            if (isInSelfieMode(stack)) {
-                tag.putBoolean(Frame.SELFIE, true);
-            }
-
-            if (captureProperties.flash()) {
-                tag.putBoolean(Frame.FLASH, true);
-            }
-
-            double zoom = CameraSetting.ZOOM.getOrDefault(stack);
-            int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
-            tag.putInt(Frame.FOCAL_LENGTH, focalLength);
-
-            if (captureProperties.extraData().contains(CaptureProperties.LIGHT_LEVEL)) {
-                tag.putInt(Frame.LIGHT_LEVEL, captureProperties.extraData().getInt(CaptureProperties.LIGHT_LEVEL));
-            }
-
-            captureProperties.chromaticChannel().ifPresent(channel ->
-                    tag.putString(Frame.COLOR_CHANNEL, channel.getSerializedName()));
-
-            // Position
-            ListTag pos = new ListTag();
-            pos.addAll(List.of(
-                    DoubleTag.valueOf(cameraHolder.position().x()),
-                    DoubleTag.valueOf(cameraHolder.position().y()),
-                    DoubleTag.valueOf(cameraHolder.position().z())));
-            tag.put(Frame.POSITION, pos);
-            tag.put(Frame.PITCH, FloatTag.valueOf(cameraHolder.getXRot()));
-            tag.put(Frame.YAW, FloatTag.valueOf(cameraHolder.getYRot()));
-
-            // Environment
-            tag.putInt(Frame.DAY_TIME, (int) level.getDayTime());
-            tag.putString(Frame.DIMENSION, level.dimension().location().toString());
-            BlockPos blockPos = cameraHolder.blockPosition();
-            level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
-                    .ifPresent(biome -> tag.putString(Frame.BIOME, biome.toString()));
-            int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
-            level.updateSkyBrightness();
-            int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
-            if (cameraHolder.isUnderWater())
-                tag.putBoolean(Frame.UNDERWATER, true);
-            if (cameraHolder.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0)
-                tag.putBoolean(Frame.IN_CAVE, true);
-            else if (!cameraHolder.isUnderWater()) {
-                Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
-                if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
-                    tag.putString(Frame.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
-                else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
-                    tag.putString(Frame.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
-                else
-                    tag.putString(Frame.WEATHER, "Clear");
-            }
-
-            addStructuresInfo(level, blockPos, tag);
-
-            List<LivingEntity> capturedEntities = getEntitiesInFrame(photographer, level, stack);
-            capturedEntities.forEach(entity -> entityCaptured(photographer, stack, entity));
-
-            entitiesInFrame = capturedEntities.stream()
-                    .limit(Exposure.MAX_ENTITIES_IN_FRAME)
-                    .map(entity -> EntityInFrame.of(cameraHolder, entity, customDataTag -> {
-                        //TODO: modifyEntityInFrameData event
-                    }))
-                    .toList();
+            data.put(Frame.PROJECTED, true);
+            return;
         }
 
-        ExposureIdentifier identifier = ExposureIdentifier.id(captureProperties.exposureId());
-        return new Frame(identifier, captureProperties.filmType().orElse(ExposureType.COLOR), new Photographer(photographer), entitiesInFrame, CustomData.of(tag));
+        if (isInSelfieMode(stack)) {
+            data.put(Frame.SELFIE, true);
+        }
+        if (captureProperties.flash()) {
+            data.put(Frame.FLASH, true);
+        }
+
+        double zoom = CameraSetting.ZOOM.getOrDefault(stack);
+        int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
+        data.put(Frame.FOCAL_LENGTH, focalLength);
+
+        captureProperties.extraData().get(CaptureProperties.LIGHT_LEVEL)
+                .ifPresent(lightLevel -> data.put(Frame.LIGHT_LEVEL, lightLevel));
+
+        captureProperties.isolateChannel().ifPresent(channel ->
+                data.put(Frame.COLOR_CHANNEL, channel));
+
+        data.put(Frame.POSITION, cameraHolder.position());
+        data.put(Frame.PITCH, cameraHolder.getXRot());
+        data.put(Frame.YAW, cameraHolder.getYRot());
+
+        data.put(Frame.DAY_TIME, (int) level.getDayTime());
+        data.put(Frame.DIMENSION, level.dimension().location());
+
+        BlockPos blockPos = cameraHolder.blockPosition();
+        level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
+                .ifPresent(biome -> data.put(Frame.BIOME, biome));
+
+        int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
+        level.updateSkyBrightness();
+        int skyLight = level.getBrightness(LightLayer.SKY, blockPos);
+
+        if (cameraHolder.isUnderWater()) {
+            data.put(Frame.UNDERWATER, true);
+        }
+        if (cameraHolder.getBlockY() < Math.min(level.getSeaLevel(), surfaceHeight) && skyLight == 0) {
+            data.put(Frame.IN_CAVE, true);
+        } else if (!cameraHolder.isUnderWater()) {
+            Biome.Precipitation precipitation = level.getBiome(blockPos).value().getPrecipitationAt(blockPos);
+            if (level.isThundering() && precipitation != Biome.Precipitation.NONE)
+                data.put(Frame.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snowstorm" : "Thunder");
+            else if (level.isRaining() && precipitation != Biome.Precipitation.NONE)
+                data.put(Frame.WEATHER, precipitation == Biome.Precipitation.SNOW ? "Snow" : "Rain");
+            else
+                data.put(Frame.WEATHER, "Clear");
+        }
+
+        List<ResourceLocation> structures = LevelUtil.getStructuresAt(level, blockPos);
+        if (!structures.isEmpty()) {
+            data.put(Frame.STRUCTURES, structures);
+        }
+
+        //TODO: addExtraData event
     }
 
     public void addFrameToFilm(ItemStack stack, Frame frame) {
@@ -717,32 +712,6 @@ public class CameraItem extends Item {
                 // So it's just easier to hardcode it like this.
                 Exposure.CriteriaTriggers.PHOTOGRAPH_ENDERMAN_EYES.get().trigger(player);
             }
-        }
-    }
-
-    protected void addStructuresInfo(ServerLevel level, BlockPos pos, CompoundTag frame) {
-        Map<Structure, LongSet> allStructuresAt = level.structureManager().getAllStructuresAt(pos);
-
-        List<Structure> inside = new ArrayList<>();
-
-        for (Structure structure : allStructuresAt.keySet()) {
-            StructureStart structureAt = level.structureManager().getStructureAt(pos, structure);
-            if (structureAt.isValid()) {
-                inside.add(structure);
-            }
-        }
-
-        Registry<Structure> structures = level.registryAccess().registryOrThrow(Registries.STRUCTURE);
-        ListTag structuresTag = new ListTag();
-
-        for (Structure structure : inside) {
-            ResourceLocation key = structures.getKey(structure);
-            if (key != null)
-                structuresTag.add(StringTag.valueOf(key.toString()));
-        }
-
-        if (!structuresTag.isEmpty()) {
-            frame.put("Structures", structuresTag);
         }
     }
 

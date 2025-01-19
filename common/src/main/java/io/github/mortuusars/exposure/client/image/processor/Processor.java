@@ -36,16 +36,26 @@ public interface Processor {
     Processor NEGATIVE_FILM = new NegativeFilmProcessor();
     Processor AGED = new AgedHSBProcessor(0xD9A863, 0.65f, 40, 255);
 
+    Processor BLACK_AND_WHITE = new BlackAndWhiteProcessor(0.299F, 0.587F, 0.114F);
+
+    static Processor optional(boolean condition, Supplier<Processor> supplier) {
+        return condition ? supplier.get() : EMPTY;
+    }
+
     static Processor brightness(float stops) {
         return stops != 0 ? new BrightnessProcessor(stops) : EMPTY;
     }
 
-    static Processor blackAndWhite(float contrast) {
-        return new BlackAndWhiteProcessor(contrast);
+    static Processor singleChannelBlackAndWhite(ColorChannel colorChannel) {
+        return switch (colorChannel) {
+            case RED -> new BlackAndWhiteProcessor(1F, 0.05F, 0.05F);
+            case GREEN -> new BlackAndWhiteProcessor(0.05F, 1F, 0.05F);
+            case BLUE -> new BlackAndWhiteProcessor(0.05F, 0.05F, 1F);
+        };
     }
 
-    static Processor singleChannelBlackAndWhite(ColorChannel colorChannel) {
-        return new SingleChannelBlackAndWhiteProcessor(colorChannel);
+    static Processor contrast(float value) {
+        return new ContrastProcessor(value);
     }
 
     interface Crop extends Processor {
@@ -95,14 +105,6 @@ public interface Processor {
                 return combineIdentifiers(this, next);
             }
         };
-    }
-
-    default Processor thenIf(boolean condition, Processor next) {
-        return condition ? then(next) : this;
-    }
-
-    default Processor thenIf(boolean condition, Supplier<Processor> next) {
-        return condition ? then(next.get()) : this;
     }
 
     static String combineIdentifiers(Processor first, Processor second) {

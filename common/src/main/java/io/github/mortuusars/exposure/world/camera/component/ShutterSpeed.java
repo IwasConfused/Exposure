@@ -1,14 +1,18 @@
 package io.github.mortuusars.exposure.world.camera.component;
 
 import com.mojang.serialization.Codec;
+import io.github.mortuusars.exposure.Exposure;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.util.StringRepresentable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
-public class ShutterSpeed {
+public class ShutterSpeed implements StringRepresentable {
     public static final ShutterSpeed DEFAULT = new ShutterSpeed("1/60");
 
     public static final Codec<ShutterSpeed> CODEC = Codec.STRING.xmap(ShutterSpeed::new, ShutterSpeed::getNotation);
@@ -71,5 +75,10 @@ public class ShutterSpeed {
     @Override
     public int hashCode() {
         return Objects.hash(valueMilliseconds, notation);
+    }
+
+    @Override
+    public @NotNull String getSerializedName() {
+        return getNotation();
     }
 }

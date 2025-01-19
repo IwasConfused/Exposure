@@ -2,10 +2,10 @@ package io.github.mortuusars.exposure.world.camera;
 
 import com.mojang.serialization.Codec;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.camera.capture.ProjectionMode;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -18,7 +18,6 @@ public enum ColorChannel implements StringRepresentable {
     BLUE(0xFF4E73CE);
 
     public static final Codec<ColorChannel> CODEC = StringRepresentable.fromEnum(ColorChannel::values);
-
     public static final StreamCodec<ByteBuf, ColorChannel> STREAM_CODEC =
             ByteBufCodecs.idMapper(id -> ColorChannel.values()[id], ColorChannel::ordinal);
 
@@ -52,7 +51,7 @@ public enum ColorChannel implements StringRepresentable {
         return defaultValue;
     }
 
-    public static Optional<ColorChannel> fromString(String serializedName) {
+    public static Optional<ColorChannel> fromStringOptional(String serializedName) {
         for (ColorChannel value : values()) {
             if (value.getSerializedName().equals(serializedName))
                 return Optional.of(value);
@@ -60,8 +59,20 @@ public enum ColorChannel implements StringRepresentable {
         return Optional.empty();
     }
 
+    public static ColorChannel fromStringOrThrow(String serializedName) {
+        for (ColorChannel value : values()) {
+            if (value.getSerializedName().equals(serializedName))
+                return value;
+        }
+        throw new IllegalArgumentException(serializedName + " is not a valid ColorChannel.");
+    }
+
     @Override
     public @NotNull String getSerializedName() {
         return toString().toLowerCase();
+    }
+
+    public ResourceLocation getShader() {
+        return Exposure.resource("shaders/" + getSerializedName() + "_filter.json");
     }
 }

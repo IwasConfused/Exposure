@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public record CameraSetting<T>(DataComponentType<T> component, T defaultValue) {
     public static final Codec<CameraSetting<?>> CODEC = ResourceLocation.CODEC.xmap(CameraSetting::byId, CameraSetting::idOf);
@@ -72,6 +73,10 @@ public record CameraSetting<T>(DataComponentType<T> component, T defaultValue) {
 
     public @Nullable T get(ItemStack stack) {
         return stack.get(component);
+    }
+
+    public Optional<T> getOptional(ItemStack stack) {
+        return Optional.ofNullable(get(stack));
     }
 
     public T getOrDefault(ItemStack stack) {

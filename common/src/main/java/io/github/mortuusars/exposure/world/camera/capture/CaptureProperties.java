@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.world.camera.capture;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.mortuusars.exposure.util.ExtraData;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.CameraID;
 import io.github.mortuusars.exposure.world.camera.ColorChannel;
@@ -9,7 +10,6 @@ import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import net.minecraft.core.*;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -21,7 +21,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public record CaptureProperties(String exposureId,
-                                Optional<ExposureType> filmType,
+                                ExposureType filmType,
                                 Optional<Holder<ColorPalette>> colorPalette,
                                 Optional<Integer> frameSize,
                                 Optional<Float> cropFactor,
@@ -29,13 +29,18 @@ public record CaptureProperties(String exposureId,
                                 Optional<Float> fovOverride,
                                 boolean flash,
                                 Optional<ProjectionInfo> projection,
-                                Optional<ColorChannel> chromaticChannel,
+                                Optional<ColorChannel> isolateChannel,
                                 Optional<UUID> photographerEntityId,
                                 Optional<CameraID> cameraId,
-                                CompoundTag extraData) {
+                                ExtraData extraData) {
+
+    public static final ExtraData.Entry<Integer> LIGHT_LEVEL = new ExtraData.Entry<>("light_level", ExtraData::getInt, ExtraData::putInt);
+
+    // --
+
     public static final Codec<CaptureProperties> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.fieldOf("id").forGetter(CaptureProperties::exposureId),
-            ExposureType.CODEC.optionalFieldOf("film_type").forGetter(CaptureProperties::filmType),
+            ExposureType.CODEC.optionalFieldOf("film_type", ExposureType.COLOR).forGetter(CaptureProperties::filmType),
             ColorPalette.HOLDER_CODEC.optionalFieldOf("color_palette").forGetter(CaptureProperties::colorPalette),
             Codec.INT.optionalFieldOf("frame_size").forGetter(CaptureProperties::frameSize),
             Codec.FLOAT.optionalFieldOf("crop_factor").forGetter(CaptureProperties::cropFactor),
@@ -43,17 +48,17 @@ public record CaptureProperties(String exposureId,
             Codec.FLOAT.optionalFieldOf("fov_override").forGetter(CaptureProperties::fovOverride),
             Codec.BOOL.optionalFieldOf("flash", false).forGetter(CaptureProperties::flash),
             ProjectionInfo.CODEC.optionalFieldOf("projection").forGetter(CaptureProperties::projection),
-            ColorChannel.CODEC.optionalFieldOf("chromatic_channel").forGetter(CaptureProperties::chromaticChannel),
+            ColorChannel.CODEC.optionalFieldOf("chromatic_channel").forGetter(CaptureProperties::isolateChannel),
             UUIDUtil.LENIENT_CODEC.optionalFieldOf("photographer_id").forGetter(CaptureProperties::photographerEntityId),
             CameraID.CODEC.optionalFieldOf("camera_id").forGetter(CaptureProperties::cameraId),
-            CompoundTag.CODEC.optionalFieldOf("extra_data", new CompoundTag()).forGetter(CaptureProperties::extraData)
+            ExtraData.CODEC.optionalFieldOf("extra_data", new ExtraData()).forGetter(CaptureProperties::extraData)
     ).apply(instance, CaptureProperties::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, CaptureProperties> STREAM_CODEC = new StreamCodec<>() {
         public @NotNull CaptureProperties decode(RegistryFriendlyByteBuf buffer) {
             return new CaptureProperties(
                     ByteBufCodecs.STRING_UTF8.decode(buffer),
-                    ByteBufCodecs.optional(ExposureType.STREAM_CODEC).decode(buffer),
+                    ExposureType.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.optional(ColorPalette.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.FLOAT).decode(buffer),
@@ -64,12 +69,12 @@ public record CaptureProperties(String exposureId,
                     ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(CameraID.STREAM_CODEC).decode(buffer),
-                    ByteBufCodecs.COMPOUND_TAG.decode(buffer));
+                    ExtraData.STREAM_CODEC.decode(buffer));
         }
 
         public void encode(RegistryFriendlyByteBuf buffer, CaptureProperties data) {
             ByteBufCodecs.STRING_UTF8.encode(buffer, data.exposureId());
-            ByteBufCodecs.optional(ExposureType.STREAM_CODEC).encode(buffer, data.filmType());
+            ExposureType.STREAM_CODEC.encode(buffer, data.filmType());
             ByteBufCodecs.optional(ColorPalette.STREAM_CODEC).encode(buffer, data.colorPalette());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.frameSize());
             ByteBufCodecs.optional(ByteBufCodecs.FLOAT).encode(buffer, data.cropFactor());
@@ -77,23 +82,17 @@ public record CaptureProperties(String exposureId,
             ByteBufCodecs.optional(ByteBufCodecs.FLOAT).encode(buffer, data.fovOverride());
             ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).encode(buffer, data.projection());
-            ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.chromaticChannel());
+            ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.isolateChannel());
             ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC).encode(buffer, data.photographerEntityId());
             ByteBufCodecs.optional(CameraID.STREAM_CODEC).encode(buffer, data.cameraId());
-            ByteBufCodecs.COMPOUND_TAG.encode(buffer, data.extraData());
+            ExtraData.STREAM_CODEC.encode(buffer, data.extraData());
         }
     };
-
-    // --
-
-    public static final String LIGHT_LEVEL = "light_level";
-
-    // --
 
     public static final class Builder {
         private final String exposureId;
 
-        private @Nullable ExposureType filmType = null;
+        private ExposureType filmType = ExposureType.COLOR;
         private @Nullable Holder<ColorPalette> colorPalette = null;
         private @Nullable Integer frameSize = null;
         private @Nullable Float cropFactor = null;
@@ -104,33 +103,33 @@ public record CaptureProperties(String exposureId,
         private @Nullable ColorChannel chromaticChannel;
         private @Nullable UUID photographerEntityID = null;
         private @Nullable CameraID cameraID = null;
-        private final CompoundTag extraData = new CompoundTag();
+        private final ExtraData extraData = new ExtraData();
 
         public Builder(String exposureId) {
             this.exposureId = exposureId;
         }
 
-        public Builder setFilmType(ExposureType filmType) {
+        public Builder setFilmType(@Nullable ExposureType filmType) {
             this.filmType = filmType;
             return this;
         }
 
-        public Builder setColorPalette(Holder<ColorPalette> colorPalette) {
+        public Builder setColorPalette(@Nullable Holder<ColorPalette> colorPalette) {
             this.colorPalette = colorPalette;
             return this;
         }
 
-        public Builder setFrameSize(int frameSize) {
+        public Builder setFrameSize(@Nullable Integer frameSize) {
             this.frameSize = frameSize;
             return this;
         }
 
-        public Builder setCropFactor(float cropFactor) {
+        public Builder setCropFactor(@Nullable Float cropFactor) {
             this.cropFactor = cropFactor;
             return this;
         }
 
-        public Builder setShutterSpeed(ShutterSpeed shutterSpeed) {
+        public Builder setShutterSpeed(@Nullable ShutterSpeed shutterSpeed) {
             this.shutterSpeed = shutterSpeed;
             return this;
         }
@@ -186,14 +185,14 @@ public record CaptureProperties(String exposureId,
             return this;
         }
 
-        public Builder extraData(Consumer<CompoundTag> extraDataUpdater) {
+        public Builder extraData(Consumer<ExtraData> extraDataUpdater) {
             extraDataUpdater.accept(extraData);
             return this;
         }
 
         public CaptureProperties build() {
             return new CaptureProperties(exposureId,
-                    Optional.ofNullable(this.filmType),
+                    this.filmType,
                     Optional.ofNullable(this.colorPalette),
                     Optional.ofNullable(this.frameSize),
                     Optional.ofNullable(this.cropFactor),

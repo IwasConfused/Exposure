@@ -2,15 +2,17 @@ package io.github.mortuusars.exposure.world.camera.frame;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.mortuusars.exposure.util.ExtraData;
 import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
+import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -21,28 +23,32 @@ public record Frame(ExposureIdentifier exposureIdentifier,
                     ExposureType type,
                     Photographer photographer,
                     List<EntityInFrame> entitiesInFrame,
-                    CustomData tag) {
-    public static final String PROJECTED = "projected";
-    public static final String CHROMATIC = "chromatic";
+                    ExtraData extraData) {
+    public static final ExtraData.Entry<Boolean> PROJECTED = ExtraData.Entry.bool("projected");
+    public static final ExtraData.Entry<Boolean> CHROMATIC = ExtraData.Entry.bool("chromatic");
 
-    public static final String COLOR_CHANNEL = "color_channel";
-    public static final String SHUTTER_SPEED_MS = "shutter_speed_ms";
-    public static final String FOCAL_LENGTH = "focal_length";
-    public static final String TIMESTAMP = "timestamp";
+    public static final ExtraData.Entry<ColorChannel> COLOR_CHANNEL =
+            ExtraData.Entry.stringRepresentable("color_channel", ColorChannel::fromStringOrThrow);
+    public static final ExtraData.Entry<ShutterSpeed> SHUTTER_SPEED =
+            ExtraData.Entry.stringRepresentable("shutter_speed", ShutterSpeed::new);
 
-    public static final String FLASH = "flash";
-    public static final String SELFIE = "selfie";
-    public static final String POSITION = "pos";
-    public static final String PITCH = "pitch";
-    public static final String YAW = "yaw";
-    public static final String LIGHT_LEVEL = "light_level";
-    public static final String DAY_TIME = "day_time";
-    public static final String DIMENSION = "dimension";
-    public static final String BIOME = "biome";
-    public static final String WEATHER = "weather";
-    public static final String IN_CAVE = "in_cave";
-    public static final String UNDERWATER = "underwater";
+    public static final ExtraData.Entry<Long> TIMESTAMP = ExtraData.Entry.longVal("timestamp");
+    public static final ExtraData.Entry<Integer> FOCAL_LENGTH = ExtraData.Entry.intVal("focal_length");
+    public static final ExtraData.Entry<Boolean> FLASH = ExtraData.Entry.bool("flash");
+    public static final ExtraData.Entry<Boolean> SELFIE = ExtraData.Entry.bool("selfie");
 
+    public static final ExtraData.Entry<Vec3> POSITION = ExtraData.Entry.vec3("pos");
+    public static final ExtraData.Entry<Float> PITCH = ExtraData.Entry.floatVal("pitch");
+    public static final ExtraData.Entry<Float> YAW = ExtraData.Entry.floatVal("yaw");
+    public static final ExtraData.Entry<Integer> LIGHT_LEVEL = ExtraData.Entry.intVal("light_level");
+    public static final ExtraData.Entry<Integer> DAY_TIME = ExtraData.Entry.intVal("day_time");
+    public static final ExtraData.Entry<ResourceLocation> DIMENSION = ExtraData.Entry.resourceLocation("dimension");
+    public static final ExtraData.Entry<ResourceLocation> BIOME = ExtraData.Entry.resourceLocation("biome");
+    public static final ExtraData.Entry<String> WEATHER = ExtraData.Entry.string("weather");
+    public static final ExtraData.Entry<Boolean> IN_CAVE = ExtraData.Entry.bool("in_cave");
+    public static final ExtraData.Entry<Boolean> UNDERWATER = ExtraData.Entry.bool("underwater");
+    public static final ExtraData.Entry<List<ResourceLocation>> STRUCTURES = ExtraData.Entry.stringBasedList("structures",
+            ResourceLocation::parse, ResourceLocation::toString);
     // --
 
     public static final Frame EMPTY = new Frame(
@@ -50,36 +56,38 @@ public record Frame(ExposureIdentifier exposureIdentifier,
             ExposureType.COLOR,
             Photographer.EMPTY,
             Collections.emptyList(),
-            CustomData.EMPTY);
+            ExtraData.EMPTY);
 
     public static final Codec<Frame> CODEC = RecordCodecBuilder.create(instance -> instance.group(
                     ExposureIdentifier.CODEC.fieldOf("exposure").forGetter(Frame::exposureIdentifier),
                     ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(Frame::type),
                     Photographer.CODEC.optionalFieldOf("photographer", Photographer.EMPTY).forGetter(Frame::photographer),
                     EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("captured_entities", Collections.emptyList()).forGetter(Frame::entitiesInFrame),
-                    CustomData.CODEC.optionalFieldOf("tag", CustomData.EMPTY).forGetter(Frame::tag))
+                    ExtraData.CODEC.optionalFieldOf("extra_data", ExtraData.EMPTY).forGetter(Frame::extraData))
             .apply(instance, Frame::new));
 
     public static final StreamCodec<FriendlyByteBuf, Frame> STREAM_CODEC = new StreamCodec<>() {
-        @SuppressWarnings("deprecation")
         public @NotNull Frame decode(FriendlyByteBuf buffer) {
             return new Frame(
                     ExposureIdentifier.STREAM_CODEC.decode(buffer),
                     ExposureType.STREAM_CODEC.decode(buffer),
                     Photographer.STREAM_CODEC.decode(buffer),
                     EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).decode(buffer),
-                    CustomData.STREAM_CODEC.decode(buffer));
+                    ExtraData.STREAM_CODEC.decode(buffer));
         }
 
-        @SuppressWarnings("deprecation")
         public void encode(FriendlyByteBuf buffer, Frame frame) {
             ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.exposureIdentifier());
             ExposureType.STREAM_CODEC.encode(buffer, frame.type());
             Photographer.STREAM_CODEC.encode(buffer, frame.photographer);
             EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).encode(buffer, frame.entitiesInFrame());
-            CustomData.STREAM_CODEC.encode(buffer, frame.tag());
+            ExtraData.STREAM_CODEC.encode(buffer, frame.extraData());
         }
     };
+
+    public static Mutable create() {
+        return new Mutable(EMPTY);
+    }
 
     /**
      * Creates a frame that has data common to all frames in a provided list.
@@ -107,9 +115,9 @@ public record Frame(ExposureIdentifier exposureIdentifier,
                 .orElse(new ArrayList<>());
         result.setEntitiesInFrame(commonEntitiesInFrame);
 
-        CompoundTag mergedTag = frames.stream()
-                .map(f -> f.tag.copyTag())
-                .reduce(new CompoundTag(), CompoundTag::merge);
+        ExtraData mergedTag = frames.stream()
+                .map(f -> f.extraData.copy())
+                .reduce(new ExtraData(), ExtraData::merge);
         result.setTag(mergedTag);
 
         return result.toImmutable();
@@ -132,21 +140,20 @@ public record Frame(ExposureIdentifier exposureIdentifier,
     /**
      * Do not modify the tag here! It may cause unwanted side effects.
      */
-    @SuppressWarnings("deprecation")
-    public CompoundTag getAdditionalDataTagForReading() {
-        return tag().getUnsafe();
+    public ExtraData getExtraDataForReading() {
+        return extraData();
     }
 
-    public boolean isFromFile() {
-        return getAdditionalDataTagForReading().getBoolean(PROJECTED);
+    public boolean isProjected() {
+        return getExtraDataForReading().get(PROJECTED).orElse(false);
     }
 
     public boolean isChromatic() {
-        return getAdditionalDataTagForReading().getBoolean(CHROMATIC);
+        return getExtraDataForReading().get(CHROMATIC).orElse(false);
     }
 
     public Optional<ColorChannel> getColorChannel() {
-        return ColorChannel.fromString(getAdditionalDataTagForReading().getString(COLOR_CHANNEL));
+        return getExtraDataForReading().get(COLOR_CHANNEL);
     }
 
     public boolean wasTakenWithChromaticFilter() {
@@ -162,14 +169,14 @@ public record Frame(ExposureIdentifier exposureIdentifier,
         private ExposureType type;
         private Photographer photographer;
         private List<EntityInFrame> entitiesInFrame;
-        private CompoundTag tag;
+        private ExtraData tag;
 
         public Mutable(Frame photographData) {
             this.identifier = photographData.exposureIdentifier();
             this.type = photographData.type();
             this.photographer = photographData.photographer();
             this.entitiesInFrame = new ArrayList<>(photographData.entitiesInFrame());
-            this.tag = photographData.tag().copyTag();
+            this.tag = photographData.extraData().copy();
         }
 
         public ExposureIdentifier getIdentifier() {
@@ -208,22 +215,27 @@ public record Frame(ExposureIdentifier exposureIdentifier,
             return this;
         }
 
-        public CompoundTag getTag() {
+        public ExtraData getTag() {
             return tag;
         }
 
-        public Mutable setTag(CompoundTag tag) {
+        public Mutable setTag(ExtraData tag) {
             this.tag = tag;
             return this;
         }
 
-        public Mutable updateTag(Consumer<CompoundTag> updater) {
+        public Mutable updateExtraData(Consumer<ExtraData> updater) {
             updater.accept(tag);
             return this;
         }
 
+        public <T> Mutable addExtraData(ExtraData.Entry<T> entry, T value) {
+            tag.put(entry, value);
+            return this;
+        }
+
         public Mutable setChromatic(boolean chromatic) {
-            return updateTag(tag -> tag.putBoolean(CHROMATIC, chromatic));
+            return updateExtraData(tag -> tag.put(CHROMATIC, chromatic));
         }
 
         public Frame toImmutable() {
@@ -232,7 +244,7 @@ public record Frame(ExposureIdentifier exposureIdentifier,
                     this.type,
                     this.photographer,
                     this.entitiesInFrame,
-                    CustomData.of(this.tag));
+                    this.tag);
         }
     }
 }

@@ -34,19 +34,10 @@ public class SingleChannelBlackAndWhiteProcessor implements Processor {
             case BLUE -> FastColor.ARGB32.blue(colorARGB);
         };
 
-        int avg = (r + g + b) / 3;
-
-        int val = Mth.lerpInt(0.9f, avg, color);
-
-        return FastColor.ARGB32.color(FastColor.ARGB32.alpha(colorARGB), val, val, val);
-
-//        int color = switch (channel) {
-//            case RED -> FastColor.ARGB32.red(colorARGB);
-//            case GREEN -> FastColor.ARGB32.green(colorARGB);
-//            case BLUE -> FastColor.ARGB32.blue(colorARGB);
-//        };
-//
-//        return FastColor.ARGB32.color(FastColor.ARGB32.alpha(colorARGB), color, color, color);
+        return FastColor.ARGB32.color(FastColor.ARGB32.alpha(colorARGB),
+                Mth.lerpInt(1f, r, color),
+                Mth.lerpInt(1f, g, color),
+                Mth.lerpInt(1f, b, color));
     }
 
     @Override

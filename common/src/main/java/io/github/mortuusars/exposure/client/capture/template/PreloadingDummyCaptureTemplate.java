@@ -34,7 +34,7 @@ public class PreloadingDummyCaptureTemplate implements CaptureTemplate {
                         Processor.Crop.factor(1),
                         Processor.Resize.to(16),
                         Processor.brightness(brightnessStops),
-                        Processor.blackAndWhite(1)))
+                        Processor.BLACK_AND_WHITE))
                 .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette))
                 .thenAsync(img -> ExposureData.EMPTY);
     }

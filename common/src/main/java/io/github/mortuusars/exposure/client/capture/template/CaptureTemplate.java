@@ -21,12 +21,10 @@ public interface CaptureTemplate {
     Task<?> createTask(CaptureProperties captureProperties);
 
     default Processor chooseColorProcessor(CaptureProperties data) {
-        return data.filmType()
-                .filter(type -> type == ExposureType.BLACK_AND_WHITE)
-                .map(type -> data.chromaticChannel()
-                        .map(Processor::singleChannelBlackAndWhite)
-                        .orElse(Processor.blackAndWhite(1.15f)))
-                .orElse(Processor.EMPTY);
+        return data.filmType() == ExposureType.BLACK_AND_WHITE
+                ? data.isolateChannel().map(Processor::singleChannelBlackAndWhite).orElse(Processor.BLACK_AND_WHITE)
+                : Processor.EMPTY;
+
     }
 
     default Function<PalettedImage, ExposureData> convertToExposureData(ResourceLocation paletteId, ExposureData.Tag tag) {
@@ -34,7 +32,7 @@ public interface CaptureTemplate {
     }
 
     default ExposureData.Tag createExposureTag(Player executingPlayer, CaptureProperties data, boolean isFromFile) {
-        return new ExposureData.Tag(data.filmType().orElse(ExposureType.COLOR), executingPlayer.getScoreboardName(),
+        return new ExposureData.Tag(data.filmType(), executingPlayer.getScoreboardName(),
                 UnixTimestamp.Seconds.now(), isFromFile, false);
     }
 

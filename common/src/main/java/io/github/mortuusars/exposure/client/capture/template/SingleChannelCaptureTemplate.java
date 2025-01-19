@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.client.capture.template;
 
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
 import io.github.mortuusars.exposure.client.capture.palettizer.Palettizer;
@@ -47,10 +46,6 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
 
         float brightnessStops = data.shutterSpeed().orElse(ShutterSpeed.DEFAULT).getStopsDifference(ShutterSpeed.DEFAULT);
 
-        @Nullable ResourceLocation postEffect = data.chromaticChannel()
-                .map(c -> Exposure.resource("shaders/" + c.getSerializedName() + "_filter.json"))
-                .orElse(null);
-
         Holder<ColorPalette> colorPaletteHolder = data.colorPalette().orElse(ColorPalettes.getDefault(Minecrft.registryAccess()));
         ColorPalette palette = colorPaletteHolder.value();
         ResourceLocation paletteId = colorPaletteHolder.unwrapKey().orElseThrow().location();
@@ -60,7 +55,7 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
                                 () -> CaptureActions.setCameraEntity(cameraHolder)),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
-                        CaptureActions.optional(postEffect != null, () -> CaptureActions.setPostEffect(postEffect)),
+                        CaptureActions.optional(data.isolateChannel(), channel -> CaptureActions.setPostEffect(channel.getShader())),
                         CaptureActions.modifyGamma(brightnessStops),
                         CaptureActions.optional(data.flash(), () -> CaptureActions.flash(cameraHolder)))
                 .handleErrorAndGetResult(printCasualErrorInChat())

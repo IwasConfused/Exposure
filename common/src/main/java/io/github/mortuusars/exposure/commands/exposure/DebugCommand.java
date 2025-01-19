@@ -13,7 +13,6 @@ import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
-import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.frame.Photographer;
 import io.github.mortuusars.exposure.data.ColorPalettes;
@@ -28,16 +27,14 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.*;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public class DebugCommand {
@@ -66,14 +63,7 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
-        Optional<Camera> camera = Optional.empty();
-
-        for (InteractionHand hand : InteractionHand.values()) {
-            ItemStack itemInHand = player.getItemInHand(hand);
-            if (itemInHand.getItem() instanceof CameraItem cameraItem) {
-                camera = Optional.of(new CameraInHand(player, cameraItem.getOrCreateID(itemInHand), hand));
-            }
-        }
+        Camera camera = CameraInHand.find(player); // Can be CameraInHand.Empty
 
         List<CaptureProperties> properties = new ArrayList<>();
 
@@ -81,25 +71,30 @@ public class DebugCommand {
             ColorChannel channel = ColorChannel.values()[i];
             String exposureId = ExposureIdentifier.createId(player, channel.getSerializedName());
 
-            Holder<ColorPalette> colorPalette = ColorPalettes.get(context.getSource().registryAccess(), ColorPalettes.DEFAULT);
+            ResourceKey<ColorPalette> paletteKey = camera.mapAttachment(Attachment.FILM, FilmItem::getColorPaletteId).orElse(ColorPalettes.DEFAULT);
+            Holder<ColorPalette> colorPalette = ColorPalettes.get(context.getSource().registryAccess(), paletteKey);
 
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
                     .setPhotographer(player)
-                    .setCameraID(camera.map(Camera::getCameraID))
-                    .setShutterSpeed(camera.flatMap(c -> c.map(CameraSetting.SHUTTER_SPEED::getOrDefault)).orElse(ShutterSpeed.DEFAULT))
+                    .setCameraID(camera.getCameraID())
+                    .setShutterSpeed(camera.getSetting(CameraSetting.SHUTTER_SPEED).orElse(null))
                     .setFilmType(ExposureType.BLACK_AND_WHITE)
-                    .setFrameSize(camera.flatMap(c -> c.map(s -> Attachment.FILM.mapOrElse(s, FilmItem::getFrameSize, () -> 320))).orElse(320))
-                    .setCropFactor(camera.flatMap(c -> c.map((cItem, cStack) -> cItem.getCropFactor())).orElse(Exposure.CROP_FACTOR))
+                    .setFrameSize(camera.mapAttachment(Attachment.FILM, FilmItem::getFrameSize).orElse(null))
+                    .setCropFactor(camera.map((cameraItem, cameraStack) -> cameraItem.getCropFactor()).orElse(null))
                     .setColorPalette(colorPalette)
                     .setChromaticChannel(channel)
                     .build();
 
             properties.add(captureProperties);
 
-            Frame frame = camera.flatMap(c -> c.map((cameraItem, cameraStack) ->
-                            cameraItem.createFrame(context.getSource().getLevel(), captureProperties, player, cameraStack)))
-                    .orElse(new Frame(ExposureIdentifier.id(exposureId),
-                            ExposureType.BLACK_AND_WHITE, new Photographer(player), Collections.emptyList(), CustomData.EMPTY));
+            Frame frame = camera
+                    .map((cameraItem, cameraStack) ->
+                            cameraItem.createFrame(context.getSource().getLevel(), captureProperties, player,
+                                    cameraItem.getEntitiesInFrame(player, context.getSource().getLevel(), cameraStack), cameraStack))
+                    .orElse(Frame.create().setIdentifier(ExposureIdentifier.id(exposureId))
+                            .setType(ExposureType.BLACK_AND_WHITE)
+                            .setPhotographer(new Photographer(player))
+                            .toImmutable());
 
             Supplier<Component> msg = () -> {
                 ItemStack photograph = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
