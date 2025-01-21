@@ -193,6 +193,14 @@ public class CameraItem extends Item {
         return stack.getOrDefault(Exposure.DataComponents.CAMERA_ACTIVE, false);
     }
 
+    public void setDisassembled(ItemStack stack, boolean disassembled) {
+        stack.set(Exposure.DataComponents.CAMERA_DISASSEMBLED, disassembled);
+    }
+
+    public boolean isDisassembled(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.CAMERA_DISASSEMBLED, false);
+    }
+
     public @NotNull InteractionResultHolder<ItemStack> activateInHand(Player player, ItemStack stack, @NotNull InteractionHand hand) {
         player.setActiveExposureCamera(new CameraInHand(player, getOrCreateID(stack), hand));
         if (player.level().isClientSide) {
@@ -497,6 +505,8 @@ public class CameraItem extends Item {
 
             PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(slotIndex));
         }
+
+        stack.set(Exposure.DataComponents.CAMERA_DISASSEMBLED, true);
 
         Sound.play(player, Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), SoundSource.PLAYERS, 0.9f, 0.9f, 0.2f);
 

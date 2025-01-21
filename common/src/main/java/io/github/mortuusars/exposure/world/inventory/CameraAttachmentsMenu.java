@@ -252,8 +252,9 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
     @Override
     public void removed(Player player) {
         super.removed(player);
+        camera.apply((item, stack) -> item.setDisassembled(stack, false));
 
-        // Without this, client inventory is syncing properly when menu is closed. (only when opened by r-click in GUI)
+        // Without this, client inventory is not syncing properly when menu is closed. (only when opened by r-click in GUI)
         player.inventoryMenu.resumeRemoteUpdates();
     }
 

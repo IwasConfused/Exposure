@@ -197,6 +197,9 @@ public class Exposure {
         public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_active",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 
+        public static final DataComponentType<Boolean> CAMERA_DISASSEMBLED = Register.dataComponentType("camera_disassembled",
+                arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
+
         public static final DataComponentType<Boolean> SELFIE_MODE = Register.dataComponentType("camera_selfie_mode",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));
 

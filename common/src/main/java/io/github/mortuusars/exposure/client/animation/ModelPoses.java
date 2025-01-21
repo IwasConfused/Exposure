@@ -14,11 +14,13 @@ public class ModelPoses {
         }
 
         model.head.xRot += 0.4f; // If we turn head down completely - arms will be too low.
-        if (arm == HumanoidArm.RIGHT) {
-            AnimationUtils.animateCrossbowHold(model.rightArm, model.leftArm, model.head, true);
-        } else if (arm == HumanoidArm.LEFT) {
-            AnimationUtils.animateCrossbowHold(model.rightArm, model.leftArm, model.head, false);
-        }
+        boolean rightHanded = arm == HumanoidArm.RIGHT;
+        ModelPart mainHand = rightHanded ? model.rightArm : model.leftArm;
+        ModelPart offHand = rightHanded ? model.leftArm : model.rightArm;
+        mainHand.yRot = (rightHanded ? -0.3F : 0.3F) + model.head.yRot;
+        offHand.yRot = (rightHanded ? 0.6F : -0.6F) + model.head.yRot;
+        mainHand.xRot = (float) (-Math.PI / 2) + model.head.xRot + 0.1F;
+        offHand.xRot = -1.5F + model.head.xRot;
         model.head.xRot += 0.3f;
 
         model.hat.copyFrom(model.head);
@@ -39,5 +41,23 @@ public class ModelPoses {
         if (undoArmBobbing) {
             AnimationUtils.bobModelPart(cameraArm, entity.tickCount, arm == HumanoidArm.LEFT ? 1.0F : -1.0F);
         }
+    }
+
+    public static void applyCameraDisassembledPose(HumanoidModel<?> model, LivingEntity entity, HumanoidArm arm) {
+        if (PlatformHelper.isModLoaded("realcamera")) {
+            return;
+        }
+
+        model.head.xRot += 0.4f; // If we turn head down completely - arms will be too low.
+        boolean rightHanded = arm == HumanoidArm.RIGHT;
+        ModelPart mainHand = rightHanded ? model.rightArm : model.leftArm;
+        ModelPart offHand = rightHanded ? model.leftArm : model.rightArm;
+        mainHand.yRot = (rightHanded ? -0.3F : 0.3F) + model.head.yRot;
+        offHand.yRot = (rightHanded ? 0.6F : -0.6F) + model.head.yRot;
+        mainHand.xRot = (float) (-Math.PI / 2) + model.head.xRot + 0.1F;
+        offHand.xRot = -1.5F + model.head.xRot;
+        model.head.xRot += 0.3f;
+
+        model.hat.copyFrom(model.head);
     }
 }

@@ -17,6 +17,15 @@
         "class": "io/github/mortuusars/exposure/neoforge/enumextension/CameraSelfieArmPose",
         "field": "ENUM_PARAMS"
       }
+    },
+    {
+      "enum": "net/minecraft/client/model/HumanoidModel$ArmPose",
+      "name": "exposure_CAMERA_DISASSEMBLED",
+      "constructor": "(ZLnet/neoforged/neoforge/client/IArmPoseTransformer;)V",
+      "parameters": {
+        "class": "io/github/mortuusars/exposure/neoforge/enumextension/CameraDisassembledArmPose",
+        "field": "ENUM_PARAMS"
+      }
     }
   ]
 }

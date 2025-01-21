@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.item;
 
+import io.github.mortuusars.exposure.neoforge.enumextension.CameraDisassembledArmPose;
 import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.neoforge.enumextension.CameraArmPose;
 import io.github.mortuusars.exposure.neoforge.enumextension.CameraSelfieArmPose;
@@ -19,15 +20,17 @@ public class CameraItemForgeClientExtensions implements IClientItemExtensions {
     }
 
     @Override
-    public HumanoidModel.@Nullable ArmPose getArmPose(@NotNull LivingEntity entityLiving,
-                                                      @NotNull InteractionHand hand, @NotNull ItemStack itemStack) {
-        if (entityLiving instanceof Player
-                && itemStack.getItem() instanceof CameraItem cameraItem
-                && cameraItem.isActive(itemStack)) {
-            if (cameraItem.isInSelfieMode(itemStack))
-                return CameraSelfieArmPose.value();
-            else
-                return CameraArmPose.value();
+    public HumanoidModel.@Nullable ArmPose getArmPose(@NotNull LivingEntity entity,
+                                                      @NotNull InteractionHand hand, @NotNull ItemStack stack) {
+        if (stack.getItem() instanceof CameraItem cameraItem) {
+            if (cameraItem.isActive(stack)) {
+                return cameraItem.isInSelfieMode(stack) ? CameraSelfieArmPose.value() : CameraArmPose.value();
+            }
+
+            if (cameraItem.isDisassembled(stack)) {
+                return CameraDisassembledArmPose.value();
+            }
+
         }
 
         return HumanoidModel.ArmPose.ITEM;
