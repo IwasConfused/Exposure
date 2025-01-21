@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.Image;
+import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
+import io.github.mortuusars.exposure.client.sound.instance.ShutterTickingSoundInstance;
 import io.github.mortuusars.exposure.client.task.ExposureRetrieveTask;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplate;
 import io.github.mortuusars.exposure.client.image.TrichromeImage;
@@ -24,13 +26,12 @@ import io.github.mortuusars.exposure.network.packet.client.*;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.util.ArrayList;
@@ -40,21 +41,13 @@ import java.util.List;
 public class ClientPacketsHandler {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public static void applyShader(ApplyShaderS2CP packet) {
-        if (packet.shouldRemove()) {
-            Minecraft.getInstance().gameRenderer.shutdownEffect();
-        } else {
-            Minecraft.getInstance().gameRenderer.loadEffect(packet.shaderLocation());
-        }
+    public static void applyShader(ShaderApplyS2CP packet) {
+        packet.shaderLocation().ifPresentOrElse(
+                shader -> Minecrft.get().gameRenderer.loadEffect(shader),
+                () -> Minecrft.get().gameRenderer.shutdownEffect());
     }
 
     public static void showExposure(ShowExposureCommandS2CP packet) {
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null) {
-            LOGGER.error("Cannot show exposures. Player is null.");
-            return;
-        }
-
         List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(packet.frames().stream().map(frame -> {
             ItemStack photographStack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
             photographStack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
@@ -63,9 +56,9 @@ public class ClientPacketsHandler {
 
         Collections.reverse(photographs);
 
-        @Nullable Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
+        Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
 
-        Minecraft.getInstance().setScreen(screen);
+        Minecrft.get().setScreen(screen);
     }
 
     public static void clearRenderingCache() {
@@ -104,17 +97,27 @@ public class ClientPacketsHandler {
                 .acceptAsync(ExposureUploader.upload(packet.id())));
     }
 
-    public static void startCapture(StartCaptureS2CP packet) {
+    public static void startCapture(CaptureStartS2CP packet) {
         Task<?> captureTask = CaptureTemplates.getOrThrow(packet.templateId()).createTask(packet.captureProperties());
         ExposureClient.cycles().enqueueTask(captureTask);
     }
 
-    public static void startDebugRGBCapture(StartDebugRGBCaptureS2CP packet) {
+    public static void startDebugRGBCapture(CaptureStartDebugRGBS2CP packet) {
         CaptureTemplate template = CaptureTemplates.getOrThrow(packet.templateId());
 
         for (CaptureProperties captureProperties : packet.captureProperties()) {
             Task<?> captureTask = template.createTask(captureProperties);
             ExposureClient.cycles().enqueueTask(captureTask);
+        }
+    }
+
+    public static void playShutterTickingSound(UniqueSoundPlayShutterTickingS2CP packet) {
+        Entity entity = Minecrft.player().level().getEntity(packet.entityId());
+        if (entity != null) {
+            SoundInstance instance = new ShutterTickingSoundInstance(entity, packet.cameraId(),
+                    Exposure.SoundEvents.SHUTTER_TICKING.get(), entity.getSoundSource(),
+                    packet.volume(), packet.pitch(), packet.durationTicks());
+            UniqueSoundManager.play(packet.cameraId().toString(), instance);
         }
     }
 }

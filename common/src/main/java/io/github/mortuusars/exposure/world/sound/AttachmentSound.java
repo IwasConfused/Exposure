@@ -46,11 +46,12 @@ public class AttachmentSound {
         this.removedPitch = 1f;
     }
 
-    public void playOnePerPlayer(Player player, boolean isRemoved) {
+    public void playSided(Player player, boolean isRemoved) {
         @Nullable Supplier<SoundEvent> sound = isRemoved ? getRemoved() : getInserted();
-        if (sound != null)
-            OnePerEntitySounds.play(null, player, sound.get(), SoundSource.PLAYERS,
-                    isRemoved ? getRemovedVolume() : getInsertedVolume(), isRemoved ? getRemovedPitch() : getInsertedPitch());
+        if (sound != null) {
+            Sound.playUniqueSided(Integer.toString(player.getId()), player, player, sound.get(), SoundSource.PLAYERS,
+                    isRemoved ? getRemovedVolume() : getInsertedVolume(), isRemoved ? getRemovedPitch() : getInsertedPitch(), 0F);
+        }
     }
 
     public @Nullable Supplier<SoundEvent> getInserted() {

@@ -16,9 +16,9 @@ import java.util.function.Function;
 
 public abstract class Camera {
     protected final CameraHolder holder;
-    protected final CameraID id;
+    protected final CameraId id;
 
-    public Camera(CameraHolder holder, CameraID id) {
+    public Camera(CameraHolder holder, CameraId id) {
         this.holder = holder;
         this.id = id;
     }
@@ -31,7 +31,7 @@ public abstract class Camera {
         return holder;
     }
 
-    public CameraID getId() {
+    public CameraId getId() {
         return id;
     }
 
@@ -49,7 +49,7 @@ public abstract class Camera {
         return map(CameraItem::isActive, false);
     }
 
-    public boolean idMatches(CameraID id) {
+    public boolean idMatches(CameraId id) {
         return this.id.equals(id);
     }
 
@@ -132,7 +132,7 @@ public abstract class Camera {
 
     public static class Empty extends Camera {
         public Empty(CameraHolder holder) {
-            super(holder, new CameraID(Util.NIL_UUID));
+            super(holder, new CameraId(Util.NIL_UUID));
         }
 
         @Override

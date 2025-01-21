@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.world.block.LightroomBlock;
 import io.github.mortuusars.exposure.world.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.commands.argument.*;
-import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.camera.component.CompositionGuide;
 import io.github.mortuusars.exposure.world.camera.component.FlashMode;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
@@ -191,8 +191,8 @@ public class Exposure {
     public static class DataComponents {
         // Camera State
 
-        public static final DataComponentType<CameraID> CAMERA_ID = Register.dataComponentType("camera_id",
-                arg -> arg.persistent(CameraID.CODEC).networkSynchronized(CameraID.STREAM_CODEC));
+        public static final DataComponentType<CameraId> CAMERA_ID = Register.dataComponentType("camera_id",
+                arg -> arg.persistent(CameraId.CODEC).networkSynchronized(CameraId.STREAM_CODEC));
 
         public static final DataComponentType<Boolean> CAMERA_ACTIVE = Register.dataComponentType("camera_active",
                 arg -> arg.persistent(Codec.BOOL).networkSynchronized(ByteBufCodecs.BOOL));

@@ -22,7 +22,7 @@ import io.github.mortuusars.exposure.world.item.part.Attachment;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
-import io.github.mortuusars.exposure.network.packet.client.StartDebugRGBCaptureS2CP;
+import io.github.mortuusars.exposure.network.packet.client.CaptureStartDebugRGBS2CP;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
@@ -112,7 +112,7 @@ public class DebugCommand {
             ExposureServer.frameHistory().add(player, frame);
         }
 
-        Packets.sendToClient(new StartDebugRGBCaptureS2CP(CaptureType.DEBUG_RGB, properties), player);
+        Packets.sendToClient(new CaptureStartDebugRGBS2CP(CaptureType.DEBUG_RGB, properties), player);
 
         context.getSource().sendSuccess(() -> Component.literal("Capturing RGB channels..."), true);
 

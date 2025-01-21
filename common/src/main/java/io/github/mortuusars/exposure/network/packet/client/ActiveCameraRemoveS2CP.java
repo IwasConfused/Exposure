@@ -10,15 +10,15 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public class RemoveActiveCameraS2CP implements IPacket {
-    public static final RemoveActiveCameraS2CP INSTANCE = new RemoveActiveCameraS2CP();
+public class ActiveCameraRemoveS2CP implements IPacket {
+    public static final ActiveCameraRemoveS2CP INSTANCE = new ActiveCameraRemoveS2CP();
 
-    public static final ResourceLocation ID = Exposure.resource("remove_active_camera");
-    public static final CustomPacketPayload.Type<RemoveActiveCameraS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
+    public static final ResourceLocation ID = Exposure.resource("active_camera_remove");
+    public static final CustomPacketPayload.Type<ActiveCameraRemoveS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 
-    public static final StreamCodec<FriendlyByteBuf, RemoveActiveCameraS2CP> STREAM_CODEC = StreamCodec.unit(INSTANCE);
+    public static final StreamCodec<FriendlyByteBuf, ActiveCameraRemoveS2CP> STREAM_CODEC = StreamCodec.unit(INSTANCE);
 
-    private RemoveActiveCameraS2CP() { }
+    private ActiveCameraRemoveS2CP() { }
 
     @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {

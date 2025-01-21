@@ -1,6 +1,6 @@
 package io.github.mortuusars.exposure.client.capture.action;
 
-import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.InterplanarProjectionFinishedC2SP;
 import io.github.mortuusars.exposure.util.TranslatableError;
@@ -8,19 +8,19 @@ import io.github.mortuusars.exposure.util.TranslatableError;
 import java.util.Optional;
 
 public class InterplanarProjectionAction implements CaptureAction {
-    private final CameraID cameraID;
+    private final CameraId cameraId;
 
-    public InterplanarProjectionAction(CameraID cameraID) {
-        this.cameraID = cameraID;
+    public InterplanarProjectionAction(CameraId cameraId) {
+        this.cameraId = cameraId;
     }
 
     @Override
     public void onSuccess() {
-        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(cameraID, true, Optional.empty()));
+        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(cameraId, true, Optional.empty()));
     }
 
     @Override
     public void onFailure(TranslatableError error) {
-        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(cameraID, false, Optional.of(error)));
+        Packets.sendToServer(new InterplanarProjectionFinishedC2SP(cameraId, false, Optional.of(error)));
     }
 }

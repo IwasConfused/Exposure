@@ -1,21 +1,21 @@
 package io.github.mortuusars.exposure.server;
 
-import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import net.minecraft.world.level.Level;
 
 import java.util.Optional;
 
 public class CameraInstance {
-    protected final CameraID cameraID;
+    protected final CameraId cameraId;
 
     private int deferredCooldownTicks = 0;
     private long projectionDeadline = -1;
     private ProjectionState projectionState = ProjectionState.IDLE;
     private Optional<TranslatableError> projectionError = Optional.empty();
 
-    public CameraInstance(CameraID cameraID) {
-        this.cameraID = cameraID;
+    public CameraInstance(CameraId cameraId) {
+        this.cameraId = cameraId;
     }
 
     // --

@@ -13,10 +13,10 @@ import io.github.mortuusars.exposure.client.capture.template.PreloadingDummyCapt
 import io.github.mortuusars.exposure.client.render.ItemFramePhotographRenderer;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
-import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
-import io.github.mortuusars.exposure.client.sound.OnePerEntitySoundsClient;
+import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
@@ -38,7 +38,7 @@ public class ClientEvents {
         boolean active = Minecrft.player().getActiveExposureCamera().isEmpty();
 
         EasingFunction.EASE_OUT_EXPO.ease(1);
-        ViewfinderRegistry.getOrThrow(Exposure.Items.CAMERA.get()).apply(new Camera(Minecrft.player(), CameraID.create()) {
+        ViewfinderRegistry.getOrThrow(Exposure.Items.CAMERA.get()).apply(new Camera(Minecrft.player(), CameraId.create()) {
             @Override
             public ItemStack getItemStack() {
                 return new ItemStack(Exposure.Items.CAMERA.get());
@@ -49,7 +49,7 @@ public class ClientEvents {
         CaptureTemplates.get(Exposure.resource("dummy"));
         CameraCaptureTemplate cameraCaptureTemplate = new CameraCaptureTemplate();
         ExposureClient.cycles().enqueueTask(new PreloadingDummyCaptureTemplate().createTask(null));
-        OnePerEntitySoundsClient.stop(Minecrft.player(), Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
+        UniqueSoundManager.stop(Minecrft.player().getScoreboardName(), Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
     }
 
     public static void disconnect() {

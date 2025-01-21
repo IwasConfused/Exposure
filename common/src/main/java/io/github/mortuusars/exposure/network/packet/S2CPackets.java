@@ -9,18 +9,18 @@ import java.util.List;
 public class S2CPackets {
     public static List<CustomPacketPayload.TypeAndCodec<? extends FriendlyByteBuf, ? extends CustomPacketPayload>> getDefinitions() {
         return List.of(
-                new CustomPacketPayload.TypeAndCodec<>(ApplyShaderS2CP.TYPE, ApplyShaderS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(ShaderApplyS2CP.TYPE, ShaderApplyS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ClearRenderingCacheS2CP.TYPE, ClearRenderingCacheS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(CreateChromaticExposureS2CP.TYPE, CreateChromaticExposureS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ExposureDataChangedS2CP.TYPE, ExposureDataChangedS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(PlayOnePerEntitySoundS2CP.TYPE, PlayOnePerEntitySoundS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(PlayOnePerEntityShutterTickingSoundS2CP.TYPE, PlayOnePerEntityShutterTickingSoundS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(UniqueSoundPlayS2CP.TYPE, UniqueSoundPlayS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(UniqueSoundPlayShutterTickingS2CP.TYPE, UniqueSoundPlayShutterTickingS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(StopOnePerEntitySoundS2CP.TYPE, StopOnePerEntitySoundS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(UniqueSoundStopS2CP.TYPE, UniqueSoundStopS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ExposureDataResponseS2CP.TYPE, ExposureDataResponseS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(RemoveActiveCameraS2CP.TYPE, RemoveActiveCameraS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(StartCaptureS2CP.TYPE, StartCaptureS2CP.STREAM_CODEC),
-                new CustomPacketPayload.TypeAndCodec<>(StartDebugRGBCaptureS2CP.TYPE, StartDebugRGBCaptureS2CP.STREAM_CODEC)
+                new CustomPacketPayload.TypeAndCodec<>(ActiveCameraRemoveS2CP.TYPE, ActiveCameraRemoveS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(CaptureStartS2CP.TYPE, CaptureStartS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(CaptureStartDebugRGBS2CP.TYPE, CaptureStartDebugRGBS2CP.STREAM_CODEC)
         );
     }
 }

@@ -11,8 +11,8 @@ import net.minecraft.world.item.ItemStack;
 public class CameraInHand extends Camera {
     protected final InteractionHand hand;
 
-    public CameraInHand(CameraHolder holder, CameraID cameraID, InteractionHand hand) {
-        super(holder, cameraID);
+    public CameraInHand(CameraHolder holder, CameraId cameraId, InteractionHand hand) {
+        super(holder, cameraId);
         this.hand = hand;
         if (!(holder instanceof LivingEntity)) {
             throw new IllegalStateException("Only LivingEntity can hold camera in hand."
@@ -46,7 +46,7 @@ public class CameraInHand extends Camera {
 
     public static class Empty extends CameraInHand {
         public Empty(CameraHolder holder) {
-            super(holder, new CameraID(Util.NIL_UUID), InteractionHand.MAIN_HAND);
+            super(holder, new CameraId(Util.NIL_UUID), InteractionHand.MAIN_HAND);
         }
 
         @Override

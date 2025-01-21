@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
 import io.github.mortuusars.exposure.world.camera.component.FocalRange;
@@ -23,14 +23,13 @@ import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.world.item.part.Shutter;
 import io.github.mortuusars.exposure.world.inventory.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.client.StartCaptureS2CP;
+import io.github.mortuusars.exposure.network.packet.client.CaptureStartS2CP;
 import io.github.mortuusars.exposure.network.packet.server.OpenCameraAttachmentsInCreativePacketC2SP;
 import io.github.mortuusars.exposure.server.CameraInstance;
 import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import io.github.mortuusars.exposure.world.level.LevelUtil;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
-import io.github.mortuusars.exposure.world.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.*;
 import io.github.mortuusars.exposure.world.sound.Sound;
 import net.minecraft.ChatFormatting;
@@ -175,9 +174,9 @@ public class CameraItem extends Item {
 
     // --
 
-    public CameraID getOrCreateID(ItemStack stack) {
+    public CameraId getOrCreateID(ItemStack stack) {
         if (!stack.has(Exposure.DataComponents.CAMERA_ID)) {
-            stack.set(Exposure.DataComponents.CAMERA_ID, CameraID.create());
+            stack.set(Exposure.DataComponents.CAMERA_ID, CameraId.create());
         }
         return stack.get(Exposure.DataComponents.CAMERA_ID);
     }
@@ -306,7 +305,7 @@ public class CameraItem extends Item {
                     ItemStack returnedStack = !currentAttachment.isEmpty() ? currentAttachment.getCopy() : otherStack;
                     access.set(returnedStack);
 
-                    attachment.sound().playOnePerPlayer(player, false);
+                    attachment.sound().playSided(player, false);
                     return true;
                 }
             }
@@ -366,7 +365,7 @@ public class CameraItem extends Item {
         if (level.isClientSide
                 || getShutter().isOpen(stack)
                 || Attachment.FILM.isEmpty(stack)
-                || !CameraInstances.canReleaseShutter(CameraID.ofStack(stack))) {
+                || !CameraInstances.canReleaseShutter(CameraId.ofStack(stack))) {
             return InteractionResultHolder.consume(stack);
         }
 
@@ -389,13 +388,13 @@ public class CameraItem extends Item {
 
             getShutter().open(holder, serverLevel, stack, shutterSpeed);
 
-            CameraID cameraID = getOrCreateID(stack);
+            CameraId cameraId = getOrCreateID(stack);
 
             String exposureId = ExposureIdentifier.createId(serverPlayer);
 
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
                     .setCameraHolder(holder)
-                    .setCameraID(cameraID)
+                    .setCameraID(cameraId)
                     .setShutterSpeed(CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
                     .setFilmType(film.getItem().getType())
                     .setFrameSize(film.getItem().getFrameSize(film.getItemStack()))
@@ -410,11 +409,10 @@ public class CameraItem extends Item {
             if (shutterSpeed.shouldCauseTickingSound() || captureProperties.projection().isPresent()) {
                 int duration = Math.max(shutterSpeed.getDurationTicks(), captureProperties.projection()
                         .map(l -> Config.Server.PROJECT_TIMEOUT_TICKS.get()).orElse(0));
-                OnePerEntitySounds.playShutterTickingSoundForAll(entity, cameraID,
-                        1f, 1f, duration);
+                Sound.playShutterTicking(entity, cameraId, duration);
             }
 
-            CameraInstances.createOrUpdate(cameraID, instance -> {
+            CameraInstances.createOrUpdate(cameraId, instance -> {
                 int cooldown = calculateCooldownAfterShot(stack, captureProperties);
                 instance.setDeferredCooldown(cooldown);
 
@@ -427,7 +425,7 @@ public class CameraItem extends Item {
 
             addNewFrame(serverLevel, captureProperties, holder, stack);
 
-            Packets.sendToClient(new StartCaptureS2CP(getCaptureType(stack), captureProperties), serverPlayer);
+            Packets.sendToClient(new CaptureStartS2CP(getCaptureType(stack), captureProperties), serverPlayer);
         }
 
         return InteractionResultHolder.consume(stack);
@@ -453,7 +451,8 @@ public class CameraItem extends Item {
                     : Exposure.SoundEvents.FILM_ADVANCE.get();
 
             float fullness = filmItem.getFullness(filmStack);
-            OnePerEntitySounds.play(null, holder.asEntity(), sound, SoundSource.PLAYERS, 1f, 0.85f + 0.2f * fullness);
+            String id = holder.asEntity().getId() + getOrCreateID(stack).uuid().toString();
+            Sound.playUnique(id, holder.asEntity(), sound, SoundSource.PLAYERS, 1f, 0.85f + 0.2f * fullness);
         });
     }
 

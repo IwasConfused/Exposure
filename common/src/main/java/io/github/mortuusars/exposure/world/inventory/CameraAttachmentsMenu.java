@@ -154,8 +154,9 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         Attachment<?> attachment = attachments.get(slotId);
         attachment.set(camera.getItemStack(), newStack);
 
-        if (player.level().isClientSide() && clientContentsInitialized)
-            attachment.sound().playOnePerPlayer(player, newStack.isEmpty());
+        if (!player.level().isClientSide() || clientContentsInitialized) {
+            attachment.sound().playSided(player, newStack.isEmpty());
+        }
 
         if (!player.level().isClientSide() && player.isCreative()) {
             // Fixes item not updating properly when not in "Inventory" tab of creative inventory

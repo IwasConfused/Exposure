@@ -4,7 +4,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.util.ExtraData;
 import io.github.mortuusars.exposure.data.ColorPalette;
-import io.github.mortuusars.exposure.world.camera.CameraID;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
@@ -30,7 +30,7 @@ public record CaptureProperties(String exposureId,
                                 Optional<ProjectionInfo> projection,
                                 Optional<ColorChannel> isolateChannel,
                                 Optional<Integer> cameraHolderEntityId,
-                                Optional<CameraID> cameraId,
+                                Optional<CameraId> cameraId,
                                 ExtraData extraData) {
 
     public static final ExtraData.Entry<Integer> LIGHT_LEVEL = new ExtraData.Entry<>("light_level", ExtraData::getInt, ExtraData::putInt);
@@ -49,7 +49,7 @@ public record CaptureProperties(String exposureId,
             ProjectionInfo.CODEC.optionalFieldOf("projection").forGetter(CaptureProperties::projection),
             ColorChannel.CODEC.optionalFieldOf("chromatic_channel").forGetter(CaptureProperties::isolateChannel),
             Codec.INT.optionalFieldOf("camera_holder_id").forGetter(CaptureProperties::cameraHolderEntityId),
-            CameraID.CODEC.optionalFieldOf("camera_id").forGetter(CaptureProperties::cameraId),
+            CameraId.CODEC.optionalFieldOf("camera_id").forGetter(CaptureProperties::cameraId),
             ExtraData.CODEC.optionalFieldOf("extra_data", new ExtraData()).forGetter(CaptureProperties::extraData)
     ).apply(instance, CaptureProperties::new));
 
@@ -67,7 +67,7 @@ public record CaptureProperties(String exposureId,
                     ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
-                    ByteBufCodecs.optional(CameraID.STREAM_CODEC).decode(buffer),
+                    ByteBufCodecs.optional(CameraId.STREAM_CODEC).decode(buffer),
                     ExtraData.STREAM_CODEC.decode(buffer));
         }
 
@@ -83,7 +83,7 @@ public record CaptureProperties(String exposureId,
             ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).encode(buffer, data.projection());
             ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.isolateChannel());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.cameraHolderEntityId());
-            ByteBufCodecs.optional(CameraID.STREAM_CODEC).encode(buffer, data.cameraId());
+            ByteBufCodecs.optional(CameraId.STREAM_CODEC).encode(buffer, data.cameraId());
             ExtraData.STREAM_CODEC.encode(buffer, data.extraData());
         }
     };
@@ -101,7 +101,7 @@ public record CaptureProperties(String exposureId,
         private @Nullable ProjectionInfo projectionInfo;
         private @Nullable ColorChannel chromaticChannel;
         private @Nullable Integer cameraHolderEntityID = null;
-        private @Nullable CameraID cameraID = null;
+        private @Nullable CameraId cameraId = null;
         private final ExtraData extraData = new ExtraData();
 
         public Builder(String exposureId) {
@@ -149,13 +149,13 @@ public record CaptureProperties(String exposureId,
             return this;
         }
 
-        public Builder setCameraID(@Nullable CameraID cameraID) {
-            this.cameraID = cameraID;
+        public Builder setCameraID(@Nullable CameraId cameraId) {
+            this.cameraId = cameraId;
             return this;
         }
 
-        public Builder setCameraID(Optional<CameraID> cameraID) {
-            this.cameraID = cameraID.orElse(null);
+        public Builder setCameraID(Optional<CameraId> cameraId) {
+            this.cameraId = cameraId.orElse(null);
             return this;
         }
 
@@ -196,7 +196,7 @@ public record CaptureProperties(String exposureId,
                     Optional.ofNullable(this.projectionInfo),
                     Optional.ofNullable(this.chromaticChannel),
                     Optional.ofNullable(this.cameraHolderEntityID),
-                    Optional.ofNullable(this.cameraID),
+                    Optional.ofNullable(this.cameraId),
                     this.extraData);
         }
     }
