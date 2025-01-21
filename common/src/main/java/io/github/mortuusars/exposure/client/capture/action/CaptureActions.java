@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.capture.action;
 
 import io.github.mortuusars.exposure.world.camera.CameraID;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import net.minecraft.client.CameraType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -39,8 +39,8 @@ public interface CaptureActions {
         return new FlashAction(photographer);
     }
 
-    static CaptureAction interplanarProjection(PhotographerEntity photographer, CameraID cameraID) {
-        return new InterplanarProjectionAction(photographer, cameraID);
+    static CaptureAction interplanarProjection(CameraID cameraID) {
+        return new InterplanarProjectionAction(cameraID);
     }
 
     static CaptureAction setCameraEntity(Entity viewEntity) {

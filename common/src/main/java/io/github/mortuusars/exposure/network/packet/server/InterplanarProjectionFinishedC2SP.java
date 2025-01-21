@@ -5,7 +5,6 @@ import io.github.mortuusars.exposure.world.camera.CameraID;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.util.TranslatableError;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -16,19 +15,16 @@ import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
-import java.util.UUID;
 
-public record InterplanarProjectionFinishedC2SP(UUID photographerEntityID,
-                                                CameraID cameraID,
-                                                boolean isSuccessful,
+public record InterplanarProjectionFinishedC2SP(CameraID cameraID,
+                                                boolean successful,
                                                 Optional<TranslatableError> error) implements IPacket {
-    public static final ResourceLocation ID = Exposure.resource("interplanar_projector_finished");
+    public static final ResourceLocation ID = Exposure.resource("interplanar_projection_finished");
     public static final Type<InterplanarProjectionFinishedC2SP> TYPE = new Type<>(ID);
 
     public static final StreamCodec<FriendlyByteBuf, InterplanarProjectionFinishedC2SP> STREAM_CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, InterplanarProjectionFinishedC2SP::photographerEntityID,
             CameraID.STREAM_CODEC, InterplanarProjectionFinishedC2SP::cameraID,
-            ByteBufCodecs.BOOL, InterplanarProjectionFinishedC2SP::isSuccessful,
+            ByteBufCodecs.BOOL, InterplanarProjectionFinishedC2SP::successful,
             ByteBufCodecs.optional(TranslatableError.STREAM_CODEC), InterplanarProjectionFinishedC2SP::error,
             InterplanarProjectionFinishedC2SP::new
     );
@@ -40,7 +36,7 @@ public record InterplanarProjectionFinishedC2SP(UUID photographerEntityID,
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        CameraInstances.ifPresent(cameraID, cameraInstance -> cameraInstance.setProjectionResult(player.level(), isSuccessful, error));
+        CameraInstances.ifPresent(cameraID, cameraInstance -> cameraInstance.setProjectionResult(player.level(), successful, error));
         return true;
     }
 }

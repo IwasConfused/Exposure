@@ -7,7 +7,6 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,12 +33,12 @@ public abstract class LocalPlayerMixin extends Player {
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void onTick(CallbackInfo ci) {
-        @Nullable Camera camera = activeExposureCamera();
-
         CameraClient.tick();
 
-        if (camera != null && !camera.isActive()) {
-            removeActiveExposureCamera();
-        }
+        getActiveExposureCamera().ifPresent(camera -> {
+            if (!camera.isActive()) {
+                removeActiveExposureCamera();
+            }
+        });
     }
 }

@@ -16,7 +16,7 @@ import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.frame.*;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.data.Lenses;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
@@ -32,6 +32,7 @@ import io.github.mortuusars.exposure.world.level.LevelUtil;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.world.sound.OnePerEntitySounds;
 import io.github.mortuusars.exposure.util.*;
+import io.github.mortuusars.exposure.world.sound.Sound;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.*;
@@ -193,35 +194,32 @@ public class CameraItem extends Item {
         return stack.getOrDefault(Exposure.DataComponents.CAMERA_ACTIVE, false);
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> activateInHand(PhotographerEntity photographer,
-                                                                      ItemStack stack, @NotNull InteractionHand hand) {
-        setActive(stack, true);
-
-        if (photographer instanceof LivingEntity) {
-            photographer.setActiveExposureCamera(new CameraInHand(photographer, getOrCreateID(stack), hand));
-        }
-
-        photographer.playCameraSound(getViewfinderOpenSound(), 0.35f, 0.9f, 0.2f);
-
-        photographer.asEntity().gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
-
-        if (photographer instanceof Player player && player.level().isClientSide) {
+    public @NotNull InteractionResultHolder<ItemStack> activateInHand(Player player, ItemStack stack, @NotNull InteractionHand hand) {
+        player.setActiveExposureCamera(new CameraInHand(player, getOrCreateID(stack), hand));
+        if (player.level().isClientSide) {
             Minecrft.releaseUseButton(); // Releasing use key to not take a shot immediately, if right click is still held.
         }
+        return activate(player, stack);
+    }
 
+    public @NotNull InteractionResultHolder<ItemStack> activate(CameraHolder holder, ItemStack stack) {
+        setActive(stack, true);
+        Entity entity = holder.asEntity();
+        Sound.play(entity, getViewfinderOpenSound(), entity.getSoundSource(), 0.35f, 0.9f, 0.2f);
+        entity.gameEvent(GameEvent.EQUIP);
         return InteractionResultHolder.consume(stack);
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> deactivate(PhotographerEntity photographer, ItemStack stack) {
+    public @NotNull InteractionResultHolder<ItemStack> deactivate(CameraHolder holder, ItemStack stack) {
         setActive(stack, false);
         CameraSetting.SELFIE_MODE.set(stack, false);
-        photographer.removeActiveExposureCamera();
-        photographer.playCameraSound(getViewfinderCloseSound(), 0.35f, 0.9f, 0.2f);
-        photographer.asEntity().gameEvent(GameEvent.EQUIP); // Sends skulk vibrations
+        Entity entity = holder.asEntity();
+        Sound.play(entity, getViewfinderCloseSound(), entity.getSoundSource(), 0.35f, 0.9f, 0.2f);
+        entity.gameEvent(GameEvent.EQUIP);
         return InteractionResultHolder.consume(stack);
     }
 
-    public int calculateCooldownAfterShot(ItemStack stack, PhotographerEntity photographer, CaptureProperties captureProperties) {
+    public int calculateCooldownAfterShot(ItemStack stack, CaptureProperties captureProperties) {
         if (captureProperties.projection().isPresent()) return PROJECT_COOLDOWN;
         if (captureProperties.flash()) return FLASH_COOLDOWN;
         return BASE_COOLDOWN;
@@ -273,7 +271,7 @@ public class CameraItem extends Item {
         if (action != ClickAction.SECONDARY) return false;
 
         if (getShutter().isOpen(stack)) {
-            playSound(player, player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f, 0);
+            player.playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f);
             player.displayClientMessage(Component.translatable("item.exposure.camera.camera_attachments.fail.shutter_open")
                     .withStyle(ChatFormatting.RED), true);
             return true;
@@ -299,8 +297,7 @@ public class CameraItem extends Item {
                     StoredItemStack currentAttachment = attachment.get(stack);
 
                     if (otherStack.getCount() > 1 && !currentAttachment.isEmpty()) {
-                        if (player.level().isClientSide())
-                            playSound(null, player, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f, 0);
+                        player.playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 0.9f, 1f);
                         return true; // Cannot swap when holding more than one item
                     }
 
@@ -325,7 +322,8 @@ public class CameraItem extends Item {
         getShutter().tick(player, serverLevel, stack);
 
         boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
-        if (isActive(stack) && (!isHolding || player.activeExposureCamera() == null)) {
+        boolean matchesActive = player.getActiveExposureCamera().map(camera -> camera.idMatches(getOrCreateID(stack))).orElse(false);
+        if (isActive(stack) && (!isHolding || !matchesActive)) {
             deactivate(player, stack);
         }
 
@@ -333,47 +331,37 @@ public class CameraItem extends Item {
             CameraInstance.ProjectionState state = instance.getProjectionState(level);
             switch (state) {
                 case SUCCESSFUL, FAILED, TIMED_OUT -> {
-                    handleProjectionResult(stack, player, serverLevel, state, instance.getProjectionError(level));
+                    handleProjectionResult(serverLevel, player, stack, state, instance.getProjectionError(level));
                     instance.stopWaitingForProjection();
                 }
             }
         });
-
-        // Tests entities in frame
-//         if (isActive(stack)) {
-//             List<LivingEntity> entitiesInFrame = getEntitiesInFrame(player, serverLevel, stack);
-//             entitiesInFrame.forEach(e -> {
-//                 e.addEffect(new MobEffectInstance(MobEffects.GLOWING, 2));
-//             });
-//         }
     }
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(@NotNull Level level, @NotNull Player player, @NotNull InteractionHand hand) {
-        return useAs(level, player, hand);
-    }
-
-    public @NotNull InteractionResultHolder<ItemStack> useAs(@NotNull Level level, PhotographerEntity photographer, InteractionHand hand) {
-        LivingEntity entity = (LivingEntity) photographer.asEntity();
-        ItemStack stack = entity.getItemInHand(hand);
+        ItemStack stack = player.getItemInHand(hand);
 
         if (hand == InteractionHand.MAIN_HAND
-                && entity.getOffhandItem().getItem() instanceof CameraItem offhandCameraItem
-                && offhandCameraItem.isActive(entity.getOffhandItem())) {
+                && player.getOffhandItem().getItem() instanceof CameraItem offhandCameraItem
+                && offhandCameraItem.isActive(player.getOffhandItem())) {
             return InteractionResultHolder.pass(stack);
         }
 
         if (!isActive(stack)) {
-            return photographer.asEntity() instanceof Player player && player.isSecondaryUseActive()
+            return player.isSecondaryUseActive()
                     ? openCameraAttachments(player, stack)
-                    : activateInHand(photographer, stack, hand);
+                    : activateInHand(player, stack, hand);
         }
 
-        return release(level, photographer, stack);
+        return release(player, stack);
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> release(Level level, PhotographerEntity photographer, ItemStack stack) {
-        photographer.playCameraSound(getReleaseButtonSound(), 0.3f, 1f, 0.1f);
+    public @NotNull InteractionResultHolder<ItemStack> release(CameraHolder holder, ItemStack stack) {
+        Entity entity = holder.asEntity();
+        Level level = entity.level();
+
+        Sound.playSided(entity, getReleaseButtonSound(), entity.getSoundSource(), 0.3f, 1f, 0.1f);
 
         if (level.isClientSide
                 || getShutter().isOpen(stack)
@@ -388,27 +376,25 @@ public class CameraItem extends Item {
             return InteractionResultHolder.consume(stack);
 
         if (level instanceof ServerLevel serverLevel) {
-            if (!(photographer.getExecutingPlayer() instanceof ServerPlayer serverPlayer)) {
-                Exposure.LOGGER.error("Cannot start capture: photographer '{}' does not have valid executing player.", photographer);
+            if (!(holder.getPlayerExecutingExposure() instanceof ServerPlayer serverPlayer)) {
+                Exposure.LOGGER.error("Cannot start capture: photographer '{}' does not have valid executing player.", holder);
                 return InteractionResultHolder.consume(stack);
             }
-
-            Entity entity = photographer.asEntity();
 
             int lightLevel = LevelUtil.getLightLevelAt(level, entity.blockPosition());
             boolean shouldFlashFire = shouldFlashFire(stack, lightLevel);
             ShutterSpeed shutterSpeed = CameraSetting.SHUTTER_SPEED.getOrDefault(stack);
 
-            boolean flashHasFired = shouldFlashFire && tryUseFlash(photographer, stack);
+            boolean flashHasFired = shouldFlashFire && tryUseFlash(entity, serverLevel, stack);
 
-            getShutter().open(photographer, serverLevel, stack, shutterSpeed);
+            getShutter().open(holder, serverLevel, stack, shutterSpeed);
 
             CameraID cameraID = getOrCreateID(stack);
 
-            String exposureId = ExposureIdentifier.createId(photographer.getExecutingPlayer());
+            String exposureId = ExposureIdentifier.createId(serverPlayer);
 
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
-                    .setPhotographer(photographer)
+                    .setCameraHolder(holder)
                     .setCameraID(cameraID)
                     .setShutterSpeed(CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
                     .setFilmType(film.getItem().getType())
@@ -424,14 +410,12 @@ public class CameraItem extends Item {
             if (shutterSpeed.shouldCauseTickingSound() || captureProperties.projection().isPresent()) {
                 int duration = Math.max(shutterSpeed.getDurationTicks(), captureProperties.projection()
                         .map(l -> Config.Server.PROJECT_TIMEOUT_TICKS.get()).orElse(0));
-                OnePerEntitySounds.playShutterTickingSoundForAll(photographer.asEntity(), cameraID,
+                OnePerEntitySounds.playShutterTickingSoundForAll(entity, cameraID,
                         1f, 1f, duration);
             }
 
             CameraInstances.createOrUpdate(cameraID, instance -> {
-                instance.setPhotographer(photographer);
-
-                int cooldown = calculateCooldownAfterShot(stack, photographer, captureProperties);
+                int cooldown = calculateCooldownAfterShot(stack, captureProperties);
                 instance.setDeferredCooldown(cooldown);
 
                 captureProperties.projection().ifPresent(fileLoading -> {
@@ -441,7 +425,7 @@ public class CameraItem extends Item {
 
             ExposureServer.exposureRepository().expect(serverPlayer, exposureId);
 
-            addNewFrame(serverLevel, captureProperties, photographer, stack);
+            addNewFrame(serverLevel, captureProperties, holder, stack);
 
             Packets.sendToClient(new StartCaptureS2CP(getCaptureType(stack), captureProperties), serverPlayer);
         }
@@ -453,12 +437,12 @@ public class CameraItem extends Item {
         return CaptureType.CAMERA;
     }
 
-    protected void onShutterOpen(PhotographerEntity photographer, ServerLevel serverLevel, ItemStack stack) {
+    protected void onShutterOpen(CameraHolder holder, ServerLevel serverLevel, ItemStack stack) {
 
     }
 
-    protected void onShutterClosed(PhotographerEntity photographer, ServerLevel serverLevel, ItemStack stack) {
-        if (photographer.asEntity() instanceof Player player) {
+    protected void onShutterClosed(CameraHolder holder, ServerLevel serverLevel, ItemStack stack) {
+        if (holder instanceof Player player) {
             int cooldown = CameraInstances.getOptional(stack).map(CameraInstance::getDeferredCooldown).orElse(BASE_COOLDOWN);
             player.getCooldowns().addCooldown(this, cooldown);
         }
@@ -469,7 +453,7 @@ public class CameraItem extends Item {
                     : Exposure.SoundEvents.FILM_ADVANCE.get();
 
             float fullness = filmItem.getFullness(filmStack);
-            OnePerEntitySounds.play(null, photographer.asEntity(), sound, SoundSource.PLAYERS, 1f, 0.85f + 0.2f * fullness);
+            OnePerEntitySounds.play(null, holder.asEntity(), sound, SoundSource.PLAYERS, 1f, 0.85f + 0.2f * fullness);
         });
     }
 
@@ -515,7 +499,7 @@ public class CameraItem extends Item {
             PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(slotIndex));
         }
 
-        playSound(player, player, Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), 0.9f, 0.9f, 0.2f);
+        Sound.play(player, Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), SoundSource.PLAYERS, 0.9f, 0.9f, 0.2f);
 
         return InteractionResultHolder.success(stack);
     }
@@ -531,8 +515,7 @@ public class CameraItem extends Item {
         };
     }
 
-    protected boolean tryUseFlash(PhotographerEntity photographer, ItemStack stack) {
-        Entity entity = photographer.asEntity();
+    protected boolean tryUseFlash(Entity entity, ServerLevel serverLevel, ItemStack stack) {
         Level level = entity.level();
         BlockPos playerHeadPos = entity.blockPosition().above();
         @Nullable BlockPos flashPos = null;
@@ -555,7 +538,8 @@ public class CameraItem extends Item {
         level.setBlock(flashPos, Exposure.Blocks.FLASH.get().defaultBlockState()
                 .setValue(FlashBlock.WATERLOGGED, level.getFluidState(flashPos)
                         .isSourceOfType(Fluids.WATER)), Block.UPDATE_ALL_IMMEDIATE);
-        playSound(null, entity, getFlashSound(), 1f, 1f, 0f);
+
+        Sound.play(entity, getFlashSound(), entity.getSoundSource());
 
         entity.gameEvent(GameEvent.PRIME_FUSE);
 
@@ -584,37 +568,37 @@ public class CameraItem extends Item {
 
     // --
 
-    public void addNewFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, ItemStack stack) {
+    public void addNewFrame(ServerLevel level, CaptureProperties captureProperties, CameraHolder holder, ItemStack stack) {
         List<LivingEntity> capturedEntities = captureProperties.projection().isEmpty()
-                ? getEntitiesInFrame(photographer, level, stack)
+                ? getEntitiesInFrame(holder, level, stack)
                 : Collections.emptyList();
 
-        capturedEntities.forEach(entity -> entityCaptured(photographer, stack, entity));
+        capturedEntities.forEach(entity -> entityCaptured(holder, stack, entity));
 
-        Frame frame = createFrame(level, captureProperties, photographer, capturedEntities, stack);
+        Frame frame = createFrame(level, captureProperties, holder, capturedEntities, stack);
         addFrameToFilm(stack, frame);
-        onFrameAdded(level, photographer, stack, frame);
+        onFrameAdded(level, holder, stack, frame);
     }
 
-    public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, PhotographerEntity photographer, List<LivingEntity> capturedEntities, ItemStack stack) {
+    public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, CameraHolder holder, List<LivingEntity> capturedEntities, ItemStack stack) {
         return Frame.create()
                 .setIdentifier(ExposureIdentifier.id(captureProperties.exposureId()))
                 .setType(captureProperties.filmType())
-                .setPhotographer(new Photographer(photographer))
+                .setPhotographer(new Photographer(holder))
                 .setEntitiesInFrame(capturedEntities.stream()
                         .limit(Exposure.MAX_ENTITIES_IN_FRAME)
-                        .map(entity -> EntityInFrame.of(photographer.asEntity(), entity, data -> {
+                        .map(entity -> EntityInFrame.of(holder.asEntity(), entity, data -> {
                             //TODO: addCustomEntityInFrameData event
                         }))
                         .toList())
                 .addExtraData(Frame.SHUTTER_SPEED, CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
                 .addExtraData(Frame.TIMESTAMP, UnixTimestamp.Seconds.now())
-                .updateExtraData(data -> addFrameExtraData(data, photographer, level, captureProperties, stack))
+                .updateExtraData(data -> addFrameExtraData(data, holder, level, captureProperties, stack))
                 .toImmutable();
     }
 
-    protected void addFrameExtraData(ExtraData data, PhotographerEntity photographer, ServerLevel level, CaptureProperties captureProperties, ItemStack stack) {
-        Entity cameraHolder = photographer.asEntity();
+    protected void addFrameExtraData(ExtraData data, CameraHolder holder, ServerLevel level, CaptureProperties captureProperties, ItemStack stack) {
+        Entity cameraHolder = holder.asEntity();
         boolean projecting = captureProperties.projection().isPresent();
 
         if (projecting) {
@@ -685,25 +669,28 @@ public class CameraItem extends Item {
         }, () -> Exposure.LOGGER.error("Cannot add frame: no film attachment is present."));
     }
 
-    public void onFrameAdded(ServerLevel level, PhotographerEntity photographer, ItemStack stack, Frame frame) {
-        ExposureServer.frameHistory().add(photographer.asEntity(), frame);
+    public void onFrameAdded(ServerLevel level, CameraHolder holder, ItemStack stack, Frame frame) {
+        ExposureServer.frameHistory().add(holder.asEntity(), frame);
 
-        if (photographer.getOwnerPlayer() instanceof ServerPlayer serverPlayer) {
-            serverPlayer.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);
-            //TODO: advancement trigger
-            //Exposure.CriteriaTriggers.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frame, entities);
-        }
+        holder.getPlayerAwardedForExposure()
+                .filter(player -> player instanceof ServerPlayer)
+                .ifPresent(player -> {
+                    ServerPlayer serverPlayer = (ServerPlayer) player;
+                    serverPlayer.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);
+                    //TODO: advancement trigger
+                    //Exposure.CriteriaTriggers.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frame, entities);
+                });
     }
 
-    public List<LivingEntity> getEntitiesInFrame(PhotographerEntity photographer, ServerLevel level, ItemStack stack) {
+    public List<LivingEntity> getEntitiesInFrame(CameraHolder cameraHolder, ServerLevel level, ItemStack stack) {
         float zoom = CameraSetting.ZOOM.getOrDefault(stack);
         double fov = getFocalRange(level.registryAccess(), stack).fovFromZoom(zoom) * getCropFactor();
 
-        return EntitiesInFrame.get(photographer.asEntity(), fov, isInSelfieMode(stack));
+        return EntitiesInFrame.get(cameraHolder.asEntity(), fov, isInSelfieMode(stack));
     }
 
-    protected void entityCaptured(PhotographerEntity photographer, ItemStack stack, LivingEntity entity) {
-        if (photographer.asEntity() instanceof ServerPlayer player && entity instanceof EnderMan enderMan) {
+    protected void entityCaptured(CameraHolder cameraHolder, ItemStack stack, LivingEntity entity) {
+        if (cameraHolder.asEntity() instanceof ServerPlayer player && entity instanceof EnderMan enderMan) {
             boolean lookingAtAngryEnderMan = player.equals(enderMan.getTarget()) && enderMan.isLookingAtMe(player);
 
             if (lookingAtAngryEnderMan) {
@@ -715,18 +702,20 @@ public class CameraItem extends Item {
         }
     }
 
-    public void handleProjectionResult(ItemStack stack, PhotographerEntity photographer, ServerLevel level,
+    public void handleProjectionResult(ServerLevel level, CameraHolder cameraHolder, ItemStack stack,
                                        CameraInstance.ProjectionState projectionState, Optional<TranslatableError> error) {
         StoredItemStack filter = Attachment.FILTER.get(stack);
         if (filter.isEmpty()) return;
         if (!(filter.getItem() instanceof InterplanarProjectorItem interplanarProjector)) return;
         if (!interplanarProjector.isConsumable(filter.getForReading())) return;
 
+        Entity entity = cameraHolder.asEntity();
+
         if (projectionState == CameraInstance.ProjectionState.FAILED) {
             ItemStack filterStack = filter.getCopy().transmuteCopy(Exposure.Items.BROKEN_INTERPLANAR_PROJECTOR.get());
             error.ifPresent(err -> filterStack.set(Exposure.DataComponents.INTERPLANAR_PROJECTOR_ERROR_CODE, err.code()));
             Attachment.FILTER.set(stack, filterStack);
-            playSound(null, photographer.asEntity(), Exposure.SoundEvents.BSOD.get(), 1f, 1f, 0);
+            Sound.play(entity, Exposure.SoundEvents.BSOD.get());
             return;
         }
 
@@ -735,11 +724,9 @@ public class CameraItem extends Item {
         Attachment.FILTER.set(stack, filterStack);
 
         if (projectionState == CameraInstance.ProjectionState.TIMED_OUT) {
-            photographer.playCameraSound(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.4f, 0.6f, 0f);
-            deactivate(photographer, stack);
+            Sound.play(entity, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), entity.getSoundSource(), 0.4f, 0.6f);
         } else if (projectionState == CameraInstance.ProjectionState.SUCCESSFUL) {
-            photographer.playCameraSound(Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), 0.8f, 1.1f, 0f);
-            Entity entity = photographer.asEntity();
+            Sound.play(entity, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), entity.getSoundSource(), 0.8f, 1.1f);
             for (int i = 0; i < 16; i++) {
                 level.sendParticles(ParticleTypes.PORTAL, entity.getX(), entity.getY() + 1.2, entity.getZ(), 2,
                         entity.getRandom().nextGaussian() * 0.3, entity.getRandom().nextGaussian() * 0.3, entity.getRandom().nextGaussian() * 0.3, 0.01);
@@ -748,13 +735,6 @@ public class CameraItem extends Item {
     }
 
     // --
-
-    public void playSound(@Nullable Player excludedPlayer, @NotNull Entity origin, SoundEvent sound,
-                          float volume, float pitch, float pitchVariety) {
-        if (pitchVariety > 0f)
-            pitch = pitch - (pitchVariety / 2f) + (origin.getRandom().nextFloat() * pitchVariety);
-        origin.level().playSound(excludedPlayer, origin, sound, SoundSource.PLAYERS, volume, pitch);
-    }
 
     protected int getMatchingSlotInInventory(Inventory inventory, ItemStack stack) {
         for (int i = 0; i < inventory.getContainerSize(); i++) {

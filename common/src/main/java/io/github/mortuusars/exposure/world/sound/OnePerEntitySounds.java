@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * This system is made to allow only one sound playing from a camera at a given time.
+ * This system allows only one sound playing from a camera at a given time.
  * Otherwise, when rapidly photographing, sounds (like film advancing) will play overlapping each other,
  * which doesn't sound good (and doesn't make sense either).
  */
@@ -34,14 +34,14 @@ public class OnePerEntitySounds {
                 soundEvent.getRange(1f) * 2);
     }
 
-    public static void stop(@Nullable Player excludedPlayer, Entity sourceEntity, SoundEvent soundEvent) {
-        if (!(sourceEntity.level() instanceof ServerLevel serverLevel)) {
-            OnePerEntitySoundsClient.stop(sourceEntity, soundEvent);
+    public static void stop(@Nullable Player excludedPlayer, Entity entity, SoundEvent soundEvent) {
+        if (!(entity.level() instanceof ServerLevel serverLevel)) {
+            OnePerEntitySoundsClient.stop(entity, soundEvent);
             return;
         }
 
-        Packets.sendToPlayersNear(new StopOnePerEntitySoundS2CP(sourceEntity.getUUID(), soundEvent),
-                serverLevel, (ServerPlayer)excludedPlayer, sourceEntity.getX(), sourceEntity.getY(), sourceEntity.getZ(),
+        Packets.sendToPlayersNear(new StopOnePerEntitySoundS2CP(entity.getId(), soundEvent),
+                serverLevel, (ServerPlayer)excludedPlayer, entity.getX(), entity.getY(), entity.getZ(),
                 soundEvent.getRange(1f) * 2);
     }
 
@@ -51,23 +51,22 @@ public class OnePerEntitySounds {
         }
     }
 
-    public static void stopForAllClients(Entity sourceEntity, SoundEvent soundEvent) {
-        if (!sourceEntity.level().isClientSide) {
-            Packets.sendToAllClients(new StopOnePerEntitySoundS2CP(sourceEntity.getUUID(), soundEvent));
+    public static void stopForAllClients(Entity entity, SoundEvent soundEvent) {
+        if (!entity.level().isClientSide) {
+            Packets.sendToAllClients(new StopOnePerEntitySoundS2CP(entity.getId(), soundEvent));
         }
     }
 
     public static void playShutterTickingSoundForAll(Entity entity, CameraID cameraID,
                                                      float volume, float pitch, int durationTicks) {
         if (!entity.level().isClientSide) {
-            Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(
-                    entity.getUUID(), cameraID, volume, pitch, durationTicks));
+            Packets.sendToAllClients(new PlayOnePerEntityShutterTickingSoundS2CP(entity.getId(), cameraID, volume, pitch, durationTicks));
         }
     }
 
-    public static void stopShutterTickingSoundForAll(Entity sourceEntity) {
-        if (!sourceEntity.level().isClientSide) {
-            Packets.sendToAllClients(new StopOnePerEntitySoundS2CP(sourceEntity.getUUID(),
+    public static void stopShutterTickingSoundForAll(Entity entity) {
+        if (!entity.level().isClientSide) {
+            Packets.sendToAllClients(new StopOnePerEntitySoundS2CP(entity.getId(),
                     Exposure.SoundEvents.SHUTTER_TICKING.get()));
         }
     }

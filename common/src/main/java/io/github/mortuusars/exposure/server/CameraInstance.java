@@ -1,18 +1,14 @@
 package io.github.mortuusars.exposure.server;
 
 import io.github.mortuusars.exposure.world.camera.CameraID;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.util.TranslatableError;
-import net.minecraft.Util;
 import net.minecraft.world.level.Level;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class CameraInstance {
     protected final CameraID cameraID;
 
-    private UUID lastPhotographerId = Util.NIL_UUID;
     private int deferredCooldownTicks = 0;
     private long projectionDeadline = -1;
     private ProjectionState projectionState = ProjectionState.IDLE;
@@ -20,16 +16,6 @@ public class CameraInstance {
 
     public CameraInstance(CameraID cameraID) {
         this.cameraID = cameraID;
-    }
-
-    // --
-
-    public Optional<PhotographerEntity> getLastPhotographer(Level level) {
-        return PhotographerEntity.fromUuid(level, lastPhotographerId);
-    }
-
-    public void setPhotographer(PhotographerEntity photographer) {
-        lastPhotographerId = photographer.asEntity().getUUID();
     }
 
     // --

@@ -14,12 +14,9 @@ import io.github.mortuusars.exposure.util.cycles.task.Task;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.capture.ProjectionInfo;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import net.minecraft.core.Holder;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-
-import java.util.UUID;
 
 public class PathCaptureTemplate implements CaptureTemplate {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -31,11 +28,9 @@ public class PathCaptureTemplate implements CaptureTemplate {
             return new EmptyTask<>();
         }
 
-        UUID photographerUUID = data.photographerEntityId().orElse(Minecrft.player().getUUID());
-        @Nullable PhotographerEntity photographer = PhotographerEntity.fromUuid(Minecrft.level(), photographerUUID).orElse(null);
-
-        if (photographer == null) {
-            LOGGER.error("Failed to create capture task: photographer cannot be obtained. '{}'", data);
+        int entityId =  data.cameraHolderEntityId().orElse(Minecrft.player().getId());
+        if (!(Minecrft.level().getEntity(entityId) instanceof CameraHolder cameraHolder)) {
+            LOGGER.error("Failed to create capture task: camera holder cannot be obtained. '{}'", data);
             return new EmptyTask<>();
         }
 
@@ -58,7 +53,7 @@ public class PathCaptureTemplate implements CaptureTemplate {
                         Modifier.brightness(brightnessStops),
                         chooseColorProcessor(data)))
                 .thenAsync(Palettizer.fromProjectionMode(projectionInfo.mode()).palettizeAndClose(palette.value()))
-                .thenAsync(convertToExposureData(palette, createExposureTag(photographer.getExecutingPlayer(), data, true)))
+                .thenAsync(convertToExposureData(palette, createExposureTag(cameraHolder.getPlayerExecutingExposure(), data, true)))
                 .acceptAsync(image -> ExposureUploader.upload(data.exposureId(), image))
                 .onError(err -> LOGGER.error(err.technical().getString()));
     }

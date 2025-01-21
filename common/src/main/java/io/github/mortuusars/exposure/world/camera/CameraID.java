@@ -21,4 +21,8 @@ public record CameraID(UUID uuid) {
     public static CameraID ofStack(ItemStack stack) {
         return stack.getOrDefault(Exposure.DataComponents.CAMERA_ID, new CameraID(Util.NIL_UUID));
     }
+
+    public boolean matches(ItemStack stack) {
+        return equals(stack.get(Exposure.DataComponents.CAMERA_ID));
+    }
 }

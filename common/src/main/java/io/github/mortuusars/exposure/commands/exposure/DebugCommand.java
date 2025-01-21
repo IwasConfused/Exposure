@@ -75,8 +75,8 @@ public class DebugCommand {
             Holder<ColorPalette> colorPalette = ColorPalettes.get(context.getSource().registryAccess(), paletteKey);
 
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
-                    .setPhotographer(player)
-                    .setCameraID(camera.getCameraID())
+                    .setCameraHolder(player)
+                    .setCameraID(camera.getId())
                     .setShutterSpeed(camera.getSetting(CameraSetting.SHUTTER_SPEED).orElse(null))
                     .setFilmType(ExposureType.BLACK_AND_WHITE)
                     .setFrameSize(camera.mapAttachment(Attachment.FILM, FilmItem::getFrameSize).orElse(null))

@@ -1,8 +1,9 @@
 package io.github.mortuusars.exposure.client.sound;
 
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.camera.CameraID;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.client.sound.instance.ShutterTimerTickingSoundInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.EntityBoundSoundInstance;
@@ -20,6 +21,7 @@ import java.util.*;
  * Because we are not using Holder of SoundEvent - SoundsEvents should be compared by their location, not directly.
  */
 public class OnePerEntitySoundsClient {
+    //TODO: use multimap
     private static final Map<Entity, Map<ResourceLocation, SoundInstance>> SOUNDS = new HashMap<>();
 
     public static void play(@NotNull Entity sourceEntity, SoundEvent soundEvent, SoundSource source, float volume, float pitch) {
@@ -31,6 +33,9 @@ public class OnePerEntitySoundsClient {
         if (previousInstance != null) {
             Minecraft.getInstance().getSoundManager().stop(previousInstance);
         }
+
+//        Table<String, ResourceLocation, SoundInstance> sounds = HashBasedTable.create();
+//        @Nullable SoundInstance instance = sounds.get("asd", soundEvent.getLocation());
 
         instances.put(soundEvent.getLocation(), soundInstance);
 
@@ -49,11 +54,11 @@ public class OnePerEntitySoundsClient {
         }
     }
 
-    public static void playShutterTicking(PhotographerEntity photographer, CameraID cameraID,
+    public static void playShutterTicking(Entity entity, CameraID cameraID,
                                           float volume, float pitch, int durationTicks) {
         SoundEvent soundEvent = Exposure.SoundEvents.SHUTTER_TICKING.get();
-        SoundInstance soundInstance = createShutterTickingSoundInstance(photographer, cameraID, soundEvent, volume, pitch, durationTicks);
-        Map<ResourceLocation, SoundInstance> instances = SOUNDS.computeIfAbsent(photographer.asEntity(), e -> new HashMap<>());
+        SoundInstance soundInstance = createShutterTickingSoundInstance(entity, cameraID, soundEvent, volume, pitch, durationTicks);
+        Map<ResourceLocation, SoundInstance> instances = SOUNDS.computeIfAbsent(entity, e -> new HashMap<>());
 
         @Nullable SoundInstance previousInstance = instances.get(soundEvent.getLocation());
         if (previousInstance != null) {
@@ -75,9 +80,8 @@ public class OnePerEntitySoundsClient {
         return new EntityBoundSoundInstance(soundEvent, source, volume, pitch, sourceEntity, sourceEntity.getRandom().nextLong());
     }
 
-    private static SoundInstance createShutterTickingSoundInstance(PhotographerEntity photographer, CameraID cameraID,
+    private static SoundInstance createShutterTickingSoundInstance(Entity entity, CameraID cameraID,
                                                                    SoundEvent soundEvent, float volume, float pitch, int durationTicks) {
-        return new ShutterTimerTickingSoundInstance(photographer, cameraID, soundEvent, SoundSource.PLAYERS,
-                volume, pitch, durationTicks);
+        return new ShutterTimerTickingSoundInstance(entity, cameraID, soundEvent, SoundSource.PLAYERS, volume, pitch, durationTicks);
     }
 }

@@ -2,22 +2,19 @@ package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.camera.CameraID;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
 import io.github.mortuusars.exposure.network.packet.IPacket;
 import io.github.mortuusars.exposure.client.sound.OnePerEntitySoundsClient;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.UUID;
-
-public record PlayOnePerEntityShutterTickingSoundS2CP(UUID photographerEntityID,
+public record PlayOnePerEntityShutterTickingSoundS2CP(int entityId,
                                                       CameraID cameraID,
                                                       float volume,
                                                       float pitch,
@@ -26,7 +23,7 @@ public record PlayOnePerEntityShutterTickingSoundS2CP(UUID photographerEntityID,
     public static final Type<PlayOnePerEntityShutterTickingSoundS2CP> TYPE = new Type<>(ID);
 
     public static final StreamCodec<RegistryFriendlyByteBuf, PlayOnePerEntityShutterTickingSoundS2CP> STREAM_CODEC = StreamCodec.composite(
-            UUIDUtil.STREAM_CODEC, PlayOnePerEntityShutterTickingSoundS2CP::photographerEntityID,
+            ByteBufCodecs.VAR_INT, PlayOnePerEntityShutterTickingSoundS2CP::entityId,
             CameraID.STREAM_CODEC, PlayOnePerEntityShutterTickingSoundS2CP::cameraID,
             ByteBufCodecs.FLOAT, PlayOnePerEntityShutterTickingSoundS2CP::volume,
             ByteBufCodecs.FLOAT, PlayOnePerEntityShutterTickingSoundS2CP::pitch,
@@ -41,9 +38,10 @@ public record PlayOnePerEntityShutterTickingSoundS2CP(UUID photographerEntityID,
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        PhotographerEntity.fromUuid(player.level(), photographerEntityID)
-                .ifPresent(photographer ->
-                        OnePerEntitySoundsClient.playShutterTicking(photographer, cameraID, volume, pitch, durationTicks));
+        Entity entity = player.level().getEntity(entityId);
+        if (entity != null) {
+            OnePerEntitySoundsClient.playShutterTicking(entity, cameraID, volume, pitch, durationTicks);
+        }
         return true;
     }
 }

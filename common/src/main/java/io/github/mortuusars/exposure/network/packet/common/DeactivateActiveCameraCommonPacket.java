@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.network.packet.common;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.world.camera.Camera;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.PacketFlow;
@@ -28,9 +29,10 @@ public class DeactivateActiveCameraCommonPacket implements IPacket {
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        player.ifActiveExposureCameraPresent((item, stack) -> item.deactivate(player, stack),
-                () -> Exposure.LOGGER.error("Cannot deactivate a camera: player '{}' does not have an active camera.",
-                        player.getScoreboardName()));
+        player.getActiveExposureCamera().filter(Camera::isActive).ifPresent(camera -> {
+            camera.map((item, stack) -> item.deactivate(camera.getHolder(), stack));
+            player.removeActiveExposureCamera();
+        });
         return true;
     }
 }

@@ -1,10 +1,11 @@
 package io.github.mortuusars.exposure.world.camera;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
+import net.minecraft.Util;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
@@ -14,27 +15,34 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class Camera {
-    protected final PhotographerEntity photographer;
-    protected final CameraID cameraID;
+    protected final CameraHolder holder;
+    protected final CameraID id;
 
-    public Camera(PhotographerEntity photographer, CameraID cameraID) {
-        this.photographer = photographer;
-        this.cameraID = cameraID;
-    }
-
-    public PhotographerEntity getPhotographer() {
-        return photographer;
-    }
-
-    public CameraID getCameraID() {
-        return cameraID;
+    public Camera(CameraHolder holder, CameraID id) {
+        this.holder = holder;
+        this.id = id;
     }
 
     public abstract ItemStack getItemStack();
 
+    // --
+
+    public CameraHolder getHolder() {
+        return holder;
+    }
+
+    public CameraID getId() {
+        return id;
+    }
+
+    // --
+
+    public void update() {
+
+    }
+
     public boolean isEmpty() {
-        ItemStack stack = getItemStack();
-        return stack.isEmpty() || !(stack.getItem() instanceof CameraItem);
+        return !(getItemStack().getItem() instanceof CameraItem);
     }
 
     public boolean isActive() {
@@ -42,7 +50,7 @@ public abstract class Camera {
     }
 
     public boolean idMatches(CameraID id) {
-        return cameraID.equals(id);
+        return this.id.equals(id);
     }
 
     public boolean isShutterOpen() {
@@ -50,8 +58,8 @@ public abstract class Camera {
     }
 
     public void release() {
-        ifPresent((item, stack) -> item.release(photographer.asEntity().level(), photographer, getItemStack()),
-                () -> Exposure.LOGGER.error("Cannot take a shot: camera is not active. Photographer: {}", photographer.asEntity()));
+        ifPresent((item, stack) -> item.release(getHolder(), getItemStack()),
+                () -> Exposure.LOGGER.error("Cannot take a shot: camera is not active. Camera Holder: {}", holder.asEntity()));
     }
 
     // --
@@ -118,5 +126,18 @@ public abstract class Camera {
             return setting.getOptional(getItemStack());
         }
         return Optional.empty();
+    }
+
+    // --
+
+    public static class Empty extends Camera {
+        public Empty(CameraHolder holder) {
+            super(holder, new CameraID(Util.NIL_UUID));
+        }
+
+        @Override
+        public ItemStack getItemStack() {
+            return ItemStack.EMPTY;
+        }
     }
 }

@@ -14,13 +14,10 @@ import io.github.mortuusars.exposure.util.cycles.task.EmptyTask;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
-
-import java.util.UUID;
 
 public class ExposeCaptureTemplate implements CaptureTemplate {
     private static final Logger LOGGER = LogUtils.getLogger();
@@ -32,27 +29,24 @@ public class ExposeCaptureTemplate implements CaptureTemplate {
             return new EmptyTask<>();
         }
 
-        UUID photographerUUID = data.photographerEntityId().orElse(Minecrft.player().getUUID());
-        @Nullable PhotographerEntity photographer = PhotographerEntity.fromUuidOrWrap(Minecrft.level(), photographerUUID, Minecrft.player()).orElse(null);
-
-        if (photographer == null) {
-            LOGGER.error("Failed to create capture task: photographer cannot be obtained. '{}'", data);
+        int entityId =  data.cameraHolderEntityId().orElse(Minecrft.player().getId());
+        if (!(Minecrft.level().getEntity(entityId) instanceof CameraHolder cameraHolder)) {
+            LOGGER.error("Failed to create capture task: camera holder cannot be obtained. '{}'", data);
             return new EmptyTask<>();
         }
 
-        Entity cameraHolder = photographer.asEntity();
+        Entity entity = cameraHolder.asEntity();
         float brightnessStops = data.shutterSpeed().orElse(ShutterSpeed.DEFAULT).getStopsDifference(ShutterSpeed.DEFAULT);
         Holder<ColorPalette> palette = data.colorPalette().orElse(ColorPalettes.getDefault(Minecrft.registryAccess()));
 
         return Capture.of(Capture.screenshot(),
-                        CaptureActions.optional(!photographer.getExecutingPlayer().equals(cameraHolder),
-                                () -> CaptureActions.setCameraEntity(cameraHolder)),
+                        CaptureActions.setCameraEntity(entity),
                         CaptureActions.optional(data.fovOverride(), fov -> CaptureActions.setFov(fov)),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
                         CaptureActions.disablePostEffect(),
                         CaptureActions.modifyGamma(brightnessStops),
-                        CaptureActions.optional(data.flash(), () -> CaptureActions.flash(cameraHolder)))
+                        CaptureActions.optional(data.flash(), () -> CaptureActions.flash(entity)))
                 .handleErrorAndGetResult(err -> LOGGER.error(err.technical().getString()))
                 .thenAsync(Modifier.chain(
                         Modifier.Crop.SQUARE_CENTER,
@@ -61,7 +55,7 @@ public class ExposeCaptureTemplate implements CaptureTemplate {
                         Modifier.brightness(brightnessStops),
                         chooseColorProcessor(data)))
                 .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette.value()))
-                .thenAsync(convertToExposureData(palette, createExposureTag(photographer.getExecutingPlayer(), data, false)))
+                .thenAsync(convertToExposureData(palette, createExposureTag(cameraHolder.getPlayerExecutingExposure(), data, false)))
                 .acceptAsync(image -> ExposureUploader.upload(data.exposureId(), image))
                 .onError(err -> LOGGER.error(err.technical().getString()));
     }

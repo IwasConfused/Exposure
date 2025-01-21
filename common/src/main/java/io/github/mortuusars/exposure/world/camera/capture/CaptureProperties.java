@@ -8,7 +8,7 @@ import io.github.mortuusars.exposure.world.camera.CameraID;
 import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import net.minecraft.core.*;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public record CaptureProperties(String exposureId,
@@ -30,7 +29,7 @@ public record CaptureProperties(String exposureId,
                                 boolean flash,
                                 Optional<ProjectionInfo> projection,
                                 Optional<ColorChannel> isolateChannel,
-                                Optional<UUID> photographerEntityId,
+                                Optional<Integer> cameraHolderEntityId,
                                 Optional<CameraID> cameraId,
                                 ExtraData extraData) {
 
@@ -49,7 +48,7 @@ public record CaptureProperties(String exposureId,
             Codec.BOOL.optionalFieldOf("flash", false).forGetter(CaptureProperties::flash),
             ProjectionInfo.CODEC.optionalFieldOf("projection").forGetter(CaptureProperties::projection),
             ColorChannel.CODEC.optionalFieldOf("chromatic_channel").forGetter(CaptureProperties::isolateChannel),
-            UUIDUtil.LENIENT_CODEC.optionalFieldOf("photographer_id").forGetter(CaptureProperties::photographerEntityId),
+            Codec.INT.optionalFieldOf("camera_holder_id").forGetter(CaptureProperties::cameraHolderEntityId),
             CameraID.CODEC.optionalFieldOf("camera_id").forGetter(CaptureProperties::cameraId),
             ExtraData.CODEC.optionalFieldOf("extra_data", new ExtraData()).forGetter(CaptureProperties::extraData)
     ).apply(instance, CaptureProperties::new));
@@ -67,7 +66,7 @@ public record CaptureProperties(String exposureId,
                     ByteBufCodecs.BOOL.decode(buffer),
                     ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).decode(buffer),
-                    ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC).decode(buffer),
+                    ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
                     ByteBufCodecs.optional(CameraID.STREAM_CODEC).decode(buffer),
                     ExtraData.STREAM_CODEC.decode(buffer));
         }
@@ -83,7 +82,7 @@ public record CaptureProperties(String exposureId,
             ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).encode(buffer, data.projection());
             ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.isolateChannel());
-            ByteBufCodecs.optional(UUIDUtil.STREAM_CODEC).encode(buffer, data.photographerEntityId());
+            ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.cameraHolderEntityId());
             ByteBufCodecs.optional(CameraID.STREAM_CODEC).encode(buffer, data.cameraId());
             ExtraData.STREAM_CODEC.encode(buffer, data.extraData());
         }
@@ -101,7 +100,7 @@ public record CaptureProperties(String exposureId,
         private boolean flash = false;
         private @Nullable ProjectionInfo projectionInfo;
         private @Nullable ColorChannel chromaticChannel;
-        private @Nullable UUID photographerEntityID = null;
+        private @Nullable Integer cameraHolderEntityID = null;
         private @Nullable CameraID cameraID = null;
         private final ExtraData extraData = new ExtraData();
 
@@ -144,14 +143,9 @@ public record CaptureProperties(String exposureId,
             return this;
         }
 
-        public Builder setPhotographer(@Nullable PhotographerEntity photographer) {
-            if (photographer == null) photographerEntityID = null;
-            else photographerEntityID = photographer.asEntity().getUUID();
-            return this;
-        }
-
-        public Builder setPhotographerId(@Nullable UUID photographerId) {
-            photographerEntityID = photographerId;
+        public Builder setCameraHolder(@Nullable CameraHolder holder) {
+            if (holder == null) cameraHolderEntityID = null;
+            else cameraHolderEntityID = holder.asEntity().getId();
             return this;
         }
 
@@ -201,7 +195,7 @@ public record CaptureProperties(String exposureId,
                     this.flash,
                     Optional.ofNullable(this.projectionInfo),
                     Optional.ofNullable(this.chromaticChannel),
-                    Optional.ofNullable(this.photographerEntityID),
+                    Optional.ofNullable(this.cameraHolderEntityID),
                     Optional.ofNullable(this.cameraID),
                     this.extraData);
         }

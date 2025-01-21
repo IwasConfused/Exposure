@@ -31,7 +31,10 @@ public class CameraClient {
     }
 
     public static void deactivate() {
-        Minecrft.player().ifActiveExposureCameraPresent((item, stack) -> item.deactivate(Minecrft.player(), stack));
+        Minecrft.player().getActiveExposureCamera().filter(Camera::isActive).ifPresent(camera -> {
+            camera.map((item, stack) -> item.deactivate(camera.getHolder(), stack));
+            Minecrft.player().removeActiveExposureCamera();
+        });
         Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
     }
 
@@ -65,12 +68,11 @@ public class CameraClient {
     // --
 
     public static void updateSelfieMode() {
-        @Nullable Camera camera = Minecrft.player().activeExposureCamera();
-        if (camera != null) {
+        Minecrft.player().getActiveExposureCamera().ifPresent(camera -> {
             boolean inSelfieMode = Minecrft.options().getCameraType() == CameraType.THIRD_PERSON_FRONT;
             if (CameraSetting.SELFIE_MODE.getOrDefault(camera.getItemStack()) != inSelfieMode) {
                 CameraClient.setSetting(CameraSetting.SELFIE_MODE, inSelfieMode);
             }
-        }
+        });
     }
 }

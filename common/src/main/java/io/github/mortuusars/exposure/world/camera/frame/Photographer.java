@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.world.camera.frame;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import io.github.mortuusars.exposure.world.entity.PhotographerEntity;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.Util;
 import net.minecraft.core.UUIDUtil;
@@ -38,8 +38,8 @@ public final class Photographer {
         this.uuid = uuid;
     }
 
-    public Photographer(PhotographerEntity photographerEntity) {
-        Entity owner = photographerEntity.getOwnerEntity();
+    public Photographer(CameraHolder cameraHolder) {
+        Entity owner = cameraHolder.getExposureAuthorEntity();
         this.name = owner instanceof Player ? owner.getScoreboardName() : EntityType.getKey(owner.getType()).toString();
         // UUID of non-player entities are not recorded because they are usually short-lived.
         this.uuid = owner instanceof Player ? owner.getUUID() : Util.NIL_UUID;

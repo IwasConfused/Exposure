@@ -21,7 +21,7 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
         if (!(entity instanceof Player player))
             return;
 
-        if (player.activeExposureCamera() instanceof CameraInHand camera) {
+        if (player.getActiveExposureCamera().orElse(null) instanceof CameraInHand camera) {
             HumanoidArm arm = camera.getHand() == InteractionHand.MAIN_HAND
                     ? Minecraft.getInstance().options.mainHand().get()
                     : Minecraft.getInstance().options.mainHand().get().getOpposite();
