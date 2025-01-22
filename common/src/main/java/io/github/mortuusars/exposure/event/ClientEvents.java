@@ -12,6 +12,7 @@ import io.github.mortuusars.exposure.client.capture.template.CaptureTemplates;
 import io.github.mortuusars.exposure.client.capture.template.PreloadingDummyCaptureTemplate;
 import io.github.mortuusars.exposure.client.render.ItemFramePhotographRenderer;
 import io.github.mortuusars.exposure.client.util.Minecrft;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
@@ -35,14 +36,14 @@ public class ClientEvents {
 
     private static void preloadStuffToFixLagSpikes() {
         ClientPacketsHandler.clearRenderingCache();
-        boolean active = Minecrft.player().getActiveExposureCamera().isEmpty();
+        boolean active = Minecrft.player().getActiveExposureCameraOptional().isEmpty();
 
         EasingFunction.EASE_OUT_EXPO.ease(1);
         ViewfinderRegistry.getOrThrow(Exposure.Items.CAMERA.get()).apply(new Camera(Minecrft.player(), CameraId.create()) {
             @Override
-            public ItemStack getItemStack() {
-                return new ItemStack(Exposure.Items.CAMERA.get());
-            }
+            public ItemStack getItemStack() { return new ItemStack(Exposure.Items.CAMERA.get()); }
+            @Override
+            public Packet createSyncPacket() { return null; }
         });
         CameraClient.removeViewfinder();
 

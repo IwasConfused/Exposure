@@ -35,7 +35,7 @@ public abstract class LocalPlayerMixin extends Player {
     private void onTick(CallbackInfo ci) {
         CameraClient.tick();
 
-        getActiveExposureCamera().ifPresent(camera -> {
+        getActiveExposureCameraOptional().ifPresent(camera -> {
             if (!camera.isActive()) {
                 removeActiveExposureCamera();
             }

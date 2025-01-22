@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
-import io.github.mortuusars.exposure.network.packet.common.DeactivateActiveCameraCommonPacket;
+import io.github.mortuusars.exposure.network.packet.common.ActiveCameraDeactivateCommonPacket;
 import net.minecraft.client.CameraType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +23,7 @@ public class CameraClient {
     }
 
     public static Optional<Camera> getActive() {
-        return Minecrft.player().getActiveExposureCamera();
+        return Minecrft.player().getActiveExposureCameraOptional();
     }
 
     public static boolean isActive() {
@@ -31,15 +31,15 @@ public class CameraClient {
     }
 
     public static void deactivate() {
-        Minecrft.player().getActiveExposureCamera().filter(Camera::isActive).ifPresent(camera -> {
-            camera.map((item, stack) -> item.deactivate(camera.getHolder(), stack));
+        Minecrft.player().getActiveExposureCameraOptional().ifPresent(camera -> {
+            camera.map((item, stack) -> item.deactivate(camera.getOwner(), stack));
             Minecrft.player().removeActiveExposureCamera();
         });
-        Packets.sendToServer(DeactivateActiveCameraCommonPacket.INSTANCE);
+        Packets.sendToServer(ActiveCameraDeactivateCommonPacket.INSTANCE);
     }
 
     public static <T> void setSetting(CameraSetting<T> setting, T value) {
-        Minecrft.player().getActiveExposureCamera().ifPresent(camera -> {
+        Minecrft.player().getActiveExposureCameraOptional().ifPresent(camera -> {
             setting.setAndSync(Minecrft.player(), value);
         });
     }
@@ -68,7 +68,7 @@ public class CameraClient {
     // --
 
     public static void updateSelfieMode() {
-        Minecrft.player().getActiveExposureCamera().ifPresent(camera -> {
+        Minecrft.player().getActiveExposureCameraOptional().ifPresent(camera -> {
             boolean inSelfieMode = Minecrft.options().getCameraType() == CameraType.THIRD_PERSON_FRONT;
             if (CameraSetting.SELFIE_MODE.getOrDefault(camera.getItemStack()) != inSelfieMode) {
                 CameraClient.setSetting(CameraSetting.SELFIE_MODE, inSelfieMode);

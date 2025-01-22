@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
-public record ShaderApplyS2CP(Optional<ResourceLocation> shaderLocation) implements IPacket {
+public record ShaderApplyS2CP(Optional<ResourceLocation> shaderLocation) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("shader_apply");
     public static final CustomPacketPayload.Type<ShaderApplyS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
     public static final StreamCodec<FriendlyByteBuf, ShaderApplyS2CP> STREAM_CODEC = StreamCodec.composite(

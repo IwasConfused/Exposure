@@ -30,7 +30,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
     public CameraAttachmentsMenu(int containerId, Inventory playerInventory, int cameraSlotIndex) {
         super(Exposure.MenuTypes.CAMERA.get(), containerId);
 
-        ItemStack cameraStack = playerInventory.items.get(cameraSlotIndex);
+        ItemStack cameraStack = cameraSlotIndex == 40 ? playerInventory.offhand.get(0) : playerInventory.items.get(cameraSlotIndex);
         Preconditions.checkState(cameraStack.getItem() instanceof CameraItem,
                 "Failed to open Camera Attachments. " + cameraStack + " is not a CameraItem.");
 
@@ -156,6 +156,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
 
         if (!player.level().isClientSide() || clientContentsInitialized) {
             attachment.sound().playSided(player, newStack.isEmpty());
+            camera.apply((item, stack) -> item.actionPerformed(stack, player.level()));
         }
 
         if (!player.level().isClientSide() && player.isCreative()) {

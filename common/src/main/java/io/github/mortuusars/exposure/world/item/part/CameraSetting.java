@@ -103,7 +103,7 @@ public record CameraSetting<T>(DataComponentType<T> component, T defaultValue) {
     }
 
     public void setAndSync(Player player, T value) {
-        player.getActiveExposureCamera().ifPresent(camera -> {
+        player.getActiveExposureCameraOptional().ifPresent(camera -> {
             set(camera.getItemStack(), value);
 
             RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), player.level().registryAccess());

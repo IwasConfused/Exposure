@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record CaptureStartDebugRGBS2CP(ResourceLocation templateId, List<CaptureProperties> captureProperties) implements IPacket {
+public record CaptureStartDebugRGBS2CP(ResourceLocation templateId, List<CaptureProperties> captureProperties) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("capture_start_debug_rgb");
     public static final Type<CaptureStartDebugRGBS2CP> TYPE = new Type<>(ID);
 

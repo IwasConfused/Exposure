@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.item.component.album.AlbumPage;
 import io.github.mortuusars.exposure.world.inventory.AlbumMenu;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -14,7 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record AlbumSyncNoteC2SP(int pageIndex, String text) implements IPacket {
+public record AlbumSyncNoteC2SP(int pageIndex, String text) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("album_update_note");
     public static final CustomPacketPayload.Type<AlbumSyncNoteC2SP> TYPE = new CustomPacketPayload.Type<>(ID);
 

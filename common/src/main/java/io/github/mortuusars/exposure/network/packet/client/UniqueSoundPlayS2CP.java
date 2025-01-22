@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -17,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public record UniqueSoundPlayS2CP(String id, int entityId, SoundEvent sound, SoundSource source,
-                                  float volume, float pitch) implements IPacket {
+                                  float volume, float pitch) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("unique_sound_play");
     public static final CustomPacketPayload.Type<UniqueSoundPlayS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 

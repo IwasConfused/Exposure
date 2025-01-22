@@ -45,6 +45,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -185,20 +186,32 @@ public class CameraItem extends Item {
         return CameraSetting.SELFIE_MODE.getOrDefault(stack);
     }
 
+    public boolean isActive(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.CAMERA_ACTIVE, false);
+    }
+
     public void setActive(ItemStack stack, boolean active) {
         stack.set(Exposure.DataComponents.CAMERA_ACTIVE, active);
     }
 
-    public boolean isActive(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.CAMERA_ACTIVE, false);
+    public boolean isDisassembled(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.CAMERA_DISASSEMBLED, false);
     }
 
     public void setDisassembled(ItemStack stack, boolean disassembled) {
         stack.set(Exposure.DataComponents.CAMERA_DISASSEMBLED, disassembled);
     }
 
-    public boolean isDisassembled(ItemStack stack) {
-        return stack.getOrDefault(Exposure.DataComponents.CAMERA_DISASSEMBLED, false);
+    public long getLastActionTime(ItemStack stack) {
+        return stack.getOrDefault(Exposure.DataComponents.CAMERA_LAST_ACTION_TIME, -1L);
+    }
+
+    public void setLastActionTime(ItemStack stack, long lastActionTime) {
+        stack.set(Exposure.DataComponents.CAMERA_LAST_ACTION_TIME, lastActionTime);
+    }
+
+    public void actionPerformed(ItemStack stack, Level level) {
+        setLastActionTime(stack, level.getGameTime());
     }
 
     public @NotNull InteractionResultHolder<ItemStack> activateInHand(Player player, ItemStack stack, @NotNull InteractionHand hand) {
@@ -209,18 +222,17 @@ public class CameraItem extends Item {
         return activate(player, stack);
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> activate(CameraHolder holder, ItemStack stack) {
+    public @NotNull InteractionResultHolder<ItemStack> activate(Entity entity, ItemStack stack) {
         setActive(stack, true);
-        Entity entity = holder.asEntity();
+        setDisassembled(stack, false);
         Sound.play(entity, getViewfinderOpenSound(), entity.getSoundSource(), 0.35f, 0.9f, 0.2f);
         entity.gameEvent(GameEvent.EQUIP);
         return InteractionResultHolder.consume(stack);
     }
 
-    public @NotNull InteractionResultHolder<ItemStack> deactivate(CameraHolder holder, ItemStack stack) {
+    public @NotNull InteractionResultHolder<ItemStack> deactivate(Entity entity, ItemStack stack) {
         setActive(stack, false);
         CameraSetting.SELFIE_MODE.set(stack, false);
-        Entity entity = holder.asEntity();
         Sound.play(entity, getViewfinderCloseSound(), entity.getSoundSource(), 0.35f, 0.9f, 0.2f);
         entity.gameEvent(GameEvent.EQUIP);
         return InteractionResultHolder.consume(stack);
@@ -329,7 +341,7 @@ public class CameraItem extends Item {
         getShutter().tick(player, serverLevel, stack);
 
         boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
-        boolean matchesActive = player.getActiveExposureCamera().map(camera -> camera.idMatches(getOrCreateID(stack))).orElse(false);
+        boolean matchesActive = player.getActiveExposureCameraOptional().map(camera -> camera.idMatches(getOrCreateID(stack))).orElse(false);
         if (isActive(stack) && (!isHolding || !matchesActive)) {
             deactivate(player, stack);
         }

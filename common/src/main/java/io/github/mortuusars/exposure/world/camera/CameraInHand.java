@@ -1,9 +1,12 @@
 package io.github.mortuusars.exposure.world.camera;
 
+import io.github.mortuusars.exposure.network.packet.Packet;
+import io.github.mortuusars.exposure.network.packet.client.ActiveCameraInHandSetS2CP;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.item.CameraItem;
 import net.minecraft.Util;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -11,18 +14,23 @@ import net.minecraft.world.item.ItemStack;
 public class CameraInHand extends Camera {
     protected final InteractionHand hand;
 
-    public CameraInHand(CameraHolder holder, CameraId cameraId, InteractionHand hand) {
-        super(holder, cameraId);
+    public CameraInHand(Entity owner, CameraId cameraId, InteractionHand hand) {
+        super(owner, cameraId);
         this.hand = hand;
-        if (!(holder instanceof LivingEntity)) {
+        if (!(owner instanceof LivingEntity)) {
             throw new IllegalStateException("Only LivingEntity can hold camera in hand."
-                    + EntityType.getKey(holder.asEntity().getType()) + " does snot have hands.");
+                    + EntityType.getKey(owner.getType()) + " does snot have hands.");
         }
     }
 
     @Override
     public ItemStack getItemStack() {
-        return ((LivingEntity) getHolder().asEntity()).getItemInHand(getHand());
+        return ((LivingEntity) getOwner()).getItemInHand(getHand());
+    }
+
+    @Override
+    public Packet createSyncPacket() {
+        return new ActiveCameraInHandSetS2CP(getOwner().getId(), getId(), getHand());
     }
 
     public InteractionHand getHand() {
@@ -31,22 +39,20 @@ public class CameraInHand extends Camera {
 
     // --
 
-    public static CameraInHand find(CameraHolder holder) {
-        if (holder instanceof LivingEntity entity) {
-            for (InteractionHand hand : InteractionHand.values()) {
-                ItemStack itemInHand = entity.getItemInHand(hand);
-                if (itemInHand.getItem() instanceof CameraItem cameraItem) {
-                    return new CameraInHand(holder, cameraItem.getOrCreateID(itemInHand), hand);
-                }
+    public static CameraInHand find(LivingEntity entity) {
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack itemInHand = entity.getItemInHand(hand);
+            if (itemInHand.getItem() instanceof CameraItem cameraItem) {
+                return new CameraInHand(entity, cameraItem.getOrCreateID(itemInHand), hand);
             }
         }
 
-        return new CameraInHand.Empty(holder);
+        return new CameraInHand.Empty(entity);
     }
 
     public static class Empty extends CameraInHand {
-        public Empty(CameraHolder holder) {
-            super(holder, new CameraId(Util.NIL_UUID), InteractionHand.MAIN_HAND);
+        public Empty(LivingEntity entity) {
+            super(entity, new CameraId(Util.NIL_UUID), InteractionHand.MAIN_HAND);
         }
 
         @Override

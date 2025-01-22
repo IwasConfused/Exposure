@@ -3,11 +3,13 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
+import io.github.mortuusars.exposure.world.sound.Sound;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -102,6 +104,7 @@ public class Viewfinder {
                     : CameraType.FIRST_PERSON;
 
             Minecrft.options().setCameraType(newCameraType);
+            Sound.playSided(Minecrft.player(), Exposure.SoundEvents.CAMERA_DIAL_CLICK.get());
             CameraClient.setSetting(CameraSetting.SELFIE_MODE, Minecraft.getInstance().options.getCameraType() == CameraType.THIRD_PERSON_FRONT);
             return true;
         }

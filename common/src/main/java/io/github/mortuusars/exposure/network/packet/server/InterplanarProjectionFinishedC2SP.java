@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.camera.CameraId;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public record InterplanarProjectionFinishedC2SP(CameraId cameraId,
                                                 boolean successful,
-                                                Optional<TranslatableError> error) implements IPacket {
+                                                Optional<TranslatableError> error) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("interplanar_projection_finished");
     public static final Type<InterplanarProjectionFinishedC2SP> TYPE = new Type<>(ID);
 

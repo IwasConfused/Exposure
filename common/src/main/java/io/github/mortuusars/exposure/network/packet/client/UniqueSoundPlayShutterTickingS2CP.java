@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.world.camera.CameraId;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -17,7 +17,7 @@ public record UniqueSoundPlayShutterTickingS2CP(int entityId,
                                                 CameraId cameraId,
                                                 float volume,
                                                 float pitch,
-                                                int durationTicks) implements IPacket {
+                                                int durationTicks) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("unique_sound_play_shutter_ticking");
     public static final Type<UniqueSoundPlayShutterTickingS2CP> TYPE = new Type<>(ID);
 

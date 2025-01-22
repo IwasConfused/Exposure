@@ -2,6 +2,9 @@ package io.github.mortuusars.exposure.mixin;
 
 import com.mojang.authlib.GameProfile;
 import io.github.mortuusars.exposure.event.ServerEvents;
+import io.github.mortuusars.exposure.network.Packets;
+import io.github.mortuusars.exposure.network.packet.client.ActiveCameraRemoveS2CP;
+import io.github.mortuusars.exposure.world.camera.Camera;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -12,6 +15,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+@SuppressWarnings("AddedMixinMembersNamePattern")
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin extends Player {
     public ServerPlayerMixin(Level level, BlockPos pos, float yRot, GameProfile gameProfile) {
@@ -26,5 +30,17 @@ public abstract class ServerPlayerMixin extends Player {
     @Inject(method = "tick", at = @At("RETURN"))
     private void onTick(CallbackInfo ci) {
         ServerEvents.playerTick(((ServerPlayer) (Object) this));
+    }
+
+    @Override
+    public void setActiveExposureCamera(Camera camera) {
+        super.setActiveExposureCamera(camera);
+        Packets.sendToAllClients(camera.createSyncPacket());
+    }
+
+    @Override
+    public void removeActiveExposureCamera() {
+        super.removeActiveExposureCamera();
+        Packets.sendToAllClients(new ActiveCameraRemoveS2CP(getId()));
     }
 }

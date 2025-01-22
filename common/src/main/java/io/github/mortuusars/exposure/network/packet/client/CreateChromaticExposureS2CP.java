@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public record CreateChromaticExposureS2CP(String id, List<ExposureIdentifier> layers) implements IPacket {
+public record CreateChromaticExposureS2CP(String id, List<ExposureIdentifier> layers) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("create_chromatic_exposure");
     public static final CustomPacketPayload.Type<CreateChromaticExposureS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 

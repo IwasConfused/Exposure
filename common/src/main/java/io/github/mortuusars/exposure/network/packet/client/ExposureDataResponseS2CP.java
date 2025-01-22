@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.network.packet.client;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.world.level.storage.RequestedPalettedExposure;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record ExposureDataResponseS2CP(String id, RequestedPalettedExposure result) implements IPacket {
+public record ExposureDataResponseS2CP(String id, RequestedPalettedExposure result) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("exposure_data_response");
     public static final Type<ExposureDataResponseS2CP> TYPE = new Type<>(ID);
 

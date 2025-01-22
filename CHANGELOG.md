@@ -11,6 +11,7 @@
 - Added ability to project from URL with Interplanar Projector
 - Changed how custom Lenses and Filters are defined.
 - Added mipmaps to exposures.
+- Player model now has slight animations for doing stuff with a camera. 
 
 - Added config option to change default exposure size.
 - Added config option to disable loading images from file with Interplanar Projector.

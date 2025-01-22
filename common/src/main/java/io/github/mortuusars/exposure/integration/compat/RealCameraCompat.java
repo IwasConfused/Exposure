@@ -6,6 +6,6 @@ import net.minecraft.world.entity.player.Player;
 
 public class RealCameraCompat {
     public static void init() {
-        DisableHelper.registerOr("renderModel", entity -> entity instanceof Player && Minecrft.player().getActiveExposureCamera().isPresent());
+        DisableHelper.registerOr("renderModel", entity -> entity instanceof Player && Minecrft.player().getActiveExposureCameraOptional().isPresent());
     }
 }

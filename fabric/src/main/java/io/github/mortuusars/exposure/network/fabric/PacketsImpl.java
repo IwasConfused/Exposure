@@ -2,9 +2,8 @@ package io.github.mortuusars.exposure.network.fabric;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.fabric.ExposureFabric;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.NotNull;
@@ -13,15 +12,15 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 public class PacketsImpl {
-    public static void sendToServer(IPacket packet) {
+    public static void sendToServer(Packet packet) {
         FabricC2SPackets.sendToServer(packet);
     }
 
-    public static void sendToClient(IPacket packet, ServerPlayer player) {
+    public static void sendToClient(Packet packet, ServerPlayer player) {
         ServerPlayNetworking.send(player, packet);
     }
 
-    public static void sendToClients(IPacket packet, Predicate<ServerPlayer> filter) {
+    public static void sendToClients(Packet packet, Predicate<ServerPlayer> filter) {
         if (ExposureFabric.server == null) {
             Exposure.LOGGER.error("Cannot send a packet to players. Server is not available.");
             return;
@@ -34,7 +33,7 @@ public class PacketsImpl {
         }
     }
 
-    public static void sendToAllClients(IPacket packet) {
+    public static void sendToAllClients(Packet packet) {
         if (ExposureFabric.server == null) {
             Exposure.LOGGER.error("Cannot send a packet to all players. Server is not available.");
             return;
@@ -45,7 +44,7 @@ public class PacketsImpl {
         }
     }
 
-    public static void sendToPlayersNear(IPacket packet, @NotNull ServerLevel level, @Nullable ServerPlayer excludedPlayer,
+    public static void sendToPlayersNear(Packet packet, @NotNull ServerLevel level, @Nullable ServerPlayer excludedPlayer,
                                          double x, double y, double z, double radius) {
         sendToClients(packet, player -> {
             if (player != excludedPlayer && player.level().dimension() == level.dimension()) {

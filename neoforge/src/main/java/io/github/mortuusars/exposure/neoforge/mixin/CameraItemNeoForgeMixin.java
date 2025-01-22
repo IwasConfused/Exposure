@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.neoforge.mixin;
 
 import io.github.mortuusars.exposure.world.item.CameraItem;
-import io.github.mortuusars.exposure.neoforge.item.CameraItemForgeClientExtensions;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
@@ -49,11 +48,5 @@ public abstract class CameraItemNeoForgeMixin extends Item implements IItemExten
     @Override
     public @NotNull UseAnim getUseAnimation(@NotNull ItemStack stack) {
         return UseAnim.CUSTOM;
-    }
-
-    @SuppressWarnings("removal")
-    @Override
-    public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-        consumer.accept(CameraItemForgeClientExtensions.INSTANCE);
     }
 }

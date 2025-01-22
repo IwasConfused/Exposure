@@ -1,13 +1,16 @@
 package io.github.mortuusars.exposure.world.camera;
 
+import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
-import net.minecraft.Util;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.slf4j.Logger;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -15,20 +18,23 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public abstract class Camera {
-    protected final CameraHolder holder;
+    private static final Logger LOGGER = LogUtils.getLogger();
+
+    protected final Entity owner;
     protected final CameraId id;
 
-    public Camera(CameraHolder holder, CameraId id) {
-        this.holder = holder;
+    public Camera(Entity owner, CameraId id) {
+        this.owner = owner;
         this.id = id;
     }
 
     public abstract ItemStack getItemStack();
+    public abstract Packet createSyncPacket();
 
     // --
 
-    public CameraHolder getHolder() {
-        return holder;
+    public Entity getOwner() {
+        return owner;
     }
 
     public CameraId getId() {
@@ -58,8 +64,13 @@ public abstract class Camera {
     }
 
     public void release() {
-        ifPresent((item, stack) -> item.release(getHolder(), getItemStack()),
-                () -> Exposure.LOGGER.error("Cannot take a shot: camera is not active. Camera Holder: {}", holder.asEntity()));
+        if (!(getOwner() instanceof CameraHolder holder)) {
+            LOGGER.error("Cannot release: owner is not a Camera Holder: {}", owner);
+            return;
+        }
+
+        ifPresent((item, stack) -> item.release(holder, getItemStack()),
+                () -> LOGGER.error("Cannot take a shot: camera is not active. Camera Holder: {}", owner));
     }
 
     // --
@@ -126,18 +137,5 @@ public abstract class Camera {
             return setting.getOptional(getItemStack());
         }
         return Optional.empty();
-    }
-
-    // --
-
-    public static class Empty extends Camera {
-        public Empty(CameraHolder holder) {
-            super(holder, new CameraId(Util.NIL_UUID));
-        }
-
-        @Override
-        public ItemStack getItemStack() {
-            return ItemStack.EMPTY;
-        }
     }
 }

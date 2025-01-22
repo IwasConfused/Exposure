@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.network.packet.server;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.item.AlbumItem;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
-public record AlbumSignC2SP(int slot, String title, String author) implements IPacket {
+public record AlbumSignC2SP(int slot, String title, String author) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("album_sign");
     public static final CustomPacketPayload.Type<AlbumSignC2SP> TYPE = new CustomPacketPayload.Type<>(ID);
 

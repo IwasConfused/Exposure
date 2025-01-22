@@ -50,7 +50,7 @@ public class FrameCounterButton extends ImageButton {
     }
 
     protected String createText() {
-        return Minecrft.player().getActiveExposureCamera().map(camera -> {
+        return Minecrft.player().getActiveExposureCameraOptional().map(camera -> {
             ItemStack filmStack = Attachment.FILM.get(camera.getItemStack()).getForReading();
             if (filmStack.isEmpty() || !(filmStack.getItem() instanceof FilmRollItem filmItem)) {
                 return "-";
@@ -63,7 +63,7 @@ public class FrameCounterButton extends ImageButton {
     }
 
     protected boolean cameraHasFilmRoll() {
-        return Minecrft.player().getActiveExposureCamera()
+        return Minecrft.player().getActiveExposureCameraOptional()
                 .map(camera -> Attachment.FILM.isPresent(camera.getItemStack()))
                 .orElse(false);
     }

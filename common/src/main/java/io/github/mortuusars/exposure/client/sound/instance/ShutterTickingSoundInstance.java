@@ -69,8 +69,8 @@ public class ShutterTickingSoundInstance extends EntityBoundSoundInstance {
                     isOnHotbar = true;
                 }
             }
-        } else if (entity instanceof LivingEntity && entity instanceof CameraHolder cameraHolder) {
-            CameraInHand cameraInHand = CameraInHand.find(cameraHolder);
+        } else if (entity instanceof LivingEntity livingEntity) {
+            CameraInHand cameraInHand = CameraInHand.find(livingEntity);
             if (!cameraInHand.isEmpty() && cameraInHand.idMatches(cameraId)) {
                 stack = cameraInHand.getItemStack();
             }

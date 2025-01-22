@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -13,7 +13,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 
-public record UniqueSoundStopS2CP(String id, SoundEvent sound) implements IPacket {
+public record UniqueSoundStopS2CP(String id, SoundEvent sound) implements Packet {
     public static final ResourceLocation ID = Exposure.resource("unique_sound_stop");
     public static final CustomPacketPayload.Type<UniqueSoundStopS2CP> TYPE = new CustomPacketPayload.Type<>(ID);
 

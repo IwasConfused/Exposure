@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.network.fabric;
 
 import io.github.mortuusars.exposure.network.packet.C2SPackets;
 import io.github.mortuusars.exposure.network.packet.CommonPackets;
-import io.github.mortuusars.exposure.network.packet.IPacket;
+import io.github.mortuusars.exposure.network.packet.Packet;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -19,22 +19,22 @@ public class FabricC2SPackets {
             PayloadTypeRegistry.playC2S().register(
                     (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
                     (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec().cast());
-            ServerPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<IPacket>) definition.type(), FabricC2SPackets::handleServerboundPacket);
+            ServerPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<Packet>) definition.type(), FabricC2SPackets::handleServerboundPacket);
         }
 
         for (var definition : CommonPackets.getDefinitions()) {
             PayloadTypeRegistry.playC2S().register(
                     (CustomPacketPayload.Type<CustomPacketPayload>) definition.type(),
                     (StreamCodec<FriendlyByteBuf, CustomPacketPayload>) definition.codec().cast());
-            ServerPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<IPacket>) definition.type(), FabricC2SPackets::handleServerboundPacket);
+            ServerPlayNetworking.registerGlobalReceiver((CustomPacketPayload.Type<Packet>) definition.type(), FabricC2SPackets::handleServerboundPacket);
         }
     }
 
-    private static <T extends IPacket> void handleServerboundPacket(T payload, ServerPlayNetworking.Context context) {
+    private static <T extends Packet> void handleServerboundPacket(T payload, ServerPlayNetworking.Context context) {
         payload.handle(PacketFlow.SERVERBOUND, context.player());
     }
 
-    public static void sendToServer(IPacket packet) {
+    public static void sendToServer(Packet packet) {
         ClientPlayNetworking.send(packet);
     }
 }
