@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NbtTransferringShapelessExtension implements ICraftingCategoryExtension<ComponentTransferringRecipe> {
+public class ComponentTransferringShapelessExtension implements ICraftingCategoryExtension<ComponentTransferringRecipe> {
     @Override
     public void setRecipe(RecipeHolder<ComponentTransferringRecipe> recipeHolder, IRecipeLayoutBuilder builder,
                           ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {

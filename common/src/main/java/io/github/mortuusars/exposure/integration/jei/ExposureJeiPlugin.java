@@ -10,12 +10,10 @@ import io.github.mortuusars.exposure.client.gui.screen.ItemRenameScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.integration.jei.category.PhotographPrintingCategory;
 import io.github.mortuusars.exposure.integration.jei.category.PhotographStackingCategory;
-import io.github.mortuusars.exposure.integration.jei.recipe.NbtTransferringShapelessExtension;
+import io.github.mortuusars.exposure.integration.jei.recipe.ComponentTransferringShapelessExtension;
 import io.github.mortuusars.exposure.integration.jei.recipe.PhotographPrintingJeiRecipe;
 import io.github.mortuusars.exposure.integration.jei.recipe.PhotographStackingJeiRecipe;
-import io.github.mortuusars.exposure.world.item.crafting.recipe.FilmDevelopingRecipe;
-import io.github.mortuusars.exposure.world.item.crafting.recipe.PhotographAgingRecipe;
-import io.github.mortuusars.exposure.world.item.crafting.recipe.PhotographCopyingRecipe;
+import io.github.mortuusars.exposure.world.item.crafting.recipe.ComponentTransferringRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.gui.handlers.IGuiContainerHandler;
@@ -85,9 +83,7 @@ public class ExposureJeiPlugin implements IModPlugin {
 
     @Override
     public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registration) {
-        registration.getCraftingCategory().addExtension(FilmDevelopingRecipe.class, new NbtTransferringShapelessExtension());
-        registration.getCraftingCategory().addExtension(PhotographCopyingRecipe.class, new NbtTransferringShapelessExtension());
-        registration.getCraftingCategory().addExtension(PhotographAgingRecipe.class, new NbtTransferringShapelessExtension());
+        registration.getCraftingCategory().addExtension(ComponentTransferringRecipe.class, new ComponentTransferringShapelessExtension());
     }
 
     @Override
