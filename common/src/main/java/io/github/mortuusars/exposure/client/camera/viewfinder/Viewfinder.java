@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.item.CameraItem;
 import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.world.sound.Sound;
 import net.minecraft.client.CameraType;
@@ -89,9 +90,7 @@ public class Viewfinder {
     }
 
     public boolean keyPressed(int key, int scanCode, int action) {
-        if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
-                && Minecrft.options().keyAttack.matches(key, scanCode)
-                && !(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen)) {
+        if (!canAttack() && Minecrft.options().keyAttack.matches(key, scanCode)) {
             return true;
         }
 
@@ -146,7 +145,7 @@ public class Viewfinder {
 
         if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) return false;
 
-        if (!Config.Common.CAMERA_VIEWFINDER_ATTACK.get() && Minecrft.options().keyAttack.matchesMouse(button))
+        if (!canAttack() && Minecrft.options().keyAttack.matchesMouse(button))
             return true; // Block attacks
 
         if (KeyboardHandler.getCameraControlsKey().matchesMouse(button)) {
@@ -160,6 +159,11 @@ public class Viewfinder {
         }
 
         return false;
+    }
+
+    private boolean canAttack() {
+        return Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
+                && !camera.map(CameraItem::isInSelfieMode).orElse(false); // Attacking in selfie mode has weird anim.
     }
 
     public boolean mouseScrolled(double amount) {
