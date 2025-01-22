@@ -723,20 +723,23 @@ public class CameraItem extends Item {
         }
     }
 
-    public void handleProjectionResult(ServerLevel level, CameraHolder cameraHolder, ItemStack stack,
+    public void handleProjectionResult(ServerLevel level, CameraHolder holder, ItemStack stack,
                                        CameraInstance.ProjectionState projectionState, Optional<TranslatableError> error) {
         StoredItemStack filter = Attachment.FILTER.get(stack);
         if (filter.isEmpty()) return;
         if (!(filter.getItem() instanceof InterplanarProjectorItem interplanarProjector)) return;
         if (!interplanarProjector.isConsumable(filter.getForReading())) return;
 
-        Entity entity = cameraHolder.asEntity();
+        Entity entity = holder.asEntity();
 
         if (projectionState == CameraInstance.ProjectionState.FAILED) {
             ItemStack filterStack = filter.getCopy().transmuteCopy(Exposure.Items.BROKEN_INTERPLANAR_PROJECTOR.get());
             error.ifPresent(err -> filterStack.set(Exposure.DataComponents.INTERPLANAR_PROJECTOR_ERROR_CODE, err.code()));
             Attachment.FILTER.set(stack, filterStack);
             Sound.play(entity, Exposure.SoundEvents.BSOD.get());
+            if (getShutter().isOpen(stack)) {
+                getShutter().close(holder, level, stack);
+            }
             return;
         }
 
