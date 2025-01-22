@@ -39,6 +39,11 @@ public class ShutterTickingSoundInstance extends EntityBoundSoundInstance {
     }
 
     @Override
+    public boolean canStartSilent() {
+        return true;
+    }
+
+    @Override
     public boolean canPlaySound() {
         return !this.entity.isSilent();
     }
