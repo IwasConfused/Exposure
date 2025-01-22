@@ -6,10 +6,10 @@ displayURL="${mod_page}"
 logoFile="${mod_id}_logo.png"
 
 [[mixins]]
-config="${mod_id}-common.mixins.json"
+config="exposure-common.mixins.json"
 
 [[mixins]]
-config="${mod_id}.neoforge.mixins.json"
+config="exposure-neoforge.mixins.json"
 
 [[mods]]
 modId="${mod_id}"
@@ -17,7 +17,6 @@ version="${mod_version}"
 displayName="${mod_name}"
 authors="${mod_authors}"
 description="${mod_description}"
-#enumExtensions="META-INF/enumextensions.json"
 
 [[dependencies.${mod_id}]]
 modId="neoforge"
