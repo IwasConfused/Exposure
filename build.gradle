@@ -85,7 +85,8 @@ subprojects {
         silentMojangMappingsLicense()
         runs {
             client {
-                vmArgs '-XX:+AllowEnhancedClassRedefinition', '-XX:HotswapAgent=core', '-Dmixin.debug.export=true'
+                vmArgs '-XX:+AllowEnhancedClassRedefinition', '-XX:HotswapAgent=core'
+//                , '-Dmixin.debug.export=true'
             }
         }
     }
