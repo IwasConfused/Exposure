@@ -93,22 +93,19 @@
     "sounds": [
       {
         "name": "minecraft:item/spyglass/use",
-        "volume": 0.65,
         "pitch": 1.15
       },
       {
         "name": "minecraft:item/spyglass/use",
-        "volume": 0.65,
         "pitch": 1.33
       },
       {
         "name": "minecraft:item/spyglass/use",
-        "volume": 0.65,
         "pitch": 1.4
       },
       {
         "name": "minecraft:item/spyglass/use",
-        "volume": 0.65,
+        "volume": 0.85,
         "pitch": 1.55
       }
     ]

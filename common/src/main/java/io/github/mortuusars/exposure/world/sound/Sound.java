@@ -25,8 +25,8 @@ public class Sound {
         play(level, x, y, z, sound ,source, volume, pitch, 0F);
     }
 
-    public static void play(Level level, double x, double y, double z, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
+    public static void play(Level level, double x, double y, double z, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariability) {
+        pitch = vary(pitch, pitchVariability);
         level.playSound(null, x, y, z, sound, source, volume, pitch);
     }
 
@@ -42,8 +42,8 @@ public class Sound {
         play(entity, sound, source, volume, pitch, 0F);
     }
 
-    public static void play(Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
+    public static void play(Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariability) {
+        pitch = vary(pitch, pitchVariability);
         entity.level().playSound(null, entity, sound, source, volume, pitch);
     }
 
@@ -57,26 +57,30 @@ public class Sound {
         playSided(player, x, y, z, sound, source, volume, pitch, 0F);
     }
 
-    public static void playSided(Player player, double x, double y, double z, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
+    public static void playSided(Player player, double x, double y, double z, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariability) {
+        pitch = vary(pitch, pitchVariability);
         player.level().playSound(player, x, y, z, sound, source, volume, pitch);
     }
 
-    public static void playSided(Player player, Entity entity, SoundEvent sound) {
-        playSided(player, entity, sound, entity.getSoundSource(), 1F, 1F, 0F);
-    }
+//    public static void playSided(Player player, Entity entity, SoundEvent sound) {
+//        playSided(player, entity, sound, entity.getSoundSource(), 1F, 1F, 0F);
+//    }
+//
+//    public static void playSided(Player player, Entity entity, SoundEvent sound, SoundSource source) {
+//        playSided(player, entity, sound, source, 1F, 1F, 0F);
+//    }
+//
+//    public static void playSided(Player player, Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch) {
+//        playSided(player, entity, sound, source, volume, pitch, 0F);
+//    }
+//
+//    public static void playSided(Player player, Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariability) {
+//        pitch = vary(pitch, pitchVariability);
+//        player.level().playSound(player, entity, sound, source, volume, pitch);
+//    }
 
-    public static void playSided(Player player, Entity entity, SoundEvent sound, SoundSource source) {
-        playSided(player, entity, sound, source, 1F, 1F, 0F);
-    }
-
-    public static void playSided(Player player, Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch) {
-        playSided(player, entity, sound, source, volume, pitch, 0F);
-    }
-
-    public static void playSided(Player player, Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
-        player.level().playSound(player, entity, sound, source, volume, pitch);
+    public static void playSided(Entity entity, SoundEffect sound) {
+        playSided(entity, sound.get(), entity.getSoundSource(), sound.volume(), sound.pitch(), sound.pitchVariability());
     }
 
     public static void playSided(Entity entity, SoundEvent sound) {
@@ -88,20 +92,20 @@ public class Sound {
     }
 
     public static void playSided(Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch) {
-        if (entity instanceof Player player) {
-            playSided(player, entity, sound, source, volume, pitch, 0F);
-        } else {
-            play(entity, sound, source, volume, pitch, 0F);
-        }
+        playSided(entity, sound, source, volume, pitch, 0F);
     }
 
-    public static void playSided(Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
+    public static void playSided(Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch, float pitchVariability) {
+        pitch = vary(pitch, pitchVariability);
         @Nullable Player player = entity instanceof Player ? ((Player) entity) : null;
         entity.level().playSound(player, entity, sound, source, volume, pitch);
     }
 
     // --
+
+    public static void playUnique(String id, Entity entity, SoundEffect sound, SoundSource source) {
+        playUnique(id, entity, sound.get(), source, sound.volume(), sound.pitch(), sound.pitchVariability());
+    }
 
     public static void playUnique(String id, Entity entity, SoundEvent sound, SoundSource source) {
         playUnique(id, entity, sound, source, 1F, 1F, 0F);
@@ -112,17 +116,21 @@ public class Sound {
     }
 
     public static void playUnique(String id, Entity entity, SoundEvent sound, SoundSource source,
-                                  float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
+                                  float volume, float pitch, float pitchVariability) {
+        pitch = vary(pitch, pitchVariability);
         if (entity.level() instanceof ServerLevel serverLevel) {
             UniqueSoundPlayS2CP packet = new UniqueSoundPlayS2CP(id, entity.getId(), sound, source, volume, pitch);
             Packets.sendToPlayersNear(packet, serverLevel, null, entity, sound.getRange(1f) * 4);
         }
     }
 
+    public static void playUniqueSided(String id, Player player, Entity entity, SoundEffect sound, SoundSource source) {
+        playUniqueSided(id, player, entity, sound.get(), source, sound.volume(), sound.pitch(), sound.pitchVariability());
+    }
+
     public static void playUniqueSided(String id, Player player, Entity entity, SoundEvent sound, SoundSource source,
-                                       float volume, float pitch, float pitchVariety) {
-        pitch = vary(pitch, pitchVariety);
+                                       float volume, float pitch, float pitchVariability) {
+        pitch = vary(pitch, pitchVariability);
         if (player.level() instanceof ServerLevel serverLevel) {
             UniqueSoundPlayS2CP packet = new UniqueSoundPlayS2CP(id, entity.getId(), sound, source, volume, pitch);
             Packets.sendToPlayersNear(packet, serverLevel, ((ServerPlayer) player), entity, sound.getRange(1f) * 4);

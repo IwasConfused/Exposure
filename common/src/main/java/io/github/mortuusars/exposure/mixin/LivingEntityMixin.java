@@ -19,7 +19,7 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "getMaxHeadRotationRelativeToBody", at = @At("RETURN"), cancellable = true)
     private void getMaxHeadRotation(CallbackInfoReturnable<Float> cir) {
         if (this instanceof CameraOperator operator && operator.getActiveExposureCamera() != null) {
-            cir.setReturnValue(Math.min(cir.getReturnValue(), 30));
+            cir.setReturnValue(Math.min(cir.getReturnValue(), 20));
         }
     }
 }

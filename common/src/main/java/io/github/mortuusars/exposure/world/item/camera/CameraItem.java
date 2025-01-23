@@ -15,7 +15,6 @@ import io.github.mortuusars.exposure.world.camera.frame.*;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
-import io.github.mortuusars.exposure.world.entity.CameraOperator;
 import io.github.mortuusars.exposure.world.item.FilmItem;
 import io.github.mortuusars.exposure.world.item.FilmRollItem;
 import io.github.mortuusars.exposure.world.item.InterplanarProjectorItem;
@@ -72,7 +71,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Supplier;
 
 public class CameraItem extends Item {
     public static final int BASE_COOLDOWN = 2;
@@ -328,7 +326,7 @@ public class CameraItem extends Item {
                     ItemStack returnedStack = !currentAttachment.isEmpty() ? currentAttachment.getCopy() : otherStack;
                     access.set(returnedStack);
 
-                    attachment.sound().playSided(player, false);
+                    attachment.playInsertSoundSided(player);
                     return true;
                 }
             }

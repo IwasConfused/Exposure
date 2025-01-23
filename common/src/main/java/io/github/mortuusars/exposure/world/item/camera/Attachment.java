@@ -1,49 +1,76 @@
 package io.github.mortuusars.exposure.world.item.camera;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.sound.AttachmentSound;
 import io.github.mortuusars.exposure.world.item.FilmRollItem;
 import io.github.mortuusars.exposure.world.item.component.StoredItemStack;
+import io.github.mortuusars.exposure.world.sound.Sound;
+import io.github.mortuusars.exposure.world.sound.SoundEffect;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.function.*;
 
 /**
  * ItemStacks gotten from this class should NOT be modified under any circumstances.
+ * Copy ItemStack and set with {@link Attachment#set(ItemStack, ItemStack)}.
  */
 public record Attachment<T extends Item>(ResourceLocation id,
                                          DataComponentType<StoredItemStack> component,
                                          Predicate<ItemStack> itemPredicate,
                                          Class<T> itemType,
-                                         AttachmentSound sound) {
+                                         Optional<SoundEffect> insertedSound,
+                                         Optional<SoundEffect> removedSound) {
     public static final Attachment<FilmRollItem> FILM = new Attachment<>(
             Exposure.resource("film"),
             Exposure.DataComponents.FILM,
             stack -> stack.getItem() instanceof FilmRollItem,
             FilmRollItem.class,
-            AttachmentSound.FILM);
+            new SoundEffect(Exposure.SoundEvents.FILM_ADVANCE, 0.9F, 1F),
+            new SoundEffect(Exposure.SoundEvents.FILM_REMOVED, 0.7F, 1F));
     public static final Attachment<Item> FLASH = new Attachment<>(
             Exposure.resource("flash"),
             Exposure.DataComponents.FLASH,
             stack -> stack.is(Exposure.Tags.Items.FLASHES),
             Item.class,
-            AttachmentSound.FLASH);
+            new SoundEffect(Exposure.SoundEvents.CAMERA_GENERIC_CLICK, 0.6F, 1.15F),
+            new SoundEffect(Exposure.SoundEvents.CAMERA_GENERIC_CLICK, 0.35F, 0.95F));
     public static final Attachment<Item> LENS = new Attachment<>(
             Exposure.resource("lens"),
             Exposure.DataComponents.LENS,
             stack -> stack.is(Exposure.Tags.Items.LENSES),
             Item.class,
-            AttachmentSound.LENS);
+            new SoundEffect(Exposure.SoundEvents.LENS_INSERT),
+            new SoundEffect(Exposure.SoundEvents.LENS_REMOVE));
     public static final Attachment<Item> FILTER = new Attachment<>(
             Exposure.resource("filter"),
             Exposure.DataComponents.FILTER,
             stack -> stack.is(Exposure.Tags.Items.FILTERS),
             Item.class,
-            AttachmentSound.FILTER);
+            new SoundEffect(Exposure.SoundEvents.FILTER_INSERT),
+            new SoundEffect(Exposure.SoundEvents.FILTER_INSERT, 0.5F));
+
+    public Attachment(ResourceLocation id,
+                      DataComponentType<StoredItemStack> component,
+                      Predicate<ItemStack> itemPredicate,
+                      Class<T> itemType,
+                      SoundEffect insertedSound,
+                      SoundEffect removedSound) {
+        this(id, component, itemPredicate, itemType, Optional.of(insertedSound), Optional.of(removedSound));
+    }
+
+    public Attachment(ResourceLocation id,
+                      DataComponentType<StoredItemStack> component,
+                      Predicate<ItemStack> itemPredicate,
+                      Class<T> itemType) {
+        this(id, component, itemPredicate, itemType, Optional.empty(), Optional.empty());
+    }
 
     public boolean matches(ItemStack stack) {
         return itemPredicate.test(stack);
@@ -146,6 +173,16 @@ public record Attachment<T extends Item>(ResourceLocation id,
             stack.set(component, new StoredItemStack(attachment));
         }
         return this;
+    }
+
+    public void playInsertSoundSided(Player player) {
+        insertedSound().ifPresent(sound ->
+                Sound.playUniqueSided(Integer.toString(player.getId()), player, player, sound, SoundSource.PLAYERS));
+    }
+
+    public void playRemoveSoundSided(Player player) {
+        removedSound().ifPresent(sound ->
+                Sound.playUniqueSided(Integer.toString(player.getId()), player, player, sound, SoundSource.PLAYERS));
     }
 
     @Override

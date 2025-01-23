@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.network.packet.server.ActiveCameraSetSettin
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.sound.Sound;
+import io.github.mortuusars.exposure.world.sound.SoundEffect;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.minecraft.core.RegistryAccess;
@@ -13,22 +14,20 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
-public record CameraSetting<T>(DataComponentType<T> component, T defaultValue, Optional<Supplier<SoundEvent>> sound) {
+public record CameraSetting<T>(DataComponentType<T> component, T defaultValue, Optional<SoundEffect> sound) {
     public static final Codec<CameraSetting<?>> CODEC = ResourceLocation.CODEC.xmap(CameraSettings::byId, CameraSettings::idOf);
     public static final StreamCodec<ByteBuf, CameraSetting<?>> STREAM_CODEC = StreamCodec.composite(
             ResourceLocation.STREAM_CODEC, CameraSettings::idOf,
             CameraSettings::byId
     );
 
-    public CameraSetting(DataComponentType<T> component, T defaultValue, Supplier<SoundEvent> sound) {
+    public CameraSetting(DataComponentType<T> component, T defaultValue, SoundEffect sound) {
         this(component, defaultValue, Optional.ofNullable(sound));
     }
 
@@ -86,7 +85,9 @@ public record CameraSetting<T>(DataComponentType<T> component, T defaultValue, O
     public boolean set(CameraHolder holder, ItemStack stack, T value) {
         if (stack.getItem() instanceof CameraItem cameraItem && set(stack, value)) {
             cameraItem.actionPerformed(stack, holder.asEntity().level());
-            sound.map(Supplier::get).ifPresent(sound -> Sound.playSided(holder.asEntity(), sound, SoundSource.PLAYERS));
+            sound.ifPresent(sound ->
+                    Sound.playSided(holder.asEntity(), sound.sound().get(), SoundSource.PLAYERS,
+                            sound.volume(), sound.pitch(), sound.pitchVariability()));
             return true;
         }
         return false;

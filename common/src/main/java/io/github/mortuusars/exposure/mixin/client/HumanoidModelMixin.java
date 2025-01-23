@@ -85,11 +85,11 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
     @Redirect(method = "setupAnim(Lnet/minecraft/world/entity/LivingEntity;FFFFF)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/AnimationUtils;bobModelPart(Lnet/minecraft/client/model/geom/ModelPart;FF)V"))
     private void removeBobbing(ModelPart modelPart, float ageInTicks, float multiplier) {
-        if (modelPart == leftArm) {
-            multiplier = exposure$LeftArmBobbingMultiplier;
+        if (exposure$LeftArmBobbingMultiplier != 1F && modelPart == leftArm) {
+            multiplier = exposure$LeftArmBobbingMultiplier * -1;
         }
-        if (modelPart == rightArm) {
-            multiplier = exposure$RightArmBobbingMultiplier * -1;
+        if (exposure$RightArmBobbingMultiplier != 1F && modelPart == rightArm) {
+            multiplier = exposure$RightArmBobbingMultiplier;
         }
         AnimationUtils.bobModelPart(modelPart, ageInTicks, multiplier);
     }

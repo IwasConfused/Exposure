@@ -9,7 +9,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,15 +102,6 @@ public abstract class PlayerMixin extends LivingEntity implements CameraHolder, 
 
         if (activeExposureCamera != null) {
             lastActionTime = activeExposureCamera.map(CameraItem::getLastActionTime).orElse(-1L);
-
-            if (!activeExposureCamera.isActive()) {
-                for (ItemStack stack : getInventory().items) {
-                    if (stack.getItem() instanceof CameraItem cameraItem && activeExposureCamera.idMatches(cameraItem.getOrCreateID(stack))) {
-                        cameraItem.deactivate(this, stack);
-                    }
-                }
-                removeActiveExposureCamera();
-            }
         } else if (getMainHandItem().getItem() instanceof CameraItem item) {
             lastActionTime = item.getLastActionTime(getMainHandItem());
         } else if (getOffhandItem().getItem() instanceof CameraItem item) {
