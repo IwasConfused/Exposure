@@ -9,11 +9,11 @@ import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.item.BrokenInterplanarProjectorItem;
 import io.github.mortuusars.exposure.world.item.FilmRollItem;
 import io.github.mortuusars.exposure.world.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
-import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
 import net.minecraft.client.DeltaTracker;
@@ -142,7 +142,7 @@ public class ViewfinderOverlay {
 
         // Guide
         if (drawGuide) {
-            ResourceLocation guideTexture = CameraSetting.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack()).overlayTextureLocation();
+            ResourceLocation guideTexture = CameraSettings.COMPOSITION_GUIDE.getOrDefault(camera.getItemStack()).overlayTextureLocation();
             GuiUtil.blit(guideTexture, guiGraphics.pose(), opening, 0, 0, (int) opening.width, (int) opening.height, 0);
         }
 

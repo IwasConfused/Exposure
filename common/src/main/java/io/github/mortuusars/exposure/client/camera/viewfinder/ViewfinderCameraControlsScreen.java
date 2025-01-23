@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
 import io.github.mortuusars.exposure.client.gui.screen.camera.button.FocalLengthButton;
@@ -15,12 +14,12 @@ import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.util.ZoomDirection;
 import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.camera.component.CompositionGuide;
 import io.github.mortuusars.exposure.world.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.world.camera.component.FlashMode;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
-import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.ActiveCameraReleaseC2SP;
 import net.minecraft.ChatFormatting;
@@ -153,21 +152,21 @@ public class ViewfinderCameraControlsScreen extends Screen {
 
     protected @NotNull Button createShutterSpeedButton() {
         List<ShutterSpeed> shutterSpeeds = camera.map((item, stack) -> item.getAvailableShutterSpeeds(), List.of(ShutterSpeed.DEFAULT));
-        ShutterSpeed currentShutterSpeed = camera.map(CameraSetting.SHUTTER_SPEED::getOrDefault, ShutterSpeed.DEFAULT);
+        ShutterSpeed currentShutterSpeed = camera.map(CameraSettings.SHUTTER_SPEED::getOrDefault, ShutterSpeed.DEFAULT);
 
         return new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, shutterSpeeds,
-                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> CameraClient.setSetting(CameraSetting.SHUTTER_SPEED, speed))
+                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> camera.setSettingAndSync(CameraSettings.SHUTTER_SPEED, speed))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.shutter_speed.tooltip")))
                 .setClickSound(Exposure.SoundEvents.CAMERA_DIAL_CLICK.get());
     }
 
     protected @NotNull Button createCompositionGuideButton() {
         List<CompositionGuide> guides = CompositionGuides.getGuides();
-        CompositionGuide currentGuide = camera.map(CameraSetting.COMPOSITION_GUIDE::getOrDefault, CompositionGuides.NONE);
+        CompositionGuide currentGuide = camera.map(CameraSettings.COMPOSITION_GUIDE::getOrDefault, CompositionGuides.NONE);
         Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(guide.buttonSpriteLocation());
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
-                currentGuide, spritesFunc, (b, guide) -> CameraClient.setSetting(CameraSetting.COMPOSITION_GUIDE, guide))
+                currentGuide, spritesFunc, (b, guide) -> camera.setSettingAndSync(CameraSettings.COMPOSITION_GUIDE, guide))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")))
                 .setTooltips(guide -> Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")
                         .append(CommonComponents.NEW_LINE)
@@ -177,12 +176,12 @@ public class ViewfinderCameraControlsScreen extends Screen {
 
     protected @NotNull Button createFlashModeButton() {
         List<FlashMode> modes = Arrays.asList(FlashMode.values());
-        FlashMode currentMode = camera.map(CameraSetting.FLASH_MODE::getOrDefault, FlashMode.OFF);
+        FlashMode currentMode = camera.map(CameraSettings.FLASH_MODE::getOrDefault, FlashMode.OFF);
         Function<FlashMode, WidgetSprites> spritesFunc = mode -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
 
         return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
-                currentMode, spritesFunc, (b, mode) -> CameraClient.setSetting(CameraSetting.FLASH_MODE, mode))
+                currentMode, spritesFunc, (b, mode) -> camera.setSettingAndSync(CameraSettings.FLASH_MODE, mode))
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")))
                 .setTooltips(mode -> Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")
                         .append(CommonComponents.NEW_LINE)

@@ -4,14 +4,12 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.*;
 import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.world.camera.CameraId;
-import io.github.mortuusars.exposure.world.camera.CameraInHand;
+import io.github.mortuusars.exposure.world.camera.*;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
 import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.capture.ProjectionInfo;
-import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.frame.*;
 import io.github.mortuusars.exposure.data.ColorPalettes;
@@ -19,7 +17,6 @@ import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
-import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.world.item.part.Shutter;
 import io.github.mortuusars.exposure.world.inventory.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
@@ -45,7 +42,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -183,7 +179,7 @@ public class CameraItem extends Item {
     }
 
     public boolean isInSelfieMode(ItemStack stack) {
-        return CameraSetting.SELFIE_MODE.getOrDefault(stack);
+        return CameraSettings.SELFIE_MODE.getOrDefault(stack);
     }
 
     public boolean isActive(ItemStack stack) {
@@ -232,7 +228,7 @@ public class CameraItem extends Item {
 
     public @NotNull InteractionResultHolder<ItemStack> deactivate(Entity entity, ItemStack stack) {
         setActive(stack, false);
-        CameraSetting.SELFIE_MODE.set(stack, false);
+        CameraSettings.SELFIE_MODE.set(stack, false);
         Sound.play(entity, getViewfinderCloseSound(), entity.getSoundSource(), 0.35f, 0.9f, 0.2f);
         entity.gameEvent(GameEvent.EQUIP);
         return InteractionResultHolder.consume(stack);
@@ -402,7 +398,7 @@ public class CameraItem extends Item {
 
             int lightLevel = LevelUtil.getLightLevelAt(level, entity.blockPosition());
             boolean shouldFlashFire = shouldFlashFire(stack, lightLevel);
-            ShutterSpeed shutterSpeed = CameraSetting.SHUTTER_SPEED.getOrDefault(stack);
+            ShutterSpeed shutterSpeed = CameraSettings.SHUTTER_SPEED.getOrDefault(stack);
 
             boolean flashHasFired = shouldFlashFire && tryUseFlash(entity, serverLevel, stack);
 
@@ -415,7 +411,7 @@ public class CameraItem extends Item {
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
                     .setCameraHolder(holder)
                     .setCameraID(cameraId)
-                    .setShutterSpeed(CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
+                    .setShutterSpeed(CameraSettings.SHUTTER_SPEED.getOrDefault(stack))
                     .setFilmType(film.getItem().getType())
                     .setFrameSize(film.getItem().getFrameSize(film.getItemStack()))
                     .setCropFactor(getCropFactor())
@@ -529,7 +525,7 @@ public class CameraItem extends Item {
         if (Attachment.FLASH.isEmpty(stack))
             return false;
 
-        return switch (CameraSetting.FLASH_MODE.getOrDefault(stack)) {
+        return switch (CameraSettings.FLASH_MODE.getOrDefault(stack)) {
             case OFF -> false;
             case ON -> true;
             case AUTO -> lightLevel < 8;
@@ -612,7 +608,7 @@ public class CameraItem extends Item {
                             //TODO: addCustomEntityInFrameData event
                         }))
                         .toList())
-                .addExtraData(Frame.SHUTTER_SPEED, CameraSetting.SHUTTER_SPEED.getOrDefault(stack))
+                .addExtraData(Frame.SHUTTER_SPEED, CameraSettings.SHUTTER_SPEED.getOrDefault(stack))
                 .addExtraData(Frame.TIMESTAMP, UnixTimestamp.Seconds.now())
                 .updateExtraData(data -> addFrameExtraData(data, holder, level, captureProperties, stack))
                 .toImmutable();
@@ -634,7 +630,7 @@ public class CameraItem extends Item {
             data.put(Frame.FLASH, true);
         }
 
-        double zoom = CameraSetting.ZOOM.getOrDefault(stack);
+        double zoom = CameraSettings.ZOOM.getOrDefault(stack);
         int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
         data.put(Frame.FOCAL_LENGTH, focalLength);
 
@@ -704,7 +700,7 @@ public class CameraItem extends Item {
     }
 
     public List<LivingEntity> getEntitiesInFrame(CameraHolder cameraHolder, ServerLevel level, ItemStack stack) {
-        float zoom = CameraSetting.ZOOM.getOrDefault(stack);
+        float zoom = CameraSettings.ZOOM.getOrDefault(stack);
         double fov = getFocalRange(level.registryAccess(), stack).fovFromZoom(zoom) * getCropFactor();
 
         return EntitiesInFrame.get(cameraHolder.asEntity(), fov, isInSelfieMode(stack));

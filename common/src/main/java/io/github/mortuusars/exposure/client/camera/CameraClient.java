@@ -4,8 +4,8 @@ import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.camera.viewfinder.ViewfinderRegistry;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
+import io.github.mortuusars.exposure.world.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.item.CameraItem;
-import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.common.ActiveCameraDeactivateCommonPacket;
 import net.minecraft.client.CameraType;
@@ -32,16 +32,10 @@ public class CameraClient {
 
     public static void deactivate() {
         Minecrft.player().getActiveExposureCameraOptional().ifPresent(camera -> {
-            camera.map((item, stack) -> item.deactivate(camera.getOwner(), stack));
+            camera.map((item, stack) -> item.deactivate(camera.getHolder(), stack));
             Minecrft.player().removeActiveExposureCamera();
         });
         Packets.sendToServer(ActiveCameraDeactivateCommonPacket.INSTANCE);
-    }
-
-    public static <T> void setSetting(CameraSetting<T> setting, T value) {
-        Minecrft.player().getActiveExposureCameraOptional().ifPresent(camera -> {
-            setting.setAndSync(Minecrft.player(), value);
-        });
     }
 
     // --
@@ -68,11 +62,12 @@ public class CameraClient {
     // --
 
     public static void updateSelfieMode() {
-        Minecrft.player().getActiveExposureCameraOptional().ifPresent(camera -> {
+        Camera camera = Minecrft.player().getActiveExposureCamera();
+        if (camera != null) {
             boolean inSelfieMode = Minecrft.options().getCameraType() == CameraType.THIRD_PERSON_FRONT;
-            if (CameraSetting.SELFIE_MODE.getOrDefault(camera.getItemStack()) != inSelfieMode) {
-                CameraClient.setSetting(CameraSetting.SELFIE_MODE, inSelfieMode);
+            if (CameraSettings.SELFIE_MODE.getOrDefault(camera.getItemStack()) != inSelfieMode) {
+                camera.setSettingAndSync(CameraSettings.SELFIE_MODE, inSelfieMode);
             }
-        });
+        }
     }
 }

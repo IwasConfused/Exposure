@@ -2,7 +2,6 @@ package io.github.mortuusars.exposure.world.camera;
 
 import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.network.packet.client.ActiveCameraInHandSetS2CP;
-import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.item.CameraItem;
 import net.minecraft.Util;
 import net.minecraft.world.InteractionHand;
@@ -14,23 +13,23 @@ import net.minecraft.world.item.ItemStack;
 public class CameraInHand extends Camera {
     protected final InteractionHand hand;
 
-    public CameraInHand(Entity owner, CameraId cameraId, InteractionHand hand) {
-        super(owner, cameraId);
+    public CameraInHand(Entity holder, CameraId cameraId, InteractionHand hand) {
+        super(holder, cameraId);
         this.hand = hand;
-        if (!(owner instanceof LivingEntity)) {
+        if (!(holder instanceof LivingEntity)) {
             throw new IllegalStateException("Only LivingEntity can hold camera in hand."
-                    + EntityType.getKey(owner.getType()) + " does snot have hands.");
+                    + EntityType.getKey(holder.getType()) + " does snot have hands.");
         }
     }
 
     @Override
     public ItemStack getItemStack() {
-        return ((LivingEntity) getOwner()).getItemInHand(getHand());
+        return ((LivingEntity) getHolder()).getItemInHand(getHand());
     }
 
     @Override
     public Packet createSyncPacket() {
-        return new ActiveCameraInHandSetS2CP(getOwner().getId(), getId(), getHand());
+        return new ActiveCameraInHandSetS2CP(getHolder().getId(), getId(), getHand());
     }
 
     public InteractionHand getHand() {

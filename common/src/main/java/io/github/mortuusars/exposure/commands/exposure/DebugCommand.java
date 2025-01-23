@@ -6,20 +6,16 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.world.camera.*;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
-import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
-import io.github.mortuusars.exposure.world.camera.ExposureType;
-import io.github.mortuusars.exposure.world.camera.Camera;
-import io.github.mortuusars.exposure.world.camera.CameraInHand;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.frame.Photographer;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.world.item.*;
 import io.github.mortuusars.exposure.world.item.part.Attachment;
-import io.github.mortuusars.exposure.world.item.part.CameraSetting;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
 import io.github.mortuusars.exposure.network.packet.client.CaptureStartDebugRGBS2CP;
@@ -77,7 +73,7 @@ public class DebugCommand {
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
                     .setCameraHolder(player)
                     .setCameraID(camera.getId())
-                    .setShutterSpeed(camera.getSetting(CameraSetting.SHUTTER_SPEED).orElse(null))
+                    .setShutterSpeed(camera.getSetting(CameraSettings.SHUTTER_SPEED).orElse(null))
                     .setFilmType(ExposureType.BLACK_AND_WHITE)
                     .setFrameSize(camera.mapAttachment(Attachment.FILM, FilmItem::getFrameSize).orElse(null))
                     .setCropFactor(camera.map((cameraItem, cameraStack) -> cameraItem.getCropFactor()).orElse(null))

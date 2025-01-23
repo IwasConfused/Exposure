@@ -29,7 +29,7 @@ public class ActiveCameraDeactivateCommonPacket implements Packet {
     @Override
     public boolean handle(PacketFlow flow, Player player) {
         player.getActiveExposureCameraOptional().ifPresent(camera -> {
-            camera.map((item, stack) -> item.deactivate(camera.getOwner(), stack));
+            camera.map((item, stack) -> item.deactivate(camera.getHolder(), stack));
             player.removeActiveExposureCamera();
         });
         return true;
