@@ -9,7 +9,7 @@ import io.github.mortuusars.exposure.client.util.Shader;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Filters;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
+import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.PostChain;
 import net.minecraft.resources.ResourceLocation;

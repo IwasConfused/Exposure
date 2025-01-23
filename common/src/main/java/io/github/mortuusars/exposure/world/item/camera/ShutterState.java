@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.world.item.component.camera;
+package io.github.mortuusars.exposure.world.item.camera;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

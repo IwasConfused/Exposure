@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.mixin.client;
 
 import io.github.mortuusars.exposure.client.animation.ModelPoses;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.entity.CameraOperator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.AgeableListModel;
@@ -58,27 +59,23 @@ public abstract class HumanoidModelMixin<T extends LivingEntity> extends Ageable
                             }
                         } else {
                             ModelPoses.applyCameraPose(((HumanoidModel<?>) (Object) this), entity, arm);
-
-                            if (arm == HumanoidArm.LEFT) {
-                                exposure$LeftArmBobbingMultiplier = 0.1F;
-                                exposure$RightArmBobbingMultiplier = 0.5F;
-                            } else {
-                                exposure$LeftArmBobbingMultiplier = 0.5F;
-                                exposure$RightArmBobbingMultiplier = 0.1F;
-                            }
+                            exposure$LeftArmBobbingMultiplier = arm == HumanoidArm.LEFT ? 0.1F : 0.5F;
+                            exposure$RightArmBobbingMultiplier = arm == HumanoidArm.RIGHT ? 0.1F : 0.5F;
                         }
                     });
                 },
                 () -> {
-                    CameraInHand camera = CameraInHand.find(entity);
-                    camera.ifPresent((item, stack) -> {
-                        if (item.isDisassembled(stack)) {
-                            HumanoidArm arm = camera.getHand() == InteractionHand.OFF_HAND
-                                    ? Minecraft.getInstance().options.mainHand().get().getOpposite()
-                                    : Minecraft.getInstance().options.mainHand().get();
-                            ModelPoses.applyCameraDisassembledPose((HumanoidModel<?>) (Object) this, entity, arm);
-                        }
-                    });
+                    if (entity instanceof CameraHolder holder
+                            && CameraInHand.find(holder) instanceof CameraInHand camera) {
+                        camera.ifPresent((item, stack) -> {
+                            if (item.isDisassembled(stack)) {
+                                HumanoidArm arm = camera.getHand() == InteractionHand.OFF_HAND
+                                        ? Minecraft.getInstance().options.mainHand().get().getOpposite()
+                                        : Minecraft.getInstance().options.mainHand().get();
+                                ModelPoses.applyCameraDisassembledPose((HumanoidModel<?>) (Object) this, entity, arm);
+                            }
+                        });
+                    }
                     exposure$LeftArmBobbingMultiplier = 1F;
                     exposure$RightArmBobbingMultiplier = 1F;
                 }

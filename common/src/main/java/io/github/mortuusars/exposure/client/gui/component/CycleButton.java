@@ -24,14 +24,16 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class CycleButton<T> extends Button {
     protected final List<T> values;
     protected final T startingValue;
     protected final Map<T, WidgetSprites> spritesMap;
-    protected final OnCycle<T> onCycle;
 
+    protected OnCycle<T> onCycle;
     protected boolean loop = true;
     protected @Nullable Tooltip defaultTooltip;
     protected Map<T, @Nullable Tooltip> tooltips = Collections.emptyMap();
@@ -53,8 +55,18 @@ public class CycleButton<T> extends Button {
     }
 
     public CycleButton(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
+                       Map<T, WidgetSprites> spritesMap) {
+        this(x, y, width, height, values, startingValue, spritesMap, (b, v) -> {});
+    }
+
+    public CycleButton(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
                        Function<T, WidgetSprites> spritesFunc, OnCycle<T> onCycle) {
         this(x, y, width, height, values, startingValue, Widgets.createMap(values, spritesFunc), onCycle);
+    }
+
+    public CycleButton(int x, int y, int width, int height, List<T> values, @NotNull T startingValue,
+                       Function<T, WidgetSprites> spritesFunc) {
+        this(x, y, width, height, values, startingValue, Widgets.createMap(values, spritesFunc), (b, v) -> {});
     }
 
     public CycleButton<T> setLooping(boolean loop) {
@@ -82,6 +94,16 @@ public class CycleButton<T> extends Button {
 
     public CycleButton<T> setClickSound(SoundEvent soundEvent) {
         this.clickSound = soundEvent;
+        return this;
+    }
+
+    public CycleButton<T> onCycle(OnCycle<T> onCycle) {
+        this.onCycle = onCycle;
+        return this;
+    }
+
+    public CycleButton<T> onCycle(Consumer<T> onCycle) {
+        this.onCycle = (button, newValue) -> onCycle.accept(newValue);
         return this;
     }
 
@@ -164,9 +186,6 @@ public class CycleButton<T> extends Button {
     public void playDownSound(SoundManager handler) {
         if (clickSound != null) {
             handler.play(SimpleSoundInstance.forUI(clickSound, 1.0F));
-        }
-        else {
-            handler.play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
         }
     }
 

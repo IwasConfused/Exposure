@@ -14,12 +14,12 @@ import io.github.mortuusars.exposure.client.input.MouseHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.client.util.ZoomDirection;
 import io.github.mortuusars.exposure.world.camera.Camera;
-import io.github.mortuusars.exposure.world.camera.CameraSettings;
+import io.github.mortuusars.exposure.world.item.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.camera.component.CompositionGuide;
 import io.github.mortuusars.exposure.world.camera.component.CompositionGuides;
 import io.github.mortuusars.exposure.world.camera.component.FlashMode;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
+import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.ActiveCameraReleaseC2SP;
 import net.minecraft.ChatFormatting;
@@ -155,9 +155,9 @@ public class ViewfinderCameraControlsScreen extends Screen {
         ShutterSpeed currentShutterSpeed = camera.map(CameraSettings.SHUTTER_SPEED::getOrDefault, ShutterSpeed.DEFAULT);
 
         return new ShutterSpeedButton(leftPos + 94, topPos + 226, 69, 12, shutterSpeeds,
-                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES, (b, speed) -> camera.setSettingAndSync(CameraSettings.SHUTTER_SPEED, speed))
+                currentShutterSpeed, speed -> SHUTTER_SPEED_SPRITES)
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.shutter_speed.tooltip")))
-                .setClickSound(Exposure.SoundEvents.CAMERA_DIAL_CLICK.get());
+                .onCycle(speed -> CameraSettings.SHUTTER_SPEED.setAndSync(camera, speed));
     }
 
     protected @NotNull Button createCompositionGuideButton() {
@@ -165,13 +165,12 @@ public class ViewfinderCameraControlsScreen extends Screen {
         CompositionGuide currentGuide = camera.map(CameraSettings.COMPOSITION_GUIDE::getOrDefault, CompositionGuides.NONE);
         Function<CompositionGuide, WidgetSprites> spritesFunc = guide -> Widgets.threeStateSprites(guide.buttonSpriteLocation());
 
-        return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides,
-                currentGuide, spritesFunc, (b, guide) -> camera.setSettingAndSync(CameraSettings.COMPOSITION_GUIDE, guide))
+        return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, guides, currentGuide, spritesFunc)
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")))
                 .setTooltips(guide -> Component.translatable("gui.exposure.camera_controls.composition_guide.tooltip")
                         .append(CommonComponents.NEW_LINE)
                         .append(guide.translate().withStyle(ChatFormatting.GRAY)))
-                .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
+                .onCycle(guide -> CameraSettings.COMPOSITION_GUIDE.setAndSync(camera, guide));
     }
 
     protected @NotNull Button createFlashModeButton() {
@@ -180,13 +179,12 @@ public class ViewfinderCameraControlsScreen extends Screen {
         Function<FlashMode, WidgetSprites> spritesFunc = mode -> Widgets.threeStateSprites(
                 Exposure.resource("camera_controls/flash_mode/flash_" + mode.getSerializedName()));
 
-        return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes,
-                currentMode, spritesFunc, (b, mode) -> camera.setSettingAndSync(CameraSettings.FLASH_MODE, mode))
+        return new CycleButton<>(0, 0, BUTTON_WIDTH, BUTTON_HEIGHT, modes, currentMode, spritesFunc)
                 .setDefaultTooltip(Tooltip.create(Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")))
                 .setTooltips(mode -> Component.translatable("gui.exposure.camera_controls.flash_mode.tooltip")
                         .append(CommonComponents.NEW_LINE)
                         .append(mode.translate().withStyle(ChatFormatting.GRAY)))
-                .setClickSound(Exposure.SoundEvents.CAMERA_BUTTON_CLICK.get());
+                .onCycle(mode -> CameraSettings.FLASH_MODE.setAndSync(camera, mode));
     }
 
     protected void addSeparator(int x, int y) {

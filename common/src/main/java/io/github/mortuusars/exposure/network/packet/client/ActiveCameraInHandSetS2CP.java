@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.network.packet.client;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.network.handler.ClientPacketsHandler;
 import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.camera.CameraInHand;
@@ -36,8 +35,10 @@ public record ActiveCameraInHandSetS2CP(int operatorEntityId, CameraId cameraId,
 
     @Override
     public boolean handle(PacketFlow flow, Player player) {
-        if (player.level().getEntity(operatorEntityId) instanceof LivingEntity entity && entity instanceof CameraOperator operator) {
-            operator.setActiveExposureCamera(new CameraInHand(entity, cameraId, hand));
+        if (player.level().getEntity(operatorEntityId) instanceof LivingEntity entity
+                && entity instanceof CameraOperator operator
+                && entity instanceof CameraHolder holder) {
+            operator.setActiveExposureCamera(new CameraInHand(holder, cameraId, hand));
         }
         return true;
     }

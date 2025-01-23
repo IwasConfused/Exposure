@@ -1,13 +1,10 @@
 package io.github.mortuusars.exposure.world.camera;
 
 import com.mojang.logging.LogUtils;
-import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.Packet;
-import io.github.mortuusars.exposure.network.packet.server.ActiveCameraSetSettingC2SP;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
-import io.github.mortuusars.exposure.world.item.CameraItem;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
-import net.minecraft.world.entity.Entity;
+import io.github.mortuusars.exposure.world.item.camera.CameraItem;
+import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.slf4j.Logger;
@@ -20,10 +17,10 @@ import java.util.function.Function;
 public abstract class Camera {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    protected final Entity holder;
+    protected final CameraHolder holder;
     protected final CameraId id;
 
-    public Camera(Entity holder, CameraId id) {
+    public Camera(CameraHolder holder, CameraId id) {
         this.holder = holder;
         this.id = id;
     }
@@ -33,7 +30,7 @@ public abstract class Camera {
 
     // --
 
-    public Entity getHolder() {
+    public CameraHolder getHolder() {
         return holder;
     }
 
@@ -130,26 +127,5 @@ public abstract class Camera {
             return attachment.map(getItemStack(), func);
         }
         return Optional.empty();
-    }
-
-    public <T> Optional<T> getSetting(CameraSetting<T> setting) {
-        if (getItemStack().getItem() instanceof CameraItem) {
-            return setting.getOptional(getItemStack());
-        }
-        return Optional.empty();
-    }
-
-    public <T> void setSetting(CameraSetting<T> setting, T value) {
-        if (getItemStack().getItem() instanceof CameraItem) {
-            setting.set(getItemStack(), value);
-        }
-    }
-
-    public <T> void setSettingAndSync(CameraSetting<T> setting, T value) {
-        if (getItemStack().getItem() instanceof CameraItem) {
-            setting.set(getItemStack(), value);
-            byte[] bytes = setting.encodeValue(getHolder().registryAccess(), value);
-            Packets.sendToServer(new ActiveCameraSetSettingC2SP(setting, bytes));
-        }
     }
 }

@@ -2,8 +2,8 @@ package io.github.mortuusars.exposure.world.inventory;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.item.CameraItem;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
+import io.github.mortuusars.exposure.world.item.camera.CameraItem;
+import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;

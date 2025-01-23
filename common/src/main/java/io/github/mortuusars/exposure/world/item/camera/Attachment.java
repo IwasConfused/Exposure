@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.world.item.part;
+package io.github.mortuusars.exposure.world.item.camera;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.sound.AttachmentSound;

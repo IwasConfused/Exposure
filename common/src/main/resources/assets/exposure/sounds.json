@@ -30,7 +30,10 @@
   },
   "item.camera.button_click": {
     "sounds": [
-      "exposure:item/camera/button_click"
+      {
+        "name": "exposure:item/camera/button_click",
+        "volume": 0.6
+      }
     ],
     "subtitle": "subtitle.exposure.camera.button_click"
   },

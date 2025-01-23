@@ -26,14 +26,18 @@ public class ShutterSpeedButton extends CycleButton<ShutterSpeed> {
         secondaryFontColor = Config.Client.getSecondaryFontColor();
     }
 
+    public ShutterSpeedButton(int x, int y, int width, int height, List<ShutterSpeed> values, @NotNull ShutterSpeed startingValue,
+                              Function<ShutterSpeed, WidgetSprites> spritesFunc) {
+        super(x, y, width, height, values, startingValue, spritesFunc, (button, newValue) -> {});
+        mainFontColor = Config.Client.getMainFontColor();
+        secondaryFontColor = Config.Client.getSecondaryFontColor();
+    }
+
     @Override
     public void playDownSound(SoundManager handler) {
         if (clickSound != null) {
             handler.play(SimpleSoundInstance.forUI(clickSound,
                     ThreadLocalRandom.current().nextFloat() * 0.05f + 0.9f + currentIndex * 0.01f, 0.7f));
-        }
-        else {
-            super.playDownSound(handler);
         }
     }
 

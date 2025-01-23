@@ -2,12 +2,11 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
-import io.github.mortuusars.exposure.world.camera.CameraSettings;
+import io.github.mortuusars.exposure.world.item.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import io.github.mortuusars.exposure.client.util.ZoomDirection;
 import net.minecraft.client.gui.screens.Screen;
@@ -64,7 +63,7 @@ public class ViewfinderZoom {
             targetFov = fov;
             animation.resetProgress();
 
-            camera.setSettingAndSync(CameraSettings.ZOOM, (float)focalRange.zoomFromFov(fov));
+            CameraSettings.ZOOM.setAndSync(camera, (float)focalRange.zoomFromFov(fov));
         }
     }
 

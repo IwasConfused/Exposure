@@ -80,19 +80,11 @@ public class Sound {
     }
 
     public static void playSided(Entity entity, SoundEvent sound) {
-        if (entity instanceof Player player) {
-            playSided(player, entity, sound, entity.getSoundSource(), 1F, 1F, 0F);
-        } else {
-            play(entity, sound, entity.getSoundSource(), 1F, 1F, 0F);
-        }
+        playSided(entity, sound, entity.getSoundSource());
     }
 
     public static void playSided(Entity entity, SoundEvent sound, SoundSource source) {
-        if (entity instanceof Player player) {
-            playSided(player, entity, sound, source, 1F, 1F, 0F);
-        } else {
-            play(entity, sound, source, 1F, 1F, 0F);
-        }
+        playSided(entity, sound, source, 1F, 1F);
     }
 
     public static void playSided(Entity entity, SoundEvent sound, SoundSource source, float volume, float pitch) {

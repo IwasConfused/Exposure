@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.world.item;
+package io.github.mortuusars.exposure.world.item.camera;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.*;
@@ -15,9 +15,11 @@ import io.github.mortuusars.exposure.world.camera.frame.*;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.data.Lenses;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
+import io.github.mortuusars.exposure.world.entity.CameraOperator;
+import io.github.mortuusars.exposure.world.item.FilmItem;
+import io.github.mortuusars.exposure.world.item.FilmRollItem;
+import io.github.mortuusars.exposure.world.item.InterplanarProjectorItem;
 import io.github.mortuusars.exposure.world.item.component.StoredItemStack;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
-import io.github.mortuusars.exposure.world.item.part.Shutter;
 import io.github.mortuusars.exposure.world.inventory.CameraAttachmentsMenu;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CaptureStartS2CP;
@@ -70,6 +72,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class CameraItem extends Item {
     public static final int BASE_COOLDOWN = 2;
@@ -143,6 +146,10 @@ public class CameraItem extends Item {
         return Exposure.SoundEvents.FLASH.get();
     }
 
+    public ResourceLocation getCaptureType(ItemStack stack) {
+        return CaptureType.CAMERA;
+    }
+
     public float getCropFactor() {
         return Exposure.CROP_FACTOR;
     }
@@ -161,7 +168,7 @@ public class CameraItem extends Item {
         return Attachment.FILTER.map(stack, ColorChannel::fromFilterStack).orElse(Optional.empty());
     }
 
-    protected Optional<ProjectionInfo> getProjectingInfo(ItemStack stack) {
+    protected Optional<ProjectionInfo> getProjectionInfo(ItemStack stack) {
         return Attachment.FILTER.map(stack, (filterItem, filterStack) ->
                         filterItem instanceof InterplanarProjectorItem projectorItem
                                 ? projectorItem.getProjectingInfo(filterStack)
@@ -417,7 +424,7 @@ public class CameraItem extends Item {
                     .setCropFactor(getCropFactor())
                     .setColorPalette(getColorPalette(level.registryAccess(), stack))
                     .setFlash(flashHasFired)
-                    .setProjectingInfo(getProjectingInfo(stack))
+                    .setProjectingInfo(getProjectionInfo(stack))
                     .setChromaticChannel(getChromaticChannel(stack))
                     .extraData(tag -> tag.putInt("light_level", lightLevel))
                     .build();
@@ -445,10 +452,6 @@ public class CameraItem extends Item {
         }
 
         return InteractionResultHolder.consume(stack);
-    }
-
-    public ResourceLocation getCaptureType(ItemStack stack) {
-        return CaptureType.CAMERA;
     }
 
     protected void onShutterOpen(CameraHolder holder, ServerLevel serverLevel, ItemStack stack) {

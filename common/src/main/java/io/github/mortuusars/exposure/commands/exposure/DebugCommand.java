@@ -9,16 +9,18 @@ import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.world.camera.*;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureType;
+import io.github.mortuusars.exposure.world.item.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.frame.Photographer;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.world.item.*;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
+import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.ClearRenderingCacheS2CP;
 import io.github.mortuusars.exposure.network.packet.client.CaptureStartDebugRGBS2CP;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.Holder;
@@ -59,7 +61,11 @@ public class DebugCommand {
         CommandSourceStack stack = context.getSource();
         ServerPlayer player = stack.getPlayerOrException();
 
-        Camera camera = CameraInHand.find(player); // Can be CameraInHand.Empty
+        @Nullable Camera camera = CameraInHand.find(player);
+        if (camera == null) {
+            camera = new CameraInHand(player, new CameraId(Util.NIL_UUID), InteractionHand.MAIN_HAND);
+        }
+
 
         List<CaptureProperties> properties = new ArrayList<>();
 
@@ -72,8 +78,8 @@ public class DebugCommand {
 
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
                     .setCameraHolder(player)
-                    .setCameraID(camera.getId())
-                    .setShutterSpeed(camera.getSetting(CameraSettings.SHUTTER_SPEED).orElse(null))
+                    .setCameraID(camera.getId().uuid().equals(Util.NIL_UUID) ? null : camera.getId())
+                    .setShutterSpeed(CameraSettings.SHUTTER_SPEED.getOrElse(camera, null))
                     .setFilmType(ExposureType.BLACK_AND_WHITE)
                     .setFrameSize(camera.mapAttachment(Attachment.FILM, FilmItem::getFrameSize).orElse(null))
                     .setCropFactor(camera.map((cameraItem, cameraStack) -> cameraItem.getCropFactor()).orElse(null))

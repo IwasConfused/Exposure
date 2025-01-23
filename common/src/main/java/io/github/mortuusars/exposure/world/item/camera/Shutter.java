@@ -1,9 +1,8 @@
-package io.github.mortuusars.exposure.world.item.part;
+package io.github.mortuusars.exposure.world.item.camera;
 
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
-import io.github.mortuusars.exposure.world.item.component.camera.ShutterState;
 import io.github.mortuusars.exposure.server.CameraInstance;
 import io.github.mortuusars.exposure.server.CameraInstances;
 import io.github.mortuusars.exposure.world.sound.Sound;
@@ -80,6 +79,6 @@ public class Shutter {
 
     public void playCloseSound(CameraHolder holder) {
         Entity entity = holder.asEntity();
-        Sound.play(entity, Exposure.SoundEvents.SHUTTER_OPEN.get(), entity.getSoundSource(), 0.7f, 1.1f, 0.2f);
+        Sound.play(entity, Exposure.SoundEvents.SHUTTER_CLOSE.get(), entity.getSoundSource(), 0.7f, 1.1f, 0.2f);
     }
 }

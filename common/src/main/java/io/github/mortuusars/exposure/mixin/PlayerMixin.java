@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.mixin;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.github.mortuusars.exposure.world.entity.CameraOperator;
-import io.github.mortuusars.exposure.world.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.camera.CameraItem;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -56,6 +56,11 @@ public abstract class PlayerMixin extends LivingEntity implements CameraHolder, 
     @Override
     public @NotNull Entity getExposureAuthorEntity() {
         return this;
+    }
+
+    @Override
+    public Optional<CameraOperator> getExposureCameraOperator() {
+        return Optional.of(this);
     }
 
     // --

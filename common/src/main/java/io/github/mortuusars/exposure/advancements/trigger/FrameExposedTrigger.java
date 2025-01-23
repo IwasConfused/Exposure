@@ -3,7 +3,7 @@ package io.github.mortuusars.exposure.advancements.trigger;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.mortuusars.exposure.advancements.predicate.CameraPredicate;
-import io.github.mortuusars.exposure.world.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.camera.CameraItem;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.advancements.critereon.*;
 import net.minecraft.nbt.CompoundTag;

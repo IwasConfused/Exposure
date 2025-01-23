@@ -15,7 +15,7 @@ import io.github.mortuusars.exposure.world.photograph.PhotographType;
 import io.github.mortuusars.exposure.util.cycles.Cycles;
 import io.github.mortuusars.exposure.client.ExposureStore;
 import io.github.mortuusars.exposure.world.item.AlbumItem;
-import io.github.mortuusars.exposure.world.item.CameraItem;
+import io.github.mortuusars.exposure.world.item.camera.CameraItem;
 import io.github.mortuusars.exposure.world.item.ChromaticSheetItem;
 import io.github.mortuusars.exposure.world.item.StackedPhotographsItem;
 import net.minecraft.client.renderer.item.ItemProperties;

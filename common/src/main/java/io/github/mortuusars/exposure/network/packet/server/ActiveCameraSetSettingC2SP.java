@@ -1,10 +1,8 @@
 package io.github.mortuusars.exposure.network.packet.server;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.camera.Camera;
-import io.github.mortuusars.exposure.world.camera.CameraSetting;
+import io.github.mortuusars.exposure.world.item.camera.CameraSetting;
 import io.github.mortuusars.exposure.network.packet.Packet;
-import io.github.mortuusars.exposure.world.entity.CameraOperator;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -31,14 +29,9 @@ public record ActiveCameraSetSettingC2SP(CameraSetting<?> setting, byte[] encode
 
     @Override
     public boolean handle(PacketFlow direction, Player player) {
-        if (player.getActiveExposureCamera() != null) {
-            player.getActiveExposureCamera().ifPresent((item, stack) -> {
-                setting.decodeAndSet(stack, player.level().registryAccess(), encodedValue);
-                item.actionPerformed(stack, player.level());
-            });
-            return true;
-        }
-
-        return false;
+        if (player.getActiveExposureCamera() == null) return false;
+        player.getActiveExposureCamera().ifPresent((item, stack) ->
+                setting.decodeAndSet(player, stack, player.level().registryAccess(), encodedValue));
+        return true;
     }
 }

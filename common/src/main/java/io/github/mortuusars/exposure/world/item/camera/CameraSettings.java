@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.world.camera;
+package io.github.mortuusars.exposure.world.item.camera;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
@@ -39,13 +39,13 @@ public class CameraSettings {
     }
 
     public static final CameraSetting<Boolean> SELFIE_MODE = register(Exposure.resource("selfie"),
-            new CameraSetting<>(Exposure.DataComponents.SELFIE_MODE, false));
+            new CameraSetting<>(Exposure.DataComponents.SELFIE_MODE, false, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK));
     public static final CameraSetting<Float> ZOOM = register(Exposure.resource("zoom"),
-            new CameraSetting<>(Exposure.DataComponents.ZOOM, 0f));
+            new CameraSetting<>(Exposure.DataComponents.ZOOM, 0f, Exposure.SoundEvents.CAMERA_LENS_RING_CLICK));
     public static final CameraSetting<ShutterSpeed> SHUTTER_SPEED = register(Exposure.resource("shutter_speed"),
-            new CameraSetting<>(Exposure.DataComponents.SHUTTER_SPEED, ShutterSpeed.DEFAULT));
+            new CameraSetting<>(Exposure.DataComponents.SHUTTER_SPEED, ShutterSpeed.DEFAULT, Exposure.SoundEvents.CAMERA_DIAL_CLICK));
     public static final CameraSetting<CompositionGuide> COMPOSITION_GUIDE = register(Exposure.resource("composition_guide"),
-            new CameraSetting<>(Exposure.DataComponents.COMPOSITION_GUIDE, CompositionGuides.NONE));
+            new CameraSetting<>(Exposure.DataComponents.COMPOSITION_GUIDE, CompositionGuides.NONE, Exposure.SoundEvents.CAMERA_BUTTON_CLICK));
     public static final CameraSetting<FlashMode> FLASH_MODE = register(Exposure.resource("flash_mode"),
-            new CameraSetting<>(Exposure.DataComponents.FLASH_MODE, FlashMode.OFF));
+            new CameraSetting<>(Exposure.DataComponents.FLASH_MODE, FlashMode.OFF, Exposure.SoundEvents.CAMERA_BUTTON_CLICK));
 }

@@ -35,6 +35,10 @@ public interface CameraHolder {
                 "and should return an entity that will be treated as an author of a photo.");
     }
 
+    default Optional<CameraOperator> getExposureCameraOperator() {
+        throw new IllegalStateException("This method must be implemented, and should return an operator (if present).");
+    }
+
     // --
 
     default Entity asEntity() {

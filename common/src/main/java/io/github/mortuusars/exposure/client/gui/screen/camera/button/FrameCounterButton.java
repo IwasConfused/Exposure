@@ -2,7 +2,7 @@ package io.github.mortuusars.exposure.client.gui.screen.camera.button;
 
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.world.item.part.Attachment;
+import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import io.github.mortuusars.exposure.world.item.FilmRollItem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
