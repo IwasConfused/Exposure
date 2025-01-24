@@ -11,13 +11,16 @@
 - Added ability to project from URL with Interplanar Projector
 - Changed how custom Lenses and Filters are defined.
 - Added mipmaps to exposures.
-- Player model now has slight animations for doing stuff with a camera. 
+- Added animation for Camera interactions (changing viewfinder settings and attachments). Player will move their hand slightly.
+- Camera interaction sounds are now audible for other players.
+- 
+- Added client config to shift view to where camera actually is when held at waist-level.
+- Added server config option to change default exposure size.
+- Added server config option to disable loading images with Interplanar Projector.
 
-- Added config option to change default exposure size.
-- Added config option to disable loading images from file with Interplanar Projector.
+- Camera filter effects are now processed separately. 
+  - Vanilla effects will not be rendered when camera captures an image, unless turned on in a config.     
 
-- Camera filter shaders are now processed separately. 
-  - Vanilla shaders (which sometimes used by other mods) will not be rendered when camera captures an image.     
 
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.

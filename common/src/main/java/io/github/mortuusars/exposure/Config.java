@@ -202,7 +202,7 @@ public class Config {
         public static final ModConfigSpec.IntValue FLASH_CAPTURE_DELAY_TICKS;
         public static final ModConfigSpec.BooleanValue FORCE_DIRECT_SCREENSHOT_CAPTURE;
         public static final ModConfigSpec.IntValue DIRECT_CAPTURE_DELAY_FRAMES;
-        public static final ModConfigSpec.BooleanValue DISABLE_POST_EFFECT;
+        public static final ModConfigSpec.BooleanValue KEEP_POST_EFFECT;
 
         // VIEWFINDER
         public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_BACKGROUND_COLOR;
@@ -210,6 +210,7 @@ public class Config {
         public static final ModConfigSpec.ConfigValue<String> VIEWFINDER_FONT_SECONDARY_COLOR;
         public static final ModConfigSpec.BooleanValue VIEWFINDER_MIDDLE_CLICK_CONTROLS;
         public static final ModConfigSpec.DoubleValue VIEWFINDER_ZOOM_SENSITIVITY_INFLUENCE;
+        public static final ModConfigSpec.BooleanValue WAIST_LEVEL_VIEWFINDER;
 
         // RENDER
         public static final ModConfigSpec.BooleanValue HIDE_LOADED_PHOTOGRAPHS_MADE_BY_OTHERS;
@@ -287,6 +288,9 @@ public class Config {
                                     "1 - full effect.",
                                     "Default: 0.75")
                             .defineInRange("ZoomSensitivityInfluence", 0.75, 0.0, 1.0);
+                    WAIST_LEVEL_VIEWFINDER = builder
+                            .comment("Shifts view down to match waist-level camera position. Default: false.")
+                            .define("WaistLevelViewfinder", false);
                     builder.pop();
                 }
 
@@ -309,12 +313,12 @@ public class Config {
                         .comment("Delay in ticks before capturing an image when shooting with flash." +
                                 "\nIf you experience flash synchronization issues (Flash having no effect on the image) - try increasing the value.")
                         .defineInRange("FlashCaptureDelayTicks", 4, 1, FlashBlock.LIFETIME_TICKS);
-                DISABLE_POST_EFFECT = builder
-                        .comment("Post Effect (vanilla shader) will be disabled when image is captured.",
+                KEEP_POST_EFFECT = builder
+                        .comment("Keep Post Effect (vanilla shader) when capturing an image.",
                                 "It is sometimes used by mods to change how player sees the world. (Cold Sweat's overheating blur, Supplementaries mob heads, for example).",
                                 "In vanilla, it's only used when spectating a creeper/enderman/etc.",
-                                "Default: true")
-                        .define("DisablePostEffect", true);
+                                "Default: false")
+                        .define("KeepPostEffect", false);
                 builder.pop();
             }
 

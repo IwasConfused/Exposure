@@ -3,16 +3,15 @@ package io.github.mortuusars.exposure.client.camera.viewfinder;
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Config;
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.item.camera.CameraItem;
-import io.github.mortuusars.exposure.world.sound.Sound;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -181,6 +180,10 @@ public class Viewfinder {
         strength *= strength; // more influence at smaller FOVs
 
         return Mth.lerp(strength, scaledSensitivity, original);
+    }
+
+    public float getCameraYOffset() {
+        return Config.Client.WAIST_LEVEL_VIEWFINDER.get() && camera.getHolder().asEntity() instanceof Player ? -0.35F : 0F;
     }
 
     @FunctionalInterface

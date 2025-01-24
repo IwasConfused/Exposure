@@ -46,7 +46,7 @@ public class CameraCaptureTemplate implements CaptureTemplate {
                         CaptureActions.setCameraEntity(entity),
                         CaptureActions.hideGui(),
                         CaptureActions.forceRegularOrSelfieCamera(),
-                        CaptureActions.disablePostEffect(),
+                        CaptureActions.optional(Config.Client.KEEP_POST_EFFECT.isFalse(), CaptureActions::disablePostEffect),
                         CaptureActions.modifyGamma(brightnessStops),
                         CaptureActions.optional(data.flash(), () -> CaptureActions.flash(entity)))
                 .handleErrorAndGetResult(printCasualErrorInChat())
