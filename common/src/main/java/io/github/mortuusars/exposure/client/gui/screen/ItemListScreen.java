@@ -3,9 +3,10 @@ package io.github.mortuusars.exposure.client.gui.screen;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.client.animation.Animation;
+import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
@@ -29,6 +30,8 @@ public class ItemListScreen extends Screen {
 
     protected final Screen parent;
     protected final List<ItemStack> items;
+    protected final int rowsCount;
+    protected final Animation openingAnimation;
 
     protected int imageWidth = 176;
     protected int imageHeight = 166;
@@ -37,12 +40,9 @@ public class ItemListScreen extends Screen {
     protected int leftPos;
     protected int topPos;
 
-    protected int rowsCount;
     @Nullable
     protected Slot hoveredSlot;
     protected List<Slot> slots = new ArrayList<>();
-
-    //TODO: Animation
 
     protected long openedAt;
 
@@ -50,14 +50,13 @@ public class ItemListScreen extends Screen {
         super(title);
         this.parent = parent;
         this.items = items;
+        List<List<ItemStack>> rows = Lists.partition(items, 9);
+        this.rowsCount = rows.size();
+        this.openingAnimation = new Animation(200, EasingFunction.EASE_OUT_EXPO);
 
         this.openedAt = Util.getMillis();
 
         SimpleContainer container = new SimpleContainer(items.toArray(ItemStack[]::new));
-
-        List<List<ItemStack>> rows = Lists.partition(items, 9);
-
-        rowsCount = rows.size();
 
         int rowX = 8;
         int rowY = 18;
@@ -104,11 +103,6 @@ public class ItemListScreen extends Screen {
 
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        long currentTime = Util.getMillis();
-        float animProgress = Math.min(1f, (currentTime - openedAt) / (float) 200);
-
-        animProgress = 1f - (float)Math.pow(1f - animProgress, 3.5f);
-
         int left = leftPos;
         int top = topPos;
 
@@ -116,6 +110,7 @@ public class ItemListScreen extends Screen {
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate((width / 2f), (height / 2f), 0.0f);
+        float animProgress = (float)openingAnimation.getValue();
         guiGraphics.pose().scale(animProgress, animProgress, animProgress);
         guiGraphics.pose().translate(-(width / 2f), -(height / 2f), 0.0f);
 
@@ -217,6 +212,18 @@ public class ItemListScreen extends Screen {
             return true;
         }
         return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (super.mouseClicked(mouseX, mouseY, button)) return true;
+
+        if (!isHovering(0, 0, imageWidth, imageHeight, mouseX, mouseY)) {
+            onClose();
+            return true;
+        }
+
+        return false;
     }
 
     @Override
