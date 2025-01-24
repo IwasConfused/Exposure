@@ -6,6 +6,9 @@
   "ingredients": [
     {
       "tag": "exposure:photo_agers"
+    },
+    {
+      "item": "minecraft:brush"
     }
   ],
   "result": {

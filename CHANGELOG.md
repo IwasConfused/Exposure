@@ -13,7 +13,9 @@
 - Added mipmaps to exposures.
 - Added animation for Camera interactions (changing viewfinder settings and attachments). Player will move their hand slightly.
 - Camera interaction sounds are now audible for other players.
-- 
+- Photograph Aging recipe now requires a Brush.
+
+
 - Added client config to shift view to where camera actually is when held at waist-level.
 - Added server config option to change default exposure size.
 - Added server config option to disable loading images with Interplanar Projector.
