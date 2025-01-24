@@ -84,7 +84,7 @@ public record CameraSetting<T>(DataComponentType<T> component, T defaultValue, O
 
     public boolean set(CameraHolder holder, ItemStack stack, T value) {
         if (stack.getItem() instanceof CameraItem cameraItem && set(stack, value)) {
-            cameraItem.actionPerformed(stack, holder.asEntity().level());
+            cameraItem.actionPerformed(stack, holder);
             sound.ifPresent(sound ->
                     Sound.playSided(holder.asEntity(), sound.sound().get(), SoundSource.PLAYERS,
                             sound.volume(), sound.pitch(), sound.pitchVariability()));

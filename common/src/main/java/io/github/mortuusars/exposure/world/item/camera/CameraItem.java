@@ -211,8 +211,9 @@ public class CameraItem extends Item {
         stack.set(Exposure.DataComponents.CAMERA_LAST_ACTION_TIME, lastActionTime);
     }
 
-    public void actionPerformed(ItemStack stack, Level level) {
-        setLastActionTime(stack, level.getGameTime());
+    public void actionPerformed(ItemStack stack, CameraHolder holder) {
+        setLastActionTime(stack, holder.asEntity().level().getGameTime());
+        holder.asEntity().gameEvent(GameEvent.ITEM_INTERACT_FINISH);
     }
 
     public @NotNull InteractionResultHolder<ItemStack> activateInHand(Player player, ItemStack stack, @NotNull InteractionHand hand) {

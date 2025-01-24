@@ -161,7 +161,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
                 attachment.playRemoveSoundSided(player);
             }
 
-            camera.apply((item, stack) -> item.actionPerformed(stack, player.level()));
+            camera.apply((item, stack) -> item.actionPerformed(stack, player));
         }
 
         if (!player.level().isClientSide() && player.isCreative()) {
