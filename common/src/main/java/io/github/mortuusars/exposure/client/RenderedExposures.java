@@ -4,7 +4,7 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.image.PalettedImage;
 import io.github.mortuusars.exposure.client.image.ResourceImage;
-import io.github.mortuusars.exposure.client.image.modifier.Modifier;
+import io.github.mortuusars.exposure.client.image.modifier.ImageModifier;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
@@ -26,7 +26,7 @@ public class RenderedExposures {
         RenderableImage image = getOrCreateRaw(frame.exposureIdentifier());
         return Censor.isAllowedToRender(frame)
                 ? image
-                : image.modifyWith(Modifier.CENSORED);
+                : image.modifyWith(ImageModifier.CENSORED);
     }
 
     public RenderableImage getOrCreateRaw(ExposureIdentifier identifier) {

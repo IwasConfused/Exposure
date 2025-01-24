@@ -1,16 +1,14 @@
-package io.github.mortuusars.exposure.client.image.modifier;
+package io.github.mortuusars.exposure.client.image.modifier.pixel;
 
-import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import io.github.mortuusars.exposure.util.color.Color;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class AgedHSBModifier implements Modifier {
-    private final int tintColor;
-    private final float tintOpacity;
-    private final int blackPoint;
-    private final int whitePoint;
+public class AgedHSBModifier implements PixelModifier {
+    protected final int tintColor;
+    protected final float tintOpacity;
+    protected final int blackPoint;
+    protected final int whitePoint;
 
     /**
      * @param tintColor in 0xXXXXXX rgb format. Only rightmost 24 bits would be used, anything extra will be discarded.
@@ -26,16 +24,11 @@ public class AgedHSBModifier implements Modifier {
     }
 
     @Override
-    public Image modify(Image image) {
-        return new ModifiedImage(image, this::modifyPixel);
-    }
-
-    @Override
     public String getIdentifier() {
         return "aged";
     }
 
-    public int modifyPixel(int ARGB) {
+    public int modify(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);
         int green = FastColor.ARGB32.green(ARGB);
@@ -52,7 +45,7 @@ public class AgedHSBModifier implements Modifier {
         float[] tintHSB = new float[3];
         Color.HSB.RGBtoHSB(FastColor.ARGB32.red(tintColor), FastColor.ARGB32.green(tintColor), FastColor.ARGB32.blue(tintColor), tintHSB);
 
-        // Luma is not 100% correct. It's brighter than it would have been originally, but brighter looks better.
+        // Luma is brighter than it would have been originally, but brighter looks better.
         int luma = Mth.clamp((int) (0.45 * red + 0.65 * green + 0.2 * blue), 0, 255);
         int tintedRGB = Color.HSB.HSBtoRGB(tintHSB[0], tintHSB[1], luma / 255f);
 

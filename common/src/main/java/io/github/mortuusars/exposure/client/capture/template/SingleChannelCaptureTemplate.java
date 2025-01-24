@@ -3,14 +3,13 @@ package io.github.mortuusars.exposure.client.capture.template;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.capture.Capture;
-import io.github.mortuusars.exposure.client.capture.action.CaptureActions;
+import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
 import io.github.mortuusars.exposure.client.capture.palettizer.Palettizer;
 import io.github.mortuusars.exposure.client.capture.saving.ExposureUploader;
-import io.github.mortuusars.exposure.client.image.modifier.Modifier;
+import io.github.mortuusars.exposure.client.image.modifier.ImageModifier;
 import io.github.mortuusars.exposure.client.util.Minecrft;
-import io.github.mortuusars.exposure.data.ColorPalettes;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
-import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.util.cycles.task.EmptyTask;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
@@ -37,24 +36,27 @@ public class SingleChannelCaptureTemplate implements CaptureTemplate {
 
         Entity entity = cameraHolder.asEntity();
 
+        ExposureType filmType = data.filmType();
         int frameSize = data.frameSize().orElse(Config.Server.DEFAULT_FRAME_SIZE.getAsInt());
-        float brightnessStops = data.shutterSpeed().orElse(ShutterSpeed.DEFAULT).getStopsDifference(ShutterSpeed.DEFAULT);
-        Holder<ColorPalette> palette = data.colorPalette().orElse(ColorPalettes.getDefault(Minecrft.registryAccess()));
+        Holder<ColorPalette> palette = data.getColorPalette(Minecrft.registryAccess());
 
         return Capture.of(Capture.screenshot(),
-                        CaptureActions.setCameraEntity(entity),
-                        CaptureActions.hideGui(),
-                        CaptureActions.forceRegularOrSelfieCamera(),
-                        CaptureActions.optional(data.isolateChannel(), channel -> CaptureActions.setPostEffect(channel.getShader())),
-                        CaptureActions.modifyGamma(brightnessStops),
-                        CaptureActions.optional(data.flash(), () -> CaptureActions.flash(entity)))
+                        CaptureAction.setCameraEntity(entity),
+                        CaptureAction.hideGui(),
+                        CaptureAction.forceRegularOrSelfieCamera(),
+                        CaptureAction.optional(data.singleChannel(), channel -> CaptureAction.setPostEffect(channel.getShader())),
+                        CaptureAction.modifyGamma(data.getShutterSpeed()),
+                        CaptureAction.optional(data.flash(), () -> CaptureAction.flash(entity)))
                 .handleErrorAndGetResult(printCasualErrorInChat())
-                .then(Modifier.chain(
-                        Modifier.Crop.SQUARE_CENTER,
-                        Modifier.Crop.factor(data.cropFactor().orElse(1F)),
-                        Modifier.Resize.to(frameSize),
-                        Modifier.brightness(brightnessStops),
-                        chooseColorProcessor(data)))
+                .then(ImageModifier.chain(
+                        ImageModifier.Crop.SQUARE_CENTER,
+                        ImageModifier.Crop.factor(data.cropFactor()),
+                        ImageModifier.Resize.to(frameSize),
+                        ImageModifier.brightness(data.getShutterSpeed()),
+                        ImageModifier.optional(filmType == ExposureType.BLACK_AND_WHITE,
+                                data.singleChannel()
+                                        .map(ImageModifier::singleChannelBlackAndWhite)
+                                        .orElse(ImageModifier.BLACK_AND_WHITE))))
                 .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette.value()))
                 .then(convertToExposureData(palette, createExposureTag(cameraHolder.getPlayerExecutingExposure(), data, false)))
                 .accept(image -> ExposureUploader.upload(data.exposureId(), image))

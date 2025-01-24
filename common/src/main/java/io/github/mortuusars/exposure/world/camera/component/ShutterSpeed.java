@@ -64,6 +64,10 @@ public class ShutterSpeed implements StringRepresentable {
         return (float) (Math.log(valueMilliseconds / relative.getDurationMilliseconds()) / Math.log(2));
     }
 
+    public float getStops() {
+        return getStopsDifference(DEFAULT);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

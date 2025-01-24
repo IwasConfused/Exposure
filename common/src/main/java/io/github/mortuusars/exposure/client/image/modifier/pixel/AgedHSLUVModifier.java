@@ -1,19 +1,17 @@
-package io.github.mortuusars.exposure.client.image.modifier;
+package io.github.mortuusars.exposure.client.image.modifier.pixel;
 
-import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import io.github.mortuusars.exposure.util.color.converter.HUSLColorConverter;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import org.apache.commons.lang3.StringUtils;
 
 // HSB is faster while giving only slightly worse result. HSLUV is slower and creates noticeable freezes when exposure is loaded.
-public class AgedHSLUVModifier implements Modifier {
-    public final int tintColor;
-    public final double[] tintColorHsluv;
-    public final float tintOpacity;
-    public final int blackPoint;
-    public final int whitePoint;
+public class AgedHSLUVModifier implements PixelModifier {
+    protected final int tintColor;
+    protected final double[] tintColorHsluv;
+    protected final float tintOpacity;
+    protected final int blackPoint;
+    protected final int whitePoint;
 
     /**
      * @param tintColor in 0xXXXXXX rgb format. Only rightmost 24 bits would be used, anything extra will be discarded.
@@ -31,20 +29,15 @@ public class AgedHSLUVModifier implements Modifier {
     }
 
     @Override
-    public Image modify(Image image) {
-        return new ModifiedImage(image, this::modifyPixel);
-    }
-
-    @Override
     public String getIdentifier() {
         return "aged";
     }
 
-    public int modifyPixel(int ARGB) {
-        int alpha = FastColor.ARGB32.alpha(ARGB);
-        int red = FastColor.ARGB32.red(ARGB);
-        int green = FastColor.ARGB32.green(ARGB);
-        int blue = FastColor.ARGB32.blue(ARGB);
+    public int modify(int colorARGB) {
+        int alpha = FastColor.ARGB32.alpha(colorARGB);
+        int red = FastColor.ARGB32.red(colorARGB);
+        int green = FastColor.ARGB32.green(colorARGB);
+        int blue = FastColor.ARGB32.blue(colorARGB);
 
         // Modify black and white points to make the image appear faded:
         red = (int) Mth.map(red, 0, 255, blackPoint, whitePoint);

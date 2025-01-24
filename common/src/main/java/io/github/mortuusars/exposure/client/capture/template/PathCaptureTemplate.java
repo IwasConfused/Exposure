@@ -5,12 +5,12 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.client.capture.Capture;
 import io.github.mortuusars.exposure.client.capture.palettizer.Palettizer;
 import io.github.mortuusars.exposure.client.capture.saving.ExposureUploader;
-import io.github.mortuusars.exposure.client.image.modifier.Modifier;
+import io.github.mortuusars.exposure.client.image.modifier.ImageModifier;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.data.ColorPalette;
-import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.util.cycles.task.EmptyTask;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.camera.capture.ProjectionInfo;
 import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
@@ -41,17 +41,21 @@ public class PathCaptureTemplate implements CaptureTemplate {
 
         ProjectionInfo projectionInfo = data.projection().get();
         String path = projectionInfo.path();
+        ExposureType filmType = data.filmType();
         int frameSize = data.frameSize().orElse(Config.Server.DEFAULT_FRAME_SIZE.getAsInt());
-        float brightnessStops = data.shutterSpeed().orElse(ShutterSpeed.DEFAULT).getStopsDifference(ShutterSpeed.DEFAULT);
-        Holder<ColorPalette> palette = data.colorPalette().orElse(ColorPalettes.getDefault(Minecrft.registryAccess()));
+        ShutterSpeed shutterSpeed = data.shutterSpeed().orElse(ShutterSpeed.DEFAULT);
+        Holder<ColorPalette> palette = data.getColorPalette(Minecrft.registryAccess());
 
         return Capture.of(Capture.path(path))
                 .logErrorAndGetResult(LOGGER)
-                .thenAsync(Modifier.chain(
-                        Modifier.Crop.SQUARE_CENTER,
-                        Modifier.Resize.to(frameSize),
-                        Modifier.brightness(brightnessStops),
-                        chooseColorProcessor(data)))
+                .thenAsync(ImageModifier.chain(
+                        ImageModifier.Crop.SQUARE_CENTER,
+                        ImageModifier.Resize.to(frameSize),
+                        ImageModifier.brightness(shutterSpeed),
+                        ImageModifier.optional(filmType == ExposureType.BLACK_AND_WHITE,
+                                data.singleChannel()
+                                        .map(ImageModifier::singleChannelBlackAndWhite)
+                                        .orElse(ImageModifier.BLACK_AND_WHITE))))
                 .thenAsync(Palettizer.fromProjectionMode(projectionInfo.mode()).palettizeAndClose(palette.value()))
                 .thenAsync(convertToExposureData(palette, createExposureTag(cameraHolder.getPlayerExecutingExposure(), data, true)))
                 .acceptAsync(image -> ExposureUploader.upload(data.exposureId(), image))

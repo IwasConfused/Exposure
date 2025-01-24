@@ -2,6 +2,8 @@ package io.github.mortuusars.exposure.world.camera.capture;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.mortuusars.exposure.client.util.Minecrft;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.util.ExtraData;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.world.camera.CameraId;
@@ -23,12 +25,12 @@ public record CaptureProperties(String exposureId,
                                 ExposureType filmType,
                                 Optional<Holder<ColorPalette>> colorPalette,
                                 Optional<Integer> frameSize,
-                                Optional<Float> cropFactor,
+                                float cropFactor,
                                 Optional<ShutterSpeed> shutterSpeed,
                                 Optional<Float> fovOverride,
                                 boolean flash,
                                 Optional<ProjectionInfo> projection,
-                                Optional<ColorChannel> isolateChannel,
+                                Optional<ColorChannel> singleChannel,
                                 Optional<Integer> cameraHolderEntityId,
                                 Optional<CameraId> cameraId,
                                 ExtraData extraData) {
@@ -42,12 +44,12 @@ public record CaptureProperties(String exposureId,
             ExposureType.CODEC.optionalFieldOf("film_type", ExposureType.COLOR).forGetter(CaptureProperties::filmType),
             ColorPalette.HOLDER_CODEC.optionalFieldOf("color_palette").forGetter(CaptureProperties::colorPalette),
             Codec.INT.optionalFieldOf("frame_size").forGetter(CaptureProperties::frameSize),
-            Codec.FLOAT.optionalFieldOf("crop_factor").forGetter(CaptureProperties::cropFactor),
+            Codec.FLOAT.optionalFieldOf("crop_factor", 1f).forGetter(CaptureProperties::cropFactor),
             ShutterSpeed.CODEC.optionalFieldOf("shutter_speed").forGetter(CaptureProperties::shutterSpeed),
             Codec.FLOAT.optionalFieldOf("fov_override").forGetter(CaptureProperties::fovOverride),
             Codec.BOOL.optionalFieldOf("flash", false).forGetter(CaptureProperties::flash),
             ProjectionInfo.CODEC.optionalFieldOf("projection").forGetter(CaptureProperties::projection),
-            ColorChannel.CODEC.optionalFieldOf("chromatic_channel").forGetter(CaptureProperties::isolateChannel),
+            ColorChannel.CODEC.optionalFieldOf("single_channel").forGetter(CaptureProperties::singleChannel),
             Codec.INT.optionalFieldOf("camera_holder_id").forGetter(CaptureProperties::cameraHolderEntityId),
             CameraId.CODEC.optionalFieldOf("camera_id").forGetter(CaptureProperties::cameraId),
             ExtraData.CODEC.optionalFieldOf("extra_data", new ExtraData()).forGetter(CaptureProperties::extraData)
@@ -60,7 +62,7 @@ public record CaptureProperties(String exposureId,
                     ExposureType.STREAM_CODEC.decode(buffer),
                     ByteBufCodecs.optional(ColorPalette.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).decode(buffer),
-                    ByteBufCodecs.optional(ByteBufCodecs.FLOAT).decode(buffer),
+                    ByteBufCodecs.FLOAT.decode(buffer),
                     ByteBufCodecs.optional(ShutterSpeed.STREAM_CODEC).decode(buffer),
                     ByteBufCodecs.optional(ByteBufCodecs.FLOAT).decode(buffer),
                     ByteBufCodecs.BOOL.decode(buffer),
@@ -76,17 +78,25 @@ public record CaptureProperties(String exposureId,
             ExposureType.STREAM_CODEC.encode(buffer, data.filmType());
             ByteBufCodecs.optional(ColorPalette.STREAM_CODEC).encode(buffer, data.colorPalette());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.frameSize());
-            ByteBufCodecs.optional(ByteBufCodecs.FLOAT).encode(buffer, data.cropFactor());
+            ByteBufCodecs.FLOAT.encode(buffer, data.cropFactor());
             ByteBufCodecs.optional(ShutterSpeed.STREAM_CODEC).encode(buffer, data.shutterSpeed());
             ByteBufCodecs.optional(ByteBufCodecs.FLOAT).encode(buffer, data.fovOverride());
             ByteBufCodecs.BOOL.encode(buffer, data.flash());
             ByteBufCodecs.optional(ProjectionInfo.STREAM_CODEC).encode(buffer, data.projection());
-            ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.isolateChannel());
+            ByteBufCodecs.optional(ColorChannel.STREAM_CODEC).encode(buffer, data.singleChannel());
             ByteBufCodecs.optional(ByteBufCodecs.VAR_INT).encode(buffer, data.cameraHolderEntityId());
             ByteBufCodecs.optional(CameraId.STREAM_CODEC).encode(buffer, data.cameraId());
             ExtraData.STREAM_CODEC.encode(buffer, data.extraData());
         }
     };
+
+    public ShutterSpeed getShutterSpeed() {
+        return shutterSpeed.orElse(ShutterSpeed.DEFAULT);
+    }
+
+    public Holder<ColorPalette> getColorPalette(RegistryAccess access) {
+        return colorPalette.orElse(ColorPalettes.getDefault(access));
+    }
 
     public static final class Builder {
         private final String exposureId;
@@ -94,7 +104,7 @@ public record CaptureProperties(String exposureId,
         private ExposureType filmType = ExposureType.COLOR;
         private @Nullable Holder<ColorPalette> colorPalette = null;
         private @Nullable Integer frameSize = null;
-        private @Nullable Float cropFactor = null;
+        private float cropFactor = 1f;
         private @Nullable ShutterSpeed shutterSpeed = null;
         private @Nullable Float fovOverride = null;
         private boolean flash = false;
@@ -189,7 +199,7 @@ public record CaptureProperties(String exposureId,
                     this.filmType,
                     Optional.ofNullable(this.colorPalette),
                     Optional.ofNullable(this.frameSize),
-                    Optional.ofNullable(this.cropFactor),
+                    this.cropFactor,
                     Optional.ofNullable(this.shutterSpeed),
                     Optional.ofNullable(this.fovOverride),
                     this.flash,

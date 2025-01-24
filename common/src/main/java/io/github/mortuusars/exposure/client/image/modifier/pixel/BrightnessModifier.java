@@ -1,46 +1,44 @@
-package io.github.mortuusars.exposure.client.image.modifier;
+package io.github.mortuusars.exposure.client.image.modifier.pixel;
 
-import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ModifiedImage;
+import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class BrightnessModifier implements Modifier {
-    public float brightenPerStop = 0.2f;
-    public float darkenPerStop = 0.2f;
+public class BrightnessModifier implements PixelModifier {
+    protected final float brightness;
 
-    protected final float brightnessStops;
-
-    public BrightnessModifier(float brightnessStops) {
-        this.brightnessStops = brightnessStops;
+    /**
+     * @param brightness 1 means no change.
+     */
+    public BrightnessModifier(float brightness) {
+        this.brightness = brightness;
     }
 
-    @Override
-    public Image modify(Image image) {
-        return new ModifiedImage(image, this::modifyPixel);
+    public BrightnessModifier(float brightnessStops, float brightnessPerStop) {
+        this(1f + brightnessStops * brightnessPerStop);
+    }
+
+    public BrightnessModifier(ShutterSpeed shutterSpeed) {
+        this(shutterSpeed.getStops(), 0.2f);
     }
 
     @Override
     public String getIdentifier() {
-        return "brightness-" + brightnessStops;
+        return "brightness-" + brightness;
     }
 
-    public int modifyPixel(int colorARGB) {
-        float stopsDif = brightnessStops;
-        if (stopsDif == 0f)
-            return colorARGB;
+    public int modify(int colorARGB) {
+        if (brightness == 1f) return colorARGB;
 
         int alpha = FastColor.ARGB32.alpha(colorARGB);
         int red = FastColor.ARGB32.red(colorARGB);
         int green = FastColor.ARGB32.green(colorARGB);
         int blue = FastColor.ARGB32.blue(colorARGB);
 
-        float brightness = 1f + (stopsDif * (stopsDif < 0 ? darkenPerStop : brightenPerStop));
-
         // We simulate bright light by not modifying all pixels equally
         float lightness = (blue + green + red) / 765f; // from 0.0 to 1.0
         float bias;
-        if (stopsDif < 0)
+        if (brightness < 1)
             bias = (1f - lightness) * 0.8f + 0.2f;
         else {
             float curve = (float) Math.pow(Math.sin(lightness * Math.PI), 2);
@@ -94,6 +92,6 @@ public class BrightnessModifier implements Modifier {
     @Override
     public String toString() {
         return "BrightnessProcessor[" +
-                "brightnessStops=" + brightnessStops + ']';
+                "brightness=" + brightness + ']';
     }
 }

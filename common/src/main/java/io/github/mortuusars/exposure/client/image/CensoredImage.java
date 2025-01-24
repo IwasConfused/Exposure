@@ -3,14 +3,14 @@ package io.github.mortuusars.exposure.client.image;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class CensoredImage implements Image {
-    private final Image image;
+public class CensoredImage extends Image.Wrapped {
+    private final int blockSize;
     private final Integer[][] cache;
 
     public CensoredImage(Image image) {
-        this.image = image;
-        float blockSize = getBlockSize();
-        this.cache = new Integer[Mth.ceil(width() / blockSize)][Mth.ceil(height() / blockSize)];
+        super(image);
+        this.blockSize = getBlockSize();
+        this.cache = new Integer[Mth.ceil((float) width() / blockSize)][Mth.ceil((float) height() / blockSize)];
     }
 
     public int getBlockSize() {
@@ -19,23 +19,7 @@ public class CensoredImage implements Image {
     }
 
     @Override
-    public int width() {
-        return image.width();
-    }
-
-    @Override
-    public int height() {
-        return image.height();
-    }
-
-    @Override
-    public void close() {
-        image.close();
-    }
-
-    @Override
     public int getPixelARGB(int x, int y) {
-        int blockSize = getBlockSize();
         int blockXIndex = x / blockSize;
         int blockYIndex = y / blockSize;
         int blockX = blockXIndex * blockSize;
@@ -58,9 +42,9 @@ public class CensoredImage implements Image {
         int totalR = 0, totalG = 0, totalB = 0, totalA = 0;
         int pixelCount = 0;
 
-        for (int y = startY; y < endY; y++) {
-            for (int x = startX; x < endX; x++) {
-                int pixel = image.getPixelARGB(x, y);
+        for (int x = startX; x < endX; x++) {
+            for (int y = startY; y < endY; y++) {
+                int pixel = getImage().getPixelARGB(x, y);
                 totalA += (pixel >> 24) & 0xFF;
                 totalR += (pixel >> 16) & 0xFF;
                 totalG += (pixel >> 8) & 0xFF;

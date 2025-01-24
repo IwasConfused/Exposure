@@ -1,25 +1,24 @@
-package io.github.mortuusars.exposure.client.image.modifier;
+package io.github.mortuusars.exposure.client.image.modifier.pixel;
 
-import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 
-public class NegativeModifier implements Modifier {
-    @Override
-    public Image modify(Image image) {
-        return new ModifiedImage(image, this::modifyPixel);
-    }
-
+public class NegativeFilmModifier implements PixelModifier {
     @Override
     public String getIdentifier() {
-        return "negative";
+        return "negative-film";
     }
 
-    public int modifyPixel(int ARGB) {
+    public int modify(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);
         int green = FastColor.ARGB32.green(ARGB);
         int blue = FastColor.ARGB32.blue(ARGB);
+
+        // Modify opacity to make lighter colors transparent, like in real film.
+        int lightness = (red + green + blue) / 3;
+        int opacity = (int) Mth.clamp(lightness * 1.5f, 0, 255);
+        alpha = (alpha * opacity) / 255;
 
         // Invert
         red = 255 - red;

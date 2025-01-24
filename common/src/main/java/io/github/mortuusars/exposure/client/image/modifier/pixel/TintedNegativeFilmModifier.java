@@ -1,12 +1,10 @@
-package io.github.mortuusars.exposure.client.image.modifier;
+package io.github.mortuusars.exposure.client.image.modifier.pixel;
 
-import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import io.github.mortuusars.exposure.world.camera.FilmColor;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
-public class TintedNegativeFilmModifier implements Modifier {
+public class TintedNegativeFilmModifier implements PixelModifier {
     private final FilmColor tintColor;
 
     public TintedNegativeFilmModifier(FilmColor tintColor) {
@@ -14,16 +12,11 @@ public class TintedNegativeFilmModifier implements Modifier {
     }
 
     @Override
-    public Image modify(Image image) {
-        return new ModifiedImage(image, this::modifyPixel);
-    }
-
-    @Override
     public String getIdentifier() {
-        return "tinted-negative-film";
+        return "tinted-negative-film-" + tintColor;
     }
 
-    public int modifyPixel(int ARGB) {
+    public int modify(int ARGB) {
         int alpha = FastColor.ARGB32.alpha(ARGB);
         int red = FastColor.ARGB32.red(ARGB);
         int green = FastColor.ARGB32.green(ARGB);

@@ -10,11 +10,11 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
 public class FlashAction implements CaptureAction {
-    private final Entity photographer;
+    private final Entity cameraHolder;
     private long initializedAt;
 
-    public FlashAction(Entity photographer) {
-        this.photographer = photographer;
+    public FlashAction(Entity cameraHolder) {
+        this.cameraHolder = cameraHolder;
     }
 
     @Override
@@ -24,12 +24,12 @@ public class FlashAction implements CaptureAction {
 
     @Override
     public void initialize() {
-        initializedAt = photographer.level().getGameTime();
+        initializedAt = cameraHolder.level().getGameTime();
     }
 
     @Override
     public void beforeCapture() {
-        long ticksDelay = photographer.level().getGameTime() - initializedAt;
+        long ticksDelay = cameraHolder.level().getGameTime() - initializedAt;
         if (ticksDelay > FlashBlock.LIFETIME_TICKS) {
             Exposure.LOGGER.warn("Capturing with delay of '{}' ticks can be too long for a flash to have an effect. " +
                     "The flash might disappear in that time.", ticksDelay);
@@ -39,9 +39,9 @@ public class FlashAction implements CaptureAction {
     @Override
     public void afterCapture() {
         // Spawning particles after capture because they will be visible on a frame otherwise.
-        Level level = photographer.level();
-        Vec3 pos = photographer.position();
-        Vec3 lookAngle = photographer.getLookAngle();
+        Level level = cameraHolder.level();
+        Vec3 pos = cameraHolder.position();
+        Vec3 lookAngle = cameraHolder.getLookAngle();
         pos = pos.add(0, 1.2, 0).add(lookAngle.multiply(0.8f, 0.8f, 0.8f));
 
         RandomSource r = level.getRandom();

@@ -1,7 +1,7 @@
 package io.github.mortuusars.exposure.client.image.renderable;
 
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.modifier.Modifier;
+import io.github.mortuusars.exposure.client.image.modifier.ImageModifier;
 
 import java.util.function.Function;
 
@@ -18,7 +18,7 @@ public interface RenderableImage extends Image {
         return new Instance(image, identifier);
     }
 
-    default RenderableImage modifyWith(Modifier modifier) {
+    default RenderableImage modifyWith(ImageModifier modifier) {
         return modifyWith(modifier::modify, modifier.getIdentifier());
     }
 

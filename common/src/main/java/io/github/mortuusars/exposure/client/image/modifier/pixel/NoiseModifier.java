@@ -1,14 +1,12 @@
-package io.github.mortuusars.exposure.client.image.modifier;
+package io.github.mortuusars.exposure.client.image.modifier.pixel;
 
 import com.google.common.base.Preconditions;
-import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.client.image.ModifiedImage;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 
 import java.util.concurrent.ThreadLocalRandom;
 
-public class NoiseModifier implements Modifier {
+public class NoiseModifier implements PixelModifier {
     protected final float intensity;
 
     public NoiseModifier(float intensity) {
@@ -17,16 +15,11 @@ public class NoiseModifier implements Modifier {
     }
 
     @Override
-    public Image modify(Image image) {
-        return new ModifiedImage(image, this::modifyPixel);
-    }
-
-    @Override
     public String getIdentifier() {
         return "noise-" + intensity;
     }
 
-    public int modifyPixel(int colorARGB) {
+    public int modify(int colorARGB) {
         int alpha = FastColor.ARGB32.alpha(colorARGB);
         int red = FastColor.ARGB32.red(colorARGB);
         int green = FastColor.ARGB32.green(colorARGB);
