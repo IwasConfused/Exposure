@@ -34,7 +34,7 @@ public record OpenCameraAttachmentsInCreativePacketC2SP(int cameraSlotIndex) imp
             serverPlayer.server.execute(() -> {
                 ItemStack stack = player.getInventory().getItem(cameraSlotIndex);
                 if (stack.getItem() instanceof CameraItem cameraItem)
-                    cameraItem.openCameraAttachments(player, cameraSlotIndex);
+                    cameraItem.openCameraAttachments(player, cameraSlotIndex, true);
             });
         }
 

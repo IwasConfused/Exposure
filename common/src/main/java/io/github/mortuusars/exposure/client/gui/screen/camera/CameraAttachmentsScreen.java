@@ -15,6 +15,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.core.Holder;
@@ -261,6 +262,14 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
         }
 
         return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        if (getMenu().isOpenedFromGui()) {
+            Minecrft.get().setScreen(new InventoryScreen(player));
+        }
     }
 
     public record HoveredElement(List<Rect2i> hoverArea, Supplier<Boolean> isEnabled) { }

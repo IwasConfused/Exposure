@@ -21,6 +21,8 @@
 - Camera filter effects are now processed separately. 
   - Vanilla effects will not be rendered when camera captures an image, unless turned on in a config.     
 
+Misc:
+  - Closing Camera Attachments menu will now go back to inventory menu if it was opened from it.
 
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.

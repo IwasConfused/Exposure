@@ -308,7 +308,7 @@ public class CameraItem extends Item {
                 return true;
             }
 
-            openCameraAttachments(player, slot.getContainerSlot());
+            openCameraAttachments(player, slot.getContainerSlot(), true);
             return true;
         }
 
@@ -371,7 +371,7 @@ public class CameraItem extends Item {
 
         if (!isActive(stack)) {
             return player.isSecondaryUseActive()
-                    ? openCameraAttachments(player, stack)
+                    ? openCameraAttachments(player, stack, false)
                     : activateInHand(player, stack, hand);
         }
 
@@ -474,7 +474,7 @@ public class CameraItem extends Item {
         });
     }
 
-    public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack) {
+    public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, ItemStack stack, boolean openedFromGUI) {
         Preconditions.checkArgument(stack.getItem() instanceof CameraItem, "%s is not a CameraItem.", stack);
 
         int cameraSlot = getMatchingSlotInInventory(player.getInventory(), stack);
@@ -483,10 +483,10 @@ public class CameraItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
 
-        return openCameraAttachments(player, cameraSlot);
+        return openCameraAttachments(player, cameraSlot, openedFromGUI);
     }
 
-    public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, int slotIndex) {
+    public InteractionResultHolder<ItemStack> openCameraAttachments(@NotNull Player player, int slotIndex, boolean openedFromGUI) {
         Preconditions.checkArgument(slotIndex >= 0,
                 "slotIndex '%s' is invalid. Should be larger than 0", slotIndex);
         ItemStack stack = player.getInventory().getItem(slotIndex);
@@ -509,11 +509,14 @@ public class CameraItem extends Item {
 
                 @Override
                 public @NotNull AbstractContainerMenu createMenu(int containerId, @NotNull Inventory playerInventory, @NotNull Player player) {
-                    return new CameraAttachmentsMenu(containerId, playerInventory, slotIndex);
+                    return new CameraAttachmentsMenu(containerId, playerInventory, slotIndex, openedFromGUI);
                 }
             };
 
-            PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> buffer.writeInt(slotIndex));
+            PlatformHelper.openMenu(serverPlayer, menuProvider, buffer -> {
+                buffer.writeInt(slotIndex);
+                buffer.writeBoolean(openedFromGUI);
+            });
         }
 
         stack.set(Exposure.DataComponents.CAMERA_DISASSEMBLED, true);

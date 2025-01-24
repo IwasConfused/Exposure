@@ -24,11 +24,13 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
     protected final int cameraSlotIndex;
     protected final ItemAndStack<CameraItem> camera;
     protected final List<Attachment<?>> attachments;
+    private final boolean openedFromGui;
 
     protected boolean clientContentsInitialized;
 
-    public CameraAttachmentsMenu(int containerId, Inventory playerInventory, int cameraSlotIndex) {
+    public CameraAttachmentsMenu(int containerId, Inventory playerInventory, int cameraSlotIndex, boolean openedFromGui) {
         super(Exposure.MenuTypes.CAMERA.get(), containerId);
+        this.openedFromGui = openedFromGui;
 
         ItemStack cameraStack = cameraSlotIndex == 40 ? playerInventory.offhand.get(0) : playerInventory.items.get(cameraSlotIndex);
         Preconditions.checkState(cameraStack.getItem() instanceof CameraItem,
@@ -75,6 +77,10 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
 
     public ItemAndStack<CameraItem> getCamera() {
         return camera;
+    }
+
+    public boolean isOpenedFromGui() {
+        return openedFromGui;
     }
 
     /**
@@ -270,6 +276,6 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
     }
 
     public static CameraAttachmentsMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
-        return new CameraAttachmentsMenu(containerId, playerInventory, buffer.readInt());
+        return new CameraAttachmentsMenu(containerId, playerInventory, buffer.readInt(), buffer.readBoolean());
     }
 }
