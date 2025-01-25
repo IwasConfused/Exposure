@@ -360,9 +360,6 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (button == 0) {
-            Preconditions.checkState(minecraft != null);
-            Preconditions.checkState(minecraft.gameMode != null);
-
             if (isOverCenterFrame((int) mouseX, (int) mouseY)) {
                 enterFrameInspectMode();
                 return true;

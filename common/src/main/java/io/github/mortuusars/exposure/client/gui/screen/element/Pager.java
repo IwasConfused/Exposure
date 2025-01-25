@@ -6,18 +6,15 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 
-@SuppressWarnings({"UnusedReturnValue", "BooleanMethodIsAlwaysInverted"})
 public class Pager {
     public long lastChangedAt;
     public int changeCooldownMS = 50;
     public boolean playSound = true;
     public SoundEvent changeSoundEvent;
 
-    protected ResourceLocation texture;
     protected int pages;
     protected boolean cycled;
     protected int currentPage;

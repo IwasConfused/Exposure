@@ -16,8 +16,8 @@ public class BuggerKeyboardHandlerMixin {
         if (!PlatformHelper.isInDevEnv()) return;
         if (!Minecraft.getInstance().gui.getDebugOverlay().showDebugScreen()) return;
         if (Minecraft.getInstance().screen != null) return;
-        if (action == InputConstants.PRESS && Bugger.onKeyPress(key, scanCode)) ci.cancel();
-        if (action == InputConstants.REPEAT && Bugger.onKeyRepeat(key, scanCode)) ci.cancel();
-        if (action == InputConstants.RELEASE && Bugger.onKeyRelease(key, scanCode)) ci.cancel();
+        if (action == InputConstants.PRESS && Bugger.onKeyPress(key, scanCode, modifiers)) ci.cancel();
+        if (action == InputConstants.REPEAT && Bugger.onKeyRepeat(key, scanCode, modifiers)) ci.cancel();
+        if (action == InputConstants.RELEASE && Bugger.onKeyRelease(key, scanCode, modifiers)) ci.cancel();
     }
 }

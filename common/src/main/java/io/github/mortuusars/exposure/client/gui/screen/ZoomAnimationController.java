@@ -18,7 +18,7 @@ public class ZoomAnimationController {
 
     public void update() {
         float speed = currentZoom < targetZoom ? zoomInSpeed : zoomOutSpeed;
-        float delta = speed * Minecraft.getInstance().getTimer().getGameTimeDeltaTicks();
+        float delta = speed * Minecraft.getInstance().getTimer().getGameTimeDeltaPartialTick(true);
         set(Mth.lerp(delta, currentZoom, targetZoom));
     }
 

@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.client.util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.RegistryAccess;
 
@@ -14,19 +15,23 @@ public class Minecrft {
     }
 
     public static LocalPlayer player() {
-        return Objects.requireNonNull(Minecraft.getInstance().player, "Player is not available.");
+        return Objects.requireNonNull(get().player, "Player is not available.");
     }
 
     public static ClientLevel level() {
-        return Objects.requireNonNull(Minecraft.getInstance().level, "Level is not available.");
+        return Objects.requireNonNull(get().level, "Level is not available.");
     }
 
     public static RegistryAccess registryAccess() {
         return level().registryAccess();
     }
 
+    public static MultiPlayerGameMode gameMode() {
+        return Objects.requireNonNull(get().gameMode, "GameMode is not available.");
+    }
+
     public static Options options() {
-        return Minecraft.getInstance().options;
+        return get().options;
     }
 
     public static void execute(Runnable runnable) {
@@ -34,6 +39,6 @@ public class Minecrft {
     }
 
     public static void releaseUseButton() {
-        Minecraft.getInstance().options.keyUse.setDown(false);
+        get().options.keyUse.setDown(false);
     }
 }

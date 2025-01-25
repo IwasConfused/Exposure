@@ -56,7 +56,6 @@ public class ShutterTickingSoundInstance extends EntityBoundSoundInstance {
 
         if (endsAtTick - entity.level().getGameTime() < 0) {
             stop();
-            Exposure.LOGGER.info("Stopped ticking sound.");
             return;
         }
 

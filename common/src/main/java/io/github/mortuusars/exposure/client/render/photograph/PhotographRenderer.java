@@ -134,19 +134,19 @@ public class PhotographRenderer {
 
             poseStack.translate(-0.5f, -0.5f, 0);
 
-            float brightnessMul = 1f - (getStackedBrightnessStep() * i);
+            float brightness = 1f - (getStackedBrightnessStep() * i);
 
             PhotographStyle photographStyle = PhotographStyle.of(photograph.getItemStack());
 
             TextureRenderer.render(poseStack, bufferSource, photographStyle.paperTexture(),
-                    packedLight, (int)(r * brightnessMul), (int)(g * brightnessMul), (int)(b * brightnessMul), a);
+                    packedLight, (int)(r * brightness), (int)(g * brightness), (int)(b * brightness), a);
 
             poseStack.popPose();
         }
     }
 
     public float getStackedBrightnessStep() {
-        return 0.15f;
+        return 0.2f;
     }
 
     public float getStackedPhotographOffset() {

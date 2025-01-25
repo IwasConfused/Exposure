@@ -139,8 +139,8 @@ public class Sound {
         }
     }
 
-    private static float vary(float value, float variety) {
-        return value - (variety / 2) + ThreadLocalRandom.current().nextFloat() * variety;
+    private static float vary(float value, float variability) {
+        return value - (variability / 2) + ThreadLocalRandom.current().nextFloat() * variability;
     }
 
     public static void playShutterTicking(Entity entity, CameraId cameraId, int duration) {

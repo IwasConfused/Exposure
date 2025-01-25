@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.client.gui.screen.album;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
@@ -32,7 +33,7 @@ public class AlbumPhotographScreen extends PhotographScreen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_ESCAPE || minecraft.options.keyInventory.matches(keyCode, scanCode)) {
+        if (keyCode == InputConstants.KEY_ESCAPE || Minecrft.options().keyInventory.matches(keyCode, scanCode)) {
             zoom.set(0f);
             return true;
         }
@@ -42,11 +43,11 @@ public class AlbumPhotographScreen extends PhotographScreen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean handled = super.mouseClicked(mouseX, mouseY, button);
-        if (handled)
+        if (super.mouseClicked(mouseX, mouseY, button)) {
             return true;
+        }
 
-        if (button == 1) { // Right Click
+        if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
             zoom.set(0f);
             return true;
         }

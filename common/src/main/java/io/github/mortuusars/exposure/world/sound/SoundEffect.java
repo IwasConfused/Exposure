@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.world.sound;
 
 import net.minecraft.sounds.SoundEvent;
 
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
 public record SoundEffect(Supplier<SoundEvent> sound, float volume, float pitch, float pitchVariability) {
@@ -19,5 +20,9 @@ public record SoundEffect(Supplier<SoundEvent> sound, float volume, float pitch,
 
     public SoundEvent get() {
         return sound().get();
+    }
+
+    public float getFinalPitch() {
+        return pitch - (pitchVariability / 2) + ThreadLocalRandom.current().nextFloat() * pitchVariability;
     }
 }
