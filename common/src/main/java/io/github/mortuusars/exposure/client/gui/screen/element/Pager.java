@@ -1,119 +1,183 @@
 package io.github.mortuusars.exposure.client.gui.screen.element;
 
-import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.util.PagingDirection;
+import io.github.mortuusars.exposure.world.sound.SoundEffect;
 import net.minecraft.Util;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractButton;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
-import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Optional;
 
 public class Pager {
-    public long lastChangedAt;
-    public int changeCooldownMS = 50;
-    public boolean playSound = true;
-    public SoundEvent changeSoundEvent;
+    protected int pagesCount;
+    protected boolean cycle;
+    protected int changeCooldownMs = 50;
+    protected @Nullable SoundEffect changeSound = null;
+    protected @Nullable AbstractButton previousPageButton = null;
+    protected @Nullable AbstractButton nextPageButton = null;
+    protected OnPageChanged onPageChanged = (oldPage, newPage) -> {
+    };
 
-    protected int pages;
-    protected boolean cycled;
     protected int currentPage;
-    protected AbstractButton previousButton;
-    protected AbstractButton nextButton;
+    protected long lastChangeTime;
 
-    public Pager(SoundEvent changeSoundEvent) {
-        this.changeSoundEvent = changeSoundEvent;
+    // --
+
+    public int getPagesCount() {
+        return pagesCount;
     }
 
-    public void init(int pages, boolean cycled, AbstractButton previousPageButton, AbstractButton nextPageButton) {
-        this.pages = pages;
-        this.cycled = cycled;
-        setPage(getCurrentPage());
-
-        this.previousButton = previousPageButton;
-        this.nextButton = nextPageButton;
-        update();
+    public Pager setPagesCount(int pages) {
+        this.pagesCount = pages;
+        setPage(getPage()); // Updates current page to new range if needed
+        return this;
     }
 
-    public int getCurrentPage() {
+    public boolean isCycled() {
+        return cycle;
+    }
+
+    public Pager setCycled(boolean cycled) {
+        this.cycle = cycled;
+        return this;
+    }
+
+    public int getChangeCooldown() {
+        return changeCooldownMs;
+    }
+
+    public Pager setChangeCooldown(int milliseconds) {
+        this.changeCooldownMs = milliseconds;
+        return this;
+    }
+
+    public Optional<SoundEffect> getChangeSound() {
+        return Optional.ofNullable(changeSound);
+    }
+
+    public Pager setChangeSound(@Nullable SoundEffect changeSound) {
+        this.changeSound = changeSound;
+        return this;
+    }
+
+    public Optional<AbstractButton> getPreviousPageButton() {
+        return Optional.ofNullable(previousPageButton);
+    }
+
+    public Pager setPreviousPageButton(@Nullable AbstractButton previousPageButton) {
+        this.previousPageButton = previousPageButton;
+        updateButtonVisibility();
+        return this;
+    }
+
+    public Optional<AbstractButton> getNextPageButton() {
+        return Optional.ofNullable(nextPageButton);
+    }
+
+    public Pager setNextPageButton(@Nullable AbstractButton nextPageButton) {
+        this.nextPageButton = nextPageButton;
+        updateButtonVisibility();
+        return this;
+    }
+
+    public OnPageChanged getOnPageChanged() {
+        return onPageChanged;
+    }
+
+    public Pager onPageChanged(OnPageChanged onPageChanged) {
+        this.onPageChanged = onPageChanged;
+        return this;
+    }
+
+    // --
+
+    public int getPage() {
         return currentPage;
     }
 
-    public void setPage(int value) {
-        this.currentPage = Mth.clamp(value, 0, this.pages);
-    }
-
-    public void update() {
-        previousButton.visible = canChangePage(PagingDirection.PREVIOUS);
-        nextButton.visible = canChangePage(PagingDirection.NEXT);
-    }
-
-    public boolean handleKeyPressed(int keyCode, int scanCode, int modifiers) {
-        if (Minecraft.getInstance().options.keyLeft.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_LEFT) {
-            if (!isOnCooldown())
-                changePage(PagingDirection.PREVIOUS);
-            return true;
-        }
-        else if (Minecraft.getInstance().options.keyRight.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_RIGHT) {
-            if (!isOnCooldown())
-                changePage(PagingDirection.NEXT);
-            return true;
-        }
-        else
+    public boolean setPage(int page) {
+        page = Mth.clamp(page, 0, this.pagesCount);
+        int oldPage = currentPage;
+        if (currentPage == page) {
             return false;
-    }
-
-    public boolean handleKeyReleased(int keyCode, int scanCode, int modifiers) {
-        if (Minecraft.getInstance().options.keyRight.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_RIGHT
-                || Minecraft.getInstance().options.keyLeft.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_LEFT) {
-            lastChangedAt = 0;
-            return true;
         }
-
-        return false;
+        currentPage = page;
+        pageChanged(oldPage, page);
+        return true;
     }
 
-    private boolean isOnCooldown() {
-        return Util.getMillis() - lastChangedAt < changeCooldownMS;
+    public boolean isOnCooldown() {
+        return Util.getMillis() - lastChangeTime < changeCooldownMs;
+    }
+
+    public void resetCooldown() {
+        lastChangeTime = 0;
+    }
+
+    public boolean isPagingDirectionAvailable(PagingDirection direction) {
+        int newIndex = getPage() + direction.getValue();
+        return pagesCount > 1 && (cycle || (0 <= newIndex && newIndex < pagesCount));
     }
 
     public boolean canChangePage(PagingDirection direction) {
-        int newIndex = getCurrentPage() + direction.getValue();
-        return pages > 1 && (cycled || (0 <= newIndex && newIndex < pages));
+        return isPagingDirectionAvailable(direction) && !isOnCooldown();
+    }
+
+    public boolean previousPage() {
+        return changePage(PagingDirection.PREVIOUS);
+    }
+
+    public boolean nextPage() {
+        return changePage(PagingDirection.NEXT);
     }
 
     public boolean changePage(PagingDirection direction) {
-        if (!canChangePage(direction))
+        if (!canChangePage(direction)) {
             return false;
+        }
 
         int oldPage = currentPage;
-        int newPage = getCurrentPage() + direction.getValue();
+        int newPage = getPage() + direction.getValue();
 
-        if (cycled && newPage >= pages)
+        if (cycle && newPage >= pagesCount)
             newPage = 0;
-        else if (cycled && newPage < 0)
-            newPage = pages - 1;
+        else if (cycle && newPage < 0)
+            newPage = pagesCount - 1;
 
         if (oldPage == newPage)
             return false;
 
-        setPage(newPage);
-        onPageChanged(direction, oldPage, currentPage);
-        return true;
+        return setPage(newPage);
     }
 
-    public void onPageChanged(PagingDirection pagingDirection, int prevPage, int currentPage) {
-        lastChangedAt = Util.getMillis();
-        if (playSound)
-            playChangeSound();
+    public void pageChanged(int oldPage, int newPage) {
+        lastChangeTime = Util.getMillis();
+        playChangeSound();
+        updateButtonVisibility();
+        onPageChanged.pageChanged(oldPage, newPage);
     }
 
-    protected void playChangeSound() {
-        Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(
-                getChangeSound(), 0.8f, 1f));
+    // --
+
+    public void updateButtonVisibility() {
+        if (previousPageButton != null) {
+            previousPageButton.visible = isPagingDirectionAvailable(PagingDirection.PREVIOUS);
+        }
+        if (nextPageButton != null) {
+            nextPageButton.visible = isPagingDirectionAvailable(PagingDirection.NEXT);
+        }
     }
 
-    protected SoundEvent getChangeSound() {
-        return changeSoundEvent;
+    public void playChangeSound() {
+        getChangeSound().ifPresent(sound -> Minecrft.get().getSoundManager().play(
+                SimpleSoundInstance.forUI(sound.get(), sound.getFinalPitch(), sound.volume())));
+    }
+
+    @FunctionalInterface
+    public interface OnPageChanged {
+        void pageChanged(int oldPage, int newPage);
     }
 }

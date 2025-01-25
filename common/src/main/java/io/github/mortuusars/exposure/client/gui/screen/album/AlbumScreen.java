@@ -8,6 +8,9 @@ import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.client.gui.screen.element.TextBlock;
 import io.github.mortuusars.exposure.client.gui.screen.element.textbox.HorizontalAlignment;
 import io.github.mortuusars.exposure.client.gui.screen.element.textbox.TextBox;
+import io.github.mortuusars.exposure.client.input.Key;
+import io.github.mortuusars.exposure.client.input.KeyBindings;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.component.album.AlbumPage;
 import io.github.mortuusars.exposure.world.inventory.AlbumMenu;
@@ -15,12 +18,11 @@ import io.github.mortuusars.exposure.world.inventory.AlbumPlayerInventorySlot;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import io.github.mortuusars.exposure.util.Side;
-import net.minecraft.client.Minecraft;
+import io.github.mortuusars.exposure.world.sound.SoundEffect;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.*;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -30,16 +32,12 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
@@ -56,20 +54,21 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
     public static final int SELECTION_COLOR = 0xFF8888FF;
     public static final int SELECTION_UNFOCUSED_COLOR = 0xFFBBBBFF;
 
-    @NotNull
-    protected final Minecraft minecraft;
-    @NotNull
-    protected final Player player;
-    @NotNull
-    protected final MultiPlayerGameMode gameMode;
+    protected final Pager pager = new Pager()
+            .setChangeSound(new SoundEffect(() -> SoundEvents.BOOK_PAGE_TURN))
+            .onPageChanged((oldPage, newPage) -> sendButtonClick(PagingDirection.fromChange(oldPage, newPage).ordinal()));
 
-    protected final Pager pager = new Pager(SoundEvents.BOOK_PAGE_TURN) {
-        @Override
-        public void onPageChanged(PagingDirection pagingDirection, int prevPage, int currentPage) {
-            super.onPageChanged(pagingDirection, prevPage, currentPage);
-            sendButtonClick(pagingDirection == PagingDirection.PREVIOUS ? AlbumMenu.PREVIOUS_PAGE_BUTTON : AlbumMenu.NEXT_PAGE_BUTTON);
-        }
-    };
+    protected final KeyBindings keyBindings = KeyBindings.of(
+            Key.press(Minecrft.options().keyInventory).executes(this::onClose),
+//            Key.press(InputConstants.KEY_ADD).or(Key.press(InputConstants.KEY_EQUALS)).executes(this::zoomIn),
+//            Key.press(GLFW.GLFW_KEY_KP_SUBTRACT).or(Key.press(InputConstants.KEY_MINUS)).executes(this::zoomOut),
+//            Key.press(Modifier.CONTROL, InputConstants.KEY_C).executes(this::copyIdentifierToClipboard),
+//            Key.press(Modifier.CONTROL, InputConstants.KEY_I).executes(this::dropAsItem),
+            Key.press(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::previousPage),
+            Key.press(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(pager::nextPage),
+            Key.release(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::resetCooldown),
+            Key.release(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(pager::resetCooldown)
+    );
 
     protected final List<Page> pages = new ArrayList<>();
 
@@ -78,14 +77,6 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
 
     public AlbumScreen(AlbumMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
-        minecraft = Minecraft.getInstance();
-        player = Objects.requireNonNull(minecraft.player);
-        gameMode = Objects.requireNonNull(minecraft.gameMode);
-    }
-
-    @Override
-    protected void containerTick() {
-        forEachPage(page -> page.noteWidget.ifLeft(TextBox::tick));
     }
 
     @Override
@@ -127,7 +118,14 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         }
 
         int spreadsCount = (int) Math.ceil(getMenu().getPages().size() / 2f);
-        pager.init(spreadsCount, false, previousPageButton, nextPageButton);
+        pager.setPagesCount(spreadsCount)
+                .setPreviousPageButton(previousPageButton)
+                .setNextPageButton(nextPageButton);
+    }
+
+    @Override
+    protected void containerTick() {
+        forEachPage(page -> page.noteWidget.ifLeft(TextBox::tick));
     }
 
     protected Page createPage(Side side, int xOffset) {
@@ -147,7 +145,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
                     if (photograph.isEmpty()) {
                         if (button.isEditable) {
                             sendButtonClick(side == Side.LEFT ? AlbumMenu.LEFT_PAGE_PHOTO_BUTTON : AlbumMenu.RIGHT_PAGE_PHOTO_BUTTON);
-                            button.playDownSound(minecraft.getSoundManager());
+                            button.playDownSound(Minecrft.get().getSoundManager());
                         }
                     } else
                         inspectPhotograph(photograph);
@@ -156,7 +154,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
                     PhotographSlotButton button = (PhotographSlotButton) b;
                     if (button.isEditable && !button.getPhotograph().isEmpty()) {
                         sendButtonClick(side == Side.LEFT ? AlbumMenu.LEFT_PAGE_PHOTO_BUTTON : AlbumMenu.RIGHT_PAGE_PHOTO_BUTTON);
-                        minecraft.getSoundManager().play(SimpleSoundInstance.forUI(
+                        Minecrft.get().getSoundManager().play(SimpleSoundInstance.forUI(
                                 Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.7f, 1.1f));
                     }
                 }, () -> getMenu().getPhotograph(side), getMenu().isAlbumEditable()) {
@@ -205,28 +203,14 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
 //            Packets.sendToServer(new AlbumSyncNoteC2SP(pageIndex, noteText));
 //        });
     }
-
     
     // RENDER
     
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        pager.update();
+        updateWidgetVisibility();
 
-        if (enterSignModeButton != null)
-            enterSignModeButton.visible = getMenu().canSignAlbum();
-
-        boolean isInAddingPhotographMode = isInAddingMode();
-
-        // Note should be hidden when adding photograph because it's drawn over the slots. Blit offset does not help.
-        forEachPage(page -> page.getNoteWidget().visible = !isInAddingPhotographMode);
-
-        for (Page page : pages) {
-            page.photographButton.visible = !getMenu().getPhotograph(page.side).isEmpty()
-                    || (!isInAddingPhotographMode && getMenu().isAlbumEditable());
-        }
-
-        inventoryLabelY = isInAddingPhotographMode ? getMenu().getPlayerInventorySlots().getFirst().y - 12 : -999;
+        inventoryLabelY = isInAddingMode() ? getMenu().getPlayerInventorySlots().getFirst().y - 12 : -999;
 
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
@@ -238,7 +222,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
             }
         }
 
-        if (isInAddingPhotographMode) {
+        if (isInAddingMode()) {
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
             for (Slot slot : getMenu().slots) {
@@ -251,6 +235,20 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         }
 
         this.renderTooltip(guiGraphics, mouseX, mouseY);
+    }
+
+    private void updateWidgetVisibility() {
+        // Note should be hidden when adding photograph because it's drawn over the slots. Blit offset does not help.
+        forEachPage(page -> page.getNoteWidget().visible = !isInAddingMode());
+
+        for (Page page : pages) {
+            page.photographButton.visible = !getMenu().getPhotograph(page.side).isEmpty()
+                    || (!isInAddingMode() && getMenu().isAlbumEditable());
+        }
+
+        if (enterSignModeButton != null) {
+            enterSignModeButton.visible = getMenu().canSignAlbum();
+        }
     }
 
     @Override
@@ -441,8 +439,8 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
     }
 
     protected void sendButtonClick(int buttonId) {
-        getMenu().clickMenuButton(player, buttonId);
-        gameMode.handleInventoryButtonClick(getMenu().containerId, buttonId);
+        getMenu().clickMenuButton(Minecrft.player(), buttonId);
+        Minecrft.gameMode().handleInventoryButtonClick(getMenu().containerId, buttonId);
 
         if (buttonId == AlbumMenu.CANCEL_ADDING_PHOTO_BUTTON)
             setFocused(null);
@@ -524,13 +522,13 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
             }
         }
 
-        if (isInAddingMode() && (minecraft.options.keyInventory.matches(keyCode, scanCode)
+        if (isInAddingMode() && (Minecrft.options().keyInventory.matches(keyCode, scanCode)
                 || keyCode == InputConstants.KEY_ESCAPE)) {
             sendButtonClick(AlbumMenu.CANCEL_ADDING_PHOTO_BUTTON);
             return true;
         }
 
-        return pager.handleKeyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        return keyBindings.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -540,20 +538,21 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
                 return super.keyReleased(keyCode, scanCode, modifiers);
         }
 
-        return pager.handleKeyReleased(keyCode, scanCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
+        return keyBindings.keyReleased(keyCode, scanCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
     }
 
 
     // MISC:
     
     protected void inspectPhotograph(ItemStack photograph) {
-        if (!(photograph.getItem() instanceof PhotographItem))
+        if (!(photograph.getItem() instanceof PhotographItem)) {
             return;
+        }
 
-        minecraft.setScreen(new AlbumPhotographScreen(this, List.of(new ItemAndStack<>(photograph))));
-        minecraft.getSoundManager()
+        Minecrft.get().setScreen(new AlbumPhotographScreen(this, List.of(new ItemAndStack<>(photograph))));
+        Minecrft.get().getSoundManager()
                 .play(SimpleSoundInstance.forUI(Exposure.SoundEvents.PHOTOGRAPH_RUSTLE.get(),
-                        player.level().getRandom().nextFloat() * 0.2f + 1.3f, 0.75f));
+                        Minecrft.level().getRandom().nextFloat() * 0.2f + 1.3f, 0.75f));
     }
 
     @NotNull
@@ -567,7 +566,7 @@ public class AlbumScreen extends AbstractContainerScreen<AlbumMenu> {
         if (isInAddingMode())
             sendButtonClick(AlbumMenu.CANCEL_ADDING_PHOTO_BUTTON);
 
-        minecraft.setScreen(new AlbumSigningScreen(this, TEXTURE, 512, 512));
+        Minecrft.get().setScreen(new AlbumSigningScreen(this, TEXTURE, 512, 512));
     }
 
     protected boolean isInAddingMode() {

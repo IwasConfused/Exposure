@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.client.gui.screen.album;
 
 import io.github.mortuusars.exposure.client.gui.screen.element.textbox.TextBox;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.inventory.AlbumMenu;
 import io.github.mortuusars.exposure.world.inventory.LecternAlbumMenu;
 import net.minecraft.client.gui.components.Button;
@@ -40,7 +41,7 @@ public class LecternAlbumScreen extends AlbumScreen {
     protected void init() {
         super.init();
 
-        if (player.mayBuild()) {
+        if (Minecrft.player().mayBuild()) {
             addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, b -> this.onClose())
                     .bounds(this.width / 2 - 100, topPos + 196, 98, 20).build());
             addRenderableWidget(Button.builder(Component.translatable("lectern.take_book"), b -> sendButtonClick(LecternAlbumMenu.TAKE_BOOK_BUTTON))

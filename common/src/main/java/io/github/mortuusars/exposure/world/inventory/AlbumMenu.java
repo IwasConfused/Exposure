@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.world.inventory;
 import com.google.common.base.Preconditions;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.util.PagingDirection;
 import io.github.mortuusars.exposure.world.item.AlbumItem;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.component.album.AlbumPage;
@@ -23,8 +24,8 @@ import java.util.function.Consumer;
 
 public class AlbumMenu extends AbstractContainerMenu {
     public static final int CANCEL_ADDING_PHOTO_BUTTON = -1;
-    public static final int PREVIOUS_PAGE_BUTTON = 0;
-    public static final int NEXT_PAGE_BUTTON = 1;
+    public static final int PREVIOUS_PAGE_BUTTON = PagingDirection.PREVIOUS.ordinal();
+    public static final int NEXT_PAGE_BUTTON = PagingDirection.NEXT.ordinal();
     public static final int LEFT_PAGE_PHOTO_BUTTON = 2;
     public static final int RIGHT_PAGE_PHOTO_BUTTON = 3;
     public static final int ENTER_SIGN_MODE_BUTTON = 4;

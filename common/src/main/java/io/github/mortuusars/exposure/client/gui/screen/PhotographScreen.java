@@ -7,7 +7,7 @@ import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
-import io.github.mortuusars.exposure.client.gui.screen.element.NewPager;
+import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.client.input.Key;
 import io.github.mortuusars.exposure.client.input.KeyBindings;
 import io.github.mortuusars.exposure.client.input.Modifier;
@@ -41,7 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class PhotographScreen extends Screen {
-    protected final NewPager pager = new NewPager()
+    protected final Pager pager = new Pager()
             .setCycled(true)
             .setChangeSound(new SoundEffect(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK))
             .onPageChanged(this::pageChanged);
@@ -79,6 +79,26 @@ public class PhotographScreen extends Screen {
         }
     }
 
+    @Override
+    protected void init() {
+        super.init();
+        zoomFactor = (float) height;
+
+        ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
+                Widgets.PREVIOUS_BUTTON_SPRITES,
+                button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
+        addRenderableWidget(previousButton);
+
+        ImageButton nextButton = new ImageButton(width - 16, (int) (height / 2f - 16 / 2f), 16, 16,
+                Widgets.NEXT_BUTTON_SPRITES,
+                button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
+        addRenderableWidget(nextButton);
+
+        pager.setPagesCount(photographs.size())
+                .setPreviousPageButton(previousButton)
+                .setNextPageButton(nextButton);
+    }
+
     protected boolean shouldQueryAllPhotographsImmediately() {
         return true;
     }
@@ -98,26 +118,6 @@ public class PhotographScreen extends Screen {
     protected void pageChanged(int oldPage, int newPage) {
         int distance = newPage - oldPage;
         Collections.rotate(photographs, -distance);
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-        zoomFactor = (float) height;
-
-        ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
-                Widgets.PREVIOUS_BUTTON_SPRITES,
-                button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
-        addRenderableWidget(previousButton);
-
-        ImageButton nextButton = new ImageButton(width - 16, (int) (height / 2f - 16 / 2f), 16, 16,
-                Widgets.NEXT_BUTTON_SPRITES,
-                button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
-        addRenderableWidget(nextButton);
-
-        pager.setPagesCount(photographs.size())
-                .setPreviousPageButton(previousButton)
-                .setNextPageButton(nextButton);
     }
 
     @Override
@@ -196,14 +196,12 @@ public class PhotographScreen extends Screen {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        return keyBindings.keyPressed(keyCode, scanCode, modifiers)
-                || super.keyPressed(keyCode, scanCode, modifiers);
+        return keyBindings.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
-        return keyBindings.keyReleased(keyCode, scanCode, modifiers)
-                || super.keyReleased(keyCode, scanCode, modifiers);
+        return keyBindings.keyReleased(keyCode, scanCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override

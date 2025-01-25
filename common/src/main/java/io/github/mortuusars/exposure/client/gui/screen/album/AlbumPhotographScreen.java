@@ -6,7 +6,6 @@ import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
 import org.jetbrains.annotations.NotNull;
@@ -56,8 +55,7 @@ public class AlbumPhotographScreen extends PhotographScreen {
     }
 
     public void close() {
-        Minecraft.getInstance().setScreen(parentScreen);
-        if (minecraft.player != null)
-            minecraft.player.playSound(Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.7f, 1.1f);
+        Minecrft.get().setScreen(parentScreen);
+        Minecrft.player().playSound(Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.7f, 1.1f);
     }
 }
