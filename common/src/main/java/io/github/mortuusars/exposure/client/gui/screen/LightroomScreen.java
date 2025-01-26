@@ -196,9 +196,9 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         FilmColor filmColor = exposureType.getFilmColor();
 
         int selectedFrame = getMenu().getSelectedFrame();
-        @Nullable Frame leftFrame = getMenu().getFrameIdByIndex(selectedFrame - 1);
-        @Nullable Frame centerFrame = getMenu().getFrameIdByIndex(selectedFrame);
-        @Nullable Frame rightFrame = getMenu().getFrameIdByIndex(selectedFrame + 1);
+        @Nullable Frame leftFrame = getMenu().getFrameByIndex(selectedFrame - 1);
+        @Nullable Frame centerFrame = getMenu().getFrameByIndex(selectedFrame);
+        @Nullable Frame rightFrame = getMenu().getFrameByIndex(selectedFrame + 1);
 
         RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
 
@@ -283,7 +283,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     private void addFrameInfoTooltipLines(List<Component> tooltipLines, int frameIndex, boolean isAdvancedTooltips) {
-        @Nullable Frame frame = getMenu().getFrameIdByIndex(frameIndex);
+        @Nullable Frame frame = getMenu().getFrameByIndex(frameIndex);
         if (frame != null) {
             frame.getColorChannel().ifPresent(c ->
                     tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
@@ -397,7 +397,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     }
 
     private void enterFrameInspectMode() {
-        Minecraft.getInstance().setScreen(new FilmFrameInspectScreen(this, getMenu()));
+        Minecraft.getInstance().setScreen(new LightroomFrameInspectScreen(this));
         player.playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 1f, 1.3f);
     }
 

@@ -146,7 +146,7 @@ public class LightroomMenu extends AbstractContainerMenu {
         return frames;
     }
 
-    public @Nullable Frame getFrameIdByIndex(int index) {
+    public @Nullable Frame getFrameByIndex(int index) {
         return index >= 0 && index < getExposedFrames().size() ? getExposedFrames().get(index) : null;
     }
 

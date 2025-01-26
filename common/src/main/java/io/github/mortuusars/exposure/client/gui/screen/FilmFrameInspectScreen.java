@@ -3,162 +3,207 @@ package io.github.mortuusars.exposure.client.gui.screen;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.block.entity.Lightroom;
+import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.gui.Widgets;
-import io.github.mortuusars.exposure.world.camera.FilmColor;
-import io.github.mortuusars.exposure.world.camera.ExposureType;
-import io.github.mortuusars.exposure.world.item.DevelopedFilmItem;
-import io.github.mortuusars.exposure.world.camera.frame.Frame;
-import io.github.mortuusars.exposure.world.inventory.LightroomMenu;
+import io.github.mortuusars.exposure.client.gui.component.SteppedZoom;
+import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
+import io.github.mortuusars.exposure.client.image.modifier.ImageModifier;
+import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
+import io.github.mortuusars.exposure.client.input.Key;
+import io.github.mortuusars.exposure.client.input.KeyBindings;
+import io.github.mortuusars.exposure.client.render.image.RenderCoordinates;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.util.PagingDirection;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
+import io.github.mortuusars.exposure.world.camera.FilmColor;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.sound.SoundEffect;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ImageButton;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
-public class FilmFrameInspectScreen extends ZoomableScreen {
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+public class FilmFrameInspectScreen extends Screen {
     public static final ResourceLocation TEXTURE = Exposure.resource("textures/gui/film_frame_inspect.png");
 
     public static final int BG_SIZE = 78;
     public static final int FRAME_SIZE = 54;
-    public static final int BUTTON_SIZE = 16;
 
-    private final LightroomScreen lightroomScreen;
-    private final LightroomMenu lightroomMenu;
+    protected final Pager pager = new Pager()
+            .setChangeSound(new SoundEffect(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK))
+            .onPageChanged(this::pageChanged);
 
-    private ImageButton previousButton;
-    private ImageButton nextButton;
+    protected final SteppedZoom zoom = new SteppedZoom()
+            .zoomInSteps(4)
+            .zoomOutSteps(4)
+            .zoomPerStep(1.4)
+            .defaultZoom(1);
 
-    public FilmFrameInspectScreen(LightroomScreen lightroomScreen, LightroomMenu lightroomMenu) {
+    protected final KeyBindings keyBindings = KeyBindings.of(
+            Key.press(Minecrft.options().keyInventory).executes(this::onClose),
+            Key.press(InputConstants.KEY_ADD).or(Key.press(InputConstants.KEY_EQUALS)).executes(zoom::zoomIn),
+            Key.press(GLFW.GLFW_KEY_KP_SUBTRACT).or(Key.press(InputConstants.KEY_MINUS)).executes(zoom::zoomOut),
+            Key.press(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::previousPage),
+            Key.press(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(pager::nextPage),
+            Key.release(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::resetCooldown),
+            Key.release(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(pager::resetCooldown)
+    );
+
+    protected final List<Frame> frames;
+
+    protected float zoomFactor;
+    protected float x;
+    protected float y;
+
+    public FilmFrameInspectScreen(List<Frame> frames) {
+        this(frames, frames.size() - 1);
+    }
+
+    public FilmFrameInspectScreen(List<Frame> frames, int startingFrame) {
         super(Component.empty());
-        this.lightroomScreen = lightroomScreen;
-        this.lightroomMenu = lightroomMenu;
-        zoom.minZoom = zoom.defaultZoom / (float) Math.pow(zoom.step, 2f);
+        this.frames = new ArrayList<>(frames);
+        initPager(startingFrame);
     }
 
-    @Override
-    public boolean isPauseScreen() {
-        return false;
-    }
-
-    private LightroomMenu getLightroomMenu() {
-        return lightroomMenu;
+    protected void initPager(int startingFrame) {
+        pager.setPagesCount(frames.size());
+        pager.setPage(startingFrame);
+        Collections.rotate(frames, -startingFrame);
     }
 
     @Override
     protected void init() {
         super.init();
 
-        zoomFactor = (float) height / BG_SIZE;
+        zoomFactor = ((float) height / BG_SIZE) / (float)zoom.getZoomPerStep();
 
-        previousButton = new ImageButton(0, (int) (height / 2f - BUTTON_SIZE / 2f), BUTTON_SIZE, BUTTON_SIZE,
-                Widgets.PREVIOUS_BUTTON_SPRITES, this::buttonPressed);
-        nextButton = new ImageButton(width - BUTTON_SIZE, (int) (height / 2f - BUTTON_SIZE / 2f), BUTTON_SIZE, BUTTON_SIZE,
-                Widgets.NEXT_BUTTON_SPRITES, this::buttonPressed);
-
+        ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
+                Widgets.PREVIOUS_BUTTON_SPRITES,
+                button -> pager.changePage(PagingDirection.PREVIOUS), Component.translatable("gui.exposure.previous_page"));
         addRenderableWidget(previousButton);
+
+        ImageButton nextButton = new ImageButton(width - 16, (int) (height / 2f - 16 / 2f), 16, 16,
+                Widgets.NEXT_BUTTON_SPRITES,
+                button -> pager.changePage(PagingDirection.NEXT), Component.translatable("gui.exposure.next_page"));
         addRenderableWidget(nextButton);
+
+        pager.setPagesCount(frames.size())
+                .setPreviousPageButton(previousButton)
+                .setNextPageButton(nextButton);
     }
 
-    private void buttonPressed(Button button) {
-        if (button == previousButton)
-            lightroomScreen.changeFrame(PagingDirection.PREVIOUS);
-        else if (button == nextButton)
-            lightroomScreen.changeFrame(PagingDirection.NEXT);
+    protected Frame getCurrentFrame() {
+        return frames.getFirst();
     }
 
-    public void close() {
-        Minecraft.getInstance().setScreen(lightroomScreen);
-        if (minecraft.player != null)
-            minecraft.player.playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 1f, 0.7f);
+    protected void pageChanged(int oldPage, int newPage) {
+        int distance = newPage - oldPage;
+        Collections.rotate(frames, -distance);
     }
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
+        float scale = (float) (zoom.get() * zoomFactor);
 
-        guiGraphics.pose().pushPose();
-        guiGraphics.pose().translate(0, 0, 500); // Otherwise exposure will overlap buttons
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.pose().popPose();
-
-        if (zoom.targetZoom == zoom.minZoom) {
-            close();
-            return;
-        }
+        RenderSystem.disableDepthTest();
 
         guiGraphics.pose().pushPose();
+        renderBlurredBackground(partialTick);
+        renderTransparentBackground(guiGraphics);
+        guiGraphics.pose().popPose();
 
+        guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(x, y, 0);
-        guiGraphics.pose().translate(width / 2f, height / 2f, 0);
+        guiGraphics.pose().translate(width / 2f, height / 2f, 50);
         guiGraphics.pose().scale(scale, scale, scale);
-
-        RenderSystem.setShaderTexture(0, TEXTURE);
 
         guiGraphics.pose().translate(BG_SIZE / -2f, BG_SIZE / -2f, 0);
 
+        RenderSystem.setShaderTexture(0, TEXTURE);
         GuiUtil.blit(guiGraphics.pose(), 0, 0, BG_SIZE, BG_SIZE, 0, 0, 256, 256, 0);
 
-        ItemStack filmStack = lightroomMenu.getSlot(Lightroom.FILM_SLOT).getItem();
-        if (!(filmStack.getItem() instanceof DevelopedFilmItem film))
-            return;
-
-        ExposureType exposureType = film.getType();
-        FilmColor filmColor = exposureType.getFilmColor();
+        Frame frame = getCurrentFrame();
+        ExposureType filmType = frame.type();
+        FilmColor filmColor = filmType.getFilmColor();
 
         RenderSystem.setShaderColor(filmColor.r(), filmColor.g(), filmColor.b(), filmColor.a());
-
         GuiUtil.blit(guiGraphics.pose(), 0, 0, BG_SIZE, BG_SIZE, 0, BG_SIZE, 256, 256, 0);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
         guiGraphics.pose().translate(12, 12, 0);
-
-        int currentFrame = getLightroomMenu().getSelectedFrame();
-        @Nullable Frame frame = getLightroomMenu().getFrameIdByIndex(currentFrame);
-        if (frame != null)
-            lightroomScreen.renderFrame(frame, guiGraphics.pose(), 0, 0, FRAME_SIZE, 1f, exposureType);
+        RenderableImage image = ExposureClient.renderedExposures().getOrCreate(frame).modifyWith(ImageModifier.NEGATIVE_FILM);
+        MultiBufferSource.BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+        ExposureClient.imageRenderer().render(image,  guiGraphics.pose(), bufferSource,
+                new RenderCoordinates(0, 0, FRAME_SIZE, FRAME_SIZE), filmType.getImageColor());
+        bufferSource.endBatch();
 
         guiGraphics.pose().popPose();
 
-        previousButton.visible = currentFrame != 0;
-        previousButton.active = currentFrame != 0;
-        nextButton.visible = currentFrame != getLightroomMenu().getTotalFrames() - 1;
-        nextButton.active = currentFrame != getLightroomMenu().getTotalFrames() - 1;
+        guiGraphics.pose().pushPose();
+        // Places widgets above, because they will be covered when photo is zoomed in
+//        guiGraphics.pose().translate(0, 0, 100);
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+        guiGraphics.pose().popPose();
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        // Background is rendered manually in #render method.
+        // Otherwise, background will be rendered on top
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_ESCAPE || minecraft.options.keyInventory.matches(keyCode, scanCode))
-            zoom.set(0f);
-        else if (minecraft.options.keyLeft.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_LEFT)
-            lightroomScreen.changeFrame(PagingDirection.PREVIOUS);
-        else if (minecraft.options.keyRight.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_RIGHT)
-            lightroomScreen.changeFrame(PagingDirection.NEXT);
-        else
-            return super.keyPressed(keyCode, scanCode, modifiers);
+        return keyBindings.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return keyBindings.keyReleased(keyCode, scanCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
+    }
+
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+        if (super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
+
+        if (scrollY >= 0.0) {
+            zoom.zoomIn();
+        } else {
+            zoom.zoomOut();
+        }
         return true;
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        boolean handled = super.mouseClicked(mouseX, mouseY, button);
-        if (handled)
-            return true;
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        if (super.mouseDragged(mouseX, mouseY, button, dragX, dragY)) return true;
 
-        if (button == 1) { // Right Click
-            zoom.set(0f);
+        if (button == InputConstants.MOUSE_BUTTON_LEFT) {
+            float centerX = width / 2f;
+            float centerY = height / 2f;
+            x = (float) Mth.clamp(x + dragX, -centerX, centerX);
+            y = (float) Mth.clamp(y + dragY, -centerY, centerY);
             return true;
         }
 
+        return false;
+    }
+
+    @Override
+    public boolean isPauseScreen() {
         return false;
     }
 }

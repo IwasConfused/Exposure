@@ -23,7 +23,8 @@ public class AlbumPhotographScreen extends PhotographScreen {
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         if (zoom.get() < zoom.getMin() + 0.1f && zoom.getTarget() < zoom.getMin() + 0.1f) {
-            onClose();
+            Minecrft.get().setScreen(parentScreen);
+            Minecrft.player().playSound(Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.7f, 1.1f);
             return;
         }
 
@@ -33,7 +34,7 @@ public class AlbumPhotographScreen extends PhotographScreen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == InputConstants.KEY_ESCAPE || Minecrft.options().keyInventory.matches(keyCode, scanCode)) {
-            zoom.setTarget(0f);
+            onClose();
             return true;
         }
 
@@ -56,7 +57,6 @@ public class AlbumPhotographScreen extends PhotographScreen {
 
     @Override
     public void onClose() {
-        Minecrft.get().setScreen(parentScreen);
-        Minecrft.player().playSound(Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.7f, 1.1f);
+        zoom.setTarget(0f); // AlbumPhotographScreen#render will close screen when zooming out ends.
     }
 }

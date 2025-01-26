@@ -21,7 +21,7 @@ public class LecternAlbumScreen extends AlbumScreen {
         public void dataChanged(AbstractContainerMenu containerMenu, int dataSlotIndex, int value) {
             if (dataSlotIndex == 1) {
                 getMenu().setCurrentSpreadIndex(value);
-                pager.setPage(value);
+                pager.changePage(value);
                 for (Page page : pages) {
                     page.noteWidget
                             .ifLeft(TextBox::setCursorToEnd)

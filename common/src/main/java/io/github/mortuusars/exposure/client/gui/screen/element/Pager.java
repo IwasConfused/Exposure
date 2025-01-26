@@ -32,7 +32,7 @@ public class Pager {
 
     public Pager setPagesCount(int pages) {
         this.pagesCount = pages;
-        setPage(getPage()); // Updates current page to new range if needed
+        changePage(getPage()); // Updates current page to new range if needed
         return this;
     }
 
@@ -98,7 +98,7 @@ public class Pager {
         return currentPage;
     }
 
-    public boolean setPage(int page) {
+    public boolean changePage(int page) {
         page = Mth.clamp(page, 0, this.pagesCount);
         int oldPage = currentPage;
         if (currentPage == page) {
@@ -107,6 +107,14 @@ public class Pager {
         currentPage = page;
         pageChanged(oldPage, page);
         return true;
+    }
+
+    /**
+     * Sets page without side effects (except button visibility). Useful when setting up starting page.
+     */
+    public void setPage(int index) {
+        currentPage = Mth.clamp(index, 0, this.pagesCount);
+        updateButtonVisibility();
     }
 
     public boolean isOnCooldown() {
@@ -150,7 +158,7 @@ public class Pager {
         if (oldPage == newPage)
             return false;
 
-        return setPage(newPage);
+        return changePage(newPage);
     }
 
     public void pageChanged(int oldPage, int newPage) {

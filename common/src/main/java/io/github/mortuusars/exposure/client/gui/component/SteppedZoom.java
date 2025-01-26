@@ -1,4 +1,4 @@
-package io.github.mortuusars.exposure.client.gui.screen;
+package io.github.mortuusars.exposure.client.gui.component;
 
 import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
@@ -6,12 +6,12 @@ import io.github.mortuusars.exposure.client.util.ZoomDirection;
 import net.minecraft.util.Mth;
 
 public class SteppedZoom {
-    protected double defaultZoom;
-    protected int zoomInSteps;
-    protected int zoomOutSteps;
-    protected double zoomPerStep;
-
+    protected double defaultZoom = 1;
+    protected int zoomInSteps = 4;
+    protected int zoomOutSteps = 4;
+    protected double zoomPerStep = 1.4;
     protected Animation animation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
+
     protected double target;
     protected double current;
 

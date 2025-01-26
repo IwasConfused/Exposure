@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.network.handler;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.gui.screen.FilmFrameInspectScreen;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
 import io.github.mortuusars.exposure.client.sound.instance.ShutterTickingSoundInstance;
@@ -18,7 +19,6 @@ import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.util.cycles.task.Result;
 import io.github.mortuusars.exposure.world.level.storage.ExposureData;
-import io.github.mortuusars.exposure.client.gui.screen.NegativeExposureScreen;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
 import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
@@ -48,16 +48,20 @@ public class ClientPacketsHandler {
     }
 
     public static void showExposure(ShowExposureCommandS2CP packet) {
+        if (packet.negative()) {
+            Screen screen = new FilmFrameInspectScreen(packet.frames());
+            Minecrft.get().setScreen(screen);
+            return;
+        }
+
         List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>(packet.frames().stream().map(frame -> {
             ItemStack photographStack = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
             photographStack.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
             return new ItemAndStack<PhotographItem>(photographStack);
         }).toList());
-
         Collections.reverse(photographs);
 
-        Screen screen = packet.negative() ? new NegativeExposureScreen(photographs) : new PhotographScreen(photographs);
-
+        Screen screen = new PhotographScreen(photographs);
         Minecrft.get().setScreen(screen);
     }
 
@@ -89,7 +93,7 @@ public class ClientPacketsHandler {
 
         ExposureClient.cycles().addParallelTask(new ExposureRetrieveTask(packet.layers(), 20_000)
                 .then(Result::unwrap)
-                .thenAsync(layers -> (Image)new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
+                .thenAsync(layers -> (Image) new TrichromeImage(layers.get(0), layers.get(1), layers.get(2)))
                 .thenAsync(Palettizer.DITHERED.palettizeAndClose(palette))
                 .thenAsync(img -> new ExposureData(img.width(), img.height(), img.pixels(), paletteId,
                         new ExposureData.Tag(ExposureType.COLOR, Minecrft.player().getScoreboardName(),
