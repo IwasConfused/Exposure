@@ -18,8 +18,12 @@ public class Animation {
         startedAt = getCurrentTime();
     }
 
-    public void resetProgress() {
-        startedAt = getCurrentTime();
+    public int getDuration() {
+        return duration;
+    }
+
+    public EasingFunction getEasing() {
+        return easing;
     }
 
     public double getValue() {
@@ -33,6 +37,10 @@ public class Animation {
 
     public boolean isFinished() {
         return getCurrentTime() >= startedAt + duration;
+    }
+
+    public void resetProgress() {
+        startedAt = getCurrentTime();
     }
 
     private long getCurrentTime() {

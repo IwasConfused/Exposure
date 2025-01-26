@@ -14,7 +14,6 @@ import io.github.mortuusars.exposure.client.input.Modifier;
 import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.photograph.PhotographType;
-import io.github.mortuusars.exposure.client.util.ZoomDirection;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
@@ -46,10 +45,16 @@ public class PhotographScreen extends Screen {
             .setChangeSound(new SoundEffect(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK))
             .onPageChanged(this::pageChanged);
 
+    protected final SteppedZoom zoom = new SteppedZoom()
+            .zoomInSteps(4)
+            .zoomOutSteps(4)
+            .zoomPerStep(1.4)
+            .defaultZoom(1);
+
     protected final KeyBindings keyBindings = KeyBindings.of(
             Key.press(Minecrft.options().keyInventory).executes(this::onClose),
-            Key.press(InputConstants.KEY_ADD).or(Key.press(InputConstants.KEY_EQUALS)).executes(this::zoomIn),
-            Key.press(GLFW.GLFW_KEY_KP_SUBTRACT).or(Key.press(InputConstants.KEY_MINUS)).executes(this::zoomOut),
+            Key.press(InputConstants.KEY_ADD).or(Key.press(InputConstants.KEY_EQUALS)).executes(zoom::zoomIn),
+            Key.press(GLFW.GLFW_KEY_KP_SUBTRACT).or(Key.press(InputConstants.KEY_MINUS)).executes(zoom::zoomOut),
             Key.press(Modifier.CONTROL, InputConstants.KEY_C).executes(this::copyIdentifierToClipboard),
             Key.press(Modifier.CONTROL, InputConstants.KEY_I).executes(this::dropAsItem),
             Key.press(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::previousPage),
@@ -58,9 +63,6 @@ public class PhotographScreen extends Screen {
             Key.release(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(pager::resetCooldown)
     );
 
-    protected final ZoomAnimationController zoom = new ZoomAnimationController();
-    protected float zoomFactor = 1.0f;
-    protected float scale = 1.0f;
     protected float x;
     protected float y;
 
@@ -82,7 +84,6 @@ public class PhotographScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        zoomFactor = (float) height;
 
         ImageButton previousButton = new ImageButton(0, (int) (height / 2f - 16 / 2f), 16, 16,
                 Widgets.PREVIOUS_BUTTON_SPRITES,
@@ -122,9 +123,8 @@ public class PhotographScreen extends Screen {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
-        zoomFactor = 0.8f;
-        zoom.update();
-        scale = zoom.get() * zoomFactor * 256;
+        float zoomFactor = height * 0.8f;
+        float scale = (float) (zoom.get() * zoomFactor);
 
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
@@ -143,8 +143,7 @@ public class PhotographScreen extends Screen {
 
         MultiBufferSource.BufferSource bufferSource = Minecrft.get().renderBuffers().bufferSource();
 
-        ArrayList<ItemAndStack<PhotographItem>> photos = new ArrayList<>(photographs);
-        ExposureClient.photographRenderer().renderStackedPhotographs(photos, guiGraphics.pose(), bufferSource,
+        ExposureClient.photographRenderer().renderStackedPhotographs(photographs, guiGraphics.pose(), bufferSource,
                 LightTexture.FULL_BRIGHT, 255, 255, 255, 255);
 
         bufferSource.endBatch();
@@ -209,9 +208,9 @@ public class PhotographScreen extends Screen {
         if (super.mouseScrolled(mouseX, mouseY, scrollX, scrollY)) return true;
 
         if (scrollY >= 0.0) {
-            zoomIn();
+            zoom.zoomIn();
         } else {
-            zoomOut();
+            zoom.zoomOut();
         }
         return true;
     }
@@ -237,14 +236,6 @@ public class PhotographScreen extends Screen {
     }
 
     // --
-
-    protected void zoomIn() {
-        zoom.change(ZoomDirection.IN);
-    }
-
-    protected void zoomOut() {
-        zoom.change(ZoomDirection.OUT);
-    }
 
     protected boolean copyIdentifierToClipboard() {
         Frame frame = getCurrentPhotograph().map(PhotographItem::getFrame);

@@ -18,8 +18,8 @@ public class ViewfinderZoom {
 
     protected final Camera camera;
     protected final Viewfinder viewfinder;
-    protected final FocalRange focalRange;
 
+    protected FocalRange focalRange;
     protected Animation animation;
     protected double targetFov;
     protected double currentFov;
@@ -27,9 +27,9 @@ public class ViewfinderZoom {
     public ViewfinderZoom(Camera camera, Viewfinder viewfinder) {
         this.camera = camera;
         this.viewfinder = viewfinder;
-        this.focalRange = camera.map((cameraItem, cameraStack) -> cameraItem.getFocalRange(Minecrft.registryAccess(), cameraStack))
-                .orElse(FocalRange.getDefault());
 
+        focalRange = camera.map((cameraItem, cameraStack) -> cameraItem.getFocalRange(Minecrft.registryAccess(), cameraStack))
+                .orElse(FocalRange.getDefault());
         animation = new Animation(300, EasingFunction.EASE_OUT_EXPO);
 
         double defaultFov = Minecrft.options().fov().get();
@@ -57,9 +57,7 @@ public class ViewfinderZoom {
 
         double fov = focalRange.clampFov(targetFov + (direction == ZoomDirection.IN ? -change : +change));
 
-        if (Math.abs(prevFov - fov) > 0.0001) {
-            Minecrft.player().playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get());
-
+        if (!Mth.equal(prevFov, fov)) {
             targetFov = fov;
             animation.resetProgress();
 
