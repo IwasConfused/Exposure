@@ -84,7 +84,7 @@ public class FilmRollItem extends Item implements FilmItem {
                             .withStyle(ChatFormatting.GRAY));
         }
 
-        if (Config.Common.FILM_ROLL_RENAMING.get()) {
+        if (Config.Server.FILM_ROLL_EASY_RENAMING.get()) {
             tooltipComponents.add(Component.translatable("item.exposure.film_roll.tooltip.renaming"));
         }
 
@@ -115,7 +115,7 @@ public class FilmRollItem extends Item implements FilmItem {
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        if (!Config.Common.FILM_ROLL_RENAMING.get() || !(player instanceof ServerPlayer serverPlayer)) {
+        if (!Config.Server.FILM_ROLL_EASY_RENAMING.get() || !(player instanceof ServerPlayer serverPlayer)) {
             return super.use(level, player, usedHand);
         }
 

@@ -62,14 +62,18 @@ public class Viewfinder {
         shader().setActive(isLookingThrough());
     }
 
-    public void close() {
-        if (shader != null) {
-            shader.close();
-        }
+    public boolean isLookingThrough() {
+        CameraType cameraType = Minecrft.options().getCameraType();
+        return cameraType == CameraType.FIRST_PERSON || cameraType == CameraType.THIRD_PERSON_FRONT;
+    }
 
-        if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) {
-            Minecrft.get().setScreen(null);
-        }
+    public boolean canAttack() {
+        return Config.Server.CAMERA_VIEWFINDER_ATTACK.get()
+                && !camera.map(CameraItem::isInSelfieMode).orElse(false); // Attacking in selfie mode has weird anim.
+    }
+
+    public float getCameraYOffset() {
+        return Config.Client.WAIST_LEVEL_VIEWFINDER.get() && camera.getHolder().asEntity() instanceof Player ? -0.35F : 0F;
     }
 
     public void openControlsScreen() {
@@ -78,9 +82,14 @@ public class Viewfinder {
         Minecrft.get().setScreen(controlsScreen);
     }
 
-    public boolean isLookingThrough() {
-        CameraType cameraType = Minecrft.options().getCameraType();
-        return cameraType == CameraType.FIRST_PERSON || cameraType == CameraType.THIRD_PERSON_FRONT;
+    public void close() {
+        if (shader != null) {
+            shader.close();
+        }
+
+        if (Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) {
+            Minecrft.get().setScreen(null);
+        }
     }
 
     public float getMaxSelfieCameraDistance() {
@@ -158,11 +167,6 @@ public class Viewfinder {
         return false;
     }
 
-    private boolean canAttack() {
-        return Config.Common.CAMERA_VIEWFINDER_ATTACK.get()
-                && !camera.map(CameraItem::isInSelfieMode).orElse(false); // Attacking in selfie mode has weird anim.
-    }
-
     public boolean mouseScrolled(double amount) {
         return isLookingThrough() && !(Minecrft.get().screen instanceof ViewfinderCameraControlsScreen) && zoom.mouseScrolled(amount);
     }
@@ -180,10 +184,6 @@ public class Viewfinder {
         strength *= strength; // more influence at smaller FOVs
 
         return Mth.lerp(strength, scaledSensitivity, original);
-    }
-
-    public float getCameraYOffset() {
-        return Config.Client.WAIST_LEVEL_VIEWFINDER.get() && camera.getHolder().asEntity() instanceof Player ? -0.35F : 0F;
     }
 
     @FunctionalInterface

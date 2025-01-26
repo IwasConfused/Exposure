@@ -36,6 +36,7 @@ public final class FocalRange implements StringRepresentable {
             FocalRange::new
     );
 
+    public static final FocalRange REGULAR = new FocalRange(18, 55);
     public static final int ALLOWED_MIN = 10;
     public static final int ALLOWED_MAX = 300;
 
@@ -87,7 +88,7 @@ public final class FocalRange implements StringRepresentable {
     }
 
     public static @NotNull FocalRange getDefault() {
-        return parse(Config.Common.CAMERA_DEFAULT_FOCAL_RANGE.get());
+        return parse(Config.Server.CAMERA_DEFAULT_FOCAL_RANGE.get());
     }
 
     @Override

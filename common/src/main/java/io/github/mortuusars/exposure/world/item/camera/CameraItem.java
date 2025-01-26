@@ -272,8 +272,8 @@ public class CameraItem extends Item {
         }
 
         if (Config.Client.CAMERA_SHOW_TOOLTIP_DETAILS.get()) {
-            boolean rClickAttachments = Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get();
-            boolean rClickHotswap = Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get();
+            boolean rClickAttachments = Config.Server.CAMERA_GUI_RIGHT_CLICK_OPEN_ATTACHMENTS.get();
+            boolean rClickHotswap = Config.Server.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get();
 
             if (rClickAttachments || rClickHotswap) {
                 if (Screen.hasShiftDown()) {
@@ -298,7 +298,7 @@ public class CameraItem extends Item {
             return true;
         }
 
-        if (otherStack.isEmpty() && Config.Common.CAMERA_GUI_RIGHT_CLICK_ATTACHMENTS_SCREEN.get()) {
+        if (otherStack.isEmpty() && Config.Server.CAMERA_GUI_RIGHT_CLICK_OPEN_ATTACHMENTS.get()) {
             if (!(slot.container instanceof Inventory)) {
                 return false; // Cannot open when not in player's inventory
             }
@@ -312,7 +312,7 @@ public class CameraItem extends Item {
             return true;
         }
 
-        if (Config.Common.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get()) {
+        if (Config.Server.CAMERA_GUI_RIGHT_CLICK_HOTSWAP.get()) {
             for (Attachment<?> attachment : getAttachments()) {
                 if (attachment.matches(otherStack)) {
                     StoredItemStack currentAttachment = attachment.get(stack);

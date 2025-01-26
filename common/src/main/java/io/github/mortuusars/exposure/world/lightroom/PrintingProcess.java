@@ -9,20 +9,20 @@ import java.util.function.Supplier;
 
 public enum PrintingProcess {
     BLACK_AND_WHITE(List.of(DyeColor.BLACK),
-            Config.Common.LIGHTROOM_BW_PRINT_TIME,
-            Config.Common.LIGHTROOM_EXPERIENCE_PER_PRINT_BW),
+            Config.Server.LIGHTROOM_BW_PRINT_TIME,
+            Config.Server.LIGHTROOM_BW_EXPERIENCE),
     COLOR(List.of(DyeColor.CYAN, DyeColor.MAGENTA, DyeColor.YELLOW, DyeColor.BLACK),
-            Config.Common.LIGHTROOM_COLOR_PRINT_TIME,
-            Config.Common.LIGHTROOM_EXPERIENCE_PER_PRINT_COLOR),
+            Config.Server.LIGHTROOM_COLOR_PRINT_TIME,
+            Config.Server.LIGHTROOM_COLOR_EXPERIENCE),
     CHROMATIC_R(List.of(DyeColor.MAGENTA, DyeColor.YELLOW),
-            Config.Common.LIGHTROOM_CHROMATIC_PRINT_TIME,
+            Config.Server.LIGHTROOM_CHROMATIC_PRINT_TIME,
             () -> 0),
     CHROMATIC_G(List.of(DyeColor.CYAN, DyeColor.YELLOW),
-            Config.Common.LIGHTROOM_CHROMATIC_PRINT_TIME,
+            Config.Server.LIGHTROOM_CHROMATIC_PRINT_TIME,
             () -> 0),
     CHROMATIC_B(List.of(DyeColor.CYAN, DyeColor.MAGENTA),
-            Config.Common.LIGHTROOM_CHROMATIC_PRINT_TIME,
-            Config.Common.LIGHTROOM_EXPERIENCE_PER_PRINT_CHROMATIC);
+            Config.Server.LIGHTROOM_CHROMATIC_PRINT_TIME,
+            Config.Server.LIGHTROOM_CHROMATIC_EXPERIENCE);
 
     private final List<DyeColor> requiredDyes;
     private final Supplier<Integer> printTime;

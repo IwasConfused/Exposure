@@ -19,7 +19,7 @@ public class Censor {
             return false;
         }
 
-        if (Config.Client.HIDE_LOADED_PHOTOGRAPHS_MADE_BY_OTHERS.get()
+        if (Config.Client.HIDE_PROJECTED_PHOTOGRAPHS_MADE_BY_OTHERS.get()
                 && frame.isProjected()
                 && (player == null || !frame.isTakenBy(player))) {
             return false;

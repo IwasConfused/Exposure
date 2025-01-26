@@ -51,7 +51,7 @@ public class StackedPhotographsItem extends Item {
      * @return How many photographs can be stacked together.
      */
     public int getStackLimit() {
-        return Config.Common.STACKED_PHOTOGRAPHS_MAX_SIZE.get();
+        return Config.Server.STACKED_PHOTOGRAPHS_MAX_SIZE.get();
     }
 
     public List<ItemAndStack<PhotographItem>> getPhotographs(ItemStack stack) {

@@ -1,7 +1,6 @@
 package io.github.mortuusars.exposure.fabric;
 
 import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeConfigRegistry;
-import fuzs.forgeconfigapiport.fabric.api.neoforge.v4.NeoForgeModConfigEvents;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.data.ColorPalette;
@@ -9,7 +8,6 @@ import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Lens;
 import io.github.mortuusars.exposure.event.CommonEvents;
 import io.github.mortuusars.exposure.event.ServerEvents;
-import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.network.fabric.FabricC2SPackets;
 import io.github.mortuusars.exposure.network.fabric.FabricS2CPackets;
 import net.fabricmc.api.ModInitializer;
@@ -19,7 +17,6 @@ import net.fabricmc.fabric.api.event.registry.DynamicRegistries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableSource;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -45,18 +42,7 @@ public class ExposureFabric implements ModInitializer {
         DynamicRegistries.registerSynced(Exposure.Registries.LENS, Lens.CODEC, Lens.CODEC);
         DynamicRegistries.registerSynced(Exposure.Registries.FILTER, Filter.CODEC, Filter.CODEC);
 
-        NeoForgeModConfigEvents.reloading(Exposure.ID).register(config -> {
-            if (config.getType() == ModConfig.Type.COMMON && FabricLoader.getInstance().isModLoaded("create")) {
-//                CreateFilmDeveloping.clearCachedData();
-            }
-
-            if (config.getType() == ModConfig.Type.CLIENT) {
-                ModCompatibilityClient.handle();
-            }
-        });
-
         NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.SERVER, Config.Server.SPEC);
-        NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.COMMON, Config.Common.SPEC);
         NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.CLIENT, Config.Client.SPEC);
 
         CommandRegistrationCallback.EVENT.register(CommonEvents::registerCommands);
@@ -104,7 +90,7 @@ public class ExposureFabric implements ModInitializer {
 
     private static void modifyLoot(ResourceKey<LootTable> tableKey, LootTable.Builder builder,
                                    LootTableSource source, HolderLookup.Provider provider) {
-        if (!Config.Common.LOOT_ADDITION.get() || !source.isBuiltin())
+        if (!Config.Server.GENERATE_LOOT.get() || !source.isBuiltin())
             return;
 
         if (BuiltInLootTables.SIMPLE_DUNGEON.equals(tableKey)) {

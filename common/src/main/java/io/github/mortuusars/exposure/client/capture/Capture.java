@@ -7,17 +7,13 @@ import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.capture.action.CompositeAction;
 import io.github.mortuusars.exposure.client.capture.task.*;
 import io.github.mortuusars.exposure.client.image.Image;
-import io.github.mortuusars.exposure.util.cycles.task.ErrorTask;
 import io.github.mortuusars.exposure.util.cycles.task.Result;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
 import io.github.mortuusars.exposure.util.TranslatableError;
 import io.github.mortuusars.exposure.client.capture.action.CaptureAction;
-import net.minecraft.util.StringUtil;
 import org.slf4j.Logger;
-import org.spongepowered.asm.util.Files;
 
 import java.io.File;
-import java.net.URI;
 import java.net.URL;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -109,7 +105,7 @@ public class Capture<T> extends Task<Result<T>> {
     }
 
     public static Task<Result<Image>> screenshot() {
-        return ExposureClient.isIrisOrOculusInstalled() || Config.Client.FORCE_DIRECT_SCREENSHOT_CAPTURE.isTrue()
+        return ExposureClient.isIrisOrOculusInstalled() || Config.Client.FORCE_DIRECT_CAPTURE.isTrue()
                 ? new DirectScreenshotCaptureTask()
                 : new BackgroundScreenshotCaptureTask();
     }

@@ -30,7 +30,7 @@ public class ConfigurableAddTableLootModifier extends AddTableLootModifier {
 
     @Override
     protected @NotNull ObjectArrayList<ItemStack> doApply(@NotNull ObjectArrayList<ItemStack> generatedLoot, @NotNull LootContext context) {
-        if (!Config.Common.LOOT_ADDITION.get()) {
+        if (!Config.Server.GENERATE_LOOT.get()) {
             return generatedLoot;
         }
 

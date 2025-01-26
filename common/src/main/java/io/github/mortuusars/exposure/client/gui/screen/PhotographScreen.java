@@ -159,7 +159,7 @@ public class PhotographScreen extends Screen {
         renderFrameInfoHint(guiGraphics, mouseX, mouseY, photograph);
         guiGraphics.pose().popPose();
 
-        if (Config.Client.SAVE_EXPOSURE_TO_FILE_WHEN_VIEWED.get())
+        if (Config.Client.EXPORT_PHOTOGRAPH_WHEN_VIEWED.get())
             trySaveToFile(photograph);
     }
 

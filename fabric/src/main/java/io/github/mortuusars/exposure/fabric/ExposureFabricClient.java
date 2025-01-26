@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.client.gui.screen.LightroomScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsScreen;
+import io.github.mortuusars.exposure.integration.ModCompatibilityClient;
 import io.github.mortuusars.exposure.world.inventory.tooltip.PhotographTooltip;
 import io.github.mortuusars.exposure.network.fabric.FabricS2CPacketHandler;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
@@ -53,5 +54,7 @@ public class ExposureFabricClient implements ClientModInitializer {
                 ? new PhotographClientTooltip(photographTooltip) : null);
 
         FabricS2CPacketHandler.register();
+
+        ModCompatibilityClient.handle();
     }
 }
