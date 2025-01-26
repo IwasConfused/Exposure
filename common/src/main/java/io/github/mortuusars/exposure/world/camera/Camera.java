@@ -28,6 +28,7 @@ public abstract class Camera {
     public abstract ItemStack getItemStack();
     public abstract Packet createSyncPacket();
 
+
     // --
 
     public CameraHolder getHolder() {
@@ -60,13 +61,17 @@ public abstract class Camera {
         return map((item, stack) -> item.getShutter().isOpen(stack), false);
     }
 
-    public void release() {
-        if (!(getHolder() instanceof CameraHolder cameraHolder)) {
-            LOGGER.error("Cannot release: owner is not a Camera Holder: {}", holder);
-            return;
+    public boolean deactivate() {
+        ItemStack stack = getItemStack();
+        if (getId().matches(stack) && stack.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(stack)) {
+            cameraItem.deactivate(getHolder().asEntity(), stack);
+            return true;
         }
+        return false;
+    }
 
-        ifPresent((item, stack) -> item.release(cameraHolder, getItemStack()),
+    public void release() {
+        ifPresent((item, stack) -> item.release(getHolder(), getItemStack()),
                 () -> LOGGER.error("Cannot take a shot: camera is not active. Camera Holder: {}", this.holder));
     }
 

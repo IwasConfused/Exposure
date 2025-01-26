@@ -28,16 +28,7 @@ public class ServerEvents {
     }
 
     public static void playerTick(ServerPlayer player) {
-        if (player.getActiveExposureCamera() instanceof CameraInHand cameraInHand) {
-            if (!cameraInHand.getId().matches(player.getItemInHand(cameraInHand.getHand()))) {
-                for (ItemStack stack : player.getInventory().items) {
-                    if (stack.getItem() instanceof CameraItem cameraItem && !cameraInHand.getId().matches(stack)) {
-                        cameraItem.deactivate(player, stack);
-                    }
-                }
-                player.removeActiveExposureCamera();
-            }
-        }
+
     }
 
     public static void itemDrop(ServerPlayer player) {

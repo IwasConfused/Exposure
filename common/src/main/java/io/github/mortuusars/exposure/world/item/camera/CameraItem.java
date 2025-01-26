@@ -342,10 +342,11 @@ public class CameraItem extends Item {
 
         getShutter().tick(player, serverLevel, stack);
 
-        boolean isHolding = isSelected || slotId == Inventory.SLOT_OFFHAND;
-        boolean matchesActive = player.getActiveExposureCameraOptional().map(camera -> camera.idMatches(getOrCreateID(stack))).orElse(false);
-        if (isActive(stack) && (!isHolding || !matchesActive)) {
-            deactivate(player, stack);
+        boolean matchesActive = player.getActiveExposureCameraOptional()
+                .map(camera -> camera.idMatches(getOrCreateID(stack)))
+                .orElse(false);
+        if (isActive(stack) && !matchesActive) {
+            setActive(stack, false);
         }
 
         CameraInstances.ifPresent(stack, instance -> {

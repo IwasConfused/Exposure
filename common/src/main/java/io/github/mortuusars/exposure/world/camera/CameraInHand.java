@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.world.camera;
 
+import io.github.mortuusars.exposure.mixin.PlayerMixin;
 import io.github.mortuusars.exposure.network.packet.Packet;
 import io.github.mortuusars.exposure.network.packet.client.ActiveCameraInHandSetS2CP;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
@@ -7,6 +8,7 @@ import io.github.mortuusars.exposure.world.item.camera.CameraItem;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +27,31 @@ public class CameraInHand extends Camera {
     @Override
     public ItemStack getItemStack() {
         return ((LivingEntity) getHolder()).getItemInHand(getHand());
+    }
+
+    @Override
+    public boolean deactivate() {
+        if (super.deactivate()) return true;
+
+        InteractionHand oppositeHand = getHand() == InteractionHand.MAIN_HAND
+                ? InteractionHand.OFF_HAND
+                : InteractionHand.MAIN_HAND;
+        ItemStack itemInHand = ((LivingEntity) getHolder()).getItemInHand(oppositeHand);
+        if (getId().matches(itemInHand) && itemInHand.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(itemInHand)) {
+            cameraItem.deactivate(getHolder().asEntity(), itemInHand);
+            return true;
+        }
+
+        if (getHolder() instanceof Player player) {
+            for (ItemStack stack : player.getInventory().items) {
+                if (getId().matches(stack) && stack.getItem() instanceof CameraItem cameraItem && cameraItem.isActive(stack)) {
+                    cameraItem.deactivate(getHolder().asEntity(), stack);
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     @Override
