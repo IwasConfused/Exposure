@@ -59,18 +59,25 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CameraItem extends Item {
     public static final int BASE_COOLDOWN = 2;
@@ -637,7 +644,9 @@ public class CameraItem extends Item {
         }
 
         double zoom = CameraSettings.ZOOM.getOrDefault(stack);
-        int focalLength = (int) getFocalRange(level.registryAccess(), stack).focalLengthFromZoom(zoom);
+        FocalRange focalRange = getFocalRange(level.registryAccess(), stack);
+        float fov = (float) focalRange.fovFromZoom(zoom);
+        int focalLength = (int) focalRange.focalLengthFromZoom(zoom);
         data.put(Frame.FOCAL_LENGTH, focalLength);
 
         captureProperties.extraData().get(CaptureProperties.LIGHT_LEVEL)
@@ -654,8 +663,6 @@ public class CameraItem extends Item {
         data.put(Frame.DIMENSION, level.dimension().location());
 
         BlockPos blockPos = cameraHolder.blockPosition();
-        level.getBiome(blockPos).unwrapKey().map(ResourceKey::location)
-                .ifPresent(biome -> data.put(Frame.BIOME, biome));
 
         int surfaceHeight = level.getHeight(Heightmap.Types.WORLD_SURFACE, cameraHolder.getBlockX(), cameraHolder.getBlockZ());
         level.updateSkyBrightness();
@@ -676,12 +683,52 @@ public class CameraItem extends Item {
                 data.put(Frame.WEATHER, "Clear");
         }
 
-        List<ResourceLocation> structures = LevelUtil.getStructuresAt(level, blockPos);
+        List<BlockPos> positionsInFrame = getPositionsInFrame(cameraHolder, fov);
+
+        // Most common biome:
+        positionsInFrame.stream()
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .flatMap(pos -> level.getBiome(pos).unwrapKey().map(ResourceKey::location))
+                .ifPresent(biome -> data.put(Frame.BIOME, biome));
+
+        List<ResourceLocation> structures = positionsInFrame.stream()
+                .map(pos -> LevelUtil.getStructuresAt(level, pos))
+                .flatMap(List::stream)
+                .collect(Collectors.toSet()) // Remove duplicates
+                .stream()
+                .toList();
         if (!structures.isEmpty()) {
             data.put(Frame.STRUCTURES, structures);
         }
 
         //TODO: addExtraData event
+    }
+
+    /**
+     * Fires 5 rays from camera and obtains positions where they landed. <br>
+     * First ray is in the center (equals to look direction).<br>
+     * Next are: top left, top right, bottom left, bottom right.
+     * These 4 are roughly in positions where rule of thirds cross points are.
+     */
+    public List<BlockPos> getPositionsInFrame(Entity cameraHolder, float fov) {
+        Vec3 eyePos = cameraHolder.getEyePosition();
+        Vec3 lookDirection = Vec3.directionFromRotation(cameraHolder.getXRot(), cameraHolder.getYRot());
+        // offset roughly corresponds to rule of thirds distance
+        float offsetDegrees = (float) ((fov * getCropFactor()) / 4.3);
+
+        return Vec3Util.getCrossVectors(lookDirection, offsetDegrees).stream()
+                .map(direction -> {
+                    Vec3 endPos = eyePos.add(direction.scale(400));
+                    return cameraHolder.level().clip(
+                            new ClipContext(eyePos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, cameraHolder));
+                })
+                .filter(hit -> hit.getType() != HitResult.Type.MISS)
+                .map(BlockHitResult::getBlockPos)
+                .toList();
     }
 
     public void addFrameToFilm(ItemStack stack, Frame frame) {
@@ -771,3 +818,4 @@ public class CameraItem extends Item {
         return -1;
     }
 }
+
