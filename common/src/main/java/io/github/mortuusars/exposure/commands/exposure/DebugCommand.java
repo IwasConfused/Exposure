@@ -91,8 +91,9 @@ public class DebugCommand {
 
             Frame frame = camera
                     .map((cameraItem, cameraStack) ->
-                            cameraItem.createFrame(context.getSource().getLevel(), captureProperties, player,
-                                    cameraItem.getEntitiesInFrame(player, context.getSource().getLevel(), cameraStack), cameraStack))
+                            cameraItem.createFrame(player, context.getSource().getLevel(), cameraStack, captureProperties,
+                                    cameraItem.getPositionsInFrame(player, cameraItem.getFov(player.level(), cameraStack)),
+                                    cameraItem.getEntitiesInFrame(player, context.getSource().getLevel(), cameraStack)))
                     .orElse(Frame.create().setIdentifier(ExposureIdentifier.id(exposureId))
                             .setType(ExposureType.BLACK_AND_WHITE)
                             .setPhotographer(new Photographer(player))
@@ -151,15 +152,13 @@ public class DebugCommand {
             ExposureServer.frameHistory().add(player, frame);
 
             Supplier<Component> msg = () -> {
-                String exposureId = frame.exposureIdentifier().getId().orElseThrow();
-                ItemStack photograph = new ItemStack(Exposure.Items.PHOTOGRAPH.get());
-                photograph.set(Exposure.DataComponents.PHOTOGRAPH_FRAME, frame);
+                String exposureId = frame.identifier().getId().orElseThrow();
                 return Component.literal("Created chromatic exposure: ")
                         .append(Component.literal(exposureId)
                                 .withStyle(Style.EMPTY
                                         .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND,
-                                                "/exposure show id " + exposureId))
-                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(photograph)))
+                                                "/exposure show latest"))
+                                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackInfo(photographStack)))
                                         .withUnderlined(true)));
             };
 

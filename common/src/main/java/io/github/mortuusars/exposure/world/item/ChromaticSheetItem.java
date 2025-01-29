@@ -86,7 +86,7 @@ public class ChromaticSheetItem extends Item {
 
         String exposureId = ExposureIdentifier.createId(player, "chromatic");
         List<Frame> layers = getLayers(stack);
-        List<ExposureIdentifier> layersIdentifiers = layers.stream().map(Frame::exposureIdentifier).toList();
+        List<ExposureIdentifier> layersIdentifiers = layers.stream().map(Frame::identifier).toList();
 
         ItemStack photographStack = createPhotographStack(ExposureIdentifier.id(exposureId), layers);
 

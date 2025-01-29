@@ -37,7 +37,7 @@ public class Config {
         // Misc
         public static final ModConfigSpec.BooleanValue FILM_ROLL_EASY_RENAMING;
         public static final ModConfigSpec.BooleanValue INTERPLANAR_PROJECTOR_LARGER_RENAMING_LIMIT;
-        public static final ModConfigSpec.BooleanValue GENERATE_LOOT;
+
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -121,6 +121,22 @@ public class Config {
                         .comment("Increases item name length limit for Interplanar Projector to 150 characters. Vanilla limit: 50.",
                                 "Default: true")
                         .define("increase_interplanar_projector_name_limit", true);
+            }
+            builder.pop();
+
+            SPEC = builder.build();
+        }
+    }
+
+    public static class Common {
+        public static final ModConfigSpec SPEC;
+        public static final ModConfigSpec.BooleanValue GENERATE_LOOT;
+
+        static {
+            ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
+
+            builder.push("misc");
+            {
                 GENERATE_LOOT = builder
                         .comment("Generate photographs and film rolls in loot chests. Default: true")
                         .define("loot_chests", true);

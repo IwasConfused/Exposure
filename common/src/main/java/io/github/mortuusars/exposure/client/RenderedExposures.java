@@ -23,7 +23,7 @@ public class RenderedExposures {
     private final Map<String, RenderedExposureInstance> cachedRenderedExposures = new HashMap<>();
 
     public RenderableImage getOrCreate(Frame frame) {
-        RenderableImage image = getOrCreateRaw(frame.exposureIdentifier());
+        RenderableImage image = getOrCreateRaw(frame.identifier());
         return Censor.isAllowedToRender(frame)
                 ? image
                 : image.modifyWith(ImageModifier.CENSORED);

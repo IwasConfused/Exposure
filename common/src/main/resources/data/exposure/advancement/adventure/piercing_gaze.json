@@ -2,12 +2,8 @@
   "parent": "exposure:adventure/exposure",
   "criteria": {
     "use_interplanar_projector": {
-      "conditions": {
-        "exposure": {
-          "nbt": "{Projected:1b}"
-        }
-      },
-      "trigger": "exposure:frame_exposed"
+      "conditions": {},
+      "trigger": "exposure:successfully_project_image"
     }
   },
   "display": {
@@ -16,7 +12,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "exposure:interplanar_projector"
+      "id": "exposure:interplanar_projector"
     },
     "title": {
       "translate": "advancement.exposure.piercing_gaze.title"

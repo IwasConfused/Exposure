@@ -22,7 +22,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "exposure:photograph"
+      "id": "exposure:photograph"
     },
     "title": {
       "translate": "advancement.exposure.moment_in_time.title"

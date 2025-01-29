@@ -12,8 +12,10 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "exposure:camera",
-      "nbt": "{Active:1b}"
+      "id": "exposure:camera",
+      "components": {
+        "exposure:camera_active": true
+      }
     },
     "title": {
       "translate": "advancement.exposure.exposure.title"
@@ -26,6 +28,5 @@
     [
       "expose_frame"
     ]
-  ],
-  "sends_telemetry_event": true
+  ]
 }

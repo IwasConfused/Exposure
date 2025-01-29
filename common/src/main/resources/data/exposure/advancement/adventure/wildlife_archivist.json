@@ -3,7 +3,7 @@
   "criteria": {
     "minecraft:axolotl": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:axolotl"
           }
@@ -13,7 +13,7 @@
     },
     "minecraft:bat": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:bat"
           }
@@ -23,7 +23,7 @@
     },
     "minecraft:camel": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:camel"
           }
@@ -33,7 +33,7 @@
     },
     "minecraft:frog": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:frog"
           }
@@ -43,7 +43,7 @@
     },
     "minecraft:glow_squid": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:glow_squid"
           }
@@ -53,7 +53,7 @@
     },
     "minecraft:squid": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:squid"
           }
@@ -63,7 +63,7 @@
     },
     "minecraft:ocelot": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:ocelot"
           }
@@ -73,7 +73,7 @@
     },
     "minecraft:parrot": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:parrot"
           }
@@ -83,7 +83,7 @@
     },
     "minecraft:rabbit": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:rabbit"
           }
@@ -93,7 +93,7 @@
     },
     "minecraft:sniffer": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:sniffer"
           }
@@ -103,7 +103,7 @@
     },
     "minecraft:turtle": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:turtle"
           }
@@ -113,7 +113,7 @@
     },
     "minecraft:bee": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:bee"
           }
@@ -123,7 +123,7 @@
     },
     "minecraft:dolphin": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:dolphin"
           }
@@ -133,7 +133,7 @@
     },
     "minecraft:fox": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:fox"
           }
@@ -143,7 +143,7 @@
     },
     "minecraft:goat": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:goat"
           }
@@ -153,7 +153,7 @@
     },
     "minecraft:llama": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:llama"
           }
@@ -163,7 +163,7 @@
     },
     "minecraft:panda": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:panda"
           }
@@ -173,7 +173,7 @@
     },
     "minecraft:polar_bear": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:polar_bear"
           }
@@ -183,7 +183,7 @@
     },
     "minecraft:wolf": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "entity_in_frame": {
             "type": "minecraft:wolf"
           }
@@ -198,7 +198,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:axolotl_bucket"
+      "id": "minecraft:axolotl_bucket"
     },
     "title": {
       "translate": "advancement.exposure.wildlife_archivist.title"

@@ -82,7 +82,7 @@ public class ViewfinderShader implements AutoCloseable {
      * Main use for this is to apply a shader when capturing a photograph.
      */
     public void process(RenderTarget renderTarget) {
-        if (shader != null && active) {
+        if (shader != null) {
             Shader.apply(shader, renderTarget);
         }
     }
@@ -90,6 +90,7 @@ public class ViewfinderShader implements AutoCloseable {
     public void update() {
         ItemStack filterStack = Attachment.FILTER.get(camera.getItemStack()).getForReading();
         Filters.of(Minecrft.registryAccess(), filterStack).map(Filter::shader).ifPresentOrElse(this::apply, this::remove);
+        setActive(viewfinder.isLookingThrough());
     }
 
     public void setActive(boolean active) {

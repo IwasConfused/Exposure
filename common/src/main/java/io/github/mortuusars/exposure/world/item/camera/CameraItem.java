@@ -64,7 +64,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.material.Fluids;
@@ -77,7 +76,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class CameraItem extends Item {
     public static final int BASE_COOLDOWN = 2;
@@ -162,6 +160,12 @@ public class CameraItem extends Item {
     public FocalRange getFocalRange(RegistryAccess registryAccess, ItemStack stack) {
         return Attachment.LENS.map(stack, lensStack -> Lenses.getFocalRangeOrDefault(registryAccess, lensStack))
                 .orElse(FocalRange.getDefault());
+    }
+
+    public float getFov(Level level, ItemStack stack) {
+        double zoom = CameraSettings.ZOOM.getOrDefault(stack);
+        FocalRange focalRange = getFocalRange(level.registryAccess(), stack);
+        return (float) focalRange.fovFromZoom(zoom);
     }
 
     public Holder<ColorPalette> getColorPalette(RegistryAccess registryAccess, ItemStack stack) {
@@ -599,23 +603,25 @@ public class CameraItem extends Item {
     // --
 
     public void addNewFrame(ServerLevel level, CaptureProperties captureProperties, CameraHolder holder, ItemStack stack) {
-        List<LivingEntity> capturedEntities = captureProperties.projection().isEmpty()
-                ? getEntitiesInFrame(holder, level, stack)
-                : Collections.emptyList();
+        boolean projecting = captureProperties.projection().isPresent();
 
-        capturedEntities.forEach(entity -> entityCaptured(holder, stack, entity));
+        float fov = getFov(level, stack);
 
-        Frame frame = createFrame(level, captureProperties, holder, capturedEntities, stack);
+        List<BlockPos> positionsInFrame = projecting ? Collections.emptyList() : getPositionsInFrame(holder.asEntity(), fov);
+        List<LivingEntity> entitiesInFrame = projecting ? Collections.emptyList() : getEntitiesInFrame(holder, level, stack);
+
+        Frame frame = createFrame(holder, level, stack, captureProperties, positionsInFrame, entitiesInFrame);
         addFrameToFilm(stack, frame);
-        onFrameAdded(level, holder, stack, frame);
+        onFrameAdded(holder, level, stack, frame, positionsInFrame, entitiesInFrame);
     }
 
-    public Frame createFrame(ServerLevel level, CaptureProperties captureProperties, CameraHolder holder, List<LivingEntity> capturedEntities, ItemStack stack) {
+    public Frame createFrame(CameraHolder holder, ServerLevel level, ItemStack stack, CaptureProperties captureProperties,
+                             List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
         return Frame.create()
                 .setIdentifier(ExposureIdentifier.id(captureProperties.exposureId()))
                 .setType(captureProperties.filmType())
                 .setPhotographer(new Photographer(holder))
-                .setEntitiesInFrame(capturedEntities.stream()
+                .setEntitiesInFrame(entitiesInFrame.stream()
                         .limit(Exposure.MAX_ENTITIES_IN_FRAME)
                         .map(entity -> EntityInFrame.of(holder.asEntity(), entity, data -> {
                             //TODO: addCustomEntityInFrameData event
@@ -623,11 +629,12 @@ public class CameraItem extends Item {
                         .toList())
                 .addExtraData(Frame.SHUTTER_SPEED, CameraSettings.SHUTTER_SPEED.getOrDefault(stack))
                 .addExtraData(Frame.TIMESTAMP, UnixTimestamp.Seconds.now())
-                .updateExtraData(data -> addFrameExtraData(data, holder, level, captureProperties, stack))
+                .updateExtraData(data -> addFrameExtraData(holder, level, stack, captureProperties, data, positionsInFrame, entitiesInFrame))
                 .toImmutable();
     }
 
-    protected void addFrameExtraData(ExtraData data, CameraHolder holder, ServerLevel level, CaptureProperties captureProperties, ItemStack stack) {
+    protected void addFrameExtraData(CameraHolder holder, ServerLevel level, ItemStack stack, CaptureProperties captureProperties,
+                                     ExtraData data, List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
         Entity cameraHolder = holder.asEntity();
         boolean projecting = captureProperties.projection().isPresent();
 
@@ -645,7 +652,6 @@ public class CameraItem extends Item {
 
         double zoom = CameraSettings.ZOOM.getOrDefault(stack);
         FocalRange focalRange = getFocalRange(level.registryAccess(), stack);
-        float fov = (float) focalRange.fovFromZoom(zoom);
         int focalLength = (int) focalRange.focalLengthFromZoom(zoom);
         data.put(Frame.FOCAL_LENGTH, focalLength);
 
@@ -682,8 +688,6 @@ public class CameraItem extends Item {
             else
                 data.put(Frame.WEATHER, "Clear");
         }
-
-        List<BlockPos> positionsInFrame = getPositionsInFrame(cameraHolder, fov);
 
         // Most common biome:
         positionsInFrame.stream()
@@ -739,16 +743,19 @@ public class CameraItem extends Item {
         }, () -> Exposure.LOGGER.error("Cannot add frame: no film attachment is present."));
     }
 
-    public void onFrameAdded(ServerLevel level, CameraHolder holder, ItemStack stack, Frame frame) {
+    public void onFrameAdded(CameraHolder holder, ServerLevel level, ItemStack stack, Frame frame,
+                             List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
         ExposureServer.frameHistory().add(holder.asEntity(), frame);
+
+        entitiesInFrame.forEach(entity -> entityCaptured(holder, stack, entity));
 
         holder.getPlayerAwardedForExposure()
                 .filter(player -> player instanceof ServerPlayer)
                 .ifPresent(player -> {
                     ServerPlayer serverPlayer = (ServerPlayer) player;
                     serverPlayer.awardStat(Exposure.Stats.FILM_FRAMES_EXPOSED);
-                    //TODO: advancement trigger
-                    //Exposure.CriteriaTriggers.FILM_FRAME_EXPOSED.trigger(player, new ItemAndStack<>(cameraStack), frame, entities);
+                    Exposure.CriteriaTriggers.FRAME_EXPOSED.get().trigger(
+                            serverPlayer, holder, stack, frame, positionsInFrame, entitiesInFrame);
                 });
     }
 
@@ -799,6 +806,8 @@ public class CameraItem extends Item {
         if (projectionState == CameraInstance.ProjectionState.TIMED_OUT) {
             Sound.play(entity, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), entity.getSoundSource(), 0.4f, 0.6f);
         } else if (projectionState == CameraInstance.ProjectionState.SUCCESSFUL) {
+            holder.getServerPlayerAwardedForExposure()
+                    .ifPresent(player -> Exposure.CriteriaTriggers.SUCCESSFULLY_PROJECT_IMAGE.get().trigger(player));
             Sound.play(entity, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), entity.getSoundSource(), 0.8f, 1.1f);
             for (int i = 0; i < 16; i++) {
                 level.sendParticles(ParticleTypes.PORTAL, entity.getX(), entity.getY() + 1.2, entity.getZ(), 2,

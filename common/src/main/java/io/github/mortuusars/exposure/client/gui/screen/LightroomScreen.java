@@ -290,7 +290,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
                         .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
 
             if (isAdvancedTooltips) {
-                Component component = frame.exposureIdentifier().map(
+                Component component = frame.identifier().map(
                                 id -> !id.isEmpty() ? Component.translatable("gui.exposure.frame.id",
                                         Component.literal(id).withStyle(ChatFormatting.GRAY)) : Component.empty(),
                                 texture -> Component.translatable("gui.exposure.frame.texture",

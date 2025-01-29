@@ -66,7 +66,7 @@ public class ClientEvents {
     public static boolean renderItemFrameItem(ItemFrame itemFrame, PoseStack poseStack, MultiBufferSource buffer, int packedLight) {
         if (!Config.Client.PHOTOGRAPH_RENDERS_IN_ITEM_FRAME.get()) return false;
         if (!(itemFrame.getItem().getItem() instanceof PhotographItem photographItem)) return false;
-        if (photographItem.getFrame(itemFrame.getItem()).exposureIdentifier().isEmpty()) return false;
+        if (photographItem.getFrame(itemFrame.getItem()).identifier().isEmpty()) return false;
 
         poseStack.pushPose();
         poseStack.scale(2F, 2F, 2F);

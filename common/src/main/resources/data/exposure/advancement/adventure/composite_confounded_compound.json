@@ -9,7 +9,11 @@
               "exposure:photograph",
               "exposure:aged_photograph"
             ],
-            "nbt": "{Chromatic:true}"
+            "predicates": {
+              "exposure:frame": {
+                "extra_data": "{chromatic:1b}"
+              }
+            }
           }
         ]
       },
@@ -18,12 +22,24 @@
   },
   "display": {
     "frame": "task",
-    "hidden": true,
+    "hidden": false,
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "exposure:chromatic_sheet",
-      "nbt": "{Exposures:[{Id:\"1\"},{Id:\"2\"},{Id:\"3\"}]}"
+      "id": "exposure:chromatic_sheet",
+      "components": {
+        "exposure:chromatic_layers": [
+          {
+            "exposure": "1"
+          },
+          {
+            "exposure": "2"
+          },
+          {
+            "exposure": "3"
+          }
+        ]
+      }
     },
     "title": {
       "translate": "advancement.exposure.composite_confounded_compound.title"

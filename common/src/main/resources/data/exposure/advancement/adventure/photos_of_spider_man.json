@@ -3,12 +3,10 @@
   "criteria": {
     "photograph_spider_man": {
       "conditions": {
-        "exposure": {
-          "entity_in_frame": {
-            "type": "minecraft:skeleton",
-            "vehicle": {
-              "type": "minecraft:spider"
-            }
+        "entity_in_frame": {
+          "type": "minecraft:skeleton",
+          "vehicle": {
+            "type": "minecraft:spider"
           }
         }
       },
@@ -21,7 +19,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:cobweb"
+      "id": "minecraft:cobweb"
     },
     "title": {
       "translate": "advancement.exposure.photos_of_spider_man.title"

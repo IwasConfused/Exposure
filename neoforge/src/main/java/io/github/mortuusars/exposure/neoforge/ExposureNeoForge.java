@@ -27,6 +27,7 @@ public class ExposureNeoForge {
         });
 
         container.registerConfig(ModConfig.Type.SERVER, Config.Server.SPEC);
+        container.registerConfig(ModConfig.Type.COMMON, Config.Common.SPEC);
         container.registerConfig(ModConfig.Type.CLIENT, Config.Client.SPEC);
 
         @Nullable IEventBus modEventBus = container.getEventBus();
@@ -40,6 +41,7 @@ public class ExposureNeoForge {
         RegisterImpl.RECIPE_TYPES.register(modEventBus);
         RegisterImpl.RECIPE_SERIALIZERS.register(modEventBus);
         RegisterImpl.CRITERION_TRIGGERS.register(modEventBus);
+        RegisterImpl.ITEM_SUB_PREDICATES.register(modEventBus);
         RegisterImpl.SOUND_EVENTS.register(modEventBus);
         RegisterImpl.COMMAND_ARGUMENT_TYPES.register(modEventBus);
         RegisterImpl.WORLD_GEN_FEATURES.register(modEventBus);

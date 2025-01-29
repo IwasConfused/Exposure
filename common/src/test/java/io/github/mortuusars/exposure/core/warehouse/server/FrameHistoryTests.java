@@ -44,7 +44,7 @@ public class FrameHistoryTests {
         ExposureFrameHistory decodedHistory = ExposureFrameHistory.load(tag, HolderLookup.Provider.create(Stream.of()));
         List<Frame> frames = decodedHistory.getFramesOf(randomUUID);
 
-        assertEquals("test", frames.getFirst().exposureIdentifier().id());
+        assertEquals("test", frames.getFirst().identifier().id());
     }
 
     @Test

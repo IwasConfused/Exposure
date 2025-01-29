@@ -11,7 +11,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:ender_eye"
+      "id": "minecraft:ender_eye"
     },
     "title": {
       "translate": "advancement.exposure.unforeseen_consequences.title"

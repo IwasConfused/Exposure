@@ -9,7 +9,13 @@
               "exposure:photograph",
               "exposure:aged_photograph"
             ],
-            "nbt": "{Texture:\"exposure:textures/exposure/mineshaft/skeleton_smirk.png\"}"
+            "predicates": {
+              "exposure:frame": {
+                "identifier": {
+                  "texture": "exposure:textures/exposure/mineshaft/skeleton_smirk.png"
+                }
+              }
+            }
           }
         ]
       },
@@ -22,7 +28,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:bone"
+      "id": "minecraft:bone"
     },
     "title": {
       "translate": "advancement.exposure.spooky_silly_skeletons.title"

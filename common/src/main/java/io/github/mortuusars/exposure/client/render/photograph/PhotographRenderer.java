@@ -39,7 +39,7 @@ public class PhotographRenderer {
 
         RenderableImage image = style.process(ExposureClient.renderedExposures().getOrCreate(frame));
 
-        int paperRotation = frame.exposureIdentifier().hashCode() % 4 * 90;
+        int paperRotation = frame.identifier().hashCode() % 4 * 90;
 
         if (renderPaper && style.paperTexture() != ExposureClient.Textures.EMPTY) {
             poseStack.pushPose();
@@ -129,7 +129,7 @@ public class PhotographRenderer {
             poseStack.translate(0.5f, 0.5f, 0);
 
             Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
-            int rotation = frame.exposureIdentifier().hashCode() % 4 * 90;
+            int rotation = frame.identifier().hashCode() % 4 * 90;
             poseStack.mulPose(Axis.ZP.rotationDegrees(rotation));
 
             poseStack.translate(-0.5f, -0.5f, 0);

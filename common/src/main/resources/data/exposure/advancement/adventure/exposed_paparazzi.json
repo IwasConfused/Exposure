@@ -3,18 +3,18 @@
   "criteria": {
     "shoot_with_flash": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "day_time": {
             "min": 13000,
             "max": 23000
           },
-          "nbt": "{Flash:1b}",
           "entity_in_frame": {
             "type": "minecraft:villager",
             "distance": {
-              "min": 5
+              "min": 6
             }
-          }
+          },
+          "extra_data": "{flash:1b}"
         }
       },
       "trigger": "exposure:frame_exposed"
@@ -26,7 +26,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:jack_o_lantern"
+      "id": "minecraft:jack_o_lantern"
     },
     "title": {
       "translate": "advancement.exposure.exposed_paparazzi.title"

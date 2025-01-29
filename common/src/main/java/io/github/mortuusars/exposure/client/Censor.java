@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 public class Censor {
     public static boolean isAllowedToRender(Frame frame) {
-        if (frame.exposureIdentifier().isTexture()) {
+        if (frame.identifier().isTexture()) {
             return true;
         }
 

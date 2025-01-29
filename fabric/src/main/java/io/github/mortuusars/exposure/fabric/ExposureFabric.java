@@ -43,6 +43,7 @@ public class ExposureFabric implements ModInitializer {
         DynamicRegistries.registerSynced(Exposure.Registries.FILTER, Filter.CODEC, Filter.CODEC);
 
         NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.SERVER, Config.Server.SPEC);
+        NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.COMMON, Config.Common.SPEC);
         NeoForgeConfigRegistry.INSTANCE.register(Exposure.ID, ModConfig.Type.CLIENT, Config.Client.SPEC);
 
         CommandRegistrationCallback.EVENT.register(CommonEvents::registerCommands);
@@ -90,7 +91,7 @@ public class ExposureFabric implements ModInitializer {
 
     private static void modifyLoot(ResourceKey<LootTable> tableKey, LootTable.Builder builder,
                                    LootTableSource source, HolderLookup.Provider provider) {
-        if (!Config.Server.GENERATE_LOOT.get() || !source.isBuiltin())
+        if (!Config.Common.GENERATE_LOOT.get() || !source.isBuiltin())
             return;
 
         if (BuiltInLootTables.SIMPLE_DUNGEON.equals(tableKey)) {

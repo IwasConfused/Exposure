@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.world.camera.component;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import io.github.mortuusars.exposure.Exposure;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.SharedConstants;
@@ -15,7 +16,14 @@ import java.util.Objects;
 public class ShutterSpeed implements StringRepresentable {
     public static final ShutterSpeed DEFAULT = new ShutterSpeed("1/60");
 
-    public static final Codec<ShutterSpeed> CODEC = Codec.STRING.xmap(ShutterSpeed::new, ShutterSpeed::getNotation);
+    public static final Codec<ShutterSpeed> CODEC = Codec.STRING.comapFlatMap(str -> {
+        try {
+            return DataResult.success(new ShutterSpeed(str));
+        } catch (Exception e) {
+            return DataResult.error(e::getMessage);
+        }
+    }, ShutterSpeed::getNotation);
+
     public static final StreamCodec<ByteBuf, ShutterSpeed> STREAM_CODEC =
             ByteBufCodecs.STRING_UTF8.map(ShutterSpeed::new, ShutterSpeed::getNotation);
 
@@ -31,12 +39,10 @@ public class ShutterSpeed implements StringRepresentable {
         if (notation.endsWith("\"")) {
             this.valueMilliseconds = Integer.parseInt(notation.replace("\"", "")) * 1000;
             this.notation = notation;
-        }
-        else if (notation.contains("1/")) {
+        } else if (notation.contains("1/")) {
             this.valueMilliseconds = 1f / Integer.parseInt(notation.replace("1/", "")) * 1000;
             this.notation = notation;
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("'%s' is not a valid shutter speed. Format should be 1/60, 2\", etc.".formatted(notation));
         }
     }
@@ -53,7 +59,7 @@ public class ShutterSpeed implements StringRepresentable {
      * Should be at least 1 tick. Otherwise, it's probably not going to work correctly.
      */
     public int getDurationTicks() {
-        return Math.max(1, (int)(valueMilliseconds / SharedConstants.MILLIS_PER_TICK));
+        return Math.max(1, (int) (valueMilliseconds / SharedConstants.MILLIS_PER_TICK));
     }
 
     public boolean shouldCauseTickingSound() {

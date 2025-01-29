@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure;
 import com.google.common.base.Preconditions;
 import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
+import io.github.mortuusars.exposure.advancements.predicate.FramePredicate;
 import io.github.mortuusars.exposure.advancements.trigger.FrameExposedTrigger;
 import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.world.block.LightroomBlock;
@@ -33,6 +34,7 @@ import io.github.mortuusars.exposure.world.item.crafting.recipe.PhotographAgingR
 import io.github.mortuusars.exposure.world.item.crafting.recipe.PhotographCopyingRecipe;
 import io.github.mortuusars.exposure.world.item.crafting.recipe.serializer.ComponentTransferringRecipeSerializer;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
+import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.advancements.critereon.PlayerTrigger;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
@@ -82,6 +84,7 @@ public class Exposure {
         Items.init();
         DataComponents.init();
         CriteriaTriggers.init();
+        ItemSubPredicates.init();
         MenuTypes.init();
         RecipeSerializers.init();
         SoundEvents.init();
@@ -409,9 +412,17 @@ public class Exposure {
     }
 
     public static class CriteriaTriggers {
-        public static Supplier<FrameExposedTrigger> FILM_FRAME_EXPOSED = Register.criterionTrigger("frame_exposed", FrameExposedTrigger::new);
+        public static Supplier<FrameExposedTrigger> FRAME_EXPOSED = Register.criterionTrigger("frame_exposed", FrameExposedTrigger::new);
         public static Supplier<PlayerTrigger> PHOTOGRAPH_ENDERMAN_EYES = Register.criterionTrigger("photograph_enderman_eyes", PlayerTrigger::new);
+        public static Supplier<PlayerTrigger> SUCCESSFULLY_PROJECT_IMAGE = Register.criterionTrigger("successfully_project_image", PlayerTrigger::new);
 
+        public static void init() {
+        }
+    }
+
+    public static class ItemSubPredicates {
+        public static Supplier<ItemSubPredicate.Type<FramePredicate>> FRAME = Register.itemSubPredicate("frame",
+                () -> new ItemSubPredicate.Type<>(FramePredicate.CODEC));
         public static void init() {
         }
     }

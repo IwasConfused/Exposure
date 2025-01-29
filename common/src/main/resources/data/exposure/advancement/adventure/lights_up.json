@@ -3,11 +3,11 @@
   "criteria": {
     "flash_in_darkness": {
       "conditions": {
-        "exposure": {
+        "frame": {
           "light_level": {
             "max": 3
           },
-          "nbt": "{Flash:1b}"
+          "extra_data": "{flash:1b}"
         }
       },
       "trigger": "exposure:frame_exposed"
@@ -19,7 +19,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:redstone_lamp"
+      "id": "minecraft:redstone_lamp"
     },
     "title": {
       "translate": "advancement.exposure.lights_up.title"

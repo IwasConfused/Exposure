@@ -19,7 +19,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public record Frame(ExposureIdentifier exposureIdentifier,
+public record Frame(ExposureIdentifier identifier,
                     ExposureType type,
                     Photographer photographer,
                     List<EntityInFrame> entitiesInFrame,
@@ -59,10 +59,10 @@ public record Frame(ExposureIdentifier exposureIdentifier,
             ExtraData.EMPTY);
 
     public static final Codec<Frame> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-                    ExposureIdentifier.CODEC.fieldOf("exposure").forGetter(Frame::exposureIdentifier),
+                    ExposureIdentifier.CODEC.fieldOf("identifier").forGetter(Frame::identifier),
                     ExposureType.CODEC.optionalFieldOf("type", ExposureType.COLOR).forGetter(Frame::type),
                     Photographer.CODEC.optionalFieldOf("photographer", Photographer.EMPTY).forGetter(Frame::photographer),
-                    EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("captured_entities", Collections.emptyList()).forGetter(Frame::entitiesInFrame),
+                    EntityInFrame.CODEC.listOf(0, 16).optionalFieldOf("entities_in_frame", Collections.emptyList()).forGetter(Frame::entitiesInFrame),
                     ExtraData.CODEC.optionalFieldOf("extra_data", ExtraData.EMPTY).forGetter(Frame::extraData))
             .apply(instance, Frame::new));
 
@@ -77,7 +77,7 @@ public record Frame(ExposureIdentifier exposureIdentifier,
         }
 
         public void encode(FriendlyByteBuf buffer, Frame frame) {
-            ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.exposureIdentifier());
+            ExposureIdentifier.STREAM_CODEC.encode(buffer, frame.identifier());
             ExposureType.STREAM_CODEC.encode(buffer, frame.type());
             Photographer.STREAM_CODEC.encode(buffer, frame.photographer);
             EntityInFrame.STREAM_CODEC.apply(ByteBufCodecs.list(16)).encode(buffer, frame.entitiesInFrame());
@@ -172,7 +172,7 @@ public record Frame(ExposureIdentifier exposureIdentifier,
         private ExtraData tag;
 
         public Mutable(Frame photographData) {
-            this.identifier = photographData.exposureIdentifier();
+            this.identifier = photographData.identifier();
             this.type = photographData.type();
             this.photographer = photographData.photographer();
             this.entitiesInFrame = new ArrayList<>(photographData.entitiesInFrame());

@@ -43,7 +43,7 @@ public class PhotographItem extends Item {
 
     @Override
     public @NotNull Optional<TooltipComponent> getTooltipImage(@NotNull ItemStack stack) {
-        ExposureIdentifier identifier = getFrame(stack).exposureIdentifier();
+        ExposureIdentifier identifier = getFrame(stack).identifier();
         return !identifier.isEmpty() ? Optional.of(new PhotographTooltip(List.of(new ItemAndStack<>(stack)))) : Optional.empty();
     }
 
@@ -76,7 +76,7 @@ public class PhotographItem extends Item {
         }
 
         if (tooltipFlag.isAdvanced()) {
-            String identifier = frame.exposureIdentifier().map(
+            String identifier = frame.identifier().map(
                     id -> "Exposure Id: " + id,
                     texture -> "Texture: " + texture);
             tooltipComponents.add(Component.literal(identifier).withStyle(ChatFormatting.DARK_GRAY));
@@ -88,7 +88,7 @@ public class PhotographItem extends Item {
         ItemStack itemInHand = player.getItemInHand(hand);
 
         Frame frame = getFrame(itemInHand);
-        if (frame == Frame.EMPTY || frame.exposureIdentifier().isEmpty()) {
+        if (frame == Frame.EMPTY || frame.identifier().isEmpty()) {
             return InteractionResultHolder.pass(itemInHand);
         }
 

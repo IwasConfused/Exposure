@@ -7,6 +7,7 @@ import io.netty.buffer.Unpooled;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerType;
 import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -101,6 +102,11 @@ public class RegisterImpl {
 
     public static <T extends CriterionTrigger<?>> Supplier<T> criterionTrigger(String name, Supplier<T> supplier) {
         T obj = Registry.register(BuiltInRegistries.TRIGGER_TYPES, Exposure.resource(name), supplier.get());
+        return () -> obj;
+    }
+
+    public static <T extends ItemSubPredicate.Type<?>> Supplier<T> itemSubPredicate(String name, Supplier<T> supplier) {
+        T obj = Registry.register(BuiltInRegistries.ITEM_SUB_PREDICATE_TYPE, Exposure.resource(name), supplier.get());
         return () -> obj;
     }
 

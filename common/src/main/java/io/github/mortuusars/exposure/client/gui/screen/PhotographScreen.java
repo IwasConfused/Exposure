@@ -108,7 +108,7 @@ public class PhotographScreen extends Screen {
     protected void queryAllPhotographs(List<ItemAndStack<PhotographItem>> photographs) {
         for (ItemAndStack<PhotographItem> photograph : photographs) {
             photograph.getItem().getFrame(photograph.getItemStack())
-                    .exposureIdentifier()
+                    .identifier()
                     .ifId(id -> ExposureClient.exposureStore().getOrRequest(id));
         }
     }
@@ -182,13 +182,13 @@ public class PhotographScreen extends Screen {
         guiGraphics.drawString(font, "?", width - font.width("?") - 10, 10, 0xFFFFFFFF);
 
         if (mouseX > width - 20 && mouseX < width && mouseY < 20) {
-            String exposureName = frame.exposureIdentifier().map(id -> id, ResourceLocation::toString);
+            String exposureName = frame.identifier().map(id -> id, ResourceLocation::toString);
 
             List<Component> lines = List.of(
                     Component.literal(exposureName),
                     Component.translatable("gui.exposure.photograph_screen.drop_as_item_tooltip", Component.literal("CTRL + I")),
                     Component.translatable("gui.exposure.photograph_screen.copy_" +
-                            frame.exposureIdentifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
+                            frame.identifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
 
             guiGraphics.renderTooltip(font, lines, Optional.empty(), mouseX, mouseY + 20);
         }
@@ -243,7 +243,7 @@ public class PhotographScreen extends Screen {
         if (!Minecrft.player().isCreative() || frame.equals(Frame.EMPTY)) {
             return false;
         }
-        String text = frame.exposureIdentifier().map(id -> id, ResourceLocation::toString);
+        String text = frame.identifier().map(id -> id, ResourceLocation::toString);
         Minecrft.get().keyboardHandler.setClipboard(text);
         Minecrft.player().displayClientMessage(
                 Component.translatable("gui.exposure.photograph_screen.copied_message", text), false);
@@ -268,7 +268,7 @@ public class PhotographScreen extends Screen {
             return;
         }
 
-        frame.exposureIdentifier().ifId(id -> {
+        frame.identifier().ifId(id -> {
             PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
             PhotographStyle photographStyle = PhotographStyle.of(photograph.getItemStack());
 

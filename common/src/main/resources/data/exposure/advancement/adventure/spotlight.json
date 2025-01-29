@@ -3,9 +3,9 @@
   "criteria": {
     "take_selfie": {
       "conditions": {
-        "exposure": {
-          "nbt": "{Selfie:1b}",
-          "entities_count": 1,
+        "frame": {
+          "extra_data": "{selfie:1b}",
+          "entities_in_frame_count": 1,
           "entity_in_frame": {
             "type": "minecraft:player"
           }
@@ -20,7 +20,7 @@
     "show_toast": true,
     "announce_to_chat": true,
     "icon": {
-      "item": "minecraft:player_head"
+      "id": "minecraft:player_head"
     },
     "title": {
       "translate": "advancement.exposure.spotlight.title"

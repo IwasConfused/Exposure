@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.world.entity;
 
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
@@ -25,6 +26,12 @@ public interface CameraHolder {
     default Optional<Player> getPlayerAwardedForExposure() {
         throw new IllegalStateException("This method must be implemented, " +
                 "and should return a player that will receive advancements or stats for exposure (if applicable).");
+    }
+
+    default Optional<ServerPlayer> getServerPlayerAwardedForExposure() {
+        return getPlayerAwardedForExposure()
+                .filter(pl -> pl instanceof ServerPlayer)
+                .map(pl -> (ServerPlayer) pl);
     }
 
     /**
