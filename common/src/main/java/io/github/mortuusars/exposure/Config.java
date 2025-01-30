@@ -86,19 +86,19 @@ public class Config {
                         .comment("Time in ticks to print black and white photograph. Default: 80")
                         .defineInRange("print_time_black_and_white", 80, 1, Integer.MAX_VALUE);
                 LIGHTROOM_COLOR_PRINT_TIME = builder
-                        .comment("Time in ticks to print color photograph. Default: 200")
-                        .defineInRange("print_time_color", 200, 1, Integer.MAX_VALUE);
+                        .comment("Time in ticks to print color photograph. Default: 160")
+                        .defineInRange("print_time_color", 160, 1, Integer.MAX_VALUE);
                 LIGHTROOM_CHROMATIC_PRINT_TIME = builder
                         .comment("Time in ticks to print one channel of a chromatic photograph. Default: 120")
                         .defineInRange("print_time_chromatic", 120, 1, Integer.MAX_VALUE);
                 LIGHTROOM_BW_EXPERIENCE = builder
-                        .comment("Amount of experience awarded per printed black and white Photograph. Set to 0 to disable. Default: 2")
+                        .comment("Amount of experience awarded per printed black and white Photograph. Default: 2")
                         .defineInRange("experience_black_and_white", 2, 0, 99);
                 LIGHTROOM_COLOR_EXPERIENCE = builder
-                        .comment("Amount of experience awarded per printed color Photograph. Set to 0 to disable. Default: 4")
+                        .comment("Amount of experience awarded per printed color Photograph. Default: 4")
                         .defineInRange("experience_color", 4, 0, 99);
                 LIGHTROOM_CHROMATIC_EXPERIENCE = builder
-                        .comment("Amount of experience awarded per printed chromatic Photograph (when all three channels have been printed). Set to 0 to disable. Default: 5")
+                        .comment("Amount of experience awarded per printed chromatic Photograph (when all three channels have been printed). Default: 5")
                         .defineInRange("experience_chromatic", 5, 0, 99);
                 builder.pop();
             }
