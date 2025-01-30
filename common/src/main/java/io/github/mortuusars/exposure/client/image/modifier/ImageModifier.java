@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.client.image.modifier;
 
+import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.client.image.CensoredImage;
 import io.github.mortuusars.exposure.client.image.CroppedImage;
 import io.github.mortuusars.exposure.client.image.Image;
@@ -79,6 +80,12 @@ public interface ImageModifier {
 
         static ImageModifier to(int size) {
             return to(size, size);
+        }
+
+        static ImageModifier multiplier(int multiplier) {
+            Preconditions.checkArgument(multiplier > 0, "multiplier should be larger than 0.");
+            return new Instance("resized-%sx".formatted(multiplier),
+                    image -> new ResizedImage(image, image.width() * multiplier, image.height() * multiplier));
         }
     }
 

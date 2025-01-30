@@ -1,5 +1,5 @@
 {
-  "parent": "exposure:adventure/composite_confounded_compound",
+  "parent": "exposure:adventure/moment_in_time",
   "criteria": {
     "get_skeleton_smirk_photograph": {
       "conditions": {

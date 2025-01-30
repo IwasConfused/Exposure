@@ -6,9 +6,11 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.export.ImageExporter;
 import io.github.mortuusars.exposure.client.gui.Widgets;
 import io.github.mortuusars.exposure.client.gui.screen.element.Pager;
 import io.github.mortuusars.exposure.client.gui.component.SteppedZoom;
+import io.github.mortuusars.exposure.client.image.modifier.ImageModifier;
 import io.github.mortuusars.exposure.client.input.Key;
 import io.github.mortuusars.exposure.client.input.KeyBindings;
 import io.github.mortuusars.exposure.client.input.Modifier;
@@ -16,7 +18,6 @@ import io.github.mortuusars.exposure.client.render.photograph.PhotographStyle;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.photograph.PhotographType;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
-import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
@@ -24,7 +25,6 @@ import io.github.mortuusars.exposure.world.sound.SoundEffect;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.network.chat.Component;
@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 public class PhotographScreen extends Screen {
     protected final Pager pager = new Pager()
@@ -261,35 +262,39 @@ public class PhotographScreen extends Screen {
     // --
 
     protected void trySaveToFile(ItemAndStack<PhotographItem> photograph) {
-        LocalPlayer player = Minecrft.get().player;
         Frame frame = photograph.getItem().getFrame(photograph.getItemStack());
 
-        if (player == null || frame == Frame.EMPTY || !frame.isTakenBy(player)) {
+        if (frame == Frame.EMPTY || !frame.identifier().isId() || !frame.isTakenBy(Minecrft.player())) {
             return;
         }
 
-        frame.identifier().ifId(id -> {
-            PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
-            PhotographStyle photographStyle = PhotographStyle.of(photograph.getItemStack());
+        String id = frame.identifier().getId().orElseThrow();
 
-            String filename = getFilename(id, photographType);
+        PhotographType photographType = photograph.getItem().getType(photograph.getItemStack());
+        PhotographStyle photographStyle = PhotographStyle.of(photograph.getItemStack());
 
-            if (savedExposures.contains(filename))
-                return;
+        String filename = getFilename(id, photographType);
 
-            ExposureData exposureData = ExposureClient.exposureStore().getOrRequest(id).orElse(ExposureData.EMPTY);
-            if (!exposureData.equals(ExposureData.EMPTY)) {
-                savedExposures.add(filename);
+        if (savedExposures.contains(filename)) {
+            return;
+        }
 
-                Exposure.LOGGER.error("Saving not implemented yet!");
+        ExposureClient.exposureStore().getOrRequest(id).getData().ifPresent(exposure -> {
+            savedExposures.add(filename);
 
-//                CompletableFuture.runAsync(() -> new ClientsideExposureExporter(filename)
-//                        .withDefaultFolder()
-//                        .organizeByWorld(Config.Client.EXPOSURE_SAVING_LEVEL_SUBFOLDER.get(), LevelNameGetter::getWorldName)
-//                        .withModifier(photographFeatures.pixelModifier())
-//                        .withSize(Config.Client.EXPOSURE_SAVING_SIZE.get())
-//                        .export(palettedExposure));
-            }
+            CompletableFuture.runAsync(() -> new ImageExporter(exposure, filename)
+                    .modify(ImageModifier.chain(
+                            photographStyle.modifier(),
+                            ImageModifier.Resize.multiplier(Config.Client.EXPORT_SIZE_MULTIPLIER.get())
+                    ))
+                    .toExposuresFolder()
+                    .organizeByWorld(Config.Client.EXPORT_ORGANIZE_BY_WORLD.get())
+                    .setCreationDate(exposure.getTag().unixTimestamp())
+                    .export())
+                    .handle((unused, throwable) -> {
+                        Exposure.LOGGER.error(throwable.getMessage());
+                        return null;
+                    });
         });
     }
 
