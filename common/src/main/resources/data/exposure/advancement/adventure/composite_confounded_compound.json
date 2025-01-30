@@ -3,21 +3,19 @@
   "criteria": {
     "get_chromatic_photograph": {
       "conditions": {
-        "items": [
-          {
-            "items": [
-              "exposure:photograph",
-              "exposure:aged_photograph"
-            ],
-            "predicates": {
-              "exposure:frame": {
-                "extra_data": "{chromatic:1b}"
-              }
+        "item": {
+          "items": [
+            "exposure:photograph",
+            "exposure:aged_photograph"
+          ],
+          "predicates": {
+            "exposure:frame": {
+              "extra_data": "{chromatic:1b}"
             }
           }
-        ]
+        }
       },
-      "trigger": "minecraft:inventory_changed"
+      "trigger": "exposure:frame_printed"
     }
   },
   "display": {
@@ -30,13 +28,13 @@
       "components": {
         "exposure:chromatic_layers": [
           {
-            "exposure": "1"
+            "identifier": "1"
           },
           {
-            "exposure": "2"
+            "identifier": "2"
           },
           {
-            "exposure": "3"
+            "identifier": "3"
           }
         ]
       }

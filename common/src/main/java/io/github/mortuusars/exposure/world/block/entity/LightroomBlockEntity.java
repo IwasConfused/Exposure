@@ -16,6 +16,7 @@ import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.StackedPhotographsItem;
 import net.minecraft.Util;
 import net.minecraft.core.*;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -34,6 +35,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
@@ -128,7 +130,6 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         PrintingProcess process = getPrintingProcess(frame);
 
         printFrame(frame, process, true);
-        onFramePrinted(frame, process);
         stopPrintingProcess();
     }
 
@@ -328,7 +329,9 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         }
 
         if (process.isChromatic()) {
-            return paperStack.getItem() instanceof ChromaticSheetItem || paperStack.is(Exposure.Tags.Items.PHOTO_PAPERS);
+            return paperStack.is(Exposure.Tags.Items.PHOTO_PAPERS) ||
+                    (paperStack.getItem() instanceof ChromaticSheetItem chromaticSheet
+                            && !chromaticSheet.canCombine(paperStack));
         }
 
         return paperStack.is(Exposure.Tags.Items.PHOTO_PAPERS);
@@ -373,7 +376,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
             awardExperienceForPrint(frame, process, printResult);
         }
 
-        playPrintingFinishedSound();
+        onFramePrinted(frame, process, printResult);
     }
 
     public void printFrameInCreative() {
@@ -403,9 +406,16 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
             chromaticItem.addLayer(chromaticStack, frame);
 
-            @Nullable ServerPlayer player = getPlayerToCombineChromatic();
-            if (chromaticItem.canCombine(chromaticStack) && player != null) {
-                return chromaticItem.combineIntoPhotograph(player, chromaticStack);
+            @Nullable ServerPlayer player = getLastOrClosestPlayer();
+            if (chromaticItem.canCombine(chromaticStack)) {
+                if (player != null) {
+                    return chromaticItem.combineIntoPhotograph(player, chromaticStack, true);
+                } else {
+                    // This will be used when creating exposure to set 'wasPrinted' in exposure tag.
+                    CompoundTag tag = new CompoundTag();
+                    tag.putBoolean("printed", true);
+                    chromaticStack.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
+                }
             }
 
             return chromaticStack;
@@ -417,7 +427,7 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         }
     }
 
-    protected @Nullable ServerPlayer getPlayerToCombineChromatic() {
+    protected @Nullable ServerPlayer getLastOrClosestPlayer() {
         if (!(getLevel() instanceof ServerLevel serverLevel)) {
             return null;
         }
@@ -467,16 +477,22 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         }
     }
 
-    protected void onFramePrinted(Frame frame, PrintingProcess process) {
+    protected void onFramePrinted(Frame frame, PrintingProcess process, ItemStack result) {
         if (process.isRegular()) { // Chromatics create new exposure. Marking is not needed.
             frame.identifier().ifId(id ->
                     ExposureServer.exposureRepository().updateExposure(id, exposure ->
                             exposure.withTag(ExposureData.Tag::setPrinted)));
         }
 
+        if (getLastOrClosestPlayer() instanceof ServerPlayer player) {
+            Exposure.CriteriaTriggers.FRAME_PRINTED.get().trigger(player, getBlockPos(), frame, result);
+        }
+
         if (advanceFrame) {
             advanceFrame();
         }
+
+        playPrintingFinishedSound();
     }
 
     protected void advanceFrame() {

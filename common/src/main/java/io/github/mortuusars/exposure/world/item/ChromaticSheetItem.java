@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.world.item;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
+import io.github.mortuusars.exposure.world.level.storage.ExposureData;
 import io.github.mortuusars.exposure.world.level.storage.ExposureIdentifier;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
@@ -10,6 +11,7 @@ import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.client.CreateChromaticExposureS2CP;
 import io.github.mortuusars.exposure.world.camera.ColorChannel;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -18,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,12 +79,13 @@ public class ChromaticSheetItem extends Item {
     @Override
     public void inventoryTick(ItemStack stack, Level level, Entity entity, int slotId, boolean isSelected) {
         if (entity instanceof ServerPlayer player && canCombine(stack)) {
-            ItemStack finalizedItem = combineIntoPhotograph(player, stack);
+            boolean printed = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).contains("printed");
+            ItemStack finalizedItem = combineIntoPhotograph(player, stack, printed);
             player.getInventory().setItem(slotId, finalizedItem);
         }
     }
 
-    public ItemStack combineIntoPhotograph(@NotNull ServerPlayer player, ItemStack stack) {
+    public ItemStack combineIntoPhotograph(@NotNull ServerPlayer player, ItemStack stack, boolean printed) {
         Preconditions.checkState(canCombine(stack), "Combining Chromatic Sheet requires 3 layers. " + stack);
 
         String exposureId = ExposureIdentifier.createId(player, "chromatic");
@@ -90,7 +94,10 @@ public class ChromaticSheetItem extends Item {
 
         ItemStack photographStack = createPhotographStack(ExposureIdentifier.id(exposureId), layers);
 
-        ExposureServer.exposureRepository().expect(player, exposureId);
+        ExposureServer.exposureRepository().expect(player, exposureId, (pl, id) -> {
+            ExposureServer.exposureRepository().updateExposure(id, exposure ->
+                    exposure.withTag(tag -> tag.withWasPrintedSetTo(printed)));
+        });
         Packets.sendToClient(new CreateChromaticExposureS2CP(exposureId, layersIdentifiers), player);
 
         return photographStack;

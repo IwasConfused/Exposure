@@ -145,7 +145,7 @@ public class DebugCommand {
                 item.addLayer(itemStack, frame);
             }
 
-            ItemStack photographStack = item.combineIntoPhotograph(player, itemStack);
+            ItemStack photographStack = item.combineIntoPhotograph(player, itemStack, false);
             @Nullable Frame frame = photographStack.get(Exposure.DataComponents.PHOTOGRAPH_FRAME);
             Preconditions.checkState(frame != null, "Frame data cannot be empty after combining.");
 

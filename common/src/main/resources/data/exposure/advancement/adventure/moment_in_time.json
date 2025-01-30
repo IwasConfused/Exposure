@@ -1,19 +1,15 @@
 {
   "parent": "exposure:adventure/exposure",
   "criteria": {
-    "get_photograph": {
+    "print_photograph": {
       "conditions": {
-        "items": [
-          {
-            "items": [
-              "exposure:photograph",
-              "exposure:aged_photograph",
-              "exposure:stacked_photographs"
-            ]
-          }
-        ]
+        "item": {
+          "items": [
+            "exposure:photograph"
+          ]
+        }
       },
-      "trigger": "minecraft:inventory_changed"
+      "trigger": "exposure:frame_printed"
     }
   },
   "display": {
@@ -33,7 +29,7 @@
   },
   "requirements": [
     [
-      "get_photograph"
+      "print_photograph"
     ]
   ],
   "sends_telemetry_event": true
