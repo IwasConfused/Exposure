@@ -1,7 +1,7 @@
 {
   "parent": "exposure:adventure/moment_in_time",
   "criteria": {
-    "get_chromatic_photograph": {
+    "print_chromatic_photograph": {
       "conditions": {
         "item": {
           "items": [
@@ -40,15 +40,15 @@
       }
     },
     "title": {
-      "translate": "advancement.exposure.composite_confounded_compound.title"
+      "translate": "advancement.exposure.complex_composite_compound.title"
     },
     "description": {
-      "translate": "advancement.exposure.composite_confounded_compound.description"
+      "translate": "advancement.exposure.complex_composite_compound.description"
     }
   },
   "requirements": [
     [
-      "get_chromatic_photograph"
+      "print_chromatic_photograph"
     ]
   ],
   "sends_telemetry_event": true

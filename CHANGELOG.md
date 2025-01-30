@@ -14,6 +14,10 @@
 - Added animation for Camera interactions (changing viewfinder settings and attachments). Player will move their hand slightly.
 - Camera interaction sounds are now audible for other players.
 - Photograph Aging recipe now requires a Brush.
+Advancements:
+  - **Moment in Time** and **Complex Composite Compound** are now granted when printing a photo, instead of just obtaining it.
+  - Added `exposure:frame_printed` trigger. Uses player that last interacted with Lightroom, or closest if last is unavailable.
+  - Predicates added by the mod and `exposure:frame_exposed` trigger have been changed. 
 
 
 - Added client config to shift view to where camera actually is when held at waist-level.
@@ -24,6 +28,7 @@
   - Vanilla effects will not be rendered when camera captures an image, unless turned on in a config.     
 
 Misc:
+  - Reduced color photograph print time from 10 to 8 seconds.
   - Closing Camera Attachments menu will now go back to inventory menu if it was opened from it.
 
 ## 1.7.6 - 2024-08-17
