@@ -16,6 +16,7 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 import java.util.Date;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ImageExporter {
@@ -26,6 +27,7 @@ public class ImageExporter {
     protected String worldName = null;
     protected long creationUnixTimestamp = 0;
     protected Function<Image, Image> imageModifier = Function.identity();
+    protected Consumer<File> onExport = f -> {};
 
     public ImageExporter(Image image, String fileName) {
         this.image = image;
@@ -88,6 +90,8 @@ public class ImageExporter {
                 trySetFileCreationDate(outputFile.getAbsolutePath(), creationUnixTimestamp);
             }
 
+            onExport.accept(outputFile);
+
             Exposure.LOGGER.info("Exposure saved: {}", outputFile);
             return true;
         }
@@ -119,5 +123,10 @@ public class ImageExporter {
             attributes.setTimes(modifyTime, modifyTime, creationTime);
         }
         catch (Exception ignored) { }
+    }
+
+    public ImageExporter onExport(Consumer<File> onExport) {
+        this.onExport = onExport;
+        return this;
     }
 }

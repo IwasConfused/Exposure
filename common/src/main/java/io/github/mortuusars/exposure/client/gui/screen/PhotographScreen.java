@@ -22,6 +22,7 @@ import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import io.github.mortuusars.exposure.world.sound.SoundEffect;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.screens.Screen;
@@ -35,10 +36,8 @@ import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.io.File;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class PhotographScreen extends Screen {
@@ -57,8 +56,10 @@ public class PhotographScreen extends Screen {
             Key.press(Minecrft.options().keyInventory).executes(this::onClose),
             Key.press(InputConstants.KEY_ADD).or(Key.press(InputConstants.KEY_EQUALS)).executes(zoom::zoomIn),
             Key.press(GLFW.GLFW_KEY_KP_SUBTRACT).or(Key.press(InputConstants.KEY_MINUS)).executes(zoom::zoomOut),
-            Key.press(Modifier.CONTROL, InputConstants.KEY_C).executes(this::copyIdentifierToClipboard),
             Key.press(Modifier.CONTROL, InputConstants.KEY_I).executes(this::dropAsItem),
+            Key.press(Modifier.CONTROL, InputConstants.KEY_C).executes(this::copyIdentifierToClipboard),
+            Key.press(Modifier.CONTROL | Modifier.SHIFT, InputConstants.KEY_C).executes(this::copySavedFilePathToClipboard),
+            Key.press(Modifier.CONTROL, InputConstants.KEY_S).executes(this::openSavedFile),
             Key.press(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::previousPage),
             Key.press(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(pager::nextPage),
             Key.release(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(pager::resetCooldown),
@@ -68,7 +69,8 @@ public class PhotographScreen extends Screen {
     protected float x;
     protected float y;
 
-    protected final List<String> savedExposures = new ArrayList<>();
+    protected final Set<String> savedExposureIds = new HashSet<>();
+    protected final Map<String, File> savedExposureFiles = new HashMap<>();
 
     protected List<ItemAndStack<PhotographItem>> photographs = new ArrayList<>();
 
@@ -160,8 +162,9 @@ public class PhotographScreen extends Screen {
         renderFrameInfoHint(guiGraphics, mouseX, mouseY, photograph);
         guiGraphics.pose().popPose();
 
-        if (Config.Client.EXPORT_PHOTOGRAPH_WHEN_VIEWED.get())
+        if (Config.Client.EXPORT_PHOTOGRAPH_WHEN_VIEWED.get()) {
             trySaveToFile(photograph);
+        }
     }
 
     @Override
@@ -185,11 +188,19 @@ public class PhotographScreen extends Screen {
         if (mouseX > width - 20 && mouseX < width && mouseY < 20) {
             String exposureName = frame.identifier().map(id -> id, ResourceLocation::toString);
 
-            List<Component> lines = List.of(
-                    Component.literal(exposureName),
-                    Component.translatable("gui.exposure.photograph_screen.drop_as_item_tooltip", Component.literal("CTRL + I")),
-                    Component.translatable("gui.exposure.photograph_screen.copy_" +
-                            frame.identifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
+            List<Component> lines = new ArrayList<>();
+
+            lines.add(Component.literal(exposureName));
+            lines.add(Component.translatable("gui.exposure.photograph_screen.drop_as_item_tooltip", Component.literal("CTRL + I")));
+            lines.add(Component.translatable("gui.exposure.photograph_screen.copy_" +
+                    frame.identifier().map(id -> "id", texture -> "texture_path") + "_tooltip", "CTRL + C"));
+
+            frame.identifier().getId().ifPresent(id -> {
+                if (savedExposureFiles.containsKey(id)) {
+                    lines.add(Component.translatable("gui.exposure.photograph_screen.copy_saved_file_path_tooltip", Component.literal("CTRL + SHIFT + C")));
+                    lines.add(Component.translatable("gui.exposure.photograph_screen.open_saved_file_tooltip", Component.literal("CTRL + S")));
+                }
+            });
 
             guiGraphics.renderTooltip(font, lines, Optional.empty(), mouseX, mouseY + 20);
         }
@@ -239,6 +250,14 @@ public class PhotographScreen extends Screen {
 
     // --
 
+    protected boolean dropAsItem() {
+        ItemStack droppedStack = getCurrentPhotograph().getItemStack().copy();
+        Minecrft.gameMode().handleCreativeModeItemDrop(droppedStack);
+        Minecrft.player().displayClientMessage(Component.translatable("gui.exposure.photograph_screen.item_dropped_message",
+                droppedStack.getDisplayName()), false);
+        return true;
+    }
+
     protected boolean copyIdentifierToClipboard() {
         Frame frame = getCurrentPhotograph().map(PhotographItem::getFrame);
         if (!Minecrft.player().isCreative() || frame.equals(Frame.EMPTY)) {
@@ -251,12 +270,32 @@ public class PhotographScreen extends Screen {
         return true;
     }
 
-    protected boolean dropAsItem() {
-        ItemStack droppedStack = getCurrentPhotograph().getItemStack().copy();
-        Minecrft.gameMode().handleCreativeModeItemDrop(droppedStack);
-        Minecrft.player().displayClientMessage(Component.translatable("gui.exposure.photograph_screen.item_dropped_message",
-                droppedStack.getDisplayName()), false);
-        return true;
+    protected boolean copySavedFilePathToClipboard() {
+        return getCurrentPhotograph()
+                .map(PhotographItem::getFrame)
+                .identifier()
+                .mapId(id -> {
+                    if (savedExposureFiles.get(id) instanceof File file) {
+                        Minecrft.get().keyboardHandler.setClipboard(file.getAbsolutePath());
+                        Minecrft.player().displayClientMessage(
+                                Component.translatable("gui.exposure.photograph_screen.copied_message", file.getAbsolutePath()), false);
+                        return true;
+                    }
+                    return false;
+                }).orElse(false);
+    }
+
+    protected boolean openSavedFile() {
+        return getCurrentPhotograph()
+                .map(PhotographItem::getFrame)
+                .identifier()
+                .mapId(id -> {
+                    if (savedExposureFiles.get(id) instanceof File file) {
+                        Util.getPlatform().openFile(file);
+                        return true;
+                    }
+                    return false;
+                }).orElse(false);
     }
 
     // --
@@ -275,12 +314,12 @@ public class PhotographScreen extends Screen {
 
         String filename = getFilename(id, photographType);
 
-        if (savedExposures.contains(filename)) {
+        if (savedExposureIds.contains(filename)) {
             return;
         }
 
         ExposureClient.exposureStore().getOrRequest(id).getData().ifPresent(exposure -> {
-            savedExposures.add(filename);
+            savedExposureIds.add(filename);
 
             CompletableFuture.runAsync(() -> new ImageExporter(exposure, filename)
                     .modify(ImageModifier.chain(
@@ -290,6 +329,7 @@ public class PhotographScreen extends Screen {
                     .toExposuresFolder()
                     .organizeByWorld(Config.Client.EXPORT_ORGANIZE_BY_WORLD.get())
                     .setCreationDate(exposure.getTag().unixTimestamp())
+                    .onExport(file -> savedExposureFiles.put(id, file))
                     .export())
                     .handle((unused, throwable) -> {
                         Exposure.LOGGER.error(throwable.getMessage());

@@ -43,12 +43,12 @@ public interface Key {
 
     static Key press(int modifiers, int keyCode) {
         return (key, code, action, mods) -> Key.actionMatches(InputConstants.PRESS, action)
-                && keyCode == key && (mods & modifiers) == modifiers;
+                && keyCode == key && mods == modifiers;
     }
 
     static Key release(int modifiers, int keyCode) {
         return (key, code, action, mods) -> Key.actionMatches(InputConstants.RELEASE, action)
-                && keyCode == key && (mods & modifiers) == modifiers;
+                && keyCode == key && mods == modifiers;
     }
 
     static Key press(KeyMapping keyMapping) {
