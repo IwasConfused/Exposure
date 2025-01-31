@@ -15,9 +15,7 @@ import java.util.concurrent.CompletableFuture;
 public class ExposureIdSuggestionProvider implements SuggestionProvider<CommandSourceStack> {
     @Override
     public CompletableFuture<Suggestions> getSuggestions(CommandContext<CommandSourceStack> context, SuggestionsBuilder builder) {
-        List<String> ids = ExposureServer.exposureRepository().getAllIdentifiers().stream()
-                .map(ExposureIdentifier::toValueString)
-                .toList();
+        List<String> ids = ExposureServer.exposureRepository().getAllIds();
         // I wanted to add ID sorting by gameTime, but suggestions are sorted alphabetically down the line anyway.
         // It can be done probably, but it's not worth the hassle
         return SharedSuggestionProvider.suggest(ids, builder);

@@ -42,7 +42,7 @@ public class ExposureRepository {
         this.exposuresFolderPath = worldFolderPath.resolve("data/" + EXPOSURES_DIRECTORY_NAME);
     }
 
-    public List<ExposureIdentifier> getAllIdentifiers() {
+    public List<String> getAllIds() {
         // Save exposures that are in cache and waiting to be saved:
         dataStorage.save();
 
@@ -53,16 +53,10 @@ public class ExposureRepository {
             return Collections.emptyList();
         }
 
-        List<ExposureIdentifier> ids = new ArrayList<>();
-
-        for (File file : filesList) {
-            if (file != null && file.isFile()) {
-                String filename = com.google.common.io.Files.getNameWithoutExtension(file.getName());
-                ids.add(ExposureIdentifier.id(filename));
-            }
-        }
-
-        return ids;
+        return Arrays.stream(filesList)
+                .filter(file -> file != null && file.isFile())
+                .map(file -> com.google.common.io.Files.getNameWithoutExtension(file.getName()))
+                .toList();
     }
 
     public RequestedPalettedExposure loadExposure(@NotNull String id) {

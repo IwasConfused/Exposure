@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import io.github.mortuusars.exposure.client.ExposureSize;
+import io.github.mortuusars.exposure.data.export.ExportSize;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -15,11 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class ExposureSizeArgument implements ArgumentType<ExposureSize> {
+public class SizeMultiplierArgument implements ArgumentType<ExportSize> {
     @Override
-    public ExposureSize parse(StringReader reader) throws CommandSyntaxException {
+    public ExportSize parse(StringReader reader) throws CommandSyntaxException {
         String string = reader.readString();
-        @Nullable ExposureSize size = ExposureSize.byName(string);
+        @Nullable ExportSize size = ExportSize.byName(string);
 
         if (size == null)
             throw new SimpleCommandExceptionType(Component.translatable("argument.enum.invalid", string)).create();
@@ -29,11 +29,11 @@ public class ExposureSizeArgument implements ArgumentType<ExposureSize> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggest(Arrays.stream(ExposureSize.values())
-                .map(ExposureSize::getSerializedName), builder);
+        return SharedSuggestionProvider.suggest(Arrays.stream(ExportSize.values())
+                .map(ExportSize::getSerializedName), builder);
     }
 
-    public static ExposureSize getSize(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, ExposureSize.class);
+    public static ExportSize getSize(final CommandContext<?> context, final String name) {
+        return context.getArgument(name, ExportSize.class);
     }
 }

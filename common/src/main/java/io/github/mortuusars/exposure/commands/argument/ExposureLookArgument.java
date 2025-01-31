@@ -7,7 +7,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import io.github.mortuusars.exposure.client.ExposureLook;
+import io.github.mortuusars.exposure.data.export.ExportLook;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import org.jetbrains.annotations.Nullable;
@@ -15,11 +15,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
-public class ExposureLookArgument implements ArgumentType<ExposureLook> {
+public class ExposureLookArgument implements ArgumentType<ExportLook> {
     @Override
-    public ExposureLook parse(StringReader reader) throws CommandSyntaxException {
+    public ExportLook parse(StringReader reader) throws CommandSyntaxException {
         String string = reader.readString();
-        @Nullable ExposureLook look = ExposureLook.byName(string);
+        @Nullable ExportLook look = ExportLook.byName(string);
         if (look == null)
             throw new SimpleCommandExceptionType(Component.translatable("argument.enum.invalid", string)).create();
 
@@ -28,12 +28,12 @@ public class ExposureLookArgument implements ArgumentType<ExposureLook> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return SharedSuggestionProvider.suggest(Arrays.stream(ExposureLook.values())
-                .filter(l -> l != ExposureLook.REGULAR)
-                .map(ExposureLook::getSerializedName), builder);
+        return SharedSuggestionProvider.suggest(Arrays.stream(ExportLook.values())
+                .filter(l -> l != ExportLook.REGULAR)
+                .map(ExportLook::getSerializedName), builder);
     }
 
-    public static ExposureLook getLook(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, ExposureLook.class);
+    public static ExportLook getLook(final CommandContext<?> context, final String name) {
+        return context.getArgument(name, ExportLook.class);
     }
 }

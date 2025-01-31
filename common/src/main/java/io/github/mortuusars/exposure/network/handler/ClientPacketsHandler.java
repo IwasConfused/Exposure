@@ -7,6 +7,7 @@ import io.github.mortuusars.exposure.client.gui.screen.FilmFrameInspectScreen;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
 import io.github.mortuusars.exposure.client.sound.instance.ShutterTickingSoundInstance;
+import io.github.mortuusars.exposure.client.task.ExportExposuresTask;
 import io.github.mortuusars.exposure.client.task.ExposureRetrieveTask;
 import io.github.mortuusars.exposure.client.capture.template.CaptureTemplate;
 import io.github.mortuusars.exposure.client.image.TrichromeImage;
@@ -26,9 +27,11 @@ import io.github.mortuusars.exposure.network.packet.client.*;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.util.cycles.task.Task;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
@@ -63,6 +66,22 @@ public class ClientPacketsHandler {
 
         Screen screen = new PhotographScreen(photographs);
         Minecrft.get().setScreen(screen);
+    }
+
+    public static void exportExposures(ExportS2CP packet) {
+        if (ExportExposuresTask.isRunning()) {
+            Minecrft.player().displayClientMessage(Component.translatable("task.exposure.export.already_running"), false);
+            return;
+        }
+        ExposureClient.cycles().addParallelTask(
+                new ExportExposuresTask(packet.ids(), packet.size(), packet.look()));
+    }
+
+    public static void stopExportTask() {
+        if (!ExportExposuresTask.stopCurrentTask()) {
+            Minecrft.player().displayClientMessage(Component.translatable("task.exposure.export.not_running")
+                    .withStyle(ChatFormatting.RED), false);
+        }
     }
 
     public static void clearRenderingCache() {

@@ -467,8 +467,8 @@ public class Exposure {
     }
 
     public static class ArgumentTypes {
-        public static final Supplier<ArgumentTypeInfo<ExposureSizeArgument, SingletonArgumentInfo<ExposureSizeArgument>.Template>> EXPOSURE_SIZE =
-                Register.commandArgumentType("exposure_size", ExposureSizeArgument.class, SingletonArgumentInfo.contextFree(ExposureSizeArgument::new));
+        public static final Supplier<ArgumentTypeInfo<SizeMultiplierArgument, SingletonArgumentInfo<SizeMultiplierArgument>.Template>> EXPOSURE_SIZE =
+                Register.commandArgumentType("exposure_size", SizeMultiplierArgument.class, SingletonArgumentInfo.contextFree(SizeMultiplierArgument::new));
         public static final Supplier<ArgumentTypeInfo<ExposureLookArgument, SingletonArgumentInfo<ExposureLookArgument>.Template>> EXPOSURE_LOOK =
                 Register.commandArgumentType("exposure_look", ExposureLookArgument.class, SingletonArgumentInfo.contextFree(ExposureLookArgument::new));
         public static final Supplier<ArgumentTypeInfo<ShaderLocationArgument, SingletonArgumentInfo<ShaderLocationArgument>.Template>> SHADER_LOCATION =
