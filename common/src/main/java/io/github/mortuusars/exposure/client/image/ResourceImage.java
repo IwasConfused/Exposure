@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.NativeImage;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImage;
 import io.github.mortuusars.exposure.client.image.renderable.RenderableImageIdentifier;
+import io.github.mortuusars.exposure.util.color.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.*;
 import net.minecraft.resources.ResourceLocation;
@@ -56,7 +57,7 @@ public class ResourceImage extends SimpleTexture implements RenderableImage {
     @Override
     public int getPixelARGB(int x, int y) {
         @Nullable NativeImage image = getNativeImage();
-        return image != null ? image.getPixelRGBA(x, y) : 0x00000000;
+        return image != null ? Color.ABGRtoARGB(image.getPixelRGBA(x, y)) : 0x00000000;
     }
 
     public @Nullable NativeImage getNativeImage() {
