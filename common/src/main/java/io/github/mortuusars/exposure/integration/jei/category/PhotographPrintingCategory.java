@@ -104,9 +104,11 @@ public class PhotographPrintingCategory implements IRecipeCategory<PhotographPri
 
     @Override
     public void draw(PhotographPrintingJeiRecipe recipe, @NotNull IRecipeSlotsView recipeSlotsView, @NotNull GuiGraphics guiGraphics, double mouseX, double mouseY) {
-        if (recipe.getExposureType() == ExposureType.COLOR)
-            RenderSystem.setShaderColor(1.1F, 0.86F, 0.66F, 1.0F);
+        if (recipe.getExposureType() == ExposureType.COLOR) {
+            RenderSystem.setShaderColor(1.1F, 0.86F, 0.66F, 1F);
+        }
         filmDrawable.draw(guiGraphics);
+        RenderSystem.setShaderColor(1F, 1F, 1F, 1F);
     }
 
     @Override
