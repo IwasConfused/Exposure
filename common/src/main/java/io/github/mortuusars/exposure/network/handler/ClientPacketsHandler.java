@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.network.handler;
 import com.mojang.logging.LogUtils;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.camera.CameraClient;
 import io.github.mortuusars.exposure.client.gui.screen.FilmFrameInspectScreen;
 import io.github.mortuusars.exposure.client.image.Image;
 import io.github.mortuusars.exposure.client.sound.UniqueSoundManager;
@@ -131,6 +132,12 @@ public class ClientPacketsHandler {
         for (CaptureProperties captureProperties : packet.captureProperties()) {
             Task<?> captureTask = template.createTask(captureProperties);
             ExposureClient.cycles().enqueueTask(captureTask);
+        }
+    }
+
+    public static void shutterOpened() {
+        if (CameraClient.viewfinder() != null) {
+            CameraClient.viewfinder().overlay().startDrawingShutter();
         }
     }
 

@@ -20,6 +20,7 @@ public class S2CPackets {
                 new CustomPacketPayload.TypeAndCodec<>(UniqueSoundStopS2CP.TYPE, UniqueSoundStopS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ShowExposureCommandS2CP.TYPE, ShowExposureCommandS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ExposureDataResponseS2CP.TYPE, ExposureDataResponseS2CP.STREAM_CODEC),
+                new CustomPacketPayload.TypeAndCodec<>(ShutterOpenedS2CP.TYPE, ShutterOpenedS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(CaptureStartS2CP.TYPE, CaptureStartS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(CaptureStartDebugRGBS2CP.TYPE, CaptureStartDebugRGBS2CP.STREAM_CODEC),
                 new CustomPacketPayload.TypeAndCodec<>(ExportS2CP.TYPE, ExportS2CP.STREAM_CODEC),

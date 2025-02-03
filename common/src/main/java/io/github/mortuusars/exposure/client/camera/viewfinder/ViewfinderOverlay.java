@@ -8,6 +8,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.animation.Animation;
 import io.github.mortuusars.exposure.client.animation.EasingFunction;
 import io.github.mortuusars.exposure.client.util.Minecrft;
+import io.github.mortuusars.exposure.util.UnixTimestamp;
 import io.github.mortuusars.exposure.world.camera.Camera;
 import io.github.mortuusars.exposure.world.item.camera.CameraSettings;
 import io.github.mortuusars.exposure.world.item.BrokenInterplanarProjectorItem;
@@ -16,6 +17,7 @@ import io.github.mortuusars.exposure.world.item.component.StoredItemStack;
 import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import io.github.mortuusars.exposure.client.util.GuiUtil;
 import io.github.mortuusars.exposure.util.Rect2f;
+import net.minecraft.SharedConstants;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -54,6 +56,9 @@ public class ViewfinderOverlay {
     protected float yRot;
     protected float xRot0;
     protected float yRot0;
+
+    protected boolean forceDrawShutterOnNextFrame;
+    protected long forceDrawShutterUntil = -1;
 
     public ViewfinderOverlay(Camera camera, Viewfinder viewfinder) {
         this.player = Minecrft.player();
@@ -132,10 +137,7 @@ public class ViewfinderOverlay {
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
 
-        // Shutter
-        if (camera.isShutterOpen()) {
-            GuiUtil.drawRect(guiGraphics, opening, 0xfa1f1d1b);
-        }
+        drawShutter(guiGraphics);
 
         // Opening Texture
         GuiUtil.blit(VIEWFINDER_TEXTURE, guiGraphics.pose(), opening, 0, 0, (int) opening.width, (int) opening.height, 0);
@@ -151,6 +153,24 @@ public class ViewfinderOverlay {
         }
 
         guiGraphics.pose().popPose();
+    }
+
+    /**
+     * Usually shutter drawing is controlled by camera#isShutterOpen,
+     * but due to fast shutter speeds and occasional lag, shutter may not be drawn at all.
+     * So we force shutter to render for at least some time when shutter is open. <br><br>
+     * Combination of timestamp and next frame check is for cases where lag takes so long that 'forceDrawShutterUntil' is passed without rendering.
+     */
+    protected void drawShutter(GuiGraphics guiGraphics) {
+        if (camera.isShutterOpen() || forceDrawShutterOnNextFrame || forceDrawShutterUntil - System.currentTimeMillis() > 0) {
+            GuiUtil.drawRect(guiGraphics, opening, 0xfa1f1d1b);
+            forceDrawShutterOnNextFrame = false;
+        }
+    }
+
+    public void startDrawingShutter() {
+        forceDrawShutterOnNextFrame = true;
+        forceDrawShutterUntil = UnixTimestamp.Milliseconds.now() + SharedConstants.MILLIS_PER_TICK * 2;
     }
 
     protected void renderBSOD(GuiGraphics guiGraphics, BrokenInterplanarProjectorItem item, ItemStack stack) {

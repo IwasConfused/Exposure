@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.world.item.camera;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.*;
+import io.github.mortuusars.exposure.network.packet.client.ShutterOpenedS2CP;
 import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.camera.*;
@@ -405,8 +406,9 @@ public class CameraItem extends Item {
 
         ItemAndStack<FilmRollItem> film = Attachment.FILM.get(stack).getItemAndStackCopy();
 
-        if (!film.getItem().canAddFrame(film.getItemStack()))
+        if (!film.getItem().canAddFrame(film.getItemStack())) {
             return InteractionResultHolder.consume(stack);
+        }
 
         if (level instanceof ServerLevel serverLevel) {
             if (!(holder.getPlayerExecutingExposure() instanceof ServerPlayer serverPlayer)) {
@@ -418,12 +420,11 @@ public class CameraItem extends Item {
             boolean shouldFlashFire = shouldFlashFire(stack, lightLevel);
             ShutterSpeed shutterSpeed = CameraSettings.SHUTTER_SPEED.getOrDefault(stack);
 
-            boolean flashHasFired = shouldFlashFire && tryUseFlash(entity, serverLevel, stack);
-
             getShutter().open(holder, serverLevel, stack, shutterSpeed);
 
-            CameraId cameraId = getOrCreateID(stack);
+            boolean flashHasFired = shouldFlashFire && tryUseFlash(entity, serverLevel, stack);
 
+            CameraId cameraId = getOrCreateID(stack);
             String exposureId = ExposureIdentifier.createId(serverPlayer);
 
             CaptureProperties captureProperties = new CaptureProperties.Builder(exposureId)
@@ -455,10 +456,9 @@ public class CameraItem extends Item {
                 });
             });
 
-            ExposureServer.exposureRepository().expect(serverPlayer, exposureId);
-
             addNewFrame(serverLevel, captureProperties, holder, stack);
 
+            ExposureServer.exposureRepository().expect(serverPlayer, exposureId);
             Packets.sendToClient(new CaptureStartS2CP(getCaptureType(stack), captureProperties), serverPlayer);
         }
 
@@ -466,7 +466,11 @@ public class CameraItem extends Item {
     }
 
     protected void onShutterOpen(CameraHolder holder, ServerLevel serverLevel, ItemStack stack) {
-
+        holder.getExposureCameraOperator().ifPresent(operator -> {
+            if (operator instanceof ServerPlayer player) {
+                Packets.sendToClient(ShutterOpenedS2CP.INSTANCE, player);
+            }
+        });
     }
 
     protected void onShutterClosed(CameraHolder holder, ServerLevel serverLevel, ItemStack stack) {
