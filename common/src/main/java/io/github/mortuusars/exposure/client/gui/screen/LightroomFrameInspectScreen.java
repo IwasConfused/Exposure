@@ -15,6 +15,7 @@ public class LightroomFrameInspectScreen extends FilmFrameInspectScreen {
     public LightroomFrameInspectScreen(LightroomScreen lightroomScreen) {
         super(lightroomScreen.getMenu().getExposedFrames(), lightroomScreen.getMenu().getSelectedFrame());
         this.lightroomScreen = lightroomScreen;
+        this.pager.setChangeSound(null);
     }
 
     @Override
@@ -31,13 +32,12 @@ public class LightroomFrameInspectScreen extends FilmFrameInspectScreen {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
         if (zoom.get() < zoom.getMin() + 0.1f && zoom.getTarget() < zoom.getMin() + 0.1f) {
             Minecrft.get().setScreen(lightroomScreen);
             Minecrft.player().playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 1f, 0.7f);
-            return;
         }
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

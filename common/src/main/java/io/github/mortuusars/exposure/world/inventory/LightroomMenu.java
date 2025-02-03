@@ -1,6 +1,5 @@
 package io.github.mortuusars.exposure.world.inventory;
 
-import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.block.entity.Lightroom;
 import io.github.mortuusars.exposure.world.block.entity.LightroomBlockEntity;
@@ -158,7 +157,7 @@ public class LightroomMenu extends AbstractContainerMenu {
         return data.get(LightroomBlockEntity.CONTAINER_DATA_PRINT_TIME_ID) > 0;
     }
 
-    public int getTotalFrames() {
+    public int getTotalFramesCount() {
         ItemStack filmStack = getBlockEntity().getItem(Lightroom.FILM_SLOT);
         return (!filmStack.isEmpty() && filmStack.getItem() instanceof FilmItem filmItem) ? filmItem.getStoredFramesCount(filmStack) : 0;
     }
@@ -169,36 +168,36 @@ public class LightroomMenu extends AbstractContainerMenu {
 
     @Override
     public boolean clickMenuButton(Player player, int buttonId) {
-        Preconditions.checkState(!player.level().isClientSide, "This should be server-side only.");
-
-        if (buttonId == PREVIOUS_FRAME_BUTTON_ID || buttonId == NEXT_FRAME_BUTTON_ID) {
-            ItemStack filmStack = getBlockEntity().getItem(Lightroom.FILM_SLOT);
-            if (!filmStack.isEmpty() && filmStack.getItem() instanceof DevelopedFilmItem) {
-                int frames = getTotalFrames();
-                if (frames == 0)
-                    return true;
-
-                int selectedFrame = data.get(LightroomBlockEntity.CONTAINER_DATA_SELECTED_FRAME_ID);
-                selectedFrame = selectedFrame + (buttonId == NEXT_FRAME_BUTTON_ID ? 1 : -1);
-                selectedFrame = Mth.clamp(selectedFrame, 0, frames - 1);
-                data.set(LightroomBlockEntity.CONTAINER_DATA_SELECTED_FRAME_ID, selectedFrame);
-                return true;
-            }
-        }
-
-        if (buttonId == TOGGLE_PROCESS_BUTTON_ID) {
-            PrintingMode currentProcess = getBlockEntity().getPrintingMode();
-            getBlockEntity().setPrintMode(currentProcess == PrintingMode.CHROMATIC ? PrintingMode.REGULAR : PrintingMode.CHROMATIC);
-        }
-
         if (buttonId == PRINT_BUTTON_ID) {
-            getBlockEntity().startPrintingProcess(false);
+            if (!player.level().isClientSide()) {
+                getBlockEntity().startPrintingProcess(false);
+            }
             return true;
         }
 
         if (buttonId == PRINT_CREATIVE_BUTTON_ID) {
-            if (player.isCreative())
+            if (player.isCreative() && !player.level().isClientSide()) {
                 getBlockEntity().printFrameInCreative();
+            }
+            return true;
+        }
+
+        if (buttonId == PREVIOUS_FRAME_BUTTON_ID || buttonId == NEXT_FRAME_BUTTON_ID) {
+            int framesCount = getTotalFramesCount();
+            if (framesCount > 0 && !player.level().isClientSide()) {
+                int selectedFrame = data.get(LightroomBlockEntity.CONTAINER_DATA_SELECTED_FRAME_ID);
+                int change = buttonId == NEXT_FRAME_BUTTON_ID ? 1 : -1;
+                selectedFrame = selectedFrame + change;
+                selectedFrame = Mth.clamp(selectedFrame, 0, framesCount - 1);
+                data.set(LightroomBlockEntity.CONTAINER_DATA_SELECTED_FRAME_ID, selectedFrame);
+            }
+            return true;
+        }
+
+        if (buttonId == TOGGLE_PROCESS_BUTTON_ID) {
+            PrintingMode currentProcess = getBlockEntity().getPrintingMode();
+            getBlockEntity().setPrintMode(currentProcess.cycle());
+            return true;
         }
 
         return false;

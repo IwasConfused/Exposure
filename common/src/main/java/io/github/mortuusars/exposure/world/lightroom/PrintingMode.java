@@ -21,6 +21,10 @@ public enum PrintingMode implements StringRepresentable {
         return defaultValue;
     }
 
+    public PrintingMode cycle() {
+        return this == REGULAR ? CHROMATIC : REGULAR;
+    }
+
     @Override
     public @NotNull String getSerializedName() {
         return name;

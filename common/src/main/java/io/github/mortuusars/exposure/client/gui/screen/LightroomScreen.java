@@ -6,6 +6,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
+import io.github.mortuusars.exposure.client.input.Key;
+import io.github.mortuusars.exposure.client.input.KeyBindings;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.block.entity.Lightroom;
 import io.github.mortuusars.exposure.world.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.client.gui.component.CycleButton;
@@ -31,11 +34,13 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Rect2i;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
@@ -44,6 +49,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     public static final ResourceLocation MAIN_TEXTURE = Exposure.resource("textures/gui/lightroom.png");
@@ -63,6 +69,12 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
             Exposure.resource("lightroom/printing_mode_chromatic_highlighted"));
 
     public static final int FRAME_SIZE = 54;
+
+    protected final KeyBindings keyBindings = KeyBindings.of(
+            Key.press(InputConstants.KEY_ADD).or(Key.press(InputConstants.KEY_EQUALS)).executes(this::enterFrameInspectMode),
+            Key.press(InputConstants.KEY_LEFT).or(Key.press(InputConstants.KEY_A)).executes(() -> changeFrame(PagingDirection.PREVIOUS)),
+            Key.press(InputConstants.KEY_RIGHT).or(Key.press(InputConstants.KEY_D)).executes(() -> changeFrame(PagingDirection.NEXT))
+    );
 
     protected Player player;
     protected Button printButton;
@@ -95,7 +107,10 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         );
 
         printButton = new ImageButton(leftPos + 117, topPos + 89, 22, 22, PRINT_BUTTON_SPRITES,
-                this::onPrintButtonPressed, Component.translatable("gui.exposure.lightroom.print"));
+                button -> {
+                    int buttonId = Screen.hasShiftDown() && player.isCreative() ? LightroomMenu.PRINT_CREATIVE_BUTTON_ID : LightroomMenu.PRINT_BUTTON_ID;
+                    clickButton(buttonId);
+                }, Component.translatable("gui.exposure.lightroom.print"));
 
         MutableComponent tooltip = Component.translatable("gui.exposure.lightroom.print");
         if (player.isCreative()) {
@@ -122,22 +137,14 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
                         .append(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic.info").withStyle(ChatFormatting.GRAY))));
         return new CycleButton<>(leftPos - 19, topPos + 91, 18, 18,
                 Arrays.asList(PrintingMode.values()), getMenu().getBlockEntity().getPrintingMode(),
-                spritesMap, (button, newMode) -> onPrintingModeToggleButtonPressed(button))
+                spritesMap, (button, newMode) -> clickButton(LightroomMenu.TOGGLE_PROCESS_BUTTON_ID))
+                .setClickSound(SoundEvents.UI_BUTTON_CLICK.value())
                 .setTooltips(tooltipMap);
     }
 
-    protected void onPrintButtonPressed(Button button) {
-        if (Minecraft.getInstance().gameMode != null) {
-            if (Screen.hasShiftDown() && player.isCreative())
-                Minecraft.getInstance().gameMode.handleInventoryButtonClick(getMenu().containerId, LightroomMenu.PRINT_CREATIVE_BUTTON_ID);
-            else
-                Minecraft.getInstance().gameMode.handleInventoryButtonClick(getMenu().containerId, LightroomMenu.PRINT_BUTTON_ID);
-        }
-    }
-
-    protected void onPrintingModeToggleButtonPressed(Button button) {
-        if (Minecraft.getInstance().gameMode != null)
-            Minecraft.getInstance().gameMode.handleInventoryButtonClick(getMenu().containerId, LightroomMenu.TOGGLE_PROCESS_BUTTON_ID);
+    protected void clickButton(int buttonId) {
+        getMenu().clickMenuButton(player, buttonId);
+        Minecrft.gameMode().handleInventoryButtonClick(getMenu().containerId, buttonId);
     }
 
     @Override
@@ -228,7 +235,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
             poseStack.pushPose();
             poseStack.translate(0, 0, 800);
 
-            if (selectedFrame < getMenu().getTotalFrames() - 1)
+            if (selectedFrame < getMenu().getTotalFramesCount() - 1)
                 guiGraphics.blit(MAIN_TEXTURE, leftPos + 111, topPos + 44, 200, 0, 10, 10);
             else
                 guiGraphics.blit(MAIN_TEXTURE, leftPos + 111, topPos + 44, 210, 0, 10, 10);
@@ -331,18 +338,12 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        Preconditions.checkState(minecraft != null);
-        Preconditions.checkState(minecraft.gameMode != null);
+        return keyBindings.keyPressed(keyCode, scanCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+    }
 
-        if (minecraft.options.keyLeft.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_LEFT) {
-            changeFrame(PagingDirection.PREVIOUS);
-            return true;
-        } else if (minecraft.options.keyRight.matches(keyCode, scanCode) || keyCode == InputConstants.KEY_RIGHT) {
-            changeFrame(PagingDirection.NEXT);
-            return true;
-        }
-
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    @Override
+    public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
+        return keyBindings.keyReleased(keyCode, scanCode, modifiers) || super.keyReleased(keyCode, scanCode, modifiers);
     }
 
     @Override
@@ -381,16 +382,17 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
 
     public void changeFrame(PagingDirection navigation) {
         if ((navigation == PagingDirection.PREVIOUS && getMenu().getSelectedFrame() == 0)
-                || (navigation == PagingDirection.NEXT && getMenu().getSelectedFrame() == getMenu().getTotalFrames() - 1))
+                || (navigation == PagingDirection.NEXT && getMenu().getSelectedFrame() == getMenu().getTotalFramesCount() - 1)) {
             return;
+        }
 
         Preconditions.checkState(minecraft != null);
         Preconditions.checkState(minecraft.player != null);
         Preconditions.checkState(minecraft.gameMode != null);
         int buttonId = navigation == PagingDirection.NEXT ? LightroomMenu.NEXT_FRAME_BUTTON_ID : LightroomMenu.PREVIOUS_FRAME_BUTTON_ID;
-        minecraft.gameMode.handleInventoryButtonClick(getMenu().containerId, buttonId);
-        player.playSound(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(), 1f, minecraft.player.level()
-                .getRandom().nextFloat() * 0.4f + 0.8f);
+        clickButton(buttonId);
+        Minecrft.get().getSoundManager().play(SimpleSoundInstance.forUI(Exposure.SoundEvents.CAMERA_LENS_RING_CLICK.get(),
+                1f, ThreadLocalRandom.current().nextFloat() * 0.4f + 0.8f));
 
         // Update block entity clientside to faster update advance frame arrows:
         getMenu().getBlockEntity().setSelectedFrameIndex(getMenu().getBlockEntity().getSelectedFrameIndex() + (navigation == PagingDirection.NEXT ? 1 : -1));

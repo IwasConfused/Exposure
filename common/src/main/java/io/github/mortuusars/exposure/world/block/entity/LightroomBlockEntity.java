@@ -361,10 +361,10 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     protected int getChromaticStep(ItemStack paper) {
-        if (!(paper.getItem() instanceof ChromaticSheetItem chromaticFragment))
+        if (!(paper.getItem() instanceof ChromaticSheetItem chromaticSheet))
             return 0;
 
-        return chromaticFragment.getLayers(paper).size();
+        return chromaticSheet.getLayers(paper).size();
     }
 
     protected void printFrame(Frame frame, PrintingProcess process, boolean consumeIngredients) {
