@@ -18,8 +18,8 @@ public class FocalLengthButton extends ImageButton {
 
     public FocalLengthButton(int x, int y, int width, int height, WidgetSprites sprites) {
         super(x, y, width, height, sprites, button -> {}, Component.empty());
-        mainFontColor = Config.Client.getMainFontColor();
-        secondaryFontColor = Config.Client.getSecondaryFontColor();
+        mainFontColor = Config.getColor(Config.Client.VIEWFINDER_FONT_MAIN_COLOR);
+        secondaryFontColor = Config.getColor(Config.Client.VIEWFINDER_FONT_SECONDARY_COLOR);
     }
 
     @Override

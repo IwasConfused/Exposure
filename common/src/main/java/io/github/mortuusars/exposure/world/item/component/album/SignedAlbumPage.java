@@ -10,12 +10,12 @@ import net.minecraft.world.item.ItemStack;
 
 public record SignedAlbumPage(ItemStack photograph, Component note) {
     public static final Codec<SignedAlbumPage> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            ItemStack.OPTIONAL_CODEC.fieldOf("photograph").forGetter(SignedAlbumPage::photograph),
+            ItemStack.OPTIONAL_CODEC.optionalFieldOf("photograph", ItemStack.EMPTY).forGetter(SignedAlbumPage::photograph),
             ComponentSerialization.CODEC.optionalFieldOf("note", Component.empty()).forGetter(SignedAlbumPage::note)
     ).apply(instance, SignedAlbumPage::new));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, SignedAlbumPage> STREAM_CODEC = StreamCodec.composite(
-            ItemStack.STREAM_CODEC, SignedAlbumPage::photograph,
+            ItemStack.OPTIONAL_STREAM_CODEC, SignedAlbumPage::photograph,
             ComponentSerialization.STREAM_CODEC, SignedAlbumPage::note,
             SignedAlbumPage::new
     );

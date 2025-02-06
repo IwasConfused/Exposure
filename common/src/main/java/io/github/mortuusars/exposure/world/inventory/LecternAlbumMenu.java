@@ -1,9 +1,6 @@
 package io.github.mortuusars.exposure.world.inventory;
 
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.world.item.AlbumItem;
-import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -11,62 +8,51 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.*;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
+import org.jetbrains.annotations.NotNull;
 
-public class LecternAlbumMenu extends AlbumMenu {
-    public static final int TAKE_BOOK_BUTTON = 99;
+public class LecternAlbumMenu extends AbstractContainerMenu {
+    public static final int BUTTON_PREV_PAGE = 1;
+    public static final int BUTTON_NEXT_PAGE = 2;
+    public static final int BUTTON_TAKE_BOOK = 3;
+    public static final int BUTTON_PAGE_JUMP_RANGE_START = 100;
 
-    private final Container lectern;
-    private final BlockPos lecternPos;
-    private final Level level;
+    private static final int SLOT_COUNT = 1;
+    private static final int DATA_COUNT = 1;
 
-    public LecternAlbumMenu(int containerId, BlockPos lecternPos, Inventory playerInventory,
-                            ItemAndStack<AlbumItem> album, Container lectern, ContainerData lecternData) {
-        this(Exposure.MenuTypes.LECTERN_ALBUM.get(), containerId, lecternPos, playerInventory, album, lectern, lecternData);
-    }
+    protected final Container container;
+    protected final ContainerData data;
 
-    protected LecternAlbumMenu(MenuType<? extends AbstractContainerMenu> type, int containerId, BlockPos lecternPos,
-                               Inventory playerInventory, ItemAndStack<AlbumItem> album, Container lectern, ContainerData lecternData) {
-        super(type, containerId, playerInventory, 0);
-        checkContainerSize(lectern, 1);
-        checkContainerDataCount(lecternData, 1);
-        this.lecternPos = lecternPos;
-        this.lectern = lectern;
-        this.level = playerInventory.player.level();
-        this.addSlot(new Slot(lectern, 0, -999, -999) {
+    public LecternAlbumMenu(int containerId, Inventory playerInventory, Container container, ContainerData data) {
+        super(Exposure.MenuTypes.LECTERN_ALBUM.get(), containerId);
+        this.container = container;
+        this.data = data;
+
+        checkContainerSize(container, SLOT_COUNT);
+        checkContainerDataCount(data, DATA_COUNT);
+
+        this.addSlot(new Slot(container, 0, -999, -999) {
             @Override
             public void setChanged() {
                 super.setChanged();
                 LecternAlbumMenu.this.slotsChanged(this.container);
             }
         });
-        this.addDataSlots(lecternData);
-        setCurrentSpreadIndex(lecternData.get(0));
+        this.addDataSlots(data);
     }
 
-    @Override
-    public boolean clickMenuButton(Player player, int id) {
-        if (id == TAKE_BOOK_BUTTON) {
-            if (!player.mayBuild())
-                return false;
-
-            ItemStack albumStack = this.lectern.removeItemNoUpdate(0);
-            this.lectern.setChanged();
-            if (!player.getInventory().add(albumStack))
-                player.drop(albumStack, false);
-
-            return true;
-        }
-
-        return super.clickMenuButton(player, id);
+    public LecternAlbumMenu(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
+        this(containerId, playerInventory, new SimpleContainer(SLOT_COUNT), new SimpleContainerData(DATA_COUNT));
+        ItemStack book = ItemStack.OPTIONAL_STREAM_CODEC.decode(buffer);
+        container.setItem(0, book);
     }
 
-    @Override
-    public void setCurrentSpreadIndex(int spreadIndex) {
-        spreadIndex = Math.max(0, spreadIndex);
-        super.setCurrentSpreadIndex(spreadIndex);
-        setData(1, spreadIndex);
+
+    public ItemStack getBook() {
+        return this.container.getItem(0);
+    }
+
+    public int getPage() {
+        return this.data.get(0);
     }
 
     @Override
@@ -76,15 +62,49 @@ public class LecternAlbumMenu extends AlbumMenu {
     }
 
     @Override
-    public boolean stillValid(Player player) {
-        return level.getBlockEntity(lecternPos) instanceof LecternBlockEntity lecternBlockEntity
-                && lecternBlockEntity.getBook().getItem() instanceof AlbumItem
-                && Container.stillValidBlockEntity(lecternBlockEntity, player);
+    public boolean clickMenuButton(Player player, int id) {
+        if (id >= BUTTON_PAGE_JUMP_RANGE_START) {
+            int pageIndex = id - BUTTON_PAGE_JUMP_RANGE_START;
+            this.setData(0, pageIndex);
+            return true;
+        }
+
+        switch (id) {
+            case BUTTON_PREV_PAGE: {
+                int i = this.data.get(0);
+                this.setData(0, i - 1);
+                return true;
+            }
+            case BUTTON_NEXT_PAGE: {
+                int i = this.data.get(0);
+                this.setData(0, i + 1);
+                return true;
+            }
+            case BUTTON_TAKE_BOOK: {
+                if (!player.mayBuild()) {
+                    return false;
+                }
+
+                ItemStack itemStack = this.container.removeItemNoUpdate(0);
+                this.container.setChanged();
+                if (!player.getInventory().add(itemStack)) {
+                    player.drop(itemStack, false);
+                }
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public static LecternAlbumMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {
-        return new LecternAlbumMenu(containerId, buffer.readBlockPos(), playerInventory,
-                new ItemAndStack<>(ItemStack.STREAM_CODEC.decode(buffer)),
-                new SimpleContainer(1), new SimpleContainerData(1));
+    @Override
+    public @NotNull ItemStack quickMoveStack(Player player, int index) {
+        return ItemStack.EMPTY;
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return container.stillValid(player);
     }
 }

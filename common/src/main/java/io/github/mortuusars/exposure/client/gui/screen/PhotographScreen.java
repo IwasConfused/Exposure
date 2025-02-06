@@ -134,10 +134,7 @@ public class PhotographScreen extends Screen {
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableDepthTest();
 
-        guiGraphics.pose().pushPose();
-        renderBlurredBackground(partialTick);
         renderTransparentBackground(guiGraphics);
-        guiGraphics.pose().popPose();
 
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(x, y, 0);

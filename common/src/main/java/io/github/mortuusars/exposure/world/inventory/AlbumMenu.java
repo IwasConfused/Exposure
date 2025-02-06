@@ -6,6 +6,7 @@ import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.util.PagingDirection;
 import io.github.mortuusars.exposure.world.item.AlbumItem;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
+import io.github.mortuusars.exposure.world.item.SignedAlbumItem;
 import io.github.mortuusars.exposure.world.item.component.album.AlbumPage;
 import io.github.mortuusars.exposure.network.Packets;
 import io.github.mortuusars.exposure.network.packet.server.AlbumSignC2SP;
@@ -21,6 +22,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AlbumMenu extends AbstractContainerMenu {
     public static final int CANCEL_ADDING_PHOTO_BUTTON = -1;
@@ -35,8 +37,6 @@ public class AlbumMenu extends AbstractContainerMenu {
     protected final int albumSlot;
     protected final ItemStack albumStack;
     protected final AlbumItem albumItem;
-
-    protected final List<AlbumPage> pages;
 
     protected final List<AlbumPhotographSlot> photographSlots = new ArrayList<>();
     protected final List<AlbumPlayerInventorySlot> playerInventorySlots = new ArrayList<>();
@@ -84,20 +84,16 @@ public class AlbumMenu extends AbstractContainerMenu {
         this.albumSlot = albumSlot;
 
         albumStack = playerInventory.getItem(albumSlot);
-        if (!(albumStack.getItem() instanceof AlbumItem albumItem)) {
+        if (!(albumStack.getItem() instanceof AlbumItem item)) {
             throw new IllegalStateException("Expected AlbumItem in slot '" + albumSlot + "'. Got: " + albumStack);
         }
 
-        this.albumItem = albumItem;
+        this.albumItem = item;
 
-        List<AlbumPage> albumPages = albumItem.getContent(albumStack).pages();
-        pages = isAlbumEditable() ? new ArrayList<>(albumPages) : albumPages;
-
-//        if (isAlbumEditable()) {
-//            while (pages.size() < album.getItem().getMaxPages()) {
-//                addEmptyPage();
-//            }
-//        }
+        if (isAlbumEditable()) {
+            // Sets all pages to empty.
+            item.setContent(albumStack, item.getContent(albumStack).toMutable().setPage(15, AlbumPage.EMPTY).toImmutable());
+        }
 
         addPhotographSlots();
         addPlayerInventorySlots(playerInventory, 70, 115);
@@ -105,7 +101,7 @@ public class AlbumMenu extends AbstractContainerMenu {
     }
 
     protected void addPhotographSlots() {
-        ItemStack[] photographs = pages.stream().map(AlbumPage::photograph).toArray(ItemStack[]::new);
+        ItemStack[] photographs = albumItem.getContent(albumStack).pages().stream().map(AlbumPage::photograph).toArray(ItemStack[]::new);
         SimpleContainer container = new SimpleContainer(photographs);
 
         for (int i = 0; i < container.getContainerSize(); i++) {
@@ -121,20 +117,14 @@ public class AlbumMenu extends AbstractContainerMenu {
             addSlot(slot);
             photographSlots.add(slot);
         }
-
-        container.addListener(c -> {
-            List<AlbumPage> pages = getPages();
-            for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
-                AlbumPage page = pages.get(pageIndex);
-                ItemStack stack = container.getItem(pageIndex);
-//                page.setPhotographStack(stack);
-            }
-            updateAlbumStack();
-        });
     }
 
     private void onPhotographSlotChanged(int slotIndex, ItemStack stack) {
-
+        albumItem.updatePage(albumStack, slotIndex, page -> page.orElse(AlbumPage.EMPTY).setPhotograph(stack));
+//        List<AlbumPage> pages = getPages();
+//        AlbumPage page = pages.get(slotIndex);
+//        page = page.setPhotograph(stack);
+//        pages.set(slotIndex, page);
     }
 
     private void addPlayerInventorySlots(Inventory playerInventory, int x, int y) {
@@ -176,6 +166,10 @@ public class AlbumMenu extends AbstractContainerMenu {
         }
     }
 
+    public int getAlbumSlot() {
+        return albumSlot;
+    }
+
     public boolean isAlbumEditable() {
         return true;
     }
@@ -192,40 +186,29 @@ public class AlbumMenu extends AbstractContainerMenu {
         return title;
     }
 
-    public void setTitle(String authorName) {
-        this.title = authorName;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public boolean canSignAlbum() {
-//        for (AlbumPage page : getPages()) {
-//            if (!page.getPhotographStack().isEmpty() || page.getNote().left().map(note -> !note.isEmpty()).orElse(false))
-//                return true;
-//        }
+        for (AlbumPage page : getPages()) {
+            if (!page.photograph().isEmpty() || !page.note().isEmpty()) {
+                return true;
+            }
+        }
         return false;
     }
 
-    protected void signAlbum(Player player) {
-        if (!player.level().isClientSide)
+    public void signAlbum(Player player) {
+        if (!player.level().isClientSide) {
             return;
+        }
 
-        if (!canSignAlbum())
+        if (!canSignAlbum()) {
             throw new IllegalStateException("Cannot sign the album.\n" + Arrays.toString(getPages().toArray()));
+        }
 
         Packets.sendToServer(new AlbumSignC2SP(albumSlot, title, player.getScoreboardName()));
-    }
-
-    public void updateAlbumStack() {
-//        List<AlbumPage> pages = getPages();
-//        for (int pageIndex = 0; pageIndex < pages.size(); pageIndex++) {
-//            AlbumPage page = pages.get(pageIndex);
-//            album.getItem().setPage(album.getItemStack(), page, pageIndex);
-//        }
-    }
-
-    protected void addEmptyPage() {
-//        AlbumPage page = album.getItem().createEmptyPage();
-//        pages.add(page);
-//        album.getItem().addPage(album.getItemStack(), page);
     }
 
     public List<AlbumPlayerInventorySlot> getPlayerInventorySlots() {
@@ -233,11 +216,7 @@ public class AlbumMenu extends AbstractContainerMenu {
     }
 
     public List<AlbumPage> getPages() {
-        return pages;
-    }
-
-    public Optional<AlbumPage> getPage(Side side) {
-        return getPage(getCurrentSpreadIndex() * 2 + side.getIndex());
+        return albumItem.getContent(albumStack).pages();
     }
 
     public Optional<AlbumPage> getPage(int pageIndex) {
@@ -245,6 +224,14 @@ public class AlbumMenu extends AbstractContainerMenu {
             return Optional.ofNullable(getPages().get(pageIndex));
 
         return Optional.empty();
+    }
+
+    public Optional<AlbumPage> getPage(Side side) {
+        return getPage(getCurrentSpreadIndex() * 2 + side.getIndex());
+    }
+
+    public void updatePage(int pageIndex, Function<AlbumPage, AlbumPage> pageTransform) {
+        albumItem.updatePage(albumStack, pageIndex, page -> pageTransform.apply(page.orElse(AlbumPage.EMPTY)));
     }
 
     public Optional<AlbumPhotographSlot> getPhotographSlot(Side side) {
@@ -332,8 +319,9 @@ public class AlbumMenu extends AbstractContainerMenu {
             photographSlot.get().set(stack);
             slot.set(ItemStack.EMPTY);
 
-            if (player.level().isClientSide)
+            if (player.level().isClientSide) {
                 player.playSound(Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.8f, 1.1f);
+            }
 
             sideBeingAddedTo = null;
             updatePlayerInventorySlots();

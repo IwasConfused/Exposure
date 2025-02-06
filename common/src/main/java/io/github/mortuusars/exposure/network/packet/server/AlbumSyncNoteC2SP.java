@@ -33,14 +33,12 @@ public record AlbumSyncNoteC2SP(int pageIndex, String text) implements Packet {
     public boolean handle(PacketFlow flow, Player player) {
         Preconditions.checkState(player != null, "Cannot handle packet: Player was null");
 
-        if (!(player.containerMenu instanceof AlbumMenu albumMenu))
-            throw new IllegalStateException("Player receiving this packet should have AlbumMenu open. Current menu: " + player.containerMenu);
+        if (!(player.containerMenu instanceof AlbumMenu albumMenu)) {
+            throw new IllegalStateException("Player receiving this packet should have AlbumMenu open. " +
+                    "Current menu: " + player.containerMenu);
+        }
 
-        AlbumPage page = albumMenu.getPages().get(pageIndex);
-        albumMenu.getPages().set(pageIndex, new AlbumPage(page.photograph(), text));
-
-        albumMenu.updateAlbumStack();
-
+        albumMenu.updatePage(pageIndex, page -> page.setNote(text));
         return true;
     }
 }

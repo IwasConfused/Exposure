@@ -130,6 +130,7 @@ public class Config {
 
     public static class Common {
         public static final ModConfigSpec SPEC;
+        public static final ModConfigSpec.BooleanValue SIGNED_ALBUM_GLINT;
         public static final ModConfigSpec.BooleanValue GENERATE_LOOT;
 
         static {
@@ -137,6 +138,10 @@ public class Config {
 
             builder.push("misc");
             {
+                SIGNED_ALBUM_GLINT = builder
+                        .comment("Signed Album item will have an enchantment glint.")
+                        .define("signed_album_glint", true);
+
                 GENERATE_LOOT = builder
                         .comment("Generate photographs and film rolls in loot chests. Default: true")
                         .define("loot_chests", true);
@@ -157,9 +162,13 @@ public class Config {
         public static final ModConfigSpec.BooleanValue CAMERA_SHOW_FILM_BAR_ON_ITEM;
         public static final ModConfigSpec.BooleanValue PHOTOGRAPH_SHOW_PHOTOGRAPHER_IN_TOOLTIP;
         public static final ModConfigSpec.BooleanValue PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR;
-        public static final ModConfigSpec.BooleanValue SIGNED_ALBUM_GLINT;
-        public static final ModConfigSpec.BooleanValue ALBUM_SHOW_PHOTOS_COUNT;
         public static final ModConfigSpec.BooleanValue DIFFERENT_DEVELOPING_POTION_COLORS;
+
+        public static final ModConfigSpec.BooleanValue ALBUM_PHOTOS_COUNT_TOOLTIP;
+        public static final ModConfigSpec.ConfigValue<String> ALBUM_FONT_MAIN_COLOR;
+        public static final ModConfigSpec.ConfigValue<String> ALBUM_FONT_SECONDARY_COLOR;
+        public static final ModConfigSpec.ConfigValue<String> ALBUM_SELECTION_COLOR;
+        public static final ModConfigSpec.ConfigValue<String> ALBUM_SELECTION_UNFOCUSED_COLOR;
 
         // VIEWFINDER
         public static final ModConfigSpec.BooleanValue VIEWFINDER_MIDDLE_CLICK_CONTROLS;
@@ -223,17 +232,26 @@ public class Config {
                         .comment("Crosshair will not get in the way when holding a photograph.")
                         .define("photograph_in_hand_hide_crosshair", true);
 
-                ALBUM_SHOW_PHOTOS_COUNT = builder
+                ALBUM_PHOTOS_COUNT_TOOLTIP = builder
                         .comment("Album will show how many photographs it contains in a tooltip.")
                         .define("album_show_photos_count", true);
-
-                SIGNED_ALBUM_GLINT = builder
-                        .comment("Signed Album item will have an enchantment glint.")
-                        .define("signed_album_glint", true);
 
                 DIFFERENT_DEVELOPING_POTION_COLORS = builder
                         .comment("Mundane, Awkward and Thick potions will have their color changed slightly, so it's easier to tell them apart. Default: true")
                         .define("different_developing_potions_colors", true);
+
+                {
+                    builder.push("album");
+                    ALBUM_FONT_MAIN_COLOR = builder
+                            .comment("Color in hex format. AARRGGBB.").define("font_main_color", "FFB59774");
+                    ALBUM_FONT_SECONDARY_COLOR = builder
+                            .comment("Color in hex format. AARRGGBB.").define("font_secondary_color", "FFEFE4CA");
+                    ALBUM_SELECTION_COLOR = builder
+                            .comment("Color in hex format. AARRGGBB.").define("selection_color", "FF8888FF");
+                    ALBUM_SELECTION_UNFOCUSED_COLOR = builder
+                            .comment("Color in hex format. AARRGGBB.").define("selection_unfocused_color", "FFBBBBFF");
+                    builder.pop();
+                }
 
                 builder.pop();
             }
@@ -337,17 +355,15 @@ public class Config {
 
             SPEC = builder.build();
         }
+    }
 
-        public static int getBackgroundColor() {
-            return Color.fromHex(VIEWFINDER_BACKGROUND_COLOR.get()).getARGB();
-        }
-
-        public static int getMainFontColor() {
-            return Color.fromHex(VIEWFINDER_FONT_MAIN_COLOR.get()).getARGB();
-        }
-
-        public static int getSecondaryFontColor() {
-            return Color.fromHex(VIEWFINDER_FONT_SECONDARY_COLOR.get()).getARGB();
+    public static int getColor(ModConfigSpec.ConfigValue<String> config) {
+        String value = config.get();
+        try {
+            return Color.fromHex(value).getARGB();
+        } catch (Exception e) {
+            Exposure.LOGGER.error("{} is not valid ARGB color. {}", value, String.join("/", config.getPath()));
+            return 0;
         }
     }
 }

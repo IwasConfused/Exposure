@@ -1,11 +1,12 @@
 package io.github.mortuusars.exposure.client.gui.screen.album;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.screen.element.textbox.HorizontalAlignment;
 import io.github.mortuusars.exposure.client.gui.screen.element.textbox.TextBox;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ImageButton;
 import net.minecraft.client.gui.components.Tooltip;
@@ -13,11 +14,6 @@ import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
 
 public class AlbumSigningScreen extends Screen {
     public static final WidgetSprites CANCEL_BUTTON_SPRITE = new WidgetSprites(
@@ -26,15 +22,9 @@ public class AlbumSigningScreen extends Screen {
     public static final int SELECTION_COLOR = 0xFF8888FF;
     public static final int SELECTION_UNFOCUSED_COLOR = 0xFFBBBBFF;
 
-    @NotNull
-    protected final Minecraft minecraft;
-    @NotNull
-    protected final Player player;
+    protected final AlbumScreen parentScreen;
 
-    protected final Screen parentScreen;
-    protected final ResourceLocation texture;
-
-    protected int imageWidth, imageHeight, leftPos, topPos, textureWidth, textureHeight;
+    protected int imageWidth, imageHeight, leftPos, topPos;
 
     protected TextBox titleTextBox;
     protected ImageButton signButton;
@@ -42,15 +32,9 @@ public class AlbumSigningScreen extends Screen {
 
     protected String titleText = "";
 
-    public AlbumSigningScreen(Screen screen, ResourceLocation texture, int textureWidth, int textureHeight) {
+    public AlbumSigningScreen(AlbumScreen parent) {
         super(Component.empty());
-        this.parentScreen = screen;
-        this.texture = texture;
-        this.textureWidth = textureWidth;
-        this.textureHeight = textureHeight;
-
-        minecraft = Minecraft.getInstance();
-        player = Objects.requireNonNull(minecraft.player);
+        this.parentScreen = parent;
     }
 
     @Override
@@ -63,7 +47,7 @@ public class AlbumSigningScreen extends Screen {
         // TITLE
         titleTextBox = new TextBox(font, leftPos + 21, topPos + 73, 108, 9,
                 () -> titleText, text -> titleText = text)
-                .setFontColor(0xFF856036, 0xFF856036)
+                .setFontColor(Config.getColor(Config.Client.ALBUM_FONT_MAIN_COLOR))
                 .setSelectionColor(SELECTION_COLOR, SELECTION_UNFOCUSED_COLOR);
         titleTextBox.textValidator = text -> text != null && font.wordWrapHeight(text, 108) <= 9 && !text.contains("\n");
         titleTextBox.horizontalAlignment = HorizontalAlignment.CENTER;
@@ -107,46 +91,51 @@ public class AlbumSigningScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         updateButtons();
-
-        renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.blit(texture, leftPos, topPos, 0, 298,
-                0, imageWidth, imageHeight, textureWidth, textureHeight);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
-
         renderLabels(guiGraphics);
+    }
+
+    @Override
+    public void renderBackground(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        renderTransparentBackground(guiGraphics);
+        guiGraphics.blit(AlbumGUI.TEXTURE, leftPos, topPos, 0, 298,
+                0, imageWidth, imageHeight, 512, 512);
     }
 
     private void renderLabels(GuiGraphics guiGraphics) {
         MutableComponent component = Component.translatable("gui.exposure.album.enter_title");
         guiGraphics.drawString(font, component,  leftPos + 149 / 2 - font.width(component) / 2, topPos + 50, 0xf5ebd0, false);
 
-        component = Component.translatable("gui.exposure.album.by_author", player.getName());
+        component = Component.translatable("gui.exposure.album.by_author", Minecrft.player().getScoreboardName());
         guiGraphics.drawString(font, component, leftPos + 149 / 2 - font.width(component) / 2, topPos + 84, 0xc7b496, false);
     }
 
     protected void signAlbum() {
-//        if (canSign()) {
-//            Packets.sendToServer(new AlbumSignC2SP(titleText));
-//            this.onClose();
-//        }
+        if (canSign()) {
+            parentScreen.getMenu().setTitle(titleText);
+            parentScreen.getMenu().signAlbum(Minecrft.player());
+            this.onClose();
+        }
     }
 
     protected void cancelSigning() {
-        minecraft.setScreen(parentScreen);
+        Minecrft.get().setScreen(parentScreen);
     }
 
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (keyCode == InputConstants.KEY_TAB)
+        if (keyCode == InputConstants.KEY_TAB) {
             return super.keyPressed(keyCode, scanCode, modifiers);
+        }
 
         if (keyCode == InputConstants.KEY_ESCAPE) {
             cancelSigning();
             return true;
         }
 
-        if (titleTextBox.isFocused())
+        if (titleTextBox.isFocused()) {
             return titleTextBox.keyPressed(keyCode, scanCode, modifiers);
+        }
 
         return super.keyPressed(keyCode, scanCode, modifiers);
     }

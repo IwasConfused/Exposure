@@ -92,6 +92,13 @@ public class TextBox extends AbstractWidget {
         return this;
     }
 
+    public TextBox setFontColor(int fontColor) {
+        this.fontColor = fontColor;
+        this.fontUnfocusedColor = fontColor;
+        clearDisplayCache();
+        return this;
+    }
+
     public TextBox setSelectionColor(int selectionColor, int selectionUnfocusedColor) {
         this.selectionColor = selectionColor;
         this.selectionUnfocusedColor = selectionUnfocusedColor;

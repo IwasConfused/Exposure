@@ -22,13 +22,12 @@ public class AlbumPhotographScreen extends PhotographScreen {
 
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
+        super.render(guiGraphics, mouseX, mouseY, partialTick);
+
         if (zoom.get() < zoom.getMin() + 0.1f && zoom.getTarget() < zoom.getMin() + 0.1f) {
             Minecrft.get().setScreen(parentScreen);
             Minecrft.player().playSound(Exposure.SoundEvents.PHOTOGRAPH_PLACE.get(), 0.7f, 1.1f);
-            return;
         }
-
-        super.render(guiGraphics, mouseX, mouseY, partialTick);
     }
 
     @Override

@@ -1,13 +1,13 @@
 package io.github.mortuusars.exposure.client.gui;
 
-import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.client.gui.screen.PhotographScreen;
+import io.github.mortuusars.exposure.client.gui.screen.album.AlbumViewScreen;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import io.github.mortuusars.exposure.world.item.crafting.recipe.FilmDevelopingRecipe;
 import io.github.mortuusars.exposure.world.item.crafting.recipe.PhotographCopyingRecipe;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.WidgetSprites;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -25,15 +25,13 @@ import java.util.function.Predicate;
 
 //TODO: Redesign. Maybe put methods in ExposureClient
 public class ClientGUI {
-    public static final WidgetSprites EMPTY_SPRITES = new WidgetSprites(Exposure.resource("empty"), Exposure.resource("empty"));
-
     public static void openPhotographScreen(List<ItemAndStack<PhotographItem>> photographs) {
-        Minecraft.getInstance().setScreen(new PhotographScreen(photographs));
+        Minecrft.get().setScreen(new PhotographScreen(photographs));
     }
 
-//    public static void openViewfinderControlsScreen() {
-//        Minecraft.getInstance().setScreen(new CameraControlsScreen());
-//    }
+    public static void openAlbumViewScreen(ItemStack albumStack) {
+        Minecrft.get().setScreen(new AlbumViewScreen(AlbumViewScreen.AlbumAccess.fromItem(albumStack)));
+    }
 
     public static void addFilmRollDevelopingTooltip(ItemStack filmStack, Item.TooltipContext tooltipContext,
                                                     @NotNull List<Component> tooltipComponents, @NotNull TooltipFlag isAdvanced) {

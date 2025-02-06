@@ -23,8 +23,8 @@ public class FrameCounterButton extends ImageButton {
 
     public FrameCounterButton(int x, int y, int width, int height, WidgetSprites sprites) {
         super(x, y, width, height, sprites, button -> {});
-        mainFontColor = Config.Client.getMainFontColor();
-        secondaryFontColor = Config.Client.getSecondaryFontColor();
+        mainFontColor = Config.getColor(Config.Client.VIEWFINDER_FONT_MAIN_COLOR);
+        secondaryFontColor = Config.getColor(Config.Client.VIEWFINDER_FONT_SECONDARY_COLOR);
     }
 
     @Override

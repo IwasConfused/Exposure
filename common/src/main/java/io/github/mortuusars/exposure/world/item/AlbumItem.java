@@ -30,6 +30,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class AlbumItem extends Item {
     public AlbumItem(Properties properties) {
@@ -40,8 +42,17 @@ public class AlbumItem extends Item {
         return stack.getOrDefault(Exposure.DataComponents.ALBUM_CONTENT, AlbumContent.EMPTY);
     }
 
+    public void setContent(ItemStack stack, AlbumContent content) {
+        stack.set(Exposure.DataComponents.ALBUM_CONTENT, content);
+    }
+
+    public void updatePage(ItemStack stack, int index, Function<Optional<AlbumPage>, AlbumPage> pageUpdater) {
+        AlbumPage page = pageUpdater.apply(getContent(stack).getPage(index));
+        setContent(stack, getContent(stack).toMutable().setPage(index, page).toImmutable());
+    }
+
     public int getPhotographsCount(ItemStack stack) {
-        return getContent(stack).pages().size();
+        return getContent(stack).pages().stream().filter(albumPage -> !albumPage.photograph().isEmpty()).toList().size();
     }
 
     @Override
@@ -83,13 +94,12 @@ public class AlbumItem extends Item {
 
         PlatformHelper.openMenu(player, menuProvider, buffer -> {
             buffer.writeVarInt(albumSlot);
-//            ItemStack.STREAM_CODEC.encode(buffer, albumStack);
         });
     }
 
     @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        if (Config.Client.ALBUM_SHOW_PHOTOS_COUNT.get()) {
+        if (Config.Client.ALBUM_PHOTOS_COUNT_TOOLTIP.get()) {
             int photographsCount = getPhotographsCount(stack);
             if (photographsCount > 0)
                 tooltipComponents.add(Component.translatable("item.exposure.album.tooltip.photos_count", photographsCount));
@@ -103,7 +113,7 @@ public class AlbumItem extends Item {
     public ItemStack sign(ItemStack albumStack, String title, String author) {
         ItemStack signedAlbumStack = new ItemStack(Exposure.Items.SIGNED_ALBUM.get());
 
-        List<SignedAlbumPage> signedPages = getContent(albumStack).removeEmptyTrailingPages().pages()
+        List<SignedAlbumPage> signedPages = getContent(albumStack).removeTrailingPages().pages()
                 .stream()
                 .map(AlbumPage::convertToSigned)
                 .toList();

@@ -64,7 +64,7 @@ public class ViewfinderOverlay {
         this.player = Minecrft.player();
         this.camera = camera;
         this.viewfinder = viewfinder;
-        this.backgroundColor = Config.Client.getBackgroundColor();
+        this.backgroundColor = Config.getColor(Config.Client.VIEWFINDER_BACKGROUND_COLOR);
         this.opening = new Rect2f(0, 0, 0, 0);
         recalculateOpening();
 

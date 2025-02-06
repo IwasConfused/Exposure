@@ -25,6 +25,7 @@
   "advancement.exposure.wildlife_archivist.title": "Wildlife Archivist",
   "block.exposure.lightroom": "Lightroom",
   "category.exposure": "Exposure",
+  "gui.exposure.album.lectern.set_current_page": "Set as Current Page",
   "command.exposure.debug.develop.fail.wrong_item": "Player should hold a Film Roll in hand.",
   "command.exposure.debug.develop.success": "Developed %s",
   "command.exposure.export.confirm": "[Confirm?]",
