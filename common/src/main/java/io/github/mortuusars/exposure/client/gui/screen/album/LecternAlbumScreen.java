@@ -67,7 +67,7 @@ public class LecternAlbumScreen extends AlbumViewScreen implements MenuAccess<Le
     }
 
     protected void pageChanged() {
-        pager.setPage(menu.getPage() / 2);
+        pager.changePage(menu.getPage() / 2);
     }
 
     protected void bookChanged() {
@@ -77,7 +77,6 @@ public class LecternAlbumScreen extends AlbumViewScreen implements MenuAccess<Le
 
     @Override
     protected void forcePage(int pageIndex) {
-//        super.forcePage(pageIndex);
         sendButtonClick(LecternAlbumMenu.BUTTON_PAGE_JUMP_RANGE_START + pageIndex);
     }
 

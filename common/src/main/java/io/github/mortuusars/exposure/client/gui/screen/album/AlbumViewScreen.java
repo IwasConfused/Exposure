@@ -244,7 +244,7 @@ public class AlbumViewScreen extends Screen {
     }
 
     protected void forcePage(int pageIndex) {
-        pager.setPage(pageIndex);
+        pager.changePage(pageIndex / 2);
     }
 
     @Override
