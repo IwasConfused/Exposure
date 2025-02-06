@@ -4,12 +4,15 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.PlatformHelper;
+import io.github.mortuusars.exposure.data.ColorPalette;
+import io.github.mortuusars.exposure.data.ColorPalettes;
 import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.client.gui.ClientGUI;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.world.inventory.ItemRenameMenu;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -80,8 +83,14 @@ public class FilmRollItem extends Item implements FilmItem {
         int frameSize = getFrameSize(stack);
         if (frameSize != getDefaultFrameSize(stack)) {
             tooltipComponents.add(Component.translatable("item.exposure.film_roll.tooltip.frame_size",
-                    Component.literal(String.format("%.1f", frameSize / 10f)))
-                            .withStyle(ChatFormatting.GRAY));
+                            Component.literal(String.format("%.1f", frameSize / 10f)))
+                    .withStyle(ChatFormatting.GRAY));
+        }
+
+        ResourceKey<ColorPalette> colorPaletteId = getColorPaletteId(stack);
+        if (tooltipFlag.isAdvanced() && !colorPaletteId.equals(ColorPalettes.DEFAULT)) {
+            tooltipComponents.add(Component.translatable("item.exposure.film_roll.tooltip.palette", colorPaletteId.location().toString())
+                    .withStyle(ChatFormatting.GRAY));
         }
 
         if (Config.Server.FILM_ROLL_EASY_RENAMING.get()) {

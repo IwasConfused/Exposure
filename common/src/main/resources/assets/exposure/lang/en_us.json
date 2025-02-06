@@ -26,6 +26,7 @@
   "block.exposure.lightroom": "Lightroom",
   "category.exposure": "Exposure",
   "gui.exposure.album.lectern.set_current_page": "Set as Current Page",
+  "item.exposure.film_roll.tooltip.palette": "Palette: %s",
   "command.exposure.debug.develop.fail.wrong_item": "Player should hold a Film Roll in hand.",
   "command.exposure.debug.develop.success": "Developed %s",
   "command.exposure.export.confirm": "[Confirm?]",
