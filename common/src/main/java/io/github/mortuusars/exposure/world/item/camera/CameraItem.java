@@ -730,7 +730,7 @@ public class CameraItem extends Item {
 
         return Vec3Util.getCrossVectors(lookDirection, offsetDegrees).stream()
                 .map(direction -> {
-                    Vec3 endPos = eyePos.add(direction.scale(400));
+                    Vec3 endPos = eyePos.add(direction.scale(100));
                     return cameraHolder.level().clip(
                             new ClipContext(eyePos, endPos, ClipContext.Block.OUTLINE, ClipContext.Fluid.ANY, cameraHolder));
                 })
