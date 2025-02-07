@@ -3,6 +3,7 @@ package io.github.mortuusars.exposure.fabric;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.input.KeyboardHandler;
+import io.github.mortuusars.exposure.client.render.GlassPhotographFrameEntityRenderer;
 import io.github.mortuusars.exposure.fabric.resources.ExposureFabricClientReloadListener;
 import io.github.mortuusars.exposure.client.gui.tooltip.PhotographClientTooltip;
 import io.github.mortuusars.exposure.client.gui.screen.ItemRenameScreen;
@@ -40,15 +41,16 @@ public class ExposureFabricClient implements ClientModInitializer {
                 pluginContext.addModels(
                         ExposureClient.Models.CAMERA_GUI.id(),
                         ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL.id(),
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL_STRIPPED.id(),
                         ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM.id(),
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM_STRIPPED.id(),
                         ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE.id(),
-                        ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE_STRIPPED.id()));
+                        ExposureClient.Models.CLEAR_PHOTOGRAPH_FRAME_SMALL.id(),
+                        ExposureClient.Models.CLEAR_PHOTOGRAPH_FRAME_MEDIUM.id(),
+                        ExposureClient.Models.CLEAR_PHOTOGRAPH_FRAME_LARGE.id()));
 
         ResourceManagerHelper.get(PackType.CLIENT_RESOURCES).registerReloadListener(new ExposureFabricClientReloadListener());
 
         EntityRendererRegistry.register(Exposure.EntityTypes.PHOTOGRAPH_FRAME.get(), PhotographFrameEntityRenderer::new);
+        EntityRendererRegistry.register(Exposure.EntityTypes.CLEAR_PHOTOGRAPH_FRAME.get(), GlassPhotographFrameEntityRenderer::new);
 
         TooltipComponentCallback.EVENT.register(data -> data instanceof PhotographTooltip photographTooltip
                 ? new PhotographClientTooltip(photographTooltip) : null);

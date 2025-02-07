@@ -75,6 +75,15 @@ public class RegisterImpl {
                 .build(id));
     }
 
+    public static <T extends Entity> Supplier<EntityType<T>> entityType(String id, EntityType.EntityFactory<T> factory, MobCategory category, boolean receiveVelocityUpdates, Consumer<EntityType.Builder<T>> typeBuilder) {
+        return ENTITY_TYPES.register(id, () -> {
+            EntityType.Builder<T> builder = EntityType.Builder.of(factory, category);
+            builder.setShouldReceiveVelocityUpdates(receiveVelocityUpdates);
+            typeBuilder.accept(builder);
+            return builder.build(id);
+        });
+    }
+
     public static <T extends SoundEvent> Supplier<T> soundEvent(String id, Supplier<T> supplier) {
         return SOUND_EVENTS.register(id, supplier);
     }

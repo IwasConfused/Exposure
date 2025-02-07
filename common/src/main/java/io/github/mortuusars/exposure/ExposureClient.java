@@ -116,16 +116,16 @@ public class ExposureClient {
                 new ModelResourceLocation(Exposure.resource("camera_gui"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_SMALL =
                 new ModelResourceLocation(Exposure.resource("photograph_frame_small"), "standalone");
-        public static final ModelResourceLocation PHOTOGRAPH_FRAME_SMALL_STRIPPED =
-                new ModelResourceLocation(Exposure.resource("photograph_frame_small_stripped"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_MEDIUM =
                 new ModelResourceLocation(Exposure.resource("photograph_frame_medium"), "standalone");
-        public static final ModelResourceLocation PHOTOGRAPH_FRAME_MEDIUM_STRIPPED =
-                new ModelResourceLocation(Exposure.resource("photograph_frame_medium_stripped"), "standalone");
         public static final ModelResourceLocation PHOTOGRAPH_FRAME_LARGE =
                 new ModelResourceLocation(Exposure.resource("photograph_frame_large"), "standalone");
-        public static final ModelResourceLocation PHOTOGRAPH_FRAME_LARGE_STRIPPED =
-                new ModelResourceLocation(Exposure.resource("photograph_frame_large_stripped"), "standalone");
+        public static final ModelResourceLocation CLEAR_PHOTOGRAPH_FRAME_SMALL =
+                new ModelResourceLocation(Exposure.resource("glass_photograph_frame_small"), "standalone");
+        public static final ModelResourceLocation CLEAR_PHOTOGRAPH_FRAME_MEDIUM =
+                new ModelResourceLocation(Exposure.resource("glass_photograph_frame_medium"), "standalone");
+        public static final ModelResourceLocation CLEAR_PHOTOGRAPH_FRAME_LARGE =
+                new ModelResourceLocation(Exposure.resource("glass_photograph_frame_large"), "standalone");
     }
 
     public static class Textures {

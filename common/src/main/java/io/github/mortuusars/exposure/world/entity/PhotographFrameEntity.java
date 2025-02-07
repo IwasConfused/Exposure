@@ -3,13 +3,14 @@ package io.github.mortuusars.exposure.world.entity;
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Config;
 import io.github.mortuusars.exposure.Exposure;
-import io.github.mortuusars.exposure.PlatformHelper;
+import io.github.mortuusars.exposure.world.item.PhotographFrameItem;
 import io.github.mortuusars.exposure.world.item.PhotographItem;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -18,11 +19,9 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerEntity;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -51,7 +50,6 @@ public class PhotographFrameEntity extends HangingEntity {
     protected static final EntityDataAccessor<ItemStack> DATA_ITEM = SynchedEntityData.defineId(PhotographFrameEntity.class, EntityDataSerializers.ITEM_STACK);
     protected static final EntityDataAccessor<Integer> DATA_ITEM_ROTATION = SynchedEntityData.defineId(PhotographFrameEntity.class, EntityDataSerializers.INT);
     protected static final EntityDataAccessor<Boolean> DATA_GLOWING = SynchedEntityData.defineId(PhotographFrameEntity.class, EntityDataSerializers.BOOLEAN);
-    protected static final EntityDataAccessor<Boolean> DATA_STRIPPED = SynchedEntityData.defineId(PhotographFrameEntity.class, EntityDataSerializers.BOOLEAN);
 
     protected int size = 0;
 
@@ -60,9 +58,19 @@ public class PhotographFrameEntity extends HangingEntity {
     }
 
     public PhotographFrameEntity(Level level, BlockPos pos, Direction facingDirection) {
-        super(Exposure.EntityTypes.PHOTOGRAPH_FRAME.get(), level, pos);
+        this(Exposure.EntityTypes.PHOTOGRAPH_FRAME.get(), level, pos, facingDirection);
+    }
+
+    protected PhotographFrameEntity(EntityType<? extends PhotographFrameEntity> entityType, Level level, BlockPos pos, Direction facingDirection) {
+        super(entityType, level, pos);
         setDirection(facingDirection);
         setItem(ItemStack.EMPTY);
+    }
+
+    @Override
+    public Component getDisplayName() {
+        ItemStack item = getItem();
+        return !item.isEmpty() ? item.getHoverName() : CommonComponents.EMPTY;
     }
 
     @Override
@@ -111,7 +119,6 @@ public class PhotographFrameEntity extends HangingEntity {
 
         tag.putByte("Size", (byte) getSize());
         tag.putByte("Facing", (byte) direction.get3DDataValue());
-        tag.putBoolean("Stripped", isStripped());
         tag.putBoolean("Invisible", isInvisible());
     }
 
@@ -119,7 +126,7 @@ public class PhotographFrameEntity extends HangingEntity {
         super.readAdditionalSaveData(tag);
         CompoundTag frameItemTag = tag.getCompound("FrameItem");
         if (!frameItemTag.isEmpty()) {
-            ItemStack stack = ItemStack.parse(registryAccess(), frameItemTag).orElse(new ItemStack(Exposure.Items.PHOTOGRAPH_FRAME.get()));
+            ItemStack stack = ItemStack.parse(registryAccess(), frameItemTag).orElse(new ItemStack(getBaseFrameItem()));
             setFrameItem(stack);
         }
 
@@ -133,7 +140,6 @@ public class PhotographFrameEntity extends HangingEntity {
 
         setSize(tag.getByte("Size"));
         setDirection(Direction.from3DDataValue(tag.getByte("Facing")));
-        setStripped(tag.getBoolean("Stripped"));
         setInvisible(tag.getBoolean("Invisible"));
     }
 
@@ -142,16 +148,6 @@ public class PhotographFrameEntity extends HangingEntity {
         return Vec3.atLowerCornerOf(this.pos);
     }
 
-    @Override
-    public double getEyeY() {
-        return 0f;
-    }
-
-    //    @Override
-//    protected float getEyeHeight(@NotNull Pose pose, @NotNull EntityDimensions dimensions) {
-//        return 0f;
-//    }
-//
     public int getWidth() {
         return getSize() * 16 + 16;
     }
@@ -271,6 +267,10 @@ public class PhotographFrameEntity extends HangingEntity {
         recalculateBoundingBox();
     }
 
+    public PhotographFrameItem getBaseFrameItem() {
+        return Exposure.Items.PHOTOGRAPH_FRAME.get();
+    }
+
     public ItemStack getFrameItem() {
         return getEntityData().get(DATA_FRAME_ITEM);
     }
@@ -309,42 +309,13 @@ public class PhotographFrameEntity extends HangingEntity {
         getEntityData().set(DATA_GLOWING, glowing);
     }
 
-    public boolean isStripped() {
-        return getEntityData().get(DATA_STRIPPED);
-    }
-
-    public void setStripped(boolean stripped) {
-        getEntityData().set(DATA_STRIPPED, stripped);
+    public boolean isFrameInvisible() {
+        return isInvisible();
     }
 
     @Override
     public @NotNull InteractionResult interact(@NotNull Player player, @NotNull InteractionHand hand) {
         ItemStack itemInHand = player.getItemInHand(hand);
-
-        if (!isStripped()) {
-            if (canStrip(itemInHand)) {
-                if (!level().isClientSide) {
-                    setStripped(true);
-                    if (player instanceof ServerPlayer serverPlayer) {
-                        itemInHand.hurtAndBreak(1, serverPlayer.serverLevel(), serverPlayer,
-                                item -> player.onEquippedItemBroken(item,
-                                        hand == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND));
-                    }
-                    gameEvent(GameEvent.BLOCK_CHANGE, player);
-                    playSound(SoundEvents.AXE_STRIP, 1f, 1f);
-                }
-                return InteractionResult.SUCCESS;
-            }
-        }
-        else if (itemInHand.is(Items.STICK)) {
-            if (!level().isClientSide) {
-                setStripped(false);
-                itemInHand.shrink(1);
-                gameEvent(GameEvent.BLOCK_CHANGE, player);
-                playPlacementSound();
-            }
-            return InteractionResult.SUCCESS;
-        }
 
         if (itemInHand.getItem() instanceof PhotographItem && getItem().isEmpty()) {
             setItem(itemInHand.copy());
@@ -364,27 +335,6 @@ public class PhotographFrameEntity extends HangingEntity {
             return InteractionResult.SUCCESS;
         }
 
-        if (isInvisible()) {
-            if (itemInHand.is(ItemTags.PLANKS)) {
-                setInvisible(false);
-                itemInHand.shrink(1);
-                if (!level().isClientSide) {
-                    playPlacementSound();
-                    gameEvent(GameEvent.BLOCK_CHANGE, player);
-                }
-                return InteractionResult.SUCCESS;
-            }
-        }
-        else if (itemInHand.is(Items.GLASS_PANE)) {
-            setInvisible(true);
-            itemInHand.shrink(1);
-            if (!level().isClientSide) {
-                playSound(Exposure.SoundEvents.FILTER_INSERT.get(), 0.8f, 1.0f);
-                gameEvent(GameEvent.BLOCK_CHANGE, player);
-            }
-            return InteractionResult.SUCCESS;
-        }
-
         if (!getItem().isEmpty()) {
             if (!level().isClientSide) {
                 playSound(getRotateSound(), 1.0F, level().getRandom().nextFloat() * 0.2f + 0.9f);
@@ -395,10 +345,6 @@ public class PhotographFrameEntity extends HangingEntity {
         }
 
         return InteractionResult.PASS;
-    }
-
-    public boolean canStrip(ItemStack stack) {
-        return PlatformHelper.canStrip(stack);
     }
 
     @Override
@@ -428,30 +374,29 @@ public class PhotographFrameEntity extends HangingEntity {
     protected void dropItem(@Nullable Entity entity, boolean dropSelf) {
         ItemStack itemStack = getItem();
         setItem(ItemStack.EMPTY);
-        if (!level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS))
-            return;
 
-        if (entity instanceof Player player && player.isCreative())
-            return;
+        if (!level().getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) return;
+        if (entity instanceof Player player && player.isCreative()) return;
 
         // Prevent item phasing through the block when placed on the ceiling (pointing DOWN)
         float yOffset = getDirection() == Direction.DOWN ? -0.3f : 0f;
 
-        if (dropSelf)
+        if (dropSelf) {
             spawnAtLocation(getFrameItem(), yOffset);
+        }
 
-        if (!itemStack.isEmpty())
+        if (!itemStack.isEmpty()) {
             spawnAtLocation(itemStack.copy(), yOffset);
+        }
     }
 
     @Override
     protected void defineSynchedData(SynchedEntityData.Builder builder) {
-       builder.define(DATA_SIZE, 0);
-       builder.define(DATA_FRAME_ITEM, ItemStack.EMPTY);
-       builder.define(DATA_ITEM, ItemStack.EMPTY);
-       builder.define(DATA_ITEM_ROTATION, 0);
-       builder.define(DATA_STRIPPED, false);
-       builder.define(DATA_GLOWING, false);
+        builder.define(DATA_SIZE, 0);
+        builder.define(DATA_FRAME_ITEM, ItemStack.EMPTY);
+        builder.define(DATA_ITEM, ItemStack.EMPTY);
+        builder.define(DATA_ITEM_ROTATION, 0);
+        builder.define(DATA_GLOWING, false);
     }
 
     @Override
@@ -473,7 +418,7 @@ public class PhotographFrameEntity extends HangingEntity {
     @Override
     public @NotNull SlotAccess getSlot(int slot) {
         if (slot == 0) {
-            return new SlotAccess(){
+            return new SlotAccess() {
 
                 @Override
                 public @NotNull ItemStack get() {
@@ -496,11 +441,6 @@ public class PhotographFrameEntity extends HangingEntity {
             return Component.translatable("entity.exposure.glow_photograph_frame");
         return super.getTypeName();
     }
-
-//    @Override
-//    public float getNameTagOffsetY() {
-//        return (getSize() + 1) / 2f + 0.35f;
-//    }
 
     @Override
     public void playPlacementSound() {

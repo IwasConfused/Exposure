@@ -83,6 +83,7 @@ public class NeoForgeCommonEvents {
                 event.accept(Exposure.Items.INTERPLANAR_PROJECTOR.get());
                 event.accept(Exposure.Items.STACKED_PHOTOGRAPHS.get());
                 event.accept(Exposure.Items.PHOTOGRAPH_FRAME.get());
+                event.accept(Exposure.Items.CLEAR_PHOTOGRAPH_FRAME.get());
                 event.accept(Exposure.Items.ALBUM.get());
             }
 

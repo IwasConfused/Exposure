@@ -70,6 +70,14 @@ public class RegisterImpl {
         return () -> type;
     }
 
+    public static <T extends Entity> Supplier<EntityType<T>> entityType(String id, EntityType.EntityFactory<T> factory, MobCategory category, boolean receiveVelocityUpdates, Consumer<EntityType.Builder<T>> typeBuilder) {
+        EntityType.Builder<T> builder = EntityType.Builder.of(factory, category);
+        typeBuilder.accept(builder);
+        builder.alwaysUpdateVelocity(receiveVelocityUpdates);
+        EntityType<T> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, Exposure.resource(id), builder.build());
+        return () -> type;
+    }
+
     public static <T extends SoundEvent> Supplier<T> soundEvent(String id, Supplier<T> supplier) {
         T obj = Registry.register(BuiltInRegistries.SOUND_EVENT, Exposure.resource(id), supplier.get());
         return () -> obj;

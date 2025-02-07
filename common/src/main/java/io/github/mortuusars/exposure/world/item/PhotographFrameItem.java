@@ -31,7 +31,7 @@ public class PhotographFrameItem extends Item {
             return InteractionResult.FAIL;
 
         Level level = context.getLevel();
-        PhotographFrameEntity frameEntity = new PhotographFrameEntity(level, resultPos, direction);
+        PhotographFrameEntity frameEntity = createEntity(level, resultPos, direction);
 
         CustomData customData = itemInHand.getOrDefault(DataComponents.ENTITY_DATA, CustomData.EMPTY);
         if (!customData.isEmpty()) {
@@ -54,5 +54,9 @@ public class PhotographFrameItem extends Item {
         }
 
         return InteractionResult.FAIL;
+    }
+
+    public @NotNull PhotographFrameEntity createEntity(Level level, BlockPos pos, Direction direction) {
+        return new PhotographFrameEntity(level, pos, direction);
     }
 }

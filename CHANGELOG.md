@@ -14,6 +14,10 @@
 - Added animation for Camera interactions (changing viewfinder settings and attachments). Player will move their hand slightly.
 - Camera interaction sounds are now audible for other players.
 - Photograph Aging recipe now requires a Brush.
+- Added Glass Photograph Frame. 
+  - Frame would not be visible when it has Photograph.
+  - Axe and Glass Pane can no longer be used on regular Photograph Frames.
+
 Advancements: 
   - Added Splitting the Photon advancement. 
   - **Moment in Time** and **Complex Composite Compound** are now granted when printing a photo, instead of just obtaining it.

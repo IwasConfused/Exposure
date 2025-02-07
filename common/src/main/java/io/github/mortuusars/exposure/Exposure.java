@@ -19,6 +19,7 @@ import io.github.mortuusars.exposure.world.camera.component.ShutterSpeed;
 import io.github.mortuusars.exposure.data.ColorPalette;
 import io.github.mortuusars.exposure.data.Filter;
 import io.github.mortuusars.exposure.data.Lens;
+import io.github.mortuusars.exposure.world.entity.GlassPhotographFrameEntity;
 import io.github.mortuusars.exposure.world.entity.PhotographFrameEntity;
 import io.github.mortuusars.exposure.world.camera.frame.Frame;
 import io.github.mortuusars.exposure.world.inventory.*;
@@ -185,6 +186,8 @@ public class Exposure {
 
         public static final Supplier<PhotographFrameItem> PHOTOGRAPH_FRAME = Register.item("photograph_frame",
                 () -> new PhotographFrameItem(new Item.Properties()));
+        public static final Supplier<GlassPhotographFrameItem> CLEAR_PHOTOGRAPH_FRAME = Register.item("glass_photograph_frame",
+                () -> new GlassPhotographFrameItem(new Item.Properties()));
 
         public static final Supplier<BlockItem> LIGHTROOM = Register.item("lightroom",
                 () -> new BlockItem(Blocks.LIGHTROOM.get(), new Item.Properties()));
@@ -304,8 +307,18 @@ public class Exposure {
 
     public static class EntityTypes {
         public static final Supplier<EntityType<PhotographFrameEntity>> PHOTOGRAPH_FRAME = Register.entityType("photograph_frame",
-                PhotographFrameEntity::new, MobCategory.MISC, 0.5F, 0.5F,
-                128, false, Integer.MAX_VALUE);
+                PhotographFrameEntity::new, MobCategory.MISC, false, builder -> builder
+                        .sized(0.5f, 0.5f)
+                        .clientTrackingRange(128)
+                        .updateInterval(Integer.MAX_VALUE)
+                        .eyeHeight(0));
+
+        public static final Supplier<EntityType<GlassPhotographFrameEntity>> CLEAR_PHOTOGRAPH_FRAME = Register.entityType("glass_photograph_frame",
+                GlassPhotographFrameEntity::new, MobCategory.MISC, false, builder -> builder
+                        .sized(0.5f, 0.5f)
+                        .clientTrackingRange(128)
+                        .updateInterval(Integer.MAX_VALUE)
+                        .eyeHeight(0));
 
         static void init() {
         }

@@ -69,6 +69,12 @@ public class Register {
     }
 
     @ExpectPlatform
+    public static <T extends Entity> Supplier<EntityType<T>> entityType(String id, EntityType.EntityFactory<T> factory, MobCategory category,
+                                                                        boolean receiveVelocityUpdates, Consumer<EntityType.Builder<T>> typeBuilder) {
+        throw new AssertionError();
+    }
+
+    @ExpectPlatform
     public static <T extends SoundEvent> Supplier<T> soundEvent(String id, Supplier<T> supplier) {
         throw new AssertionError();
     }

@@ -10,6 +10,7 @@ import io.github.mortuusars.exposure.client.gui.screen.album.AlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.album.LecternAlbumScreen;
 import io.github.mortuusars.exposure.client.gui.screen.camera.CameraAttachmentsScreen;
 import io.github.mortuusars.exposure.client.gui.screen.LightroomScreen;
+import io.github.mortuusars.exposure.client.render.GlassPhotographFrameEntityRenderer;
 import io.github.mortuusars.exposure.client.render.PhotographFrameEntityRenderer;
 import io.github.mortuusars.exposure.world.inventory.tooltip.PhotographTooltip;
 import net.neoforged.api.distmarker.Dist;
@@ -39,6 +40,7 @@ public class NeoForgeClientEvents {
         @SubscribeEvent
         public static void registerEntityRenderers(EntityRenderersEvent.RegisterRenderers event) {
             event.registerEntityRenderer(Exposure.EntityTypes.PHOTOGRAPH_FRAME.get(), PhotographFrameEntityRenderer::new);
+            event.registerEntityRenderer(Exposure.EntityTypes.CLEAR_PHOTOGRAPH_FRAME.get(), GlassPhotographFrameEntityRenderer::new);
         }
 
         @SubscribeEvent
@@ -55,11 +57,11 @@ public class NeoForgeClientEvents {
         public static void registerModels(ModelEvent.RegisterAdditional event) {
             event.register(ExposureClient.Models.CAMERA_GUI);
             event.register(ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL);
-            event.register(ExposureClient.Models.PHOTOGRAPH_FRAME_SMALL_STRIPPED);
             event.register(ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM);
-            event.register(ExposureClient.Models.PHOTOGRAPH_FRAME_MEDIUM_STRIPPED);
             event.register(ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE);
-            event.register(ExposureClient.Models.PHOTOGRAPH_FRAME_LARGE_STRIPPED);
+            event.register(ExposureClient.Models.CLEAR_PHOTOGRAPH_FRAME_SMALL);
+            event.register(ExposureClient.Models.CLEAR_PHOTOGRAPH_FRAME_MEDIUM);
+            event.register(ExposureClient.Models.CLEAR_PHOTOGRAPH_FRAME_LARGE);
         }
 
         @SubscribeEvent
