@@ -10,8 +10,14 @@
           "weight": 3,
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/mineshaft/tunnel.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/mineshaft/tunnel.png"
+                  }
+                }
+              }
             }
           ]
         },
@@ -21,8 +27,14 @@
           "weight": 3,
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/mineshaft/skeleton.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/mineshaft/skeleton.png"
+                  }
+                }
+              }
             }
           ]
         },
@@ -32,8 +44,14 @@
           "weight": 1,
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/mineshaft/skeleton_smirk.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/mineshaft/skeleton_smirk.png"
+                  }
+                }
+              }
             }
           ]
         }

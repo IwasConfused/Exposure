@@ -9,8 +9,14 @@
           "name": "exposure:photograph",
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/dungeon/skull_on_fire.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/dungeon/skull_on_fire.png"
+                  }
+                }
+              }
             }
           ]
         }

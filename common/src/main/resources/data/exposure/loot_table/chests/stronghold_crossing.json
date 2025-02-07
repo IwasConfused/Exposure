@@ -9,8 +9,14 @@
           "name": "exposure:aged_photograph",
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/stronghold/corridor_1.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/stronghold/corridor_1.png"
+                  }
+                }
+              }
             }
           ]
         },
@@ -19,8 +25,14 @@
           "name": "exposure:aged_photograph",
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/stronghold/corridor_2.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/stronghold/corridor_2.png"
+                  }
+                }
+              }
             }
           ]
         },
@@ -29,8 +41,14 @@
           "name": "exposure:aged_photograph",
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/stronghold/corridor_3.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/stronghold/corridor_3.png"
+                  }
+                }
+              }
             }
           ]
         },
@@ -39,8 +57,14 @@
           "name": "exposure:aged_photograph",
           "functions": [
             {
-              "function": "minecraft:set_nbt",
-              "tag": "{Texture:\"exposure:textures/exposure/stronghold/corridor_4.png\"}"
+              "function": "minecraft:set_components",
+              "components": {
+                "exposure:photograph_frame": {
+                  "identifier": {
+                    "texture": "exposure:textures/exposure/stronghold/corridor_4.png"
+                  }
+                }
+              }
             }
           ]
         }
