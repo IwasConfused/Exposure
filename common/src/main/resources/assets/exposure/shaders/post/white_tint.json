@@ -4,7 +4,7 @@
   ],
   "passes": [
     {
-      "name": "exposure:color_processor",
+      "name": "exposure_color_processor",
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
