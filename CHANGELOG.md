@@ -8,13 +8,14 @@
 - Photographs are no longer rendered as images in Item Frames by default. Can be turned back on in the config.
 - Added custom palettes system `//add details`
 - Added colors to base palette `//add details`
-- Added ability to project from URL with Interplanar Projector
+- Added ability to load images from URL with Interplanar Projector
 - Changed how custom Lenses and Filters are defined.
 - Added mipmaps to exposures.
 - Added animation for Camera interactions (changing viewfinder settings and attachments). Player will move their hand slightly.
 - Camera interaction sounds are now audible for other players.
 - Photograph Aging recipe now requires a Brush.
-Advancements:
+Advancements: 
+  - Added Splitting the Photon advancement. 
   - **Moment in Time** and **Complex Composite Compound** are now granted when printing a photo, instead of just obtaining it.
   - Added `exposure:frame_printed` trigger. Uses player that last interacted with Lightroom, or closest if last is unavailable.
   - Predicates added by the mod and `exposure:frame_exposed` trigger have been changed. 

@@ -662,8 +662,10 @@ public class CameraItem extends Item {
         captureProperties.extraData().get(CaptureProperties.LIGHT_LEVEL)
                 .ifPresent(lightLevel -> data.put(Frame.LIGHT_LEVEL, lightLevel));
 
-        captureProperties.singleChannel().ifPresent(channel ->
-                data.put(Frame.COLOR_CHANNEL, channel));
+        if (captureProperties.filmType() == ExposureType.BLACK_AND_WHITE) {
+            captureProperties.singleChannel().ifPresent(channel ->
+                    data.put(Frame.COLOR_CHANNEL, channel));
+        }
 
         data.put(Frame.POSITION, cameraHolder.position());
         data.put(Frame.PITCH, cameraHolder.getXRot());

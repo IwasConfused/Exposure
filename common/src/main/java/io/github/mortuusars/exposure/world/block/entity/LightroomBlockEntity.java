@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.world.block.LightroomBlock;
+import io.github.mortuusars.exposure.world.camera.ExposureType;
 import io.github.mortuusars.exposure.world.lightroom.PrintingMode;
 import io.github.mortuusars.exposure.world.lightroom.PrintingProcess;
 import io.github.mortuusars.exposure.world.level.storage.ExposureData;
@@ -223,21 +224,11 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
     public boolean isSelectedFrameChromatic() {
         @Nullable Frame frame = getSelectedFrame();
-        return frame != null && frame.wasTakenWithChromaticFilter();
+        return frame != null && frame.wasTakenWithChromaticFilter() && frame.type() == ExposureType.BLACK_AND_WHITE;
     }
 
     public boolean canPrintChromatic() {
         return isSelectedFrameChromatic() || (level != null && level.getBlockState(getBlockPos()).getValue(LightroomBlock.REFRACTED));
-        //TODO: Check chromatics from color film. Or restrict making chromatics from color.
-//        if (chromaticSelected) {
-//            return true;
-//        }
-//
-//        if (filmStack.getItem() instanceof IFilmItem filmItem && filmItem.getType() == ExposureType.BLACK_AND_WHITE && getLevel() != null) {
-//            return getLevel().getBlockState(getBlockPos().above()).is(Exposure.Tags.Blocks.CHROMATIC_REFRACTORS);
-//        }
-//
-//        return false;
     }
 
     public void startPrintingProcess(boolean advanceFrameOnFinish) {

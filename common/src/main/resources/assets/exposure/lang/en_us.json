@@ -87,6 +87,8 @@
   "error.exposure.generic.casual": "Something is not right... Maybe logs will tell more?",
   "error.exposure.generic.technical": "Some error occurred. See logs for details.",
   "exposure.configuration.album_show_photos_count": "Show Album photos count",
+  "advancement.exposure.splitting_the_photon.title": "Splitting the Photon",
+  "advancement.exposure.splitting_the_photon.description": "Expose black and white film frame with one of primary color filters",
   "exposure.configuration.background_color": "Background Color",
   "exposure.configuration.camera": "Camera",
   "exposure.configuration.camera_details_tooltip": "Show details in Camera tooltip",

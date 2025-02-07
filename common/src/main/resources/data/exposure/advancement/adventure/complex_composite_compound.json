@@ -1,5 +1,5 @@
 {
-  "parent": "exposure:adventure/moment_in_time",
+  "parent": "exposure:adventure/splitting_the_photon",
   "criteria": {
     "print_chromatic_photograph": {
       "conditions": {
