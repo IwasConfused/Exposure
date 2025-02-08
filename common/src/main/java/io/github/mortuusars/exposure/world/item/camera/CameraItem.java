@@ -628,17 +628,17 @@ public class CameraItem extends Item {
                 .setEntitiesInFrame(entitiesInFrame.stream()
                         .limit(Exposure.MAX_ENTITIES_IN_FRAME)
                         .map(entity -> EntityInFrame.of(holder.asEntity(), entity, data -> {
-                            //TODO: addCustomEntityInFrameData event
+                            PlatformHelper.postModifyEntityInFrameExtraDataEvent(holder, stack, entity, data);
                         }))
                         .toList())
                 .addExtraData(Frame.SHUTTER_SPEED, CameraSettings.SHUTTER_SPEED.getOrDefault(stack))
                 .addExtraData(Frame.TIMESTAMP, UnixTimestamp.Seconds.now())
-                .updateExtraData(data -> addFrameExtraData(holder, level, stack, captureProperties, data, positionsInFrame, entitiesInFrame))
+                .updateExtraData(data -> addFrameExtraData(holder, level, stack, captureProperties, positionsInFrame, entitiesInFrame, data))
                 .toImmutable();
     }
 
-    protected void addFrameExtraData(CameraHolder holder, ServerLevel level, ItemStack stack, CaptureProperties captureProperties,
-                                     ExtraData data, List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
+    protected void addFrameExtraData(CameraHolder holder, ServerLevel level, ItemStack camera, CaptureProperties captureProperties,
+                                     List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame, ExtraData data) {
         Entity cameraHolder = holder.asEntity();
         boolean projecting = captureProperties.projection().isPresent();
 
@@ -647,15 +647,15 @@ public class CameraItem extends Item {
             return;
         }
 
-        if (isInSelfieMode(stack)) {
+        if (isInSelfieMode(camera)) {
             data.put(Frame.SELFIE, true);
         }
         if (captureProperties.flash()) {
             data.put(Frame.FLASH, true);
         }
 
-        double zoom = CameraSettings.ZOOM.getOrDefault(stack);
-        FocalRange focalRange = getFocalRange(level.registryAccess(), stack);
+        double zoom = CameraSettings.ZOOM.getOrDefault(camera);
+        FocalRange focalRange = getFocalRange(level.registryAccess(), camera);
         int focalLength = (int) focalRange.focalLengthFromZoom(zoom);
         data.put(Frame.FOCAL_LENGTH, focalLength);
 
@@ -715,7 +715,7 @@ public class CameraItem extends Item {
             data.put(Frame.STRUCTURES, structures);
         }
 
-        //TODO: addExtraData event
+        PlatformHelper.postModifyFrameExtraDataEvent(holder, camera, captureProperties, positionsInFrame, entitiesInFrame, data);
     }
 
     /**
@@ -763,6 +763,8 @@ public class CameraItem extends Item {
                     Exposure.CriteriaTriggers.FRAME_EXPOSED.get().trigger(
                             serverPlayer, holder, stack, frame, positionsInFrame, entitiesInFrame);
                 });
+
+        PlatformHelper.postFrameAddedEvent(holder, stack, frame, positionsInFrame, entitiesInFrame);
     }
 
     public List<LivingEntity> getEntitiesInFrame(CameraHolder cameraHolder, ServerLevel level, ItemStack stack) {

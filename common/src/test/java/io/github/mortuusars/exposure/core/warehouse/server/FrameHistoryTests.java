@@ -26,7 +26,7 @@ public class FrameHistoryTests {
 
         CompoundTag tag = history.save(new CompoundTag(), HolderLookup.Provider.create(Stream.of()));
 
-        String expected = "{" + randomUUID + ":[{exposure:\"test\"}]}";
+        String expected = "{" + randomUUID + ":[{identifier:\"test\"}]}";
         assertEquals(expected, tag.toString());
     }
 

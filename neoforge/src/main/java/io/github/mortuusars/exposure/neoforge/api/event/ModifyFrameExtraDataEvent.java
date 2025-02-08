@@ -1,6 +1,7 @@
 package io.github.mortuusars.exposure.neoforge.api.event;
 
-import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.util.ExtraData;
+import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
 import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
@@ -11,25 +12,25 @@ import net.neoforged.bus.api.Event;
 import java.util.List;
 
 /**
- * Fired at the very end of a shot, when frame is added to the film.
+ * Can be used to add additional data to the frame or modify existing data. This data can be used in advancements or quests afterward.
  * Fired server side on NeoForge.EVENT_BUS.
  */
-public class FrameAddedEvent extends Event {
-
+public class ModifyFrameExtraDataEvent extends Event {
     private final CameraHolder cameraHolder;
-    private final ItemStack camera;
-    private final Frame frame;
+    private final ItemStack stack;
+    private final CaptureProperties captureProperties;
     private final List<BlockPos> positionsInFrame;
     private final List<LivingEntity> entitiesInFrame;
+    private final ExtraData data;
 
-    public FrameAddedEvent(CameraHolder cameraHolder, ItemStack camera, Frame frame,
-                           List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
-
+    public ModifyFrameExtraDataEvent(CameraHolder cameraHolder, ItemStack stack, CaptureProperties captureProperties,
+                                     List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame, ExtraData data) {
         this.cameraHolder = cameraHolder;
-        this.camera = camera;
-        this.frame = frame;
+        this.stack = stack;
+        this.captureProperties = captureProperties;
         this.positionsInFrame = positionsInFrame;
         this.entitiesInFrame = entitiesInFrame;
+        this.data = data;
     }
 
     public CameraHolder getCameraHolder() {
@@ -41,11 +42,11 @@ public class FrameAddedEvent extends Event {
     }
 
     public ItemStack getCamera() {
-        return camera;
+        return stack;
     }
 
-    public Frame getFrame() {
-        return frame;
+    public CaptureProperties getCaptureProperties() {
+        return captureProperties;
     }
 
     public List<BlockPos> getPositionsInFrame() {
@@ -54,5 +55,9 @@ public class FrameAddedEvent extends Event {
 
     public List<LivingEntity> getEntitiesInFrame() {
         return entitiesInFrame;
+    }
+
+    public ExtraData getData() {
+        return data;
     }
 }

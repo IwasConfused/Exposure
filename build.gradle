@@ -61,24 +61,20 @@ subprojects {
             url = "https://maven.fabricmc.net/"
         }
 
-
-
-        // saps.dev Maven (KubeJS and Rhino)
-        maven {
-            url = "https://maven.saps.dev/minecraft"
-            content {
-                includeGroup "dev.latvian.mods"
-            }
-        }
-
         maven {
             url "https://maven.latvian.dev/releases"
             content {
+                includeGroup "dev.latvian.mods"
                 includeGroup "dev.latvian.apps"
             }
         }
 
-        maven { url = "https://jitpack.io/" }
+        maven {
+            url 'https://jitpack.io'
+            content {
+                includeGroup "com.github.rtyley"
+            }
+        }
     }
 
     loom {
@@ -101,9 +97,6 @@ subprojects {
 
         modCompileOnlyApi("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}")
         modCompileOnlyApi("curse.maven:jade-324717:${jade_neoforge_id}")
-        modCompileOnly("dev.latvian.mods:kubejs-neoforge:${kubejs_version}")
-
-        //modCompileOnly "dev.emi:emi-xplat-intermediary:${emi_version}:api"
     }
 
     java {

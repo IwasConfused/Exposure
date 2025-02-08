@@ -1,13 +1,23 @@
 package io.github.mortuusars.exposure.neoforge;
 
+import io.github.mortuusars.exposure.neoforge.api.event.ModifyEntityInFrameDataEvent;
+import io.github.mortuusars.exposure.neoforge.api.event.FrameAddedEvent;
+import io.github.mortuusars.exposure.neoforge.api.event.ModifyFrameExtraDataEvent;
+import io.github.mortuusars.exposure.util.ExtraData;
+import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.common.ItemAbilities;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,18 +61,18 @@ public class PlatformHelperImpl {
         return !FMLEnvironment.production;
     }
 
-//    public static boolean fireShutterOpeningEvent(Player player, ItemStack cameraStack, int lightLevel, boolean shouldFlashFire) {
-//        ShutterOpeningEvent event = new ShutterOpeningEvent(player, cameraStack, lightLevel, shouldFlashFire);
-//        return MinecraftForge.EVENT_BUS.post(event);
-//    }
-//
-//    public static void fireModifyFrameDataEvent(ServerPlayer player, ItemStack cameraStack, CompoundTag frame, List<Entity> entitiesInFrame) {
-//        ModifyFrameDataEvent event = new ModifyFrameDataEvent(player, cameraStack, frame, entitiesInFrame);
-//        MinecraftForge.EVENT_BUS.post(event);
-//    }
-//
-//    public static void fireFrameAddedEvent(ServerPlayer player, ItemStack cameraStack, CompoundTag frame) {
-//        FrameAddedEvent event = new FrameAddedEvent(player, cameraStack, frame);
-//        MinecraftForge.EVENT_BUS.post(event);
-//    }
+    // --
+
+    public static void postModifyEntityInFrameExtraDataEvent(CameraHolder cameraHolder, ItemStack camera, LivingEntity entityInFrame, ExtraData data) {
+        NeoForge.EVENT_BUS.post(new ModifyEntityInFrameDataEvent(cameraHolder, camera, entityInFrame, data));
+    }
+
+    public static void postModifyFrameExtraDataEvent(CameraHolder cameraHolder, ItemStack camera, CaptureProperties captureProperties,
+                                                     List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame, ExtraData data) {
+        NeoForge.EVENT_BUS.post(new ModifyFrameExtraDataEvent(cameraHolder, camera, captureProperties, positionsInFrame, entitiesInFrame, data));
+    }
+
+    public static void postFrameAddedEvent(CameraHolder cameraHolder, ItemStack camera, Frame frame, List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
+        NeoForge.EVENT_BUS.post(new FrameAddedEvent(cameraHolder, camera, frame, positionsInFrame, entitiesInFrame));
+    }
 }

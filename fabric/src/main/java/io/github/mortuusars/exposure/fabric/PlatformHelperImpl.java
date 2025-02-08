@@ -1,19 +1,23 @@
 package io.github.mortuusars.exposure.fabric;
 
+import io.github.mortuusars.exposure.fabric.api.event.ModifyEntityInFrameExtraDataCallback;
 import io.github.mortuusars.exposure.fabric.api.event.FrameAddedCallback;
-import io.github.mortuusars.exposure.fabric.api.event.ModifyFrameDataCallback;
-import io.github.mortuusars.exposure.fabric.api.event.ShutterOpeningCallback;
+import io.github.mortuusars.exposure.fabric.api.event.ModifyFrameExtraDataCallback;
+import io.github.mortuusars.exposure.util.ExtraData;
+import io.github.mortuusars.exposure.world.camera.capture.CaptureProperties;
+import io.github.mortuusars.exposure.world.camera.frame.Frame;
+import io.github.mortuusars.exposure.world.entity.CameraHolder;
 import io.netty.buffer.ByteBufUtil;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.screenhandler.v1.ExtendedScreenHandlerFactory;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.MenuProvider;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -92,15 +96,19 @@ public class PlatformHelperImpl {
         return FabricLoader.getInstance().isDevelopmentEnvironment();
     }
 
-    public static boolean fireShutterOpeningEvent(Player player, ItemStack cameraStack, int lightLevel, boolean shouldFlashFire) {
-        return ShutterOpeningCallback.EVENT.invoker().onShutterOpening(player, cameraStack, lightLevel, shouldFlashFire);
+    // --
+
+    public static void postModifyEntityInFrameExtraDataEvent(CameraHolder cameraHolder, ItemStack camera, LivingEntity entityInFrame, ExtraData data) {
+        ModifyEntityInFrameExtraDataCallback.EVENT.invoker().modifyEntityInFrameData(cameraHolder, camera, entityInFrame, data);
     }
 
-    public static void fireModifyFrameDataEvent(ServerPlayer player, ItemStack cameraStack, CompoundTag frame, List<Entity> entitiesInFrame) {
-        ModifyFrameDataCallback.EVENT.invoker().modifyFrameData(player, cameraStack, frame, entitiesInFrame);
+    public static void postModifyFrameExtraDataEvent(CameraHolder cameraHolder, ItemStack camera, CaptureProperties captureProperties,
+                                                List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame, ExtraData data) {
+        ModifyFrameExtraDataCallback.EVENT.invoker().modifyFrameExtraData(cameraHolder, camera, captureProperties, positionsInFrame, entitiesInFrame, data);
     }
 
-    public static void fireFrameAddedEvent(ServerPlayer player, ItemStack cameraStack, CompoundTag frame) {
-        FrameAddedCallback.EVENT.invoker().onFrameAdded(player, cameraStack, frame);
+    public static void fireFrameAddedEvent(CameraHolder cameraHolder, ItemStack camera, Frame frame,
+                                           List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
+        FrameAddedCallback.EVENT.invoker().frameAdded(cameraHolder, camera, frame, positionsInFrame, entitiesInFrame);
     }
 }
