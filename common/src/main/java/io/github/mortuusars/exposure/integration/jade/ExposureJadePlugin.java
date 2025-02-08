@@ -20,8 +20,6 @@ public class ExposureJadePlugin implements IWailaPlugin {
     @Override
     public void register(IWailaCommonRegistration registration) {
         registration.registerBlockDataProvider(LightroomComponentProvider.INSTANCE, LightroomBlockEntity.class);
-        //TODO: check
-//        registration.registerItemStorage(LightroomComponentProvider.INSTANCE, LightroomBlockEntity.class);
     }
 
     @Override

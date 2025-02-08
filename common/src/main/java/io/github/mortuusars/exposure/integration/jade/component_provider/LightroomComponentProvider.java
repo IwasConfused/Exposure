@@ -1,5 +1,6 @@
 package io.github.mortuusars.exposure.integration.jade.component_provider;
 
+import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.world.block.entity.Lightroom;
 import io.github.mortuusars.exposure.world.block.entity.LightroomBlockEntity;
 import io.github.mortuusars.exposure.world.lightroom.PrintingMode;
@@ -10,9 +11,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
+import org.jetbrains.annotations.Nullable;
 import snownee.jade.api.*;
 import snownee.jade.api.config.IPluginConfig;
 import snownee.jade.api.ui.IElementHelper;
+import snownee.jade.api.view.*;
+
+import java.util.Collections;
+import java.util.List;
 
 public enum LightroomComponentProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
     INSTANCE;
@@ -94,5 +100,30 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
     @Override
     public ResourceLocation getUid() {
         return ExposureJadePlugin.LIGHTROOM;
+    }
+
+    public static class EmptyItemStackExtensionProvider implements IServerExtensionProvider<ItemStack>, IClientExtensionProvider<ItemStack, ItemView> {
+        public static final ResourceLocation ID = Exposure.resource("empty");
+
+        public static final EmptyItemStackExtensionProvider INSTANCE = new EmptyItemStackExtensionProvider();
+
+        private EmptyItemStackExtensionProvider() {
+
+        }
+
+        @Override
+        public @Nullable List<ViewGroup<ItemStack>> getGroups(Accessor<?> accessor) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public ResourceLocation getUid() {
+            return ID;
+        }
+
+        @Override
+        public List<ClientViewGroup<ItemView>> getClientGroups(Accessor<?> accessor, List<ViewGroup<ItemStack>> list) {
+            return Collections.emptyList();
+        }
     }
 }
