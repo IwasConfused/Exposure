@@ -23,21 +23,26 @@ import java.util.concurrent.CompletableFuture;
  * Captures a screenshot without showing it on screen. Makes photographing a seamless experience™.
  */
 public class BackgroundScreenshotCaptureTask extends Task<Result<Image>> {
+    public static boolean capturing = false;
+    public static @Nullable RenderTarget renderTarget = null;
+
     @Override
     public CompletableFuture<Result<Image>> execute() {
-        if (ExposureClient.isIrisOrOculusInstalled()) {
+        if (ExposureClient.shouldUseDirectCapture()) {
             Exposure.LOGGER.warn("BackgroundScreenshotCaptureMethod is used while Iris or Oculus is installed. " +
                     "Captured image most likely will not look as expected.");
         }
 
         Minecraft minecraft = Minecrft.get();
 
-        RenderTarget renderTarget = new TextureTarget(minecraft.getWindow().getWidth(),
+        renderTarget = new TextureTarget(minecraft.getWindow().getWidth(),
                 minecraft.getWindow().getHeight(), true, Minecraft.ON_OSX);
         renderTarget.setClearColor(0.0F, 0.0F, 0.0F, 0.0F);
         renderTarget.clear(Minecraft.ON_OSX);
 
         try {
+            capturing = true;
+
             // For whatever reason setPanoramicMode makes water visible again. So we cannot omit it.
             minecraft.gameRenderer.setPanoramicMode(true);
 
@@ -59,8 +64,10 @@ public class BackgroundScreenshotCaptureTask extends Task<Result<Image>> {
             minecraft.gameRenderer.setPanoramicMode(false);
             minecraft.gameRenderer.setRenderBlockOutline(true);
             renderTarget.destroyBuffers();
+            renderTarget = null;
             minecraft.levelRenderer.graphicsChanged();
             minecraft.getMainRenderTarget().bindWrite(true);
+            capturing = false;
         }
     }
 

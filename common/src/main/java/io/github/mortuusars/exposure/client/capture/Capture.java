@@ -105,7 +105,7 @@ public class Capture<T> extends Task<Result<T>> {
     }
 
     public static Task<Result<Image>> screenshot() {
-        return ExposureClient.isIrisOrOculusInstalled() || Config.Client.FORCE_DIRECT_CAPTURE.isTrue()
+        return ExposureClient.shouldUseDirectCapture() || Config.Client.FORCE_DIRECT_CAPTURE.isTrue()
                 ? new DirectScreenshotCaptureTask()
                 : new BackgroundScreenshotCaptureTask();
     }

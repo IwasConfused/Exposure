@@ -107,7 +107,7 @@ public class PlatformHelperImpl {
         ModifyFrameExtraDataCallback.EVENT.invoker().modifyFrameExtraData(cameraHolder, camera, captureProperties, positionsInFrame, entitiesInFrame, data);
     }
 
-    public static void fireFrameAddedEvent(CameraHolder cameraHolder, ItemStack camera, Frame frame,
+    public static void postFrameAddedEvent(CameraHolder cameraHolder, ItemStack camera, Frame frame,
                                            List<BlockPos> positionsInFrame, List<LivingEntity> entitiesInFrame) {
         FrameAddedCallback.EVENT.invoker().frameAdded(cameraHolder, camera, frame, positionsInFrame, entitiesInFrame);
     }

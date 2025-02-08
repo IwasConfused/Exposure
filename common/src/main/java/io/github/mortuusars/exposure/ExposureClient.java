@@ -77,10 +77,9 @@ public class ExposureClient {
 
     // --
 
-    public static boolean isIrisOrOculusInstalled() {
+    public static boolean shouldUseDirectCapture() {
         return isIrisOrOculusInstalled;
     }
-
 
     // --
 
