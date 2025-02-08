@@ -12,6 +12,10 @@ public interface RenderableImage extends Image {
     Image getImage();
     RenderableImageIdentifier getIdentifier();
 
+    default boolean isEmpty() {
+        return this.equals(EMPTY) || getImage().isEmpty();
+    }
+
     default RenderableImage modifyWith(Function<Image, Image> transformFunction, String variant) {
         Image image = transformFunction.apply(getImage());
         RenderableImageIdentifier identifier = getIdentifier().appendVariant(variant);

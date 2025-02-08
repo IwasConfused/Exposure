@@ -16,20 +16,21 @@ import net.minecraft.world.item.ItemStack;
 import java.util.List;
 
 public class PhotographRenderer {
-    public void render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
+    public boolean render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
                               MultiBufferSource bufferSource, int packedLight) {
-        render(itemStack, renderPaper, renderBackside, poseStack, bufferSource, packedLight, 255, 255, 255, 255);
+        return render(itemStack, renderPaper, renderBackside, poseStack, bufferSource, packedLight, 255, 255, 255, 255);
     }
 
-    public void render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
+    public boolean render(ItemStack itemStack, boolean renderPaper, boolean renderBackside, PoseStack poseStack,
                               MultiBufferSource bufferSource, int packedLight, int r, int g, int b, int a) {
         if (itemStack.getItem() instanceof PhotographItem photographItem)
-            renderPhotograph(poseStack, bufferSource, photographItem, itemStack, renderPaper, renderBackside, packedLight, r, g, b, a);
+            return renderPhotograph(poseStack, bufferSource, photographItem, itemStack, renderPaper, renderBackside, packedLight, r, g, b, a);
         else if (itemStack.getItem() instanceof StackedPhotographsItem stackedPhotographsItem)
-            renderStackedPhotographs(stackedPhotographsItem, itemStack, poseStack, bufferSource, packedLight, r, g, b, a);
+            return renderStackedPhotographs(stackedPhotographsItem, itemStack, poseStack, bufferSource, packedLight, r, g, b, a);
+        return false;
     }
 
-    public void renderPhotograph(PoseStack poseStack, MultiBufferSource bufferSource,
+    public boolean renderPhotograph(PoseStack poseStack, MultiBufferSource bufferSource,
                                         PhotographItem photographItem, ItemStack photographStack,
                                         boolean renderPaper, boolean renderBackside, int packedLight, int r, int g, int b, int a) {
 
@@ -89,20 +90,23 @@ public class PhotographRenderer {
             TextureRenderer.render(poseStack, bufferSource, style.overlayTexture(), packedLight, r, g, b, a);
             poseStack.popPose();
         }
+
+        return !image.isEmpty();
     }
 
-    public void renderStackedPhotographs(StackedPhotographsItem stackedPhotographsItem, ItemStack stack,
+    public boolean renderStackedPhotographs(StackedPhotographsItem stackedPhotographsItem, ItemStack stack,
                                                 PoseStack poseStack, MultiBufferSource bufferSource,
                                                 int packedLight, int r, int g, int b, int a) {
         List<ItemAndStack<PhotographItem>> photographs = stackedPhotographsItem.getPhotographs(stack);
-        renderStackedPhotographs(photographs, poseStack, bufferSource, packedLight, r, g, b, a);
+        return renderStackedPhotographs(photographs, poseStack, bufferSource, packedLight, r, g, b, a);
     }
 
-    public void renderStackedPhotographs(List<ItemAndStack<PhotographItem>> photographs,
+    public boolean renderStackedPhotographs(List<ItemAndStack<PhotographItem>> photographs,
                                                 PoseStack poseStack, MultiBufferSource bufferSource,
                                                 int packedLight, int r, int g, int b, int a) {
-        if (photographs.isEmpty())
-            return;
+        if (photographs.isEmpty()) return false;
+
+        boolean photographRendered = false;
 
         for (int i = 2; i >= 0; i--) {
             if (photographs.size() - 1 < i)
@@ -114,7 +118,7 @@ public class PhotographRenderer {
             if (i == 0) {
                 poseStack.pushPose();
                 poseStack.translate(0, 0, 0.002);
-                renderPhotograph(poseStack, bufferSource, photograph.getItem(), photograph.getItemStack(),
+                photographRendered = renderPhotograph(poseStack, bufferSource, photograph.getItem(), photograph.getItemStack(),
                         true, false, packedLight, r, g, b, a);
                 poseStack.popPose();
                 break;
@@ -143,6 +147,8 @@ public class PhotographRenderer {
 
             poseStack.popPose();
         }
+
+        return photographRendered;
     }
 
     public float getStackedBrightnessStep() {

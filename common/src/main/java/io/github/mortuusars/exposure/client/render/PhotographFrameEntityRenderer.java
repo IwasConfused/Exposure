@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.PlatformHelperClient;
+import io.github.mortuusars.exposure.client.util.Minecrft;
 import io.github.mortuusars.exposure.world.entity.PhotographFrameEntity;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -23,6 +24,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityAttachment;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.EntityHitResult;
@@ -81,13 +83,23 @@ public class PhotographFrameEntityRenderer<T extends PhotographFrameEntity> exte
         poseStack.mulPose(Axis.XP.rotationDegrees(entity.getXRot()));
         poseStack.mulPose(Axis.YP.rotationDegrees(180.0F - entity.getYRot()));
 
-        if (!entity.isFrameInvisible()) {
-            renderFrame(entity, poseStack, bufferSource, packedLight, size);
-        }
-
         ItemStack item = entity.getItem();
         if (!item.isEmpty()) {
-            renderPhotograph(entity, poseStack, bufferSource, packedLight, item, size);
+            boolean photographRendered = renderPhotograph(entity, poseStack, bufferSource, packedLight, item, size);
+
+            if (!photographRendered) {
+                poseStack.pushPose();
+                float scale = 0.65f + entity.getSize() * 0.5f;
+                poseStack.translate(0, 0, 0.46875);
+                poseStack.scale(scale, scale, scale * 0.75f);
+                poseStack.mulPose(Axis.ZP.rotationDegrees((entity.getItemRotation() * 360.0F / 4.0F)));
+                Minecrft.get().getItemRenderer().renderStatic(item, ItemDisplayContext.FIXED, packedLight, OverlayTexture.NO_OVERLAY, poseStack, bufferSource, entity.level(), 0);
+                poseStack.popPose();
+            }
+        }
+
+        if (!entity.isFrameInvisible()) {
+            renderFrame(entity, poseStack, bufferSource, packedLight, size);
         }
 
         poseStack.popPose();
@@ -104,7 +116,7 @@ public class PhotographFrameEntityRenderer<T extends PhotographFrameEntity> exte
         poseStack.popPose();
     }
 
-    protected void renderPhotograph(@NotNull T entity, @NotNull PoseStack poseStack, @NotNull MultiBufferSource bufferSource,
+    protected boolean renderPhotograph(@NotNull T entity, @NotNull PoseStack poseStack, @NotNull MultiBufferSource bufferSource,
                                   int packedLight, ItemStack item, int size) {
         poseStack.pushPose();
 
@@ -126,10 +138,12 @@ public class PhotographFrameEntityRenderer<T extends PhotographFrameEntity> exte
 
         int brightness = isGlowing ? 255 : getPhotographBrightness(entity);
 
-        ExposureClient.photographRenderer().render(item, false, false, poseStack, bufferSource, packedLight,
-                brightness, brightness, brightness, 255);
+        boolean photographRendered = ExposureClient.photographRenderer().render(item, false, false,
+                poseStack, bufferSource, packedLight, brightness, brightness, brightness, 255);
 
         poseStack.popPose();
+
+        return photographRendered;
     }
 
     public int getPhotographBrightness(T entity) {

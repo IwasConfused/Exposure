@@ -11,6 +11,10 @@ public interface Image extends AutoCloseable {
     int getPixelARGB(int x, int y);
     default void close() {}
 
+    default boolean isEmpty() {
+        return this.equals(EMPTY) || (width() <= 1 && height() <= 1 && getPixelARGB(0, 0) == 0x00000000);
+    }
+
     static void validate(int width, int height, int pixelCount) {
         Preconditions.checkArgument(width > 0, "Width should be larger than 0. %s", width);
         Preconditions.checkArgument(height > 0, "Height should be larger than 0. %s ", height);
@@ -48,6 +52,11 @@ public interface Image extends AutoCloseable {
         @Override
         public void close() {
             image.close();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return getImage().isEmpty();
         }
     }
 }
