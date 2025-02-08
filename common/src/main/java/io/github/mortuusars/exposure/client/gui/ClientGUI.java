@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-//TODO: Redesign. Maybe put methods in ExposureClient
 public class ClientGUI {
     public static void openPhotographScreen(List<ItemAndStack<PhotographItem>> photographs) {
         Minecrft.get().setScreen(new PhotographScreen(photographs));

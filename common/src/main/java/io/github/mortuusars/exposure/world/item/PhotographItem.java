@@ -77,7 +77,7 @@ public class PhotographItem extends Item {
 
         if (tooltipFlag.isAdvanced()) {
             String identifier = frame.identifier().map(
-                    id -> "Exposure Id: " + id,
+                    id -> "Id: " + id,
                     texture -> "Texture: " + texture);
             tooltipComponents.add(Component.literal(identifier).withStyle(ChatFormatting.DARK_GRAY));
         }

@@ -40,9 +40,7 @@ public record AlbumSignC2SP(int slot, String title, String author) implements Pa
         if (albumStack.getItem() instanceof AlbumItem albumItem) {
             ItemStack signedAlbumStack = albumItem.sign(albumStack, title(), author());
             player.getInventory().setItem(slot(), signedAlbumStack);
-
-            //TODO: custom sound
-            player.level().playSound(null, player, SoundEvents.VILLAGER_WORK_CARTOGRAPHER, SoundSource.PLAYERS, 0.8f ,1f);
+            player.level().playSound(null, player, Exposure.SoundEvents.WRITE.get(), SoundSource.PLAYERS, 0.8f ,1f);
         }
 
         return true;

@@ -11,8 +11,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.function.IntFunction;
 
-
-//TODO: remove? exported exposures should be loaded properly even with dithering (with no changes)
 public enum ProjectionMode implements StringRepresentable {
     DITHERED("dithered"),
     CLEAN("clean");

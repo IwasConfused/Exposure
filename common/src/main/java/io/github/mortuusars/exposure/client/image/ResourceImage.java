@@ -77,7 +77,7 @@ public class ResourceImage extends SimpleTexture implements RenderableImage {
     @Override
     public void reset(@NotNull TextureManager textureManager, @NotNull ResourceManager resourceManager,
                       @NotNull ResourceLocation path, @NotNull Executor executor) {
-        super.reset(textureManager, resourceManager, path, executor); // TODO: move after closing?
+        super.reset(textureManager, resourceManager, path, executor);
         if (image != null) {
             image.close();
             image = null;

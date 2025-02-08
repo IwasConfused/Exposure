@@ -42,7 +42,6 @@ public record EntityInFrame(ResourceLocation id, String name, BlockPos pos, int 
     }
 
     public static EntityInFrame of(Entity cameraHolder, Entity entity, ExtraData extraData) {
-        //TODO: check name on server, will not work probably
         ResourceLocation key = EntityType.getKey(entity.getType());
         String name = entity.getName().getString();
         int distance = (int) cameraHolder.distanceTo(entity);
