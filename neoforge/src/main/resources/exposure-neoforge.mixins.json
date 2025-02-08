@@ -10,7 +10,6 @@
     "AlbumItemNeoForgeMixin",
     "CameraItemNeoForgeMixin",
     "KeyMappingExtensionNeoForgeMixin",
-    "LightroomBlockEntityForgeMixin"
   ],
   "injectors": {
     "defaultRequire": 1
