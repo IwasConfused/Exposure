@@ -162,6 +162,7 @@
   "gui.exposure.camera_attachments.lens.tooltip": "Lens\n§7Changes focal range\n§8[§7Scroll Wheel§8] while looking through viewfinder to zoom in/out\n§8[§7Click§8] to see available lenses",
   "gui.exposure.camera_attachments.viewfinder.tooltip": "Viewfinder\n§8Press or hold [%s§8]%s §8while looking through viewfinder to access Camera controls",
   "gui.exposure.camera_attachments.viewfinder.tooltip.or_middle_click": "§8 or [§7Middle Click§8]",
+  "gui.exposure.camera_attachments.shutter_speed.tooltip": "Shutter Speed\n§7Duration of exposure influences brightness of the image",
   "gui.exposure.camera_controls.composition_guide.tooltip": "Composition Guide",
   "gui.exposure.camera_controls.film_frame_counter.tooltip": "Film Frames",
   "gui.exposure.camera_controls.film_frame_counter.tooltip.no_film": "No Film",

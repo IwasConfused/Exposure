@@ -51,6 +51,7 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
             () -> !getMenu().getSlot(2).hasItem());
     protected final HoveredElement viewfinder = new HoveredElement(List.of(new Rect2i(65, 25, 30, 12),
             new Rect2i(72, 31, 39, 11), new Rect2i(80, 42, 24, 5)), () -> true);
+    protected final HoveredElement shutterSpeedKnob = new HoveredElement(List.of(new Rect2i(68, 49, 21, 26)), () -> true);
 
     public CameraAttachmentsScreen(CameraAttachmentsMenu menu, Inventory playerInventory, Component title) {
         super(menu, playerInventory, title);
@@ -142,6 +143,8 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
 
         if (isMouseOver(viewfinder, mouseX, mouseY) && !isMouseOver(flash, mouseX, mouseY)) {
             guiGraphics.blit(TEXTURE, leftPos + 65, topPos + 24, 42, 185, 49, 26);
+        } else if (isMouseOver(shutterSpeedKnob, mouseX, mouseY)) {
+            guiGraphics.blit(TEXTURE, leftPos + 68, topPos + 49, 148, 185, 21, 26);
         }
     }
 
@@ -208,6 +211,9 @@ public class CameraAttachmentsScreen extends AbstractContainerScreen<CameraAttac
                     : Component.empty();
             guiGraphics.renderTooltip(font, font.split(
                     Component.translatable("gui.exposure.camera_attachments.viewfinder.tooltip", key, middleClick), 230), x, y);
+        } else if (isMouseOver(shutterSpeedKnob, x, y)) {
+            guiGraphics.renderTooltip(font, font.split(
+                    Component.translatable("gui.exposure.camera_attachments.shutter_speed.tooltip"), 230), x, y);
         } else if (isMouseOver(filter, x, y) || isMouseOver(filterOnLens, x, y)) {
             guiGraphics.renderTooltip(font, font.split(
                     Component.translatable("gui.exposure.camera_attachments.filter.tooltip"), 230), x, y);
