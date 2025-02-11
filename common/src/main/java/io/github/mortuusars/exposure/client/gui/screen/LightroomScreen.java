@@ -93,7 +93,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     @Override
     protected void init() {
         imageWidth = 176;
-        imageHeight = 210;
+        imageHeight = 209;
         super.init();
         inventoryLabelY = 116;
 
@@ -142,7 +142,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         Map<PrintingMode, Tooltip> tooltipMap = Map.of(
                 PrintingMode.REGULAR, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.regular")
                         .append(CommonComponents.NEW_LINE)
-                        .append(Component.translatable("gui.exposure.lightroom.printing_mode.regular.info"))),
+                        .append(Component.translatable("gui.exposure.lightroom.printing_mode.regular.info").withStyle(ChatFormatting.GRAY))),
                 PrintingMode.CHROMATIC, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic")
                         .append(CommonComponents.NEW_LINE)
                         .append(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic.info").withStyle(ChatFormatting.GRAY))));
