@@ -298,5 +298,10 @@
   "task.exposure.export.status.exporting": "Експорт \"%s\" - [%s/%s]",
   "task.exposure.export.status.requesting": "Запит \"%s\" - [%s/%s]",
   "task.exposure.export.stopped": "Експорт зупинено.",
-  "tooltip.exposure.hold_for_details": "§8Утримуйте [§7Shift§8] для подробиць"
+  "tooltip.exposure.hold_for_details": "§8Утримуйте [§7Shift§8] для подробиць",
+  "exposure.configuration.dyes_black_and_white": "Барвники для чорно-білого друку",
+  "exposure.configuration.dyes_chromatic_blue": "Барвники для барвистого друку синього каналу",
+  "exposure.configuration.dyes_chromatic_green": "Барвники для барвистого друку зеленого каналу",
+  "exposure.configuration.dyes_chromatic_red": "Барвники для барвистого друку червоного каналу",
+  "exposure.configuration.dyes_color": "Барвники для кольорового друку"
 }

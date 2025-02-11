@@ -35,7 +35,7 @@ public enum PrintingProcess {
     }
 
     public List<DyeColor> getRequiredDyes() {
-        return requiredDyes.get().stream().map(name -> DyeColor.byName(name, DyeColor.BLACK)).toList();
+        return requiredDyes.get().stream().map(name -> DyeColor.byName(name.toLowerCase(), DyeColor.BLACK)).toList();
     }
 
     public int getPrintTime() {

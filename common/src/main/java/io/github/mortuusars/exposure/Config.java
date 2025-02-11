@@ -89,22 +89,24 @@ public class Config {
 
             {
                 builder.push("lightroom");
+                builder.comment("Dyes that are used for particular printing process.",
+                                "Valid dyes are: cyan, magenta, yellow, black.",
+                                "Multiple definitions will make the lightroom consume multiple items per print. [\"black\", \"black\"] -> 2 Black Dye is consumed per print.");
                 LIGHTROOM_BW_DYES = builder
-                        .comment("a")
+                        .comment("Dyes for black and white print. Default: [\"black\"]")
                         .defineList("dyes_black_and_white", () -> List.of(DyeColor.BLACK.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
                 LIGHTROOM_COLOR_DYES = builder
-                        .comment("a")
+                        .comment("Dyes for color print. Default: [\"cyan\", \"magenta\", \"yellow\", \"black\"]")
                         .defineList("dyes_color", () -> List.of(DyeColor.CYAN.getName(), DyeColor.MAGENTA.getName(), DyeColor.YELLOW.getName(), DyeColor.BLACK.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
                 LIGHTROOM_CHROMATIC_RED_DYES = builder
-                        .comment("a")
+                        .comment("Dyes for chromatic red channel print. Default: [\"magenta\", \"yellow\"]")
                         .defineList("dyes_chromatic_red", () -> List.of(DyeColor.MAGENTA.getName(), DyeColor.YELLOW.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
                 LIGHTROOM_CHROMATIC_GREEN_DYES = builder
-                        .comment("a")
+                        .comment("Dyes for chromatic green channel print. Default: [\"cyan\", \"yellow\"]")
                         .defineList("dyes_chromatic_green", () -> List.of(DyeColor.CYAN.getName(), DyeColor.YELLOW.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
                 LIGHTROOM_CHROMATIC_BLUE_DYES = builder
-                        .comment("a")
+                        .comment("Dyes for chromatic blue channel print. Default: [\"cyan\", \"magenta\"]")
                         .defineList("dyes_chromatic_blue", () -> List.of(DyeColor.CYAN.getName(), DyeColor.MAGENTA.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
-
                 LIGHTROOM_BW_PRINT_TIME = builder
                         .comment("Time in ticks to print black and white photograph. Default: 80")
                         .defineInRange("print_time_black_and_white", 80, 1, Integer.MAX_VALUE);
