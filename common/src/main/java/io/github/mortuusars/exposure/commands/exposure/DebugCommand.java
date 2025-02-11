@@ -82,7 +82,7 @@ public class DebugCommand {
                     .setShutterSpeed(CameraSettings.SHUTTER_SPEED.getOrElse(camera, null))
                     .setFilmType(ExposureType.BLACK_AND_WHITE)
                     .setFrameSize(camera.mapAttachment(Attachment.FILM, FilmItem::getFrameSize).orElse(null))
-                    .setCropFactor(camera.map((cameraItem, cameraStack) -> cameraItem.getCropFactor()).orElse(null))
+                    .setCropFactor(camera.map((cameraItem, cameraStack) -> cameraItem.getCropFactor()).orElse(1f))
                     .setColorPalette(colorPalette)
                     .setChromaticChannel(channel)
                     .build();

@@ -133,7 +133,7 @@ public record CaptureProperties(String exposureId,
             return this;
         }
 
-        public Builder setCropFactor(@Nullable Float cropFactor) {
+        public Builder setCropFactor(float cropFactor) {
             this.cropFactor = cropFactor;
             return this;
         }
