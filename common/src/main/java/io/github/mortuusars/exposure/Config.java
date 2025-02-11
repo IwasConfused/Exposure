@@ -3,7 +3,10 @@ package io.github.mortuusars.exposure;
 import io.github.mortuusars.exposure.world.block.FlashBlock;
 import io.github.mortuusars.exposure.world.camera.component.FocalRange;
 import io.github.mortuusars.exposure.util.color.Color;
+import net.minecraft.world.item.DyeColor;
 import net.neoforged.neoforge.common.ModConfigSpec;
+
+import java.util.List;
 
 /**
  * Using ForgeConfigApiPort on fabric allows using forge config in both environments and without extra dependencies on forge.
@@ -24,6 +27,11 @@ public class Config {
         public static final ModConfigSpec.IntValue PROJECT_TIMEOUT_TICKS;
 
         // Lightroom
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> LIGHTROOM_BW_DYES;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> LIGHTROOM_COLOR_DYES;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> LIGHTROOM_CHROMATIC_RED_DYES;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> LIGHTROOM_CHROMATIC_GREEN_DYES;
+        public static final ModConfigSpec.ConfigValue<List<? extends String>> LIGHTROOM_CHROMATIC_BLUE_DYES;
         public static final ModConfigSpec.IntValue LIGHTROOM_BW_PRINT_TIME;
         public static final ModConfigSpec.IntValue LIGHTROOM_COLOR_PRINT_TIME;
         public static final ModConfigSpec.IntValue LIGHTROOM_CHROMATIC_PRINT_TIME;
@@ -37,7 +45,6 @@ public class Config {
         // Misc
         public static final ModConfigSpec.BooleanValue FILM_ROLL_EASY_RENAMING;
         public static final ModConfigSpec.BooleanValue INTERPLANAR_PROJECTOR_LARGER_RENAMING_LIMIT;
-
 
         static {
             ModConfigSpec.Builder builder = new ModConfigSpec.Builder();
@@ -82,6 +89,22 @@ public class Config {
 
             {
                 builder.push("lightroom");
+                LIGHTROOM_BW_DYES = builder
+                        .comment("a")
+                        .defineList("dyes_black_and_white", () -> List.of(DyeColor.BLACK.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
+                LIGHTROOM_COLOR_DYES = builder
+                        .comment("a")
+                        .defineList("dyes_color", () -> List.of(DyeColor.CYAN.getName(), DyeColor.MAGENTA.getName(), DyeColor.YELLOW.getName(), DyeColor.BLACK.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
+                LIGHTROOM_CHROMATIC_RED_DYES = builder
+                        .comment("a")
+                        .defineList("dyes_chromatic_red", () -> List.of(DyeColor.MAGENTA.getName(), DyeColor.YELLOW.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
+                LIGHTROOM_CHROMATIC_GREEN_DYES = builder
+                        .comment("a")
+                        .defineList("dyes_chromatic_green", () -> List.of(DyeColor.CYAN.getName(), DyeColor.YELLOW.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
+                LIGHTROOM_CHROMATIC_BLUE_DYES = builder
+                        .comment("a")
+                        .defineList("dyes_chromatic_blue", () -> List.of(DyeColor.CYAN.getName(), DyeColor.MAGENTA.getName()), DyeColor.BLACK::getName, Server::validatePrintingDyes);
+
                 LIGHTROOM_BW_PRINT_TIME = builder
                         .comment("Time in ticks to print black and white photograph. Default: 80")
                         .defineInRange("print_time_black_and_white", 80, 1, Integer.MAX_VALUE);
@@ -125,6 +148,15 @@ public class Config {
             builder.pop();
 
             SPEC = builder.build();
+        }
+
+        private static boolean validatePrintingDyes(Object obj) {
+            List<String> validColors = List.of(DyeColor.CYAN.getName(), DyeColor.MAGENTA.getName(), DyeColor.YELLOW.getName(), DyeColor.BLACK.getName());
+            if (!(obj instanceof String color) || !validColors.contains(color)) {
+                Exposure.LOGGER.error("Invalid dye color for printing: {} is not allowed. Allowed: Cyan, Magenta, Yellow and Black.", obj);
+                return false;
+            }
+            return true;
         }
     }
 

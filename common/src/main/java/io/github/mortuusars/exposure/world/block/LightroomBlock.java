@@ -29,20 +29,20 @@ import org.jetbrains.annotations.Nullable;
 
 public class LightroomBlock extends Block implements EntityBlock {
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
-    public static final BooleanProperty LIT = RedstoneTorchBlock.LIT;
+    public static final BooleanProperty PRINTING = BooleanProperty.create("printing");
     public static final BooleanProperty REFRACTED = BooleanProperty.create("refracted");
 
     public LightroomBlock(Properties properties) {
         super(properties);
         this.registerDefaultState(this.stateDefinition.any()
                 .setValue(FACING, Direction.NORTH)
-                .setValue(LIT, false)
+                .setValue(PRINTING, false)
                 .setValue(REFRACTED, false));
     }
 
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> pBuilder) {
-        pBuilder.add(FACING, LIT, REFRACTED);
+        pBuilder.add(FACING, PRINTING, REFRACTED);
     }
 
     @Override
@@ -87,7 +87,6 @@ public class LightroomBlock extends Block implements EntityBlock {
         return 0;
     }
 
-
     @Override
     public @NotNull BlockState rotate(BlockState pState, Rotation pRotation) {
         return pState.setValue(FACING, pRotation.rotate(pState.getValue(FACING)));
@@ -117,7 +116,7 @@ public class LightroomBlock extends Block implements EntityBlock {
     @Override
     public void neighborChanged(@NotNull BlockState state, Level level, @NotNull BlockPos pos, @NotNull Block block, @NotNull BlockPos fromPos, boolean pIsMoving) {
         if (!level.isClientSide) {
-            if (!state.getValue(LIT)) {
+            if (!state.getValue(PRINTING)) {
                 for (Direction direction : Direction.values()) {
                     BlockPos relative = pos.relative(direction);
                     if (relative.equals(fromPos) && level.getSignal(relative, direction) > 0

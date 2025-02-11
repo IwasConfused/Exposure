@@ -18,6 +18,11 @@
   - Frame would not be visible when it has Photograph.
   - Axe and Glass Pane can no longer be used on regular Photograph Frames.
 
+Lightroom:
+  - No longer emits light.
+  - Printing now requires light level greater than 12 at position above the Lightroom
+  - Chromatic Printing now requires Tinted Glass placed on top of the Lightroom.
+
 Advancements: 
   - Added Splitting the Photon advancement. 
   - **Moment in Time** and **Complex Composite Compound** are now granted when printing a photo, instead of just obtaining it.

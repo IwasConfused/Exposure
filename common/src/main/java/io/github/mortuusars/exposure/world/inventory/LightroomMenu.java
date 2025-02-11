@@ -163,7 +163,7 @@ public class LightroomMenu extends AbstractContainerMenu {
     }
 
     public boolean canChangeProcess() {
-        return getBlockEntity().canPrintChromatic();
+        return getBlockEntity().isRefracted();
     }
 
     @Override
@@ -195,7 +195,7 @@ public class LightroomMenu extends AbstractContainerMenu {
         }
 
         if (buttonId == TOGGLE_PROCESS_BUTTON_ID) {
-            PrintingMode currentProcess = getBlockEntity().getPrintingMode();
+            PrintingMode currentProcess = getBlockEntity().getActualPrintingMode();
             getBlockEntity().setPrintMode(currentProcess.cycle());
             return true;
         }

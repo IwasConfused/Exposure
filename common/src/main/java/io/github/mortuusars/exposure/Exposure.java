@@ -109,8 +109,7 @@ public class Exposure {
                 () -> new LightroomBlock(BlockBehaviour.Properties.of()
                         .mapColor(MapColor.COLOR_BROWN)
                         .strength(2.5f)
-                        .sound(SoundType.WOOD)
-                        .lightLevel(state -> 15)));
+                        .sound(SoundType.WOOD)));
 
         public static final Supplier<FlashBlock> FLASH = Register.block("flash",
                 () -> new FlashBlock(BlockBehaviour.Properties.ofFullCopy(net.minecraft.world.level.block.Blocks.AIR)

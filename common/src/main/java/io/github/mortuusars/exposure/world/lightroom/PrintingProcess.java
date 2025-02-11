@@ -8,34 +8,34 @@ import java.util.List;
 import java.util.function.Supplier;
 
 public enum PrintingProcess {
-    BLACK_AND_WHITE(List.of(DyeColor.BLACK),
+    BLACK_AND_WHITE(Config.Server.LIGHTROOM_BW_DYES,
             Config.Server.LIGHTROOM_BW_PRINT_TIME,
             Config.Server.LIGHTROOM_BW_EXPERIENCE),
-    COLOR(List.of(DyeColor.CYAN, DyeColor.MAGENTA, DyeColor.YELLOW, DyeColor.BLACK),
+    COLOR(Config.Server.LIGHTROOM_COLOR_DYES,
             Config.Server.LIGHTROOM_COLOR_PRINT_TIME,
             Config.Server.LIGHTROOM_COLOR_EXPERIENCE),
-    CHROMATIC_R(List.of(DyeColor.MAGENTA, DyeColor.YELLOW),
+    CHROMATIC_R(Config.Server.LIGHTROOM_CHROMATIC_RED_DYES,
             Config.Server.LIGHTROOM_CHROMATIC_PRINT_TIME,
             () -> 0),
-    CHROMATIC_G(List.of(DyeColor.CYAN, DyeColor.YELLOW),
+    CHROMATIC_G(Config.Server.LIGHTROOM_CHROMATIC_GREEN_DYES,
             Config.Server.LIGHTROOM_CHROMATIC_PRINT_TIME,
             () -> 0),
-    CHROMATIC_B(List.of(DyeColor.CYAN, DyeColor.MAGENTA),
+    CHROMATIC_B(Config.Server.LIGHTROOM_CHROMATIC_BLUE_DYES,
             Config.Server.LIGHTROOM_CHROMATIC_PRINT_TIME,
             Config.Server.LIGHTROOM_CHROMATIC_EXPERIENCE);
 
-    private final List<DyeColor> requiredDyes;
+    private final Supplier<List<? extends String>> requiredDyes;
     private final Supplier<Integer> printTime;
     private final Supplier<Integer> xpPerPrint;
 
-    PrintingProcess(List<DyeColor> requiredDyes, Supplier<Integer> printTime, Supplier<Integer> xpPerPrint) {
+    PrintingProcess(Supplier<List<? extends String>> requiredDyes, Supplier<Integer> printTime, Supplier<Integer> xpPerPrint) {
         this.requiredDyes = requiredDyes;
         this.printTime = printTime;
         this.xpPerPrint = xpPerPrint;
     }
 
     public List<DyeColor> getRequiredDyes() {
-        return requiredDyes;
+        return requiredDyes.get().stream().map(name -> DyeColor.byName(name, DyeColor.BLACK)).toList();
     }
 
     public int getPrintTime() {
@@ -63,7 +63,8 @@ public enum PrintingProcess {
             case 0 -> CHROMATIC_R;
             case 1 -> CHROMATIC_G;
             case 2 -> CHROMATIC_B;
-            default -> throw new IllegalStateException("Unexpected step value: " + step + ", 0|1|2 corresponding to R|G|B is expected.");
+            default ->
+                    throw new IllegalStateException("Unexpected step value: " + step + ", 0|1|2 corresponding to R|G|B is expected.");
         };
     }
 }

@@ -87,7 +87,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         super(menu, playerInventory, title);
         this.player = playerInventory.player;
 
-        this.mode = getMenu().getBlockEntity().getPrintingMode();
+        this.mode = getMenu().getBlockEntity().getActualPrintingMode();
     }
 
     @Override
@@ -111,14 +111,8 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
                     int buttonId = Screen.hasShiftDown() && player.isCreative() ? LightroomMenu.PRINT_CREATIVE_BUTTON_ID : LightroomMenu.PRINT_BUTTON_ID;
                     clickButton(buttonId);
                 }, Component.translatable("gui.exposure.lightroom.print"));
+        updatePrintButtonTooltip();
 
-        MutableComponent tooltip = Component.translatable("gui.exposure.lightroom.print");
-        if (player.isCreative()) {
-            tooltip.append("\n")
-                    .append(Component.translatable("gui.exposure.lightroom.print.creative_tooltip"));
-        }
-
-        printButton.setTooltip(Tooltip.create(tooltip));
         addRenderableWidget(printButton);
 
         printingModeToggleButton = createPrintingModeToggleButton();
@@ -127,16 +121,33 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
         updateButtons();
     }
 
+    protected void updatePrintButtonTooltip() {
+        MutableComponent tooltip = Component.translatable("gui.exposure.lightroom.print");
+        if (!getMenu().getBlockEntity().hasSufficientLightLevel()) {
+            tooltip.append("\n")
+                    .append(Component.translatable("gui.exposure.lightroom.print.not_enough_light_tooltip").withStyle(ChatFormatting.RED));
+        }
+
+        if (player.isCreative()) {
+            tooltip.append("\n")
+                    .append(Component.translatable("gui.exposure.lightroom.print.creative_tooltip"));
+        }
+
+        printButton.setTooltip(Tooltip.create(tooltip));
+    }
+
     protected CycleButton<PrintingMode> createPrintingModeToggleButton() {
         Map<PrintingMode, WidgetSprites> spritesMap = Map.of(PrintingMode.REGULAR, PRINTING_MODE_TOGGLE_REGULAR_SPRITES,
                 PrintingMode.CHROMATIC, PRINTING_MODE_TOGGLE_CHROMATIC_SPRITES);
         Map<PrintingMode, Tooltip> tooltipMap = Map.of(
-                PrintingMode.REGULAR, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.regular")),
+                PrintingMode.REGULAR, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.regular")
+                        .append(CommonComponents.NEW_LINE)
+                        .append(Component.translatable("gui.exposure.lightroom.printing_mode.regular.info"))),
                 PrintingMode.CHROMATIC, Tooltip.create(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic")
                         .append(CommonComponents.NEW_LINE)
                         .append(Component.translatable("gui.exposure.lightroom.printing_mode.chromatic.info").withStyle(ChatFormatting.GRAY))));
         return new CycleButton<>(leftPos - 19, topPos + 91, 18, 18,
-                Arrays.asList(PrintingMode.values()), getMenu().getBlockEntity().getPrintingMode(),
+                Arrays.asList(PrintingMode.values()), getMenu().getBlockEntity().getActualPrintingMode(),
                 spritesMap, (button, newMode) -> clickButton(LightroomMenu.TOGGLE_PROCESS_BUTTON_ID))
                 .setClickSound(SoundEvents.UI_BUTTON_CLICK.value())
                 .setTooltips(tooltipMap);
@@ -149,7 +160,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
 
     @Override
     protected void containerTick() {
-        PrintingMode currentMode = getMenu().getBlockEntity().getPrintingMode();
+        PrintingMode currentMode = getMenu().getBlockEntity().getActualPrintingMode();
         if (currentMode != printingModeToggleButton.getCurrentValue()) {
             printingModeToggleButton.setCurrentValue(currentMode);
         }
@@ -158,7 +169,6 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     @Override
     public void render(@NotNull GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         updateButtons();
-
         super.render(guiGraphics, mouseX, mouseY, partialTick);
         renderTooltip(guiGraphics, mouseX, mouseY);
     }
@@ -166,6 +176,7 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     protected void updateButtons() {
         printButton.active = getMenu().getBlockEntity().canPrint() || (player.isCreative() && Screen.hasShiftDown() && getMenu().getBlockEntity().canPrintInCreativeMode());
         printButton.visible = !getMenu().isPrinting();
+        updatePrintButtonTooltip();
 
         printingModeToggleButton.active = true;
         printingModeToggleButton.visible = getMenu().canChangeProcess();
@@ -235,10 +246,13 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
             poseStack.pushPose();
             poseStack.translate(0, 0, 800);
 
-            if (selectedFrame < getMenu().getTotalFramesCount() - 1)
+            if (selectedFrame < getMenu().getTotalFramesCount() - 1) {
+                // Advance Arrow
                 guiGraphics.blit(MAIN_TEXTURE, leftPos + 111, topPos + 44, 200, 0, 10, 10);
-            else
+            } else {
+                // Eject Arrow
                 guiGraphics.blit(MAIN_TEXTURE, leftPos + 111, topPos + 44, 210, 0, 10, 10);
+            }
 
             poseStack.popPose();
         }
@@ -292,9 +306,11 @@ public class LightroomScreen extends AbstractContainerScreen<LightroomMenu> {
     private void addFrameInfoTooltipLines(List<Component> tooltipLines, int frameIndex, boolean isAdvancedTooltips) {
         @Nullable Frame frame = getMenu().getFrameByIndex(frameIndex);
         if (frame != null) {
-            frame.getColorChannel().ifPresent(c ->
-                    tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
-                        .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
+            if (getMenu().getBlockEntity().isRefracted()) {
+                frame.getColorChannel().ifPresent(c ->
+                        tooltipLines.add(Component.translatable("gui.exposure.channel." + c.getSerializedName())
+                            .withStyle(Style.EMPTY.withColor(c.getRepresentationColor()))));
+            }
 
             if (isAdvancedTooltips) {
                 Component component = frame.identifier().map(

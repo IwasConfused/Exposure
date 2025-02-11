@@ -86,7 +86,7 @@ public enum LightroomComponentProvider implements IBlockComponentProvider, IServ
             tag.put("Black", lightroomBlockEntity.getItem(Lightroom.BLACK_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
             tag.put("Result", lightroomBlockEntity.getItem(Lightroom.RESULT_SLOT).saveOptional(blockAccessor.getLevel().registryAccess()));
 
-            tag.putString("Process", lightroomBlockEntity.getPrintingMode().getSerializedName());
+            tag.putString("Process", lightroomBlockEntity.getActualPrintingMode().getSerializedName());
 
             tag.putFloat("Progress", lightroomBlockEntity.getProgressPercentage());
         }

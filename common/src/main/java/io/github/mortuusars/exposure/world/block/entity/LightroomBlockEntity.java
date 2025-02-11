@@ -4,7 +4,7 @@ import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
 import io.github.mortuusars.exposure.ExposureServer;
 import io.github.mortuusars.exposure.world.block.LightroomBlock;
-import io.github.mortuusars.exposure.world.camera.ExposureType;
+import io.github.mortuusars.exposure.world.level.LevelUtil;
 import io.github.mortuusars.exposure.world.lightroom.PrintingMode;
 import io.github.mortuusars.exposure.world.lightroom.PrintingProcess;
 import io.github.mortuusars.exposure.world.level.storage.ExposureData;
@@ -145,6 +145,10 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return progress / (float) printTime;
     }
 
+    public boolean isPrinting() {
+        return level != null && level.getBlockState(getBlockPos()).getValue(LightroomBlock.PRINTING);
+    }
+
     public boolean isAdvancingFrameOnPrint() {
         return advanceFrame;
     }
@@ -195,18 +199,10 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         }
     }
 
-    /*
-        Printing mode setting stays where it was set by the player, But if the frame does not support it -
-        image would be printed with supported process, WITHOUT changing the mode setting -
-        this means that this mode will be used again if some other frame is supporting it.
+    public PrintingMode getActualPrintingMode() {
+        return isRefracted() ? printingMode : PrintingMode.REGULAR;
+    }
 
-        This was done to not reset mode in automated setups, if there were some image on a film that doesn't support selected mode.
-     */
-
-    /**
-     * @return Mode SETTING. Can be different from actual process that would be used to print an image
-     * (if frame does not support this mode, for example).
-     */
     public PrintingMode getPrintingMode() {
         return printingMode;
     }
@@ -222,13 +218,8 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         return selectedFrame;
     }
 
-    public boolean isSelectedFrameChromatic() {
-        @Nullable Frame frame = getSelectedFrame();
-        return frame != null && frame.wasTakenWithChromaticFilter() && frame.type() == ExposureType.BLACK_AND_WHITE;
-    }
-
-    public boolean canPrintChromatic() {
-        return isSelectedFrameChromatic() || (level != null && level.getBlockState(getBlockPos()).getValue(LightroomBlock.REFRACTED));
+    public boolean isRefracted() {
+        return level != null && level.getBlockState(getBlockPos()).getValue(LightroomBlock.REFRACTED);
     }
 
     public void startPrintingProcess(boolean advanceFrameOnFinish) {
@@ -241,16 +232,16 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
         PrintingProcess process = getPrintingProcess(frame);
 
-        printTime = process.getPrintTime();
+        int time = process.getPrintTime();
+        printTime = isRefracted() && process.isRegular() ? time * 3 : time;
 
         advanceFrame = advanceFrameOnFinish;
 
         if (level != null) {
             BlockState state = level.getBlockState(getBlockPos());
-            if (state.getBlock() instanceof LightroomBlock && !state.getValue(LightroomBlock.LIT)) {
-                level.setBlock(getBlockPos(), state
-                        .setValue(LightroomBlock.LIT, true), Block.UPDATE_CLIENTS);
-                playPrintingSound();
+            if (state.getBlock() instanceof LightroomBlock && !state.getValue(LightroomBlock.PRINTING)) {
+                level.setBlock(getBlockPos(), state.setValue(LightroomBlock.PRINTING, true), Block.UPDATE_CLIENTS);
+                playPrintingStartedSound();
             }
         }
     }
@@ -261,15 +252,11 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
         advanceFrame = false;
         if (level != null) {
             BlockState state = level.getBlockState(getBlockPos());
-            if (state.getBlock() instanceof LightroomBlock && state.getValue(LightroomBlock.LIT)) {
+            if (state.getBlock() instanceof LightroomBlock && state.getValue(LightroomBlock.PRINTING)) {
                 level.setBlock(getBlockPos(), state
-                        .setValue(LightroomBlock.LIT, false), Block.UPDATE_CLIENTS);
+                        .setValue(LightroomBlock.PRINTING, false), Block.UPDATE_CLIENTS);
             }
         }
-    }
-
-    public boolean isPrinting() {
-        return printTime > 0;
     }
 
     public boolean canPrint() {
@@ -287,7 +274,21 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
 
         return isPaperValidForPrint(frame, process)
                 && canOutputToResultSlot(frame, process)
-                && hasDyesForPrint(frame, process);
+                && hasDyesForPrint(frame, process)
+                && hasSufficientLightLevel();
+    }
+    
+    public boolean hasSufficientLightLevel() {
+        if (level == null) return false;
+        BlockPos above = getBlockPos().above();
+        if (isRefracted()) {
+            return LevelUtil.getLightLevelAt(level, above.above()) > 12
+                    || LevelUtil.getLightLevelAt(level, above.relative(Direction.NORTH)) > 12
+                    || LevelUtil.getLightLevelAt(level, above.relative(Direction.EAST)) > 12
+                    || LevelUtil.getLightLevelAt(level, above.relative(Direction.SOUTH)) > 12
+                    || LevelUtil.getLightLevelAt(level, above.relative(Direction.WEST)) > 12;
+        }
+        return LevelUtil.getLightLevelAt(level, above) > 12;
     }
 
     public boolean canPrintInCreativeMode() {
@@ -302,14 +303,10 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
     }
 
     protected PrintingProcess getPrintingProcess(@NotNull Frame frame) {
-        PrintingMode printingMode = getPrintingMode();
-
-        if (printingMode == PrintingMode.REGULAR || !canPrintChromatic()) {
-            return PrintingProcess.fromExposureType(frame.type());
-        }
-
-        ItemStack paperStack = getItem(Lightroom.PAPER_SLOT);
-        return PrintingProcess.fromChromaticStep(getChromaticStep(paperStack));
+        return switch (getActualPrintingMode()) {
+            case REGULAR -> PrintingProcess.fromExposureType(frame.type());
+            case CHROMATIC -> PrintingProcess.fromChromaticStep(getChromaticStep(getItem(Lightroom.PAPER_SLOT)));
+        };
     }
 
     protected boolean isPaperValidForPrint(Frame frame, PrintingProcess process) {
@@ -504,6 +501,13 @@ public class LightroomBlockEntity extends BaseContainerBlockEntity implements Wo
             ExperienceOrb.award(serverLevel, Vec3.atCenterOf(getBlockPos()), storedExperience);
             storedExperience = 0;
             setChanged();
+        }
+    }
+
+    protected void playPrintingStartedSound() {
+        if (level != null) {
+            level.playSound(null, getBlockPos(), Exposure.SoundEvents.LIGHTROOM_PRINT.get(), SoundSource.BLOCKS,
+                    1f, level.getRandom().nextFloat() * 0.3f + 1f);
         }
     }
 
