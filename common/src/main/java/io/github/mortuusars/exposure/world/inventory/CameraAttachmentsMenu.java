@@ -2,6 +2,7 @@ package io.github.mortuusars.exposure.world.inventory;
 
 import com.google.common.base.Preconditions;
 import io.github.mortuusars.exposure.Exposure;
+import io.github.mortuusars.exposure.world.camera.CameraId;
 import io.github.mortuusars.exposure.world.item.camera.CameraItem;
 import io.github.mortuusars.exposure.world.item.camera.Attachment;
 import io.github.mortuusars.exposure.world.item.util.ItemAndStack;
@@ -39,7 +40,6 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
         this.player = playerInventory.player;
         this.cameraSlotIndex = cameraSlotIndex;
         this.camera = new ItemAndStack<>(cameraStack);
-
         this.attachments = camera.getItem().getAttachments();
 
         SimpleContainer container = createAttachmentsContainer(cameraSlotIndex);
@@ -272,7 +272,7 @@ public class CameraAttachmentsMenu extends AbstractContainerMenu {
 
     @Override
     public boolean stillValid(@NotNull Player player) {
-        return ItemStack.isSameItemSameComponents(player.getInventory().getItem(cameraSlotIndex), camera.getItemStack());
+        return CameraId.ofStack(camera.getItemStack()).matches(player.getInventory().getItem(cameraSlotIndex));
     }
 
     public static CameraAttachmentsMenu fromBuffer(int containerId, Inventory playerInventory, RegistryFriendlyByteBuf buffer) {

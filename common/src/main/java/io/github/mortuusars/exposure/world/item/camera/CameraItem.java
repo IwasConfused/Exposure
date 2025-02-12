@@ -515,6 +515,8 @@ public class CameraItem extends Item {
             return InteractionResultHolder.fail(stack);
         }
 
+        getOrCreateID(stack);
+
         if (player instanceof ServerPlayer serverPlayer) {
             MenuProvider menuProvider = new MenuProvider() {
                 @Override
@@ -535,8 +537,7 @@ public class CameraItem extends Item {
             });
         }
 
-        stack.set(Exposure.DataComponents.CAMERA_DISASSEMBLED, true);
-
+        setDisassembled(stack, true);
         Sound.play(player, Exposure.SoundEvents.CAMERA_GENERIC_CLICK.get(), SoundSource.PLAYERS, 0.9f, 0.9f, 0.2f);
 
         return InteractionResultHolder.success(stack);
