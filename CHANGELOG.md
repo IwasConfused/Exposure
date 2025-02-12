@@ -1,45 +1,60 @@
 # Changelog
 
 ## UNRELEASED 1.21
-- Added `/exposure debug develop_film_in_hand` command.
-- Added `/exposure debug chromatic_from_last_three_exposures` command.
-- Film Roll renaming screen now has a sound when item is renamed and Enter key can be used to quickly apply changes.
-- Mundane, Awkward and Thick potions now have different colors to tell them apart easier.
-- Photographs are no longer rendered as images in Item Frames by default. Can be turned back on in the config.
-- Added custom palettes system `//add details`
-- Added colors to base palette `//add details`
-- Added ability to load images from URL with Interplanar Projector
-- Changed how custom Lenses and Filters are defined.
-- Added mipmaps to exposures.
-- Added animation for Camera interactions (changing viewfinder settings and attachments). Player will move their hand slightly.
-- Camera interaction sounds are now audible for other players.
-- Photograph Aging recipe now requires a Brush.
-- Added Glass Photograph Frame. 
+- Added mipmaps to exposures. (thanks to _bravely-beep_ and _MapMipMapMod by Jalvaviel_)
+- Added Glass Photograph Frame.
   - Frame would not be visible when it has Photograph.
   - Axe and Glass Pane can no longer be used on regular Photograph Frames.
+- Added animation for Camera interactions (changing viewfinder settings and attachments) - player will move their hand slightly.
+
+Capturing:
+- Added new capture method - background. Captures an image, you guessed it, in background, without rendering it on the screen.
+  - Screen no longer flickers from hiding the HUD when taking a photo.
+  - Direct method (old) still exists, and will be used if Iris is installed (due to technical limitation).
+  - Direct method can also be toggled in config, in case you experience issues with background method. 
+- Filter post effects are now processed separately from vanilla post effects.
+  - Vanilla effects will not be rendered when image is captured, unless turned on in a config.
+
+Color Palette:
+- Exposure no longer uses vanilla MapColors directly. Color palettes are now data-driven. 
+- Default color palette still uses all vanilla map colors, but with few additions, mainly brighter colors. Long exposure photos now look slightly better.
+- Added ability to create custom palettes.
+
+Interplanar Projector:
+- Can now load images from URL.
+- When renaming it in Anvil, name length limit has been increased to 150 characters (from vanilla 50), to allow for longer paths.
 
 Lightroom:
-  - No longer emits light.
-  - Printing now requires light level greater than 12 at position above the Lightroom
-  - Chromatic Printing now requires Tinted Glass placed on top of the Lightroom.
+- Printing now requires light level greater than 12 at position above the Lightroom.
+- No longer emits light.
+- Chromatic Printing now requires Tinted Glass placed on top of the Lightroom.
 
-Advancements: 
-  - Added Splitting the Photon advancement. 
-  - **Moment in Time** and **Complex Composite Compound** are now granted when printing a photo, instead of just obtaining it.
-  - Added `exposure:frame_printed` trigger. Uses player that last interacted with Lightroom, or closest if last is unavailable.
-  - Predicates added by the mod and `exposure:frame_exposed` trigger have been changed. 
-
-
-- Added client config to shift view to where camera actually is when held at waist-level.
-- Added server config option to change default exposure size.
-- Added server config option to disable loading images with Interplanar Projector.
-
-- Camera filter effects are now processed separately. 
-  - Vanilla effects will not be rendered when camera captures an image, unless turned on in a config.     
+Advancements:
+- Added Splitting the Photon advancement for exposing a frame with R/G/B filter.
+- **Moment in Time** and **Complex Composite Compound** are now granted when printing a photo, instead of just obtaining it.
+- Added `exposure:frame_printed` trigger. Uses player that last interacted with Lightroom, or closest if last is unavailable.
+- Predicates added by the mod and `exposure:frame_exposed` trigger have been changed.
 
 Misc:
-  - Reduced color photograph print time from 10 to 8 seconds.
-  - Closing Camera Attachments menu will now go back to inventory menu if it was opened from it.
+- Camera interaction sounds are now audible for other players.
+- Reduced color photograph print time from 10 to 8 seconds.
+- Closing Camera Attachments menu will now go back to inventory menu if it was opened from it (by right-clicking).
+- Mundane, Awkward and Thick potions now have different colors to tell them apart easier.
+- Film Roll renaming screen now has a sound when item is renamed and Enter key can be used to quickly apply changes.
+- Photographs are no longer rendered as images in Item Frames by default. Can be turned back on in the config.
+- Aged Photograph recipe now requires a Brush.
+- You can now select specific Album page in a Lectern by clicking on page number. Allows controlling Lectern's Comparator output properly.
+- Changed how custom Lenses and Filters are defined.
+- Added `/exposure debug develop_film_in_hand` command.
+- Added `/exposure debug expose_rgb` command.
+- Added `/exposure debug chromatic_from_last_three_exposures` command.
+
+Config:
+- Most of the 'common' settings has been moved to 'server' config.
+- Added server config option to change default exposure size.
+- Added server config option to disable loading images with Interplanar Projector.
+- Added server config option for configuring which dyes will be consumed when printing. 
+- Added client config option to shift view to where camera actually is when held at waist-level.
 
 ## 1.7.6 - 2024-08-17
 - Fixed Album disappearing from Lectern when Amendments is installed.
