@@ -145,7 +145,7 @@
   "exposure.configuration.ui": "UI",
   "exposure.configuration.viewfinder": "取景器",
   "exposure.configuration.viewfinder_attacking": "打开取景器时可攻击",
-  "exposure.configuration.waist_level_viewfinder": "腰部水平取景器",
+  "exposure.configuration.waist_level_viewfinder": "腰平取景器",
   "exposure.configuration.zoom_sensitivity_influence": "缩放灵敏度影响",
   "exposure.jei.info.photograph_frame": "有三种尺寸：1x1, 2x2 and 3x3。放置类似画，但可放在底面和顶面。荧光墨囊可使其发光",
   "gui.exposure.album.add_photograph": "添加照片",
