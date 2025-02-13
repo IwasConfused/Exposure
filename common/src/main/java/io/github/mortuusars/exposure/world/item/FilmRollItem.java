@@ -126,13 +126,6 @@ public class FilmRollItem extends Item implements FilmItem {
 
     @Override
     public @NotNull InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand usedHand) {
-        if (true) {
-            if (level.isClientSide()) {
-                Minecrft.get().grabPanoramixScreenshot(new File("D:/pan"), 256, 256);
-            }
-            return super.use(level, player, usedHand);
-        }
-
         if (!Config.Server.FILM_ROLL_EASY_RENAMING.get() || !(player instanceof ServerPlayer serverPlayer)) {
             return super.use(level, player, usedHand);
         }

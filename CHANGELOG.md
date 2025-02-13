@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.8.1 UNRELEASED
+- Fixed Film renaming menu not opening.
+
 ## 1.8.0 - 2025-02-13
 - Added mipmaps to exposures. (thanks to _bravely-beep_ and _MapMipMapMod by Jalvaviel_)
 - Added Glass Photograph Frame.
