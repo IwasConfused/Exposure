@@ -248,7 +248,7 @@
   "item.exposure.interplanar_projector": "位面投影器",
   "item.exposure.interplanar_projector.mode.clean": "§6清晰",
   "item.exposure.interplanar_projector.mode.dithered": "§6抖动",
-  "item.exposure.interplanar_projector.tooltip.switch_info": "§8[§7右键点击§8]更改模式",
+  "item.exposure.interplanar_projector.tooltip.change_mode_info": "§8[§7右键点击§8]更改模式",
   "item.exposure.interplanar_projector.tooltip.consumed_info": "§4使用后消耗",
   "item.exposure.interplanar_projector.tooltip.disabled": "§7这个领域设置了保护屏障，无法从其他位面进行投影",
   "item.exposure.interplanar_projector.tooltip.info": "§7当重命名为url或文件路径并用作滤镜时，允许从另一个位面投影图像",
