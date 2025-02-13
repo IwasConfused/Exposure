@@ -195,10 +195,11 @@ public class ViewfinderOverlay {
 
         y += margin;
 
+        int qrCodeTextureSize = 41;
         int qrCodeSize = switch ((int) Minecrft.get().getWindow().getGuiScale()) {
-            case 1 -> 37 * 3;
-            case 2 -> 37 * 2;
-            default -> 37;
+            case 1 -> qrCodeTextureSize * 3;
+            case 2 -> qrCodeTextureSize * 2;
+            default -> qrCodeTextureSize;
         };
         guiGraphics.blit(BSOD_QR_CODE_TEXTURE, x, y, 0, 0, qrCodeSize, qrCodeSize, qrCodeSize, qrCodeSize);
 
