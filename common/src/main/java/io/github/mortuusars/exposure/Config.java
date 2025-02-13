@@ -81,7 +81,6 @@ public class Config {
                         .define("projecting_enabled", true);
                 PROJECT_TIMEOUT_TICKS = builder
                         .comment("Time limit in ticks for projecting.",
-                                "This is affecting gameplay slightly - Interplanar Projector will be consumed if loading times out.",
                                 "Default: 100 (5 seconds)")
                         .defineInRange("projecting_timeout_ticks", 100, 1, 200);
                 builder.pop();

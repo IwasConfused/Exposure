@@ -62,7 +62,7 @@ public class Capture<T> extends Task<Result<T>> {
         capturingTask.execute()
                 .completeOnTimeout(Result.error(ERROR_TIMED_OUT), TIMEOUT_MS, TimeUnit.MILLISECONDS)
                 .exceptionally(throwable -> {
-                    Exposure.LOGGER.error("Capturing failed: {}", throwable.toString());
+                    LOGGER.error("Capturing failed: {}", throwable.toString());
                     return Result.error(ERROR_FAILED_GENERIC);
                 })
                 .thenApply(result -> {

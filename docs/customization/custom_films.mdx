@@ -1,0 +1,18 @@
+---
+title: Custom Films
+---
+
+With commands you can configure films by specifying some components:
+- `/give @s exposure:color_film[exposure:film_frame_size=512]` - sets frame size to 512 pixels. Default: 320(configurable) Max: 2048.
+- `/give @s exposure:color_film[exposure:film_frame_count=32]` - sets max frame count to 32.
+- `/give @s exposure:color_film[exposure:film_color_palette="exposure:map_colors"]` - sets [Color Palette](../../datapacks/custom_color_palettes).
+
+<Callout variant="warning">
+    Larger values of *film_frame_size* can cause lag and stutters.\
+    Larger values of *film_frame_count* can cause disconnects from server and/or other issues. 32 will probably be fine, 64 maybe. But I haven't tested it. Use at your own risk.
+</Callout>
+
+<Callout variant="info">
+    Using datapacks or KubeJS/CraftTweaker, you can create a recipe for a film with custom components.
+</Callout>
+

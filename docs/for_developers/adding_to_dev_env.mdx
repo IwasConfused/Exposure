@@ -1,0 +1,35 @@
+---
+title: "Adding to DevEnv"
+---
+
+You can automatically download Exposure for your mod project using Gradle.
+Add the following to your build script (`build.gradle`):
+
+## Maven Repository
+
+```groovy
+repositories {
+  /* other repositories are here */
+  maven {
+    name = "Mortuusars Github Maven"
+    url = "https://raw.githubusercontent.com/mortuusars/resources/main/maven/"
+  }
+}
+```
+
+## Declaring Dependency
+
+```groovy
+dependencies {
+  /* other minecraft dependencies are here */
+  modImplementation("io.github.mortuusars.exposure:exposure-<platform>:<minecraft_version>-<exposure_version>")
+  /* OR to not hard depend: */
+  modCompileOnly("io.github.mortuusars.exposure:exposure-<platform>:<minecraft_version>-<exposure_version>")
+  modRuntimeOnly("io.github.mortuusars.exposure:exposure-<platform>:<minecraft_version>-<exposure_version>")
+}
+```
+
+If you're using multiplatform setup (like does Exposure), you'll need to add dependencies for all platforms.
+
+`<platform>` - common / neoforge / fabric\
+`<exposure_version>` - available versions can be seen on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/exposure/files/all)/[Modrinth](https://modrinth.com/mod/exposure/versions)/[Maven](https://github.com/mortuusars/resources/tree/main/maven/io/github/mortuusars/exposure)

@@ -19,6 +19,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -134,6 +135,20 @@ public class ExposureRepository {
         onExposureReceived(player, id);
 
         LOGGER.debug("Saved exposure '{}' uploaded by '{}'.", id, player.getScoreboardName());
+    }
+
+    public void clearExpectedExposuresTimedOutLongAgo() {
+        for (Map.Entry<ServerPlayer, Set<ExpectedExposure>> exposures : expectedExposures.entrySet()) {
+            AtomicInteger cleared = new AtomicInteger();
+            exposures.getValue().removeIf(expected -> {
+                if (expected.isTimedOut(UnixTimestamp.Seconds.now() - EXPECTED_TIMEOUT_SECONDS)) {
+                    cleared.getAndIncrement();
+                    return true;
+                }
+                return false;
+            });
+            LOGGER.error("Cleared {} timed out expected exposures of player: '{}'", cleared.get(), exposures.getKey().getScoreboardName());
+        }
     }
 
     protected boolean validateUpload(ServerPlayer player, String id) {

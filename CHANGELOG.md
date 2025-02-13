@@ -23,6 +23,7 @@ Color Palette:
 Interplanar Projector:
 - Can now load images from URL.
 - When renaming it in Anvil, name length limit has been increased to 150 characters (from vanilla 50), to allow for longer paths.
+- Projector now breaks when loading has failed instead of being consumed (except when timed-out). 
 
 Lightroom:
 - Printing now requires light level greater than 12 at position above the Lightroom.

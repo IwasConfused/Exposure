@@ -43,6 +43,12 @@ public class UrlCaptureTask extends Task<Result<Image>> {
             LOGGER.info("Attempting to load image from URL: '{}'", url.toString());
 
             try {
+                Thread.sleep(6000);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+
+            try {
                 @Nullable BufferedImage image = ImageIO.read(url);
 
                 if (image == null) {

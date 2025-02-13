@@ -44,13 +44,13 @@ public class PathCaptureTask extends Task<Result<Image>> {
             }
         }
 
-        if (isValidFilePath(path)) {
-            return new FileCaptureTask(new File(path)).execute();
-        }
-
         if (looksLikeURL(path)) {
             LOGGER.error("Path '{}' looks like a URL, but does not have http/s prefix.", path);
             return CompletableFuture.completedFuture(Result.error(UrlCaptureTask.ERROR_NO_HTTP_PREFIX));
+        }
+
+        if (isValidFilePath(path)) {
+            return new FileCaptureTask(new File(path)).execute();
         }
 
         LOGGER.error("Path '{}' cannot be handled properly.", path);

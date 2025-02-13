@@ -1,0 +1,39 @@
+---
+title: Lightroom
+id: exposure:lightroom
+type: block
+---
+
+#### Used to print the [Photographs](photograph) from film negatives. Requires paper and dyes for every print.
+
+<div style={{ textAlign: "center" }}>
+<Asset location="exposure:lightroom_gui" width={512} title="Photograph" style={{ textAlign: "center" }}/>
+</div>
+
+<Callout variant="info">
+    Lightroom needs light to function. Light level above the block should be 12 or larger.
+</Callout>
+
+---
+
+### Chromatic Process
+**Tinted Glass** placed on top of Lightroom will make it *Refracted*, which unlocks **Chromatic Process**.\
+When toggled on (using the button on the left side), printing a frame will only print single channel at a time.\
+Doing this will produce a Chromatic Sheet with **red** channel printed. Use the sheet as a paper to print rest of the channels.\
+When last channel is printed (blue), Chromatic Sheet will be converted to a regular [Photograph](photograph).
+
+<Callout>
+    Chromatic Sheet always receives channels in order: red -> green -> blue, regardless of what frame is being printed.
+</Callout>
+
+<Callout variant="info">
+    Frames taken with R/G/B filter will have the channel shown in tooltip. This is only for you to help you choose correct frame for proper result.
+</Callout>
+
+---
+
+### Redstone:
+- When the Lightroom Block receives a redstone pulse, it will start printing selected frame.
+- After printing finishes - next frame will become selected.
+    - After printing the last frame, the Lightroom will eject the film through the front. (this can be prevented by blocking the front side with a non-transparent block)
+- This allows you to fully automate printing of Photographs.

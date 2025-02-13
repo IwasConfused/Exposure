@@ -80,7 +80,7 @@ public class LightroomBlock extends Block implements EntityBlock {
                 int photographsCount = stackedPhotographsItem.getPhotographs(resultStack).size();
                 return (int) ((photographsCount / (float) stackedPhotographsItem.getStackLimit() * 14) + 1);
             } else if (!resultStack.isEmpty()) {
-                return (int) ((resultStack.getCount() / (float) resultStack.getMaxStackSize() * 14) + 1);
+                return 1;
             }
         }
 

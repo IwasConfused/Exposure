@@ -797,7 +797,7 @@ public class CameraItem extends Item {
 
         Entity entity = holder.asEntity();
 
-        if (projectionState == CameraInstance.ProjectionState.FAILED) {
+        if (projectionState == CameraInstance.ProjectionState.FAILED || projectionState == CameraInstance.ProjectionState.TIMED_OUT) {
             ItemStack filterStack = filter.getCopy().transmuteCopy(Exposure.Items.BROKEN_INTERPLANAR_PROJECTOR.get());
             error.ifPresent(err -> filterStack.set(Exposure.DataComponents.INTERPLANAR_PROJECTOR_ERROR_CODE, err.code()));
             Attachment.FILTER.set(stack, filterStack);
@@ -812,9 +812,7 @@ public class CameraItem extends Item {
         filterStack.shrink(1);
         Attachment.FILTER.set(stack, filterStack);
 
-        if (projectionState == CameraInstance.ProjectionState.TIMED_OUT) {
-            Sound.play(entity, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), entity.getSoundSource(), 0.4f, 0.6f);
-        } else if (projectionState == CameraInstance.ProjectionState.SUCCESSFUL) {
+        if (projectionState == CameraInstance.ProjectionState.SUCCESSFUL) {
             holder.getServerPlayerAwardedForExposure()
                     .ifPresent(player -> Exposure.CriteriaTriggers.SUCCESSFULLY_PROJECT_IMAGE.get().trigger(player));
             Sound.play(entity, Exposure.SoundEvents.INTERPLANAR_PROJECT.get(), entity.getSoundSource(), 0.8f, 1.1f);

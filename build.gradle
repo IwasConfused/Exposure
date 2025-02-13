@@ -3,6 +3,7 @@ plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
     id "me.shedaniel.unified-publishing" version "0.1.+"
+    id 'org.moddedmc.wiki.toolkit' version '0.2.6'
 }
 
 architectury {
@@ -51,10 +52,6 @@ subprojects {
             name = "Jared's maven"
             url = "https://maven.blamejared.com/"
         }
-//        maven {
-//            name = "ModMaven"
-//            url = "https://modmaven.dev"
-//        }
 
         maven {
             name = "FabricMC"
@@ -81,6 +78,7 @@ subprojects {
         silentMojangMappingsLicense()
         runs {
             client {
+                property 'item_asset_export.render.namespaces', 'exposure'
                 vmArgs '-XX:+AllowEnhancedClassRedefinition', '-XX:HotswapAgent=core'
 //                , '-Dmixin.debug.export=true'
             }
@@ -139,8 +137,9 @@ subprojects {
 
     publishing {
         publications {
-            mavenForge(MavenPublication) {
+            maven(MavenPublication) {
                 artifactId = base.archivesName.get()
+                version = "${minecraft_version}-${mod_version}"
                 from components.java
             }
         }
@@ -154,6 +153,15 @@ subprojects {
                     url = uri(path + "/maven")
                 }
             }
+        }
+    }
+}
+
+wiki {
+    docs {
+        exposure {
+            root = file('docs/')
+            exportedAssetNamespaces = ['exposure']
         }
     }
 }
