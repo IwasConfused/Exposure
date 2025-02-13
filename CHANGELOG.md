@@ -1,6 +1,6 @@
 # Changelog
 
-## UNRELEASED 1.21
+## 1.7.6 - 2025-02-13
 - Added mipmaps to exposures. (thanks to _bravely-beep_ and _MapMipMapMod by Jalvaviel_)
 - Added Glass Photograph Frame.
   - Frame would not be visible when it has Photograph.
