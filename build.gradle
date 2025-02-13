@@ -208,7 +208,7 @@ task printLatestVersionChangelog {
 publishMods {
     changelog = project.ext.changelog
     type = BETA
-    dryRun = true
+    dryRun = providers.environmentVariable("CURSEFORGE_TOKEN").getOrNull() == null || providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
 
     def cfOptions = curseforgeOptions {
         accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
@@ -229,6 +229,7 @@ publishMods {
         from cfOptions
         file project(":neoforge")
         modLoaders.add("neoforge")
+        displayName = "${mod_name} - NeoForge ${minecraft_version} - ${mod_version}"
         optional("jei")
     }
 
@@ -238,7 +239,7 @@ publishMods {
         modLoaders.add("fabric")
         displayName = "${mod_name} - Fabric ${minecraft_version} - ${mod_version}"
         requires("fabric-api")
-        requires("forge-config-api-port")
+        requires("forge-config-api-port-fabric")
         optional("jei")
     }
 
@@ -246,6 +247,7 @@ publishMods {
         from mrOptions
         file project(":neoforge")
         modLoaders.add("neoforge")
+        displayName = "${mod_name} - ${mod_version}"
         optional("jei")
     }
 
