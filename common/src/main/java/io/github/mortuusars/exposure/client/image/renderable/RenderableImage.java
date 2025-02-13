@@ -13,7 +13,7 @@ public interface RenderableImage extends Image {
     RenderableImageIdentifier getIdentifier();
 
     default boolean isEmpty() {
-        return this.equals(EMPTY) || getImage().isEmpty();
+        return this.equals(EMPTY) || (!getImage().equals(this) && getImage().isEmpty());
     }
 
     default RenderableImage modifyWith(Function<Image, Image> transformFunction, String variant) {

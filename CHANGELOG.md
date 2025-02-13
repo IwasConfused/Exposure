@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.8.1 UNRELEASED
+- Fixed crash when hovering over a Photograph from loot chest.
 - Fixed Film renaming menu not opening.
 
 ## 1.8.0 - 2025-02-13
