@@ -62,29 +62,6 @@ public class GuiUtil {
 
     public static void drawRect(GuiGraphics guiGraphics, float x, float y, float width, float height, int color) {
         drawRect(guiGraphics.pose(), x, y, x + width, y + height, color);
-//        float minX = x;
-//        float minY = y;
-//        float maxX = x + width;
-//        float maxY = y + height;
-//
-//        if (width < 0) {
-//            minX = width;
-//            maxX = x;
-//        }
-//
-//        if (height < 0) {
-//            minY = height;
-//            maxY = y;
-//        }
-//
-//        Matrix4f matrix = guiGraphics.pose().last().pose();
-//        RenderSystem.setShader(GameRenderer::getPositionColorShader);
-//        BufferBuilder bufferBuilder = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-//        bufferBuilder.addVertex(matrix, minX, maxY, 0).setColor(color);
-//        bufferBuilder.addVertex(matrix, maxX, maxY, 0).setColor(color);
-//        bufferBuilder.addVertex(matrix, maxX, minY, 0).setColor(color);
-//        bufferBuilder.addVertex(matrix, minX, minY, 0).setColor(color);
-//        BufferUploader.drawWithShader(bufferBuilder.buildOrThrow());
     }
 
     public static void drawRect(PoseStack poseStack, float minX, float minY, float maxX, float maxY, int color) {

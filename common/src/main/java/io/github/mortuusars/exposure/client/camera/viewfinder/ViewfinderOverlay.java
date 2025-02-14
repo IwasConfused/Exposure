@@ -101,17 +101,17 @@ public class ViewfinderOverlay {
         guiGraphics.pose().translate(width / 2f, height / 2f, 0);
         guiGraphics.pose().scale(scale, scale, scale);
 
-        if (Minecrft.options().bobView().get())
+        if (Minecrft.options().bobView().get()) {
             bobView(guiGraphics.pose(), deltaTracker);
+        }
         applyAttackAnimation(guiGraphics.pose(), deltaTracker);
         applyMovementDelay(guiGraphics.pose(), deltaTracker);
 
         guiGraphics.pose().translate(-width / 2f, -height / 2f, 0);
 
         RenderSystem.enableBlend();
-        RenderSystem.disableDepthTest();
-        RenderSystem.depthMask(false);
         RenderSystem.defaultBlendFunc();
+        RenderSystem.enableDepthTest();
         RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 
         // -9999 to cover all screen when overlay is scaled down
@@ -131,9 +131,8 @@ public class ViewfinderOverlay {
             drawGuide = false;
             renderBSOD(guiGraphics, brokenInterplanarProjector, filter.getForReading());
             RenderSystem.enableBlend();
-            RenderSystem.disableDepthTest();
-            RenderSystem.depthMask(false);
             RenderSystem.defaultBlendFunc();
+            RenderSystem.enableDepthTest();
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
 
@@ -153,6 +152,7 @@ public class ViewfinderOverlay {
         }
 
         guiGraphics.pose().popPose();
+        RenderSystem.disableDepthTest();
     }
 
     /**
