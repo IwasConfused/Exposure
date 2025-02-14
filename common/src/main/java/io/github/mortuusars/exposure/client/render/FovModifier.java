@@ -13,6 +13,10 @@ public class FovModifier {
 
     private static double overrideFov = -1;
 
+    public static boolean shouldOverride() {
+        return overrideFov != -1 || (CameraClient.viewfinder() != null && CameraClient.viewfinder().isLookingThrough());
+    }
+
     public static double modify(double originalValue) {
         if (overrideFov != -1) {
             return overrideFov;

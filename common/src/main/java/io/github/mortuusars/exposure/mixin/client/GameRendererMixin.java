@@ -1,7 +1,10 @@
 package io.github.mortuusars.exposure.mixin.client;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.sugar.Local;
 import io.github.mortuusars.exposure.ExposureClient;
 import io.github.mortuusars.exposure.client.camera.CameraClient;
+import io.github.mortuusars.exposure.client.camera.viewfinder.Viewfinder;
 import io.github.mortuusars.exposure.client.render.FovModifier;
 import io.github.mortuusars.exposure.event.ClientEvents;
 import net.minecraft.client.Camera;
@@ -13,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(GameRenderer.class)
+@Mixin(value = GameRenderer.class, priority = 500)
 public abstract class GameRendererMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;getMainRenderTarget()Lcom/mojang/blaze3d/pipeline/RenderTarget;", shift = At.Shift.AFTER))
     void onRender(DeltaTracker deltaTracker, boolean renderLevel, CallbackInfo ci) {
@@ -33,9 +36,14 @@ public abstract class GameRendererMixin {
         }
     }
 
+    @ModifyReturnValue(method = "getFov", at = @At(value = "RETURN", ordinal = 1))
+    private double modifyFov(double original, @Local(argsOnly = true) boolean useFOVSetting) {
+        return useFOVSetting ? FovModifier.modify(original) : original;
+    }
+
     @Inject(method = "getFov", at = @At(value = "RETURN"), cancellable = true)
     void getFov(Camera activeRenderInfo, float partialTicks, boolean useFOVSetting, CallbackInfoReturnable<Double> cir) {
-        if (useFOVSetting) {
+        if (useFOVSetting && FovModifier.shouldOverride()) {
             cir.setReturnValue(FovModifier.modify(cir.getReturnValue()));
         }
     }
