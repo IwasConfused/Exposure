@@ -1,6 +1,8 @@
 # Changelog
 
-## UNRELEASED
+## 1.8.9 - 2025-02-15
+- Moved `different_developing_potions_colors` config option from client to common.
+  - Fixes dedicated server crash when trying to read the config value. 
 - Fixed log message appearing on each level save.
 
 ## 1.8.2 - 2025-02-14 

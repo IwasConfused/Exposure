@@ -164,6 +164,7 @@ public class Config {
     public static class Common {
         public static final ModConfigSpec SPEC;
         public static final ModConfigSpec.BooleanValue SIGNED_ALBUM_GLINT;
+        public static final ModConfigSpec.BooleanValue DIFFERENT_DEVELOPING_POTION_COLORS;
         public static final ModConfigSpec.BooleanValue GENERATE_LOOT;
 
         static {
@@ -174,6 +175,10 @@ public class Config {
                 SIGNED_ALBUM_GLINT = builder
                         .comment("Signed Album item will have an enchantment glint.")
                         .define("signed_album_glint", true);
+
+                DIFFERENT_DEVELOPING_POTION_COLORS = builder
+                        .comment("Mundane, Awkward and Thick potions will have their color changed slightly, so it's easier to tell them apart. Default: true")
+                        .define("different_developing_potions_colors", true);
 
                 GENERATE_LOOT = builder
                         .comment("Generate photographs and film rolls in loot chests. Default: true")
@@ -195,7 +200,6 @@ public class Config {
         public static final ModConfigSpec.BooleanValue CAMERA_SHOW_FILM_BAR_ON_ITEM;
         public static final ModConfigSpec.BooleanValue PHOTOGRAPH_SHOW_PHOTOGRAPHER_IN_TOOLTIP;
         public static final ModConfigSpec.BooleanValue PHOTOGRAPH_IN_HAND_HIDE_CROSSHAIR;
-        public static final ModConfigSpec.BooleanValue DIFFERENT_DEVELOPING_POTION_COLORS;
 
         public static final ModConfigSpec.BooleanValue ALBUM_PHOTOS_COUNT_TOOLTIP;
         public static final ModConfigSpec.ConfigValue<String> ALBUM_FONT_MAIN_COLOR;
@@ -268,10 +272,6 @@ public class Config {
                 ALBUM_PHOTOS_COUNT_TOOLTIP = builder
                         .comment("Album will show how many photographs it contains in a tooltip.")
                         .define("album_show_photos_count", true);
-
-                DIFFERENT_DEVELOPING_POTION_COLORS = builder
-                        .comment("Mundane, Awkward and Thick potions will have their color changed slightly, so it's easier to tell them apart. Default: true")
-                        .define("different_developing_potions_colors", true);
 
                 {
                     builder.push("album");
