@@ -23,6 +23,14 @@
     "name": "Advancements",
     "icon": "Trophy"
   },
+  "predicates": {
+    "name": "Predicates",
+    "icon": "Equal"
+  },
+  "triggers": {
+    "name": "Triggers",
+    "icon": "SquareDashedBottomCode"
+  },
   "kubejs.mdx": {
     "name": "KubeJS Integration",
     "icon": "FileCode2"
