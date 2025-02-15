@@ -1,0 +1,34 @@
+{
+  "custom_films.mdx": {
+    "name": "Custom Films",
+    "icon": "Film"
+  },
+  "custom_flashes.mdx": {
+    "name": "Custom Flashes",
+    "icon": "Zap"
+  },
+  "custom_lenses.mdx": {
+    "name": "Custom Lenses",
+    "icon": "Telescope"
+  },
+  "custom_filters.mdx": {
+    "name": "Custom Filters",
+    "icon": "Blend"
+  },
+  "custom_color_palettes.mdx": {
+    "name": "Custom Color Palettes",
+    "icon": "Palette"
+  },
+  "advancements.mdx": {
+    "name": "Advancements",
+    "icon": "Trophy"
+  },
+  "kubejs.mdx": {
+    "name": "KubeJS Integration",
+    "icon": "FileCode2"
+  },
+  "components": {
+    "name": "Components",
+    "icon": "Braces"
+  }
+}

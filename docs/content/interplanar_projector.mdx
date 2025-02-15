@@ -15,19 +15,22 @@ To load the image - rename it in an Anvil with path pointing to that image. Its 
 
 ---
 
-#### Projector has two modes:
-- Clean - image will not be dithered; colors will be mapped to nearest color in a palette.
-- Dithered - image will be dithered as usual.
+### Projector has two modes:
+- **Clean** - image will not be dithered; colors will be mapped to nearest color in a palette.
+- **Dithered** - image will be dithered as usual.
 
 *Mode is changed by right-clicking the item*
 
 ---
 
-<Callout variant="warning">
-    Interplanar Projector is consumed when image is loaded
-</Callout>
+<div name='WARNING' style={{ display: 'inline-block', margin: '2px' }}>
+    <div style={{ display: 'flex', alignItems: 'top', backgroundColor: '#282621', borderRadius: '6px', padding: '8px 12px', outline: '1px solid #9d6712' }}>
+      <TriangleAlertIcon style={{ color: '#f5aa35', marginRight: '8px' }} width={20} />
+      <span style={{ color: '#f5aa35', fontSize: '15px' }}>Interplanar Projector is consumed when image is loaded</span>
+    </div>
+</div><br/>
 
 - If loading fails, Projector will <Asset location="exposure:broken_interplanar_projector"/> break and show an [error code](interplanar_projector_error_codes).
 - Even if failed, frame would be exposed as a regular photo with inverted effect.
     - You can use Projector without renaming it just for the inverted effect alone.
-- Projector can be repaired by crafting it with an **Eye of Ender**.
+- <Asset location="exposure:broken_interplanar_projector"/> Broken Interplanar Projector can be repaired by crafting it with an **Eye of Ender**.

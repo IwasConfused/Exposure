@@ -4,7 +4,7 @@ id: exposure:camera
 type: item
 ---
 
-To start taking shots with a **Camera** you'll need to load a [Film](film).
+To start taking shots with a **Camera** you'll need to load a [Film](attachments/film).
 
 <div style={{ textAlign: "center" }}>
 <Asset location="exposure:attachments" width={400} title="Camera Attachments" style={{ textAlign: "center" }}/>
@@ -18,11 +18,14 @@ There are 4 types of attachments you can put on/in the camera:
 - [Lens](attachments/lens)
 - [Filter](attachments/filter)
 
-<Callout variant="info">
- - • Hovering over parts of the camera will show tooltip with additional information.
- - • Clicking on the Lens or Filter parts will show all available items for the attachment.
- - • You can quickly insert/swap an attachment by right-clicking the camera in GUI with item.
-</Callout>
+<div name='INFO' style={{ display: 'inline-block', margin: '2px' }}>
+    <div style={{ display: 'flex', alignItems: 'top', backgroundColor: '#21252b', borderRadius: '6px', padding: '8px 12px' }}>
+      <InfoIcon style={{ color: '#63b3eb', marginRight: '8px' }} width={20} />
+      <span style={{ color: '#63b3eb', fontSize: '15px' }}>• Hovering over parts of the camera will show tooltip with additional information.\
+                                                           • Clicking on the Lens or Filter parts will show all available items for the attachment.\
+                                                           • You can quickly insert/swap an attachment by right-clicking the camera in GUI with item.</span>
+    </div>
+</div>
 
 When Film is loaded, *use* the **Camera** to look through **Viewfinder**
 
@@ -36,10 +39,13 @@ When Film is loaded, *use* the **Camera** to look through **Viewfinder**
 - Composition Guide
 - Flash *on/off/auto* (if installed)
 
-<Callout variant="info">
-- • Controls UI also shows Focal Length and Film Frames
-- • Zooming when controls are shown will be slower and more precise
-</Callout>
+<div name='INFO' style={{ display: 'inline-block', margin: '2px' }}>
+    <div style={{ display: 'flex', alignItems: 'top', backgroundColor: '#21252b', borderRadius: '6px', padding: '8px 12px' }}>
+      <InfoIcon style={{ color: '#63b3eb', marginRight: '8px' }} width={20} />
+      <span style={{ color: '#63b3eb', fontSize: '15px' }}>Controls UI also shows Focal Length and Film Frames\
+                                                           Zooming when controls are shown will be slower and more precise</span>
+    </div>
+</div>
 
 ## Selfie Mode
 For those who want to be the main subject of a photo - there is a selfie mode.
