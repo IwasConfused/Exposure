@@ -147,7 +147,10 @@ public class ExposureRepository {
                 }
                 return false;
             });
-            LOGGER.error("Cleared {} timed out expected exposures of player: '{}'", cleared.get(), exposures.getKey().getScoreboardName());
+
+            if (cleared.get() > 0) {
+                LOGGER.info("Cleared {} timed out expected exposures of player: '{}'", cleared.get(), exposures.getKey().getScoreboardName());
+            }
         }
     }
 

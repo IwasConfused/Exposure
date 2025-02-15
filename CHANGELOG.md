@@ -1,5 +1,8 @@
 # Changelog
 
+## UNRELEASED
+- Fixed log message appearing on each level save.
+
 ## 1.8.2 - 2025-02-14 
 - Fixed shader shadows being weird when looking through Viewfinder.
 - Fixed incompatibility with some zoom mods.
