@@ -220,7 +220,7 @@
   "item.exposure.broken_interplanar_projector": "损坏的位面投影器",
   "item.exposure.broken_interplanar_projector.tooltip.broken": "已损坏",
   "item.exposure.broken_interplanar_projector.viewfinder.error_code": "错误代码：",
-  "item.exposure.broken_interplanar_projector.viewfinder.message": "位面投影仪在运行时遇到错误，已经损坏",
+  "item.exposure.broken_interplanar_projector.viewfinder.message": "位面投影器在运行时遇到错误，已经损坏",
   "item.exposure.camera": "相机",
   "item.exposure.camera.camera_attachments.fail.projecting": "投影时无法拆卸相机。",
   "item.exposure.camera.camera_attachments.fail.shutter_open": "快门打开时无法拆卸相机",
