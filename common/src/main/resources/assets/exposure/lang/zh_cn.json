@@ -77,7 +77,7 @@
   "error.exposure.capture.url.cannot_read.technical": "无法从url加载：无法读取图像",
   "error.exposure.capture.url.invalid_url.casual": "地址格式不正确。",
   "error.exposure.capture.url.invalid_url.technical": "无法从url加载：无效的url",
-  "error.exposure.capture.url.no_http_prefix.casual": "地址含义未知协议",
+  "error.exposure.capture.url.no_http_prefix.casual": "地址含有未知协议",
   "error.exposure.capture.url.no_http_prefix.technical": "无法从url加载：缺少“http://”或“https://”前缀",
   "error.exposure.capture.url.timed_out.casual": "地址处的源超出了投影器的时间限制",
   "error.exposure.capture.url.timed_out.technical": "无法从url加载：超时。",
